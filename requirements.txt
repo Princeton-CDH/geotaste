@@ -3,3 +3,5 @@ pandas
 numpy
 gspread
 gspread_dataframe
+pointpats
+fastdist
