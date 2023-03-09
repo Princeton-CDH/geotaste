@@ -38,6 +38,11 @@ def get_event_id(row):
 @cache
 def gen_combined_df():
     
+    def get_arinsee(x):
+        for y in str(x).split(';'):
+            if y.strip().isdigit():
+                return str(y.strip())
+
     ### TRY TO EXPAND rows by the semi-colon
     def getrowinfo(row, i):
         odx={}
@@ -86,6 +91,8 @@ def gen_combined_df():
     ][
         cols + [c for c in df if c not in set(cols)]  # cols
     ]
+    df['arrond_id']=df.arrondissements.apply(get_arinsee)
+
     return df.set_index('event_id')
 
 
@@ -142,17 +149,29 @@ def get_mapdf(book=None, event='borrow', year=None):
     if book and book!='*': figdf = figdf[figdf.book_id == book]
     if event and event!='*': figdf = figdf[figdf.event_type.str.lower() == event.lower()]
     if year and year!='*': figdf = figdf[figdf.start_dec == year]
+
+    def get_arinsee(x):
+        for y in str(x).split(';'):
+            if y.strip().isdigit():
+                return str(y.strip())
+    figdf['arrond_id']=figdf.arrondissements.apply(get_arinsee)
     return figdf
 
 def get_heatmap(book=None, event=None, year=None):
     figdf=get_mapdf(book=book,event=event,year=year)
     return draw_heatmap(figdf)
     
-def draw_heatmap(figdf):
-    latlon = figdf[['lat','lon']]
+def draw_map(figdf,zoom=True,**kwargs):
     centroid = latlon_SCO
-    map = folium.Map(location=centroid, zoom_start=13, width='90%')
-    hmap = folium.plugins.HeatMap(latlon)
+    opts=dict(location=centroid, zoom_start=13, width='90%')
+    if not zoom: opts={**opts, **dict(zoom_control=False, scrollWheelZoom=False, dragging=False)}
+    opts={**opts, **kwargs}
+    map = folium.Map(**opts)
+    return map
+
+def draw_heatmap(figdf,zoom=True,**kwargs):
+    map = draw_map(figdf,zoom=zoom,**kwargs)
+    hmap = folium.plugins.HeatMap(figdf[['lat','lon']])
     hmap.add_to(map)
     return map
     
@@ -175,3 +194,62 @@ def get_points(df): return df[['lat','lon']].values
 def printm(x):
     from IPython.display import display, Markdown
     display(Markdown(x))
+
+
+
+def compare_heatmaps(df1,df2,width=600,height=400,**kwargs):
+    hmap1=draw_heatmap(df1,**kwargs)
+    hmap2=draw_heatmap(df2,**kwargs)
+    return compare_maps(hmap1,hmap2,width=width,height=height)
+
+def compare_maps(map1,map2,width=600,height=600,return_str=False,**kwargs):
+
+    src1=map1.get_root().render().replace('"', '&quot;')
+    src2=map2.get_root().render().replace('"', '&quot;')
+
+    htmlstr=f'<iframe srcdoc="[SRCDOC]" style="float:left; width: {width}px; height: {height}px; display:inline-block; width: 49%; margin: 0 auto; border:0; background-color: rgba(0,0,0,0.0);"></iframe>'
+    htmlstr=htmlstr.replace('[SRCDOC]',src1) + htmlstr.replace('[SRCDOC]',src2)
+
+    return HTML(htmlstr) if not return_str else htmlstr
+
+
+
+# @cache
+def get_geojson_arrondissement(force=False):
+    url='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
+    fn=os.path.join(path_data,'arrondissements.geojson')
+    if force or not os.path.exists(fn):
+        data = requests.get(url)
+        with open(fn,'wb') as of: 
+            of.write(data.content)
+
+    # load        
+    with open(fn) as f:
+        jsond=json.load(f)
+        
+    # anno
+    for d in jsond['features']:
+        d['properties']['arrond_id'] = d['id'] = str(d['properties']['c_ar'])
+        
+    
+    return jsond
+
+
+
+
+@cache
+def get_all_arrond_ids():
+    return {
+        d['id'] 
+        for d in get_geojson_arrondissement()['features']
+    }
+
+
+
+def get_arrond_counts(df,key='arrond_id'):
+    arrond_counts = {n:0 for n in sorted(get_all_arrond_ids(), key=lambda x: int(x))}
+    for k,v in dict(df[key].value_counts()).items(): arrond_counts[k]=v    
+    arrond_df = pd.DataFrame([arrond_counts]).T.reset_index()
+    arrond_df.columns=[key, 'count']
+    arrond_df['perc']=arrond_df['count'] / sum(arrond_df['count']) * 100
+    return arrond_df
