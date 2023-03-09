@@ -433,6 +433,7 @@ def draw_maps(e=None):
         display(HTML(f'''
             <div style="float:left; color:#1A5276;"><h2>{desc1}</h2></div>
             <div style="float:right; color:#7B241C"><h2>{desc2}</h2></div>
+            <div style="clear:both;">&nbsp;</div>
         '''))
         compare_choropleths(df1,df2)
 
