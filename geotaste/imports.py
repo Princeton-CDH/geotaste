@@ -38,7 +38,7 @@ from collections import Counter
 from pprint import pprint,pformat
 from ipywidgets import Dropdown, interact, interactive
 from folium.plugins import HeatMap
-from IPython.display import display
-
+from IPython.display import display, HTML
+import requests,json
 
 
