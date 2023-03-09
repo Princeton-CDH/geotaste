@@ -102,6 +102,9 @@ def filter_combined_df(df):
     df = df[df.start_date.apply(str).str[:4].str.isdigit()]
     df['start_year'] = df['start_date'].fillna('').apply(lambda x: pd.to_numeric(str(x)[:4]))
     df['start_dec'] = df['start_year'] // 10 * 10
+    df['has_wikipedia'] = df['wikipedia_url']==""
+    df['nation'] = df['nationalities'].apply(lambda x: x.split(';')[0])
+    df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
 
     # must have coords
     df = df[df.coordinates!='']
@@ -325,7 +328,7 @@ def draw_choropleth(
 
 
 def compare_choropleths(df1,df2,return_str=False,**kwargs):
-    opts={**dict(zoom_start=12, zoom=False, heatmap=True, value='perc'), **kwargs}
+    opts={**dict(zoom_start=12, zoom=True, heatmap=True, value='perc'), **kwargs}
     
     m1=draw_choropleth(df1, **opts)
     m2=draw_choropleth(df2, **opts)
@@ -347,10 +350,10 @@ def compare_choropleths(df1,df2,return_str=False,**kwargs):
     diff_opts['fill_color']='RdBu'
     m3=draw_choropleth(df1, count_df=diff_df.reset_index(), **diff_opts)
     
-    htmlstr = compare_maps(m1,m2,return_str=True, height=600, width='50%')
-    htmlstr+= f'<div style="clear:both";><center>{get_iframe(m3,return_str=True, height=600, width="50%")}</center></div>'
+    htmlstr = compare_maps(m1,m2,return_str=True, height=400, width=600)
+    htmlstr+= f'<div style="clear:both";>{get_iframe(m3,return_str=True, height=400, width=600, float="right")}<div style="width:400px;">{round(odf,1).to_html()}</div></div>'
     display(HTML(htmlstr))
-    display(odf)
+    # display(odf)
     return htmlstr if return_str else HTML(htmlstr)
     
 
@@ -374,7 +377,14 @@ def get_author_choice():
 def get_decade_choice():
     return get_col_choice('start_dec', description='Decade')
 def get_gender_choice():
-    return get_col_choice('gender', description='Member gender')
+    return get_col_choice('gender', description='M. gender')
+def get_nation_choice():
+    return get_col_choice('nationalities', description='M. nationality')
+def get_expat_choice():
+    return get_col_choice('is_expat', description='M. is expat')
+
+def get_fame_choice():
+    return get_col_choice('has_wikipedia', description='M. has wikipedia')
 
 
 
@@ -390,12 +400,21 @@ def get_df_from_choices(choices):
 def get_choice_desc(choices):
     l=[]
     for x in choices:
-        if x.value and x.value!='*':
+        if x.value!='' and x.value!='*':
             l.append(x.name+': '+str(x.value))
     return '; '.join(l) if l else '(All borrow events)'
 
 def get_choice_funcs():
-    return [get_book_choice, get_author_choice, get_member_choice, get_decade_choice, get_gender_choice]
+    return [
+        get_decade_choice, 
+        get_author_choice, 
+        get_book_choice, 
+        get_member_choice, 
+        get_gender_choice, 
+        get_expat_choice,
+        get_nation_choice, 
+        get_fame_choice
+    ]
 
 @cache
 def get_choices_left():
