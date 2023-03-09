@@ -351,7 +351,7 @@ def compare_choropleths(df1,df2,return_str=False,**kwargs):
     m3=draw_choropleth(df1, count_df=diff_df.reset_index(), **diff_opts)
     
     htmlstr = compare_maps(m1,m2,return_str=True, height=400, width=600)
-    htmlstr+= f'<div style="clear:both";>{get_iframe(m3,return_str=True, height=400, width=600, float="right")}<div style="width:400px;">{round(odf,1).to_html()}</div></div>'
+    htmlstr+= f'<div style="clear:both";><hr/><h3>Comparison table and map</h3>{get_iframe(m3,return_str=True, height=400, width=600, float="right")}<div style="width:400px;">{round(odf,1).to_html()}</div></div>'
     display(HTML(htmlstr))
     # display(odf)
     return htmlstr if return_str else HTML(htmlstr)
