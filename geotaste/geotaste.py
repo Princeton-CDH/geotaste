@@ -439,4 +439,4 @@ def show_comparator():
     display(get_out())
 
 
-def show(): show_comparator()
+def compare(): show_comparator()
