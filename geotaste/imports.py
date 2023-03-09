@@ -40,5 +40,6 @@ from ipywidgets import Dropdown, interact, interactive
 from folium.plugins import HeatMap
 from IPython.display import display, HTML
 import requests,json
-
+from ipywidgets import *
+from IPython.display import Markdown, HTML, clear_output
 

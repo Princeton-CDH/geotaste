@@ -132,6 +132,13 @@ def get_combined_df(**kwargs):
         **kwargs
     )
 
+@cache
+def get_borrow_df(**kwargs):
+    return filter_combined_df(
+        gen_combined_df(),
+        **kwargs
+    ).query('event_type=="Borrow"')
+
 
 
 def get_choices():
@@ -203,15 +210,10 @@ def compare_heatmaps(df1,df2,width=600,height=400,**kwargs):
     return compare_maps(hmap1,hmap2,width=width,height=height)
 
 def compare_maps(map1,map2,width=600,height=600,return_str=False,**kwargs):
-
-    src1=map1.get_root().render().replace('"', '&quot;')
-    src2=map2.get_root().render().replace('"', '&quot;')
-
-    htmlstr=f'<iframe srcdoc="[SRCDOC]" style="float:left; width: {width}px; height: {height}px; display:inline-block; width: 49%; margin: 0 auto; border:0; background-color: rgba(0,0,0,0.0);"></iframe>'
-    htmlstr=htmlstr.replace('[SRCDOC]',src1) + htmlstr.replace('[SRCDOC]',src2)
-
-    return HTML(htmlstr) if not return_str else htmlstr
-
+    iframe1 = get_iframe(map1,width=width,height=height,return_str=True,float='left',**kwargs)
+    iframe2 = get_iframe(map2,width=width,height=height,return_str=True,**kwargs)
+    ostr=iframe1 + iframe2
+    return ostr if return_str else HTML(ostr)
 
 
 # @cache
@@ -229,8 +231,8 @@ def get_geojson_arrondissement(force=False):
         
     # anno
     for d in jsond['features']:
-        d['properties']['arrond_id'] = d['id'] = str(d['properties']['c_ar'])
-        
+        d['id'] = str(d['properties']['c_ar'])
+        d['properties']['arrond_id'] = d['id']
     
     return jsond
 
@@ -253,3 +255,185 @@ def get_arrond_counts(df,key='arrond_id'):
     arrond_df.columns=[key, 'count']
     arrond_df['perc']=arrond_df['count'] / sum(arrond_df['count']) * 100
     return arrond_df
+
+
+
+def compare_heatmaps(df1,df2,width=600,height=400,**kwargs):
+    hmap1=draw_heatmap(df1,**kwargs)
+    hmap2=draw_heatmap(df2,**kwargs)
+    return compare_maps(hmap1,hmap2,width=width,height=height)
+
+
+
+
+def get_iframe(map, width=600, height=400, return_str=False, **attrs):
+    src=map.get_root().render().replace('"', '&quot;')
+    
+    styled_default=dict(
+        # display='inline-block',
+        # width='49%',
+        margin='0 auto',
+        border='0',
+    )
+    
+    styled = {**styled_default, **attrs}
+    stylestr = '; '.join(f'{k}:{v}' for k,v in styled.items())
+    ostr=f'<iframe srcdoc="{src}" width="{width}" height="{height}" style="{stylestr}"></iframe>'
+    return ostr if return_str else HTML(ostr)
+
+
+def compare_maps(map1,map2,width=600,height=600,return_str=False,**kwargs):
+    iframe1 = get_iframe(map1,width=width,height=height,return_str=True,float='left',**kwargs)
+    iframe2 = get_iframe(map2,width=width,height=height,return_str=True,float='right',**kwargs)
+    ostr=iframe1 + iframe2
+    return ostr if return_str else HTML(ostr)
+
+def draw_choropleth(
+        df, 
+        heatmap=True, 
+        key='arrond_id', 
+        value='count', 
+        count_df=None, 
+        fill_color="YlGn",
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        **kwargs):
+    hmap=draw_heatmap(df,**kwargs) if heatmap else draw_map(df,**kwargs)
+    cdf=get_arrond_counts(df) if count_df is None else count_df
+    cmap = folium.Choropleth(
+        get_geojson_arrondissement(),
+        data=cdf,
+        columns=[key, value],
+        key_on="feature.id",
+        fill_color=fill_color,
+        fill_opacity=fill_opacity,
+        line_opacity=line_opacity,
+    )
+    
+    cdfi=cdf.set_index(key)
+    vkeys=set()
+    for s in cmap.geojson.data['features']:
+        for k,v in dict(cdfi.loc[s['id']]).items():
+            vkeys.add(k)
+            s['properties'][k] = round(float(v),2)
+        
+    # and finally adding a tooltip/hover to the choropleth's geojson
+    folium.GeoJsonTooltip([key]+list(vkeys)).add_to(cmap.geojson)
+    cmap.add_to(hmap)
+
+    return hmap
+
+
+def compare_choropleths(df1,df2,return_str=False,**kwargs):
+    opts={**dict(zoom_start=12, zoom=False, heatmap=True, value='perc'), **kwargs}
+    
+    m1=draw_choropleth(df1, **opts)
+    m2=draw_choropleth(df2, **opts)
+    
+    ## diff
+    cdf1=get_arrond_counts(df1).set_index('arrond_id')
+    cdf2=get_arrond_counts(df2).set_index('arrond_id')
+    diff_df = (cdf1-cdf2)
+    
+    odf=pd.DataFrame()
+    for c in cdf1: 
+        odf[c+'1']=cdf1[c]
+        odf[c+'2']=cdf2[c]
+        odf[c+'1-2']=diff_df[c]
+    odf=odf.sort_values('perc1-2')
+    
+    diff_opts = {**opts}
+    diff_opts['heatmap']=False
+    diff_opts['fill_color']='RdBu'
+    m3=draw_choropleth(df1, count_df=diff_df.reset_index(), **diff_opts)
+    
+    htmlstr = compare_maps(m1,m2,return_str=True, height=600, width='50%')
+    htmlstr+= f'<div style="clear:both";><center>{get_iframe(m3,return_str=True, height=600, width="50%")}</center></div>'
+    display(HTML(htmlstr))
+    display(odf)
+    return htmlstr if return_str else HTML(htmlstr)
+    
+
+def get_col_choice(col, sort_by_count=False, description=''):
+    DF=get_borrow_df()
+    counts = DF[col].value_counts()
+    books = sorted(list(set(DF[col])), key=lambda x: -counts[x] if sort_by_count else x)
+    book_choice = Dropdown(
+        options=['*'] + books, 
+        description=col if not description else description,
+    )
+    book_choice.name=col
+    return book_choice
+
+def get_book_choice():
+    return get_col_choice('item_title', description='Book')
+def get_member_choice():
+    return get_col_choice('member_sort_names', description='Member')
+def get_author_choice():
+    return get_col_choice('item_authors', description='Author')
+def get_decade_choice():
+    return get_col_choice('start_dec', description='Decade')
+def get_gender_choice():
+    return get_col_choice('gender', description='Member gender')
+
+
+
+
+
+def get_df_from_choices(choices):
+    df=get_borrow_df()
+    for x in choices:
+        if x.value and x.value!='*':
+            df = df[df[x.name] == x.value]
+    return df
+
+def get_choice_desc(choices):
+    l=[]
+    for x in choices:
+        if x.value and x.value!='*':
+            l.append(x.name+': '+str(x.value))
+    return '; '.join(l) if l else '(All borrow events)'
+
+def get_choice_funcs():
+    return [get_book_choice, get_author_choice, get_member_choice, get_decade_choice, get_gender_choice]
+
+@cache
+def get_choices_left():
+    return [f() for f in get_choice_funcs()]
+@cache
+def get_choices_right():
+    return [f() for f in get_choice_funcs()]
+
+def draw_maps(e=None):
+    df1=get_df_from_choices(get_choices_left())
+    df2=get_df_from_choices(get_choices_right())
+    desc1=get_choice_desc(get_choices_left())
+    desc2=get_choice_desc(get_choices_right())
+    with get_out():
+        clear_output()
+        display(HTML(f'''
+            <div style="float:left; color:#1A5276;"><h2>{desc1}</h2></div>
+            <div style="float:right; color:#7B241C"><h2>{desc2}</h2></div>
+        '''))
+        compare_choropleths(df1,df2)
+
+def get_layout():
+    button=Button(description='Draw maps')
+    button.on_click(draw_maps)
+    return HBox([
+        VBox([Label('Left-hand map')]+get_choices_left()),
+        VBox([Label('Right-hand map')]+get_choices_right()),
+        button
+    ])
+
+def show_layout():
+    display(get_layout())
+
+
+@cache
+def get_out(): return Output()
+
+def show_comparator():
+    show_layout()
+    draw_maps()
+    display(get_out())
