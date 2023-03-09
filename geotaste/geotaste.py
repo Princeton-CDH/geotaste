@@ -437,3 +437,6 @@ def show_comparator():
     show_layout()
     draw_maps()
     display(get_out())
+
+
+def show(): show_comparator()
