@@ -1,6 +1,12 @@
 import os,sys
 path_here = os.path.abspath(os.path.dirname(__file__))
-path_data = os.path.abspath(os.path.join(path_here,'..','data'))
+path_home = os.path.expanduser('~')
+path_data = os.path.abspath(os.path.join(path_home,'geotaste_data'))
+try:
+    if not os.path.exists(path_data):
+        os.makedirs(path_data)
+except Exception:
+    pass
 
 # Paths
 paths=dict(
