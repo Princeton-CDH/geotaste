@@ -379,7 +379,7 @@ def get_decade_choice():
 def get_gender_choice():
     return get_col_choice('gender', description='M. gender')
 def get_nation_choice():
-    return get_col_choice('nationalities', description='M. nationality')
+    return get_col_choice('nation', description='M. nationality')
 def get_expat_choice():
     return get_col_choice('is_expat', description='M. is expat')
 
