@@ -4,8 +4,8 @@ from .imports import *
 
 @cache
 def get_gsheet_df(): return pd.read_csv(url_gsheet).fillna('')
-@cache
-def get_members_df(): return get_urlpath_df('members')
+
+
 @cache
 def get_books_df(): return get_urlpath_df('books')
 @cache
@@ -463,3 +463,78 @@ def show_comparator():
 def compare(): 
     clear_output()
     show_comparator()
+
+
+
+
+
+#####
+
+
+def parse_generation(birth_year):
+    if type(birth_year)!=float: return ''
+    if (1883<=birth_year<=1900):
+        return 'Lost Generation (1883-1900)'
+    if (1901<=birth_year<=1927):
+        return 'Greatest Generation (1901-1927)'
+    return ''
+
+@cache
+def get_members_df(): 
+    df=get_urlpath_df('members').fillna('')
+    df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
+    df['has_wikipedia'] = df['wikipedia_url']!=''
+    df['has_viaf'] = df['viaf_url']!=''
+    df['birth_decade'] = [str(x)[:3]+'0s' if x else '' for x in df['birth_year']]
+    df['generation'] = df['birth_year'].apply(parse_generation)
+    return df
+
+def get_coords_from_arrond(coords_col, arrond_col):
+    coords = []
+    for coord,arrond in zip(coords_col,arrond_col):
+        coord_l = coord.split(';')
+        arrond_l = arrond.split(';')
+        assert len(coord_l) == len(arrond_l)
+        for i,x in enumerate(arrond_l):
+            if x: break
+        coord_x = coord_l[i]
+        coords.append(coord_x)
+    return coords
+
+def get_arinsee(x):
+    for y in str(x).split(';'):
+        if y.strip().isdigit():
+            return str(y.strip())
+
+def get_coords_df(df):
+    df = df[df.coordinates!='']
+    df['coord'] = get_coords_from_arrond(df.coordinates, df.arrondissements)
+    df['arrond_id']=df.arrondissements.apply(get_arinsee)
+    def get_lat(coord): return float(coord.split(',')[0]) if coord else np.nan
+    def get_lon(coord): return float(coord.split(',')[1]) if coord else np.nan
+    df['lat'] = df.coord.apply(get_lat)
+    df['lon'] = df.coord.apply(get_lon)
+    # valid coords
+    df = df.loc[ df[['lat','lon']].dropna().index ]
+    return df
+
+def get_member_data_choices():
+    df=get_coords_df(get_members_df().fillna(''))
+
+    genders = Dropdown(options=['* Member Gender *'] + sorted(list(set(df.gender))))
+    is_expat = Dropdown(options=['* Member: Is Expat? *'] + sorted(list(set(df.is_expat))))
+    nats = Dropdown(options=['* Member Nationality *'] + sorted(list(set([nat.strip() for nats in df.nationalities for nat in nats.split(';')]))))
+    
+    has_wikipedia = Dropdown(options=['* Member: Has wikipedia? (is famous?) *'] + sorted(list(set(df.has_wikipedia))))
+    has_viaf = Dropdown(options=['* Member: Has VIAF? (is author?) *'] + sorted(list(set(df.has_viaf))))
+    
+    
+    
+    return {
+        'gender':genders,
+        'is_expat':is_expat,
+        'nationality':nats,
+        'has_wikipedia':has_wikipedia,
+        'has_viaf':has_viaf,
+    }
+        
