@@ -341,36 +341,6 @@ def draw_choropleth(
     return hmap
 
 
-def compare_choropleths(df1,df2,return_str=False,**kwargs):
-    opts={**dict(zoom_start=12, zoom=True, heatmap=True, value='perc'), **kwargs}
-    
-    m1=draw_choropleth(df1, **opts)
-    m2=draw_choropleth(df2, **opts)
-    
-    ## diff
-    cdf1=get_arrond_counts(df1).set_index('arrond_id')
-    cdf2=get_arrond_counts(df2).set_index('arrond_id')
-    diff_df = (cdf1-cdf2)
-    
-    odf=pd.DataFrame()
-    for c in cdf1: 
-        odf[c+'1']=cdf1[c]
-        odf[c+'2']=cdf2[c]
-        odf[c+'1-2']=diff_df[c]
-    odf=odf.sort_values('perc1-2')
-    
-    diff_opts = {**opts}
-    diff_opts['heatmap']=False
-    diff_opts['fill_color']='RdBu'
-    m3=draw_choropleth(df1, count_df=diff_df.reset_index(), **diff_opts)
-    
-    htmlstr = compare_maps(m1,m2,return_str=True, height=400, width=600)
-    htmlstr+= f'<div style="clear:both";><hr/><h3>Comparison table and map</h3>{get_iframe(m3,return_str=True, height=400, width=600, float="right")}<div style="width:400px;">{round(odf,1).to_html()}</div></div>'
-    display(HTML(htmlstr))
-    # display(odf)
-    return htmlstr if return_str else HTML(htmlstr)
-    
-
 def get_col_choice(col, sort_by_count=False, description=''):
     DF=get_borrow_df()
     counts = DF[col].value_counts()
@@ -542,4 +512,147 @@ def get_member_data_choices():
         'has_wikipedia':has_wikipedia,
         'has_viaf':has_viaf,
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+@cache
+def get_member_choices_left():
+    return get_member_data_choices()
+@cache
+def get_member_choices_right():
+    return get_member_data_choices()
+
+def get_member_df_from_choices(choice_d):
+    df = get_members_df()
+    cols = set(df.columns)
+    choice_d = get_active_choice_d(choice_d)
+    for k,v in choice_d.items():
+        if k in cols:
+            print(k,v)
+            df = df[df[k]==v]    
+    
+    # others
+    nat = choice_d.get('nationality')
+    if nat:
+        df = df[df['nationalities'].str.contains(nat)]    
+    
+    return df
+
+def get_active_choice_d(choice_d):
+    od={}
+    for k,v in choice_d.items():
+        vstr=str(v.value)
+        if vstr and vstr[0]!='*':
+            od[k]=v.value
+    return od
+
+def get_member_choice_desc(choice_d):
+    choice_d=get_active_choice_d(choice_d)
+    if choice_d: return '; '.join(f'{x}: {y}' for x,y in choice_d.items())
+    return '(All members)'
+
+def draw_member_maps(e=None):
+    df1=get_coords_df(get_member_df_from_choices(get_member_choices_left()))
+    df2=get_coords_df(get_member_df_from_choices(get_member_choices_right()))
+    desc1=get_member_choice_desc(get_member_choices_left())
+    desc2=get_member_choice_desc(get_member_choices_right())
+    with get_out():
+        clear_output()
+        compare_choropleths(df1,df2, desc1=desc1, desc2=desc2)
         
+def compare_choropleths(df1,df2,return_str=False,desc1='',desc2='',**kwargs):
+    opts={**dict(zoom_start=12, zoom=True, heatmap=True, value='perc'), **kwargs}
+    
+
+    df1 = df1.query('lat!="" & lon!=""')
+    df2 = df2.query('lat!="" & lon!=""')
+
+    df1=df1[df1.lat.notna() & df1.lon.notna()]
+    df2=df2[df2.lat.notna() & df2.lon.notna()]
+
+    
+    m1=draw_choropleth(df1, **opts)
+    m2=draw_choropleth(df2, **opts)
+    
+    ## diff
+    cdf1=get_arrond_counts(df1).set_index('arrond_id')
+    cdf2=get_arrond_counts(df2).set_index('arrond_id')
+    diff_df = (cdf1-cdf2)
+    
+    odf=pd.DataFrame()
+    for c in cdf1: 
+        odf[c+'_L']=cdf1[c]
+        odf[c+'_R']=cdf2[c]
+        odf[c+'_L-R']=diff_df[c]
+    odf=odf.sort_values('perc_L-R')
+    
+    diff_opts = {**opts}
+    diff_opts['heatmap']=False
+    diff_opts['fill_color']='RdBu'
+    m3=draw_choropleth(df1, count_df=diff_df.reset_index(), **diff_opts)
+    
+    htmlstr = ''
+    if desc1 or desc2:
+        htmlstr += f'''
+            <hr/>
+            <h3>Juxtaposition of left and right maps</h3>
+            <div style="float:left; color:#1A5276;"><h4>L: {desc1}</h4> (n={len(df1)}, {odf.count_L.sum()} in arrondissement)</div>
+            <div style="float:right; color:#7B241C"><h4>R: {desc2}</h4> (n={len(df2)}, {odf.count_R.sum()} in arrondissement)</div>
+            <div style="clear:both;"></div>
+        '''
+    htmlstr+= compare_maps(m1,m2,return_str=True, height=400, width=600)
+    htmlstr+= f'''
+        <div style="clear:both";>
+            <br/>
+            <hr/>
+            <h3>Comparison table and contrast map</h3>
+            <i>Below is a table of counts and percentages creating the two maps, (L)eft and (R)ight, above. 
+            <br/>It also shows the (L-R) values: negative here means (R) outweighed left; positive means (L) outweighed (R).
+            <br/>In the map below and right, red means that (R) outweighed (L); blue means (L) outweighed (R).
+            </i>
+        </div>
+        <div style="clear:both";>
+            {get_iframe(m3,return_str=True, height=400, width=600, float="right")}
+            <div style="width:400px;">{round(odf,1).to_html()}<br/></div>
+        </div>'
+    '''
+    
+    display(HTML(htmlstr))
+    return htmlstr if return_str else HTML(htmlstr)
+
+def get_layout(choices_left_d={}, choices_right_d={}, **kwargs):
+    button=Button(description='Draw maps')
+    button.on_click(draw_member_maps)
+    return HBox([
+        VBox([Label('Left-hand map')]+list(get_member_choices_left().values())),
+        VBox([Label('Right-hand map')]+list(get_member_choices_right().values())),
+        button
+    ])
+
+def show_layout(*args,**kwargs):
+    display(get_layout(*args,**kwargs))
+
+
+@cache
+def get_out(): return Output()
+
+def show_comparator():
+    show_layout()
+    draw_member_maps()
+    display(get_out())
+
+
+def compare(): 
+    clear_output()
+    show_comparator()
+
