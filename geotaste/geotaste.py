@@ -149,12 +149,12 @@ def get_combined_df(**kwargs):
         **kwargs
     )
 
-@cache
-def get_borrow_df(**kwargs):
-    return filter_combined_df(
-        gen_combined_df(),
-        **kwargs
-    ).query('event_type=="Borrow"')
+# @cache
+# def get_borrow_df(**kwargs):
+#     return filter_combined_df(
+#         gen_combined_df(),
+#         **kwargs
+#     ).query('event_type=="Borrow"')
 
 
 
