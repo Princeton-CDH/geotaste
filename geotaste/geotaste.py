@@ -12,6 +12,18 @@ def get_books_df(): return get_urlpath_df('books')
 def get_events_df(): return get_urlpath_df('events')
 
 
+@cache
+def get_members_df(): 
+    df=get_urlpath_df('members').fillna('')
+    df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
+    df['has_wikipedia'] = df['wikipedia_url']!=''
+    df['has_viaf'] = df['viaf_url']!=''
+    df['birth_decade'] = [str(x)[:3]+'0s' if x else '' for x in df['birth_year']]
+    df['generation'] = df['birth_year'].apply(parse_generation)
+    return df
+
+
+
 def get_urlpath_df(name, force=False):
     url=urls.get(name)
     path=paths.get(name)
@@ -103,8 +115,8 @@ def filter_combined_df(df):
     df['start_year'] = df['start_date'].fillna('').apply(lambda x: pd.to_numeric(str(x)[:4]))
     df['start_dec'] = df['start_year'] // 10 * 10
     df['has_wikipedia'] = df['wikipedia_url']==""
-    df['nation'] = df['nationalities'].apply(lambda x: x.split(';')[0])
-    df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
+    # df['nation'] = df['nationalities'].apply(lambda x: x.split(';')[0])
+    # df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
 
     # must have coords
     df = df[df.coordinates!='']
@@ -479,15 +491,6 @@ def parse_generation(birth_year):
         return 'Greatest Generation (1901-1927)'
     return ''
 
-@cache
-def get_members_df(): 
-    df=get_urlpath_df('members').fillna('')
-    df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
-    df['has_wikipedia'] = df['wikipedia_url']!=''
-    df['has_viaf'] = df['viaf_url']!=''
-    df['birth_decade'] = [str(x)[:3]+'0s' if x else '' for x in df['birth_year']]
-    df['generation'] = df['birth_year'].apply(parse_generation)
-    return df
 
 def get_coords_from_arrond(coords_col, arrond_col):
     coords = []

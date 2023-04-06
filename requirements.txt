@@ -6,3 +6,4 @@ gspread_dataframe
 pointpats
 fastdist
 utm
+ipywidgets
