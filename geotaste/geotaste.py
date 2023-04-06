@@ -11,7 +11,7 @@ def get_books_df(): return get_urlpath_df('books')
 @cache
 def get_events_df(): return get_urlpath_df('events')
 @cache
-def get_locations_df(): return get_urlpath_df('locations')
+def get_dwellings_df(): return get_urlpath_df('dwellings')
 
 
 @cache
@@ -36,17 +36,17 @@ def get_urlpath_df(name, force=False):
         df=pd.read_csv(path)
     return df
 
-def get_event_id(row):
-    base=f'{row.member_id} {(row.event_type+"s").upper()} {row.book_id}'
-    if row.item_volume:
-        base+=f"[{row.item_volume.strip().replace(' ','-')})"
-    if not row.start_date: 
-        return base
+# def get_event_id(row):
+#     base=f'{row.member_id} {(row.event_type+"s").upper()} {row.book_id}'
+#     # if row.item_volume:
+#         # base+=f"[{row.item_volume.strip().replace(' ','-')})"
+#     if not row.start_date: 
+#         return base
     
-    if row.end_date and row.start_date!=row.end_date:
-        return f'{base} FROM {row.start_date} TO {row.end_date}'
+#     if row.end_date and row.start_date!=row.end_date:
+#         return f'{base} FROM {row.start_date} TO {row.end_date}'
     
-    return f'{base} ON {row.start_date}'
+#     return f'{base} ON {row.start_date}'
 
 
 @cache
