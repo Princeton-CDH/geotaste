@@ -18,10 +18,16 @@ paths=dict(
 )
 
 # Three datasets
-urls = dict(
+urls_1point2 = dict(
     members = 'https://dataspace.princeton.edu/bitstream/88435/dsp01dv13zx35z/2/SCoData_members_v1.2_2022-01.csv',
     books = 'https://dataspace.princeton.edu/bitstream/88435/dsp01jm214s28p/2/SCoData_books_v1.2_2022-01.csv',
     events = 'https://dataspace.princeton.edu/bitstream/88435/dsp019306t2441/2/SCoData_events_v1.2_2022-01.csv',
+)
+urls = dict(
+    members = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
+    books = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/books.csv',
+    events = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
+    locations = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/locations.csv',
 )
 
 # Synthesized
