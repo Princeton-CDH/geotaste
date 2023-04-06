@@ -10,6 +10,8 @@ def get_gsheet_df(): return pd.read_csv(url_gsheet).fillna('')
 def get_books_df(): return get_urlpath_df('books')
 @cache
 def get_events_df(): return get_urlpath_df('events')
+@cache
+def get_locations_df(): return get_urlpath_df('locations')
 
 
 @cache
