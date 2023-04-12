@@ -422,26 +422,26 @@ def draw_maps(e=None):
         '''))
         compare_choropleths(df1,df2)
 
-def get_layout():
-    button=Button(description='Draw maps')
-    button.on_click(draw_maps)
-    return HBox([
-        VBox([Label('Left-hand map')]+get_choices_left()),
-        VBox([Label('Right-hand map')]+get_choices_right()),
-        button
-    ])
+# # def get_layout():
+# #     button=Button(description='Draw maps')
+# #     button.on_click(draw_maps)
+# #     return HBox([
+# #         VBox([Label('Left-hand map')]+get_choices_left()),
+# #         VBox([Label('Right-hand map')]+get_choices_right()),
+# #         button
+# #     ])
 
-def show_layout():
-    display(get_layout())
+# def show_layout():
+#     display(get_layout())
 
 
-@cache
-def get_out(): return Output()
+# @cache
+# def get_out(): return Output()
 
-def show_comparator():
-    show_layout()
-    draw_maps()
-    display(get_out())
+# def show_comparator():
+#     show_layout()
+#     draw_maps()
+#     display(get_out())
 
 
 def compare(): 
