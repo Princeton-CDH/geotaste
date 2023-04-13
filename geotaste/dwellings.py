@@ -130,4 +130,4 @@ def find_dwellings_for_member_events(df, sep=DWELLING_ID_SEP):
         for resx,reasonx 
         in idf.progress_apply(find_dwelling_id, axis=1)
     ])
-    return pd.concat([idf[['event_id','member_id','book_id','event_type', 'start_date', 'end_date']],odf], axis=1)
+    return pd.concat([idf,odf], axis=1)

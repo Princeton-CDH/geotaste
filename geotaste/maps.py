@@ -144,9 +144,12 @@ def draw_choropleth(
 
 
 def get_col_choice(col, sort_by_count=False, description=''):
-    DF=get_borrow_df()
+    DF=get_combined_df()
     counts = DF[col].value_counts()
-    books = sorted(list(set(DF[col])), key=lambda x: -counts[x] if sort_by_count else x)
+    try:
+        books = sorted(list(set(DF[col])), key=lambda x: -counts[x] if sort_by_count else x)
+    except Exception:
+        books = list(set(DF[col]))
     book_choice = Dropdown(
         options=['*'] + books, 
         description=col if not description else description,
@@ -154,30 +157,29 @@ def get_col_choice(col, sort_by_count=False, description=''):
     book_choice.name=col
     return book_choice
 
+def get_event_type_choice():
+    return get_col_choice('event_type', description='Event type')
 def get_book_choice():
-    return get_col_choice('item_title', description='Book')
+    return get_col_choice('book_id', description='Book')
 def get_member_choice():
-    return get_col_choice('member_sort_names', description='Member')
+    return get_col_choice('member_id', description='Member')
 def get_author_choice():
-    return get_col_choice('item_authors', description='Author')
+    return get_col_choice('author', description='Author')
 def get_decade_choice():
-    return get_col_choice('start_dec', description='Decade')
+    return get_col_choice('start_dec', description='Decade of event')
 def get_gender_choice():
     return get_col_choice('gender', description='M. gender')
 def get_nation_choice():
     return get_col_choice('nation', description='M. nationality')
 def get_expat_choice():
     return get_col_choice('is_expat', description='M. is expat')
-
 def get_fame_choice():
     return get_col_choice('has_wikipedia', description='M. has wikipedia')
 
 
 
-
-
 def get_df_from_choices(choices):
-    df=get_borrow_df()
+    df=get_combined_df()
     for x in choices:
         if x.value and x.value!='*':
             df = df[df[x.name] == x.value]
@@ -192,6 +194,7 @@ def get_choice_desc(choices):
 
 def get_choice_funcs():
     return [
+        get_event_type_choice,
         get_decade_choice, 
         get_author_choice, 
         get_book_choice, 
