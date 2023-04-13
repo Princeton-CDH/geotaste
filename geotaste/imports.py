@@ -40,6 +40,15 @@ latlon_SCO = (48.85107555543428, 2.3385039932538567)
 
 
 
+DISPREFERRED_ADDRESSES = {
+    '11 rue Scribe': 'American Express',
+    'Berkeley Street': 'Thomas Cook', # @CHECK
+    '': 'Empty street address'
+}
+DWELLING_ID_SEP='; '
+
+
+
 ## imports
 import warnings
 warnings.filterwarnings('ignore')
@@ -56,3 +65,12 @@ import requests,json
 from ipywidgets import *
 from IPython.display import Markdown, HTML, clear_output
 
+
+
+from .utils import *
+from .books import *
+from .people import *
+from .dwellings import *
+from .events import *
+from .arronds import *
+from .maps import *
