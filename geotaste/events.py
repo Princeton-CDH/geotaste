@@ -36,6 +36,7 @@ def get_events_df():
     
     odf = df_events_expanded[['member_id','book_id']+[col for col in df if not col.split('_')[0] in {'member','item'}]]
     odf['event_id'] = odf.apply(get_event_id,axis=1)
+    odf['start_dec'] = odf.start_date.apply(lambda x: str(x)[:3]+'0' if str(x) else '?')
     
     # odf['dwelling_ids'] = odf.apply(lambda row: find_dwelling_id(row, verbose=False), axis=1)
     return odf.set_index('event_id')

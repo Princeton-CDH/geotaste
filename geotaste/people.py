@@ -18,6 +18,7 @@ def get_members_df():
     df['birth_decade'] = [str(x)[:3]+'0s' if x else '' for x in df['birth_year']]
     df['generation'] = df['birth_year'].apply(parse_generation)
     df['member_id']=df.uri.apply(get_member_id)
+    df['nation'] = df['nationalities'].apply(lambda x: x.split(';')[0])
     return df.set_index('member_id')
 
 
