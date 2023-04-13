@@ -256,16 +256,6 @@ def compare():
 
 #####
 
-
-def parse_generation(birth_year):
-    if type(birth_year)!=float: return ''
-    if (1883<=birth_year<=1900):
-        return 'Lost Generation (1883-1900)'
-    if (1901<=birth_year<=1927):
-        return 'Greatest Generation (1901-1927)'
-    return ''
-
-
 def get_coords_from_arrond(coords_col, arrond_col):
     coords = []
     for coord,arrond in zip(coords_col,arrond_col):

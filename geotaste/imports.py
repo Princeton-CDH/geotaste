@@ -73,4 +73,5 @@ from .people import *
 from .dwellings import *
 from .events import *
 from .arronds import *
+from .combined import *
 from .maps import *

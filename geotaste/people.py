@@ -20,3 +20,11 @@ def get_members_df():
     df['member_id']=df.uri.apply(get_member_id)
     return df.set_index('member_id')
 
+
+def parse_generation(birth_year):
+    if type(birth_year)!=float: return ''
+    if (1883<=birth_year<=1900):
+        return 'Lost Generation (1883-1900)'
+    if (1901<=birth_year<=1927):
+        return 'Greatest Generation (1901-1927)'
+    return ''
