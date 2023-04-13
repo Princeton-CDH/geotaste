@@ -96,8 +96,8 @@ def filter_combined_df(df):
 
 
 @cache
-def get_combined_df(**kwargs):
-    odf = get_event_dwellings_df(lim=1000).reset_index().merge(
+def get_combined_df(lim=None, **kwargs):
+    odf = get_event_dwellings_df(lim=lim).reset_index().merge(
         get_books_df().reset_index(),
         on='book_id',
         how='left',
