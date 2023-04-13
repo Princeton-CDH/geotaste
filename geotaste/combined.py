@@ -97,8 +97,15 @@ def filter_combined_df(df):
 
 @cache
 def get_combined_df(**kwargs):
-    return filter_combined_df(
-        gen_combined_df(),
-        **kwargs
-    )
+    return get_event_dwellings_df().reset_index().merge(
+        get_books_df().reset_index(),
+        on='book_id',
+        how='left',
+        suffixes=('','_book')
+    ).merge(
+        get_members_df().reset_index(),
+        on='member_id',
+        how='left',
+        suffixes=('','_member')
+    ).set_index('event_dwelling_id')
 
