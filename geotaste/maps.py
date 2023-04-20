@@ -143,7 +143,7 @@ def draw_choropleth(
     return hmap
 
 
-def get_col_choice(col, sort_by_count=False, description=''):
+def get_col_choice(col, sort_by_count=True, description=''):
     DF=get_combined_df()
     counts = DF[col].value_counts()
     try:
@@ -166,7 +166,7 @@ def get_member_choice():
 def get_author_choice():
     return get_col_choice('author', description='Author')
 def get_decade_choice():
-    return get_col_choice('start_dec', description='Decade of event')
+    return get_col_choice('start_dec', description='Event decade')
 def get_gender_choice():
     return get_col_choice('gender', description='M. gender')
 def get_nation_choice():
@@ -175,6 +175,19 @@ def get_expat_choice():
     return get_col_choice('is_expat', description='M. is expat')
 def get_fame_choice():
     return get_col_choice('has_wikipedia', description='M. has wikipedia')
+def get_book_format_choice():
+    return get_col_choice('format', description='Book format')
+def get_book_decade_choice():
+    return get_col_choice('book_dec', description='Book decade')
+def get_author_nation_choice():
+    return get_col_choice('author_nationality', description='Au. nationality')
+
+def get_author_gender_choice():
+    return get_col_choice('author_gender', description='Au. gender')
+def get_author_birth_decade_choice():
+    return get_col_choice('author_birth_decade', description='Au. birth decade')
+def get_author_generation_choice():
+    return get_col_choice('author_generation', description='Au. generation')
 
 
 
@@ -196,8 +209,14 @@ def get_choice_funcs():
     return [
         get_event_type_choice,
         get_decade_choice, 
-        get_author_choice, 
         get_book_choice, 
+        get_book_decade_choice,
+        get_book_format_choice,
+        get_author_choice, 
+        get_author_gender_choice,
+        get_author_nation_choice,
+        get_author_birth_decade_choice,
+        get_author_generation_choice,
         get_member_choice, 
         get_gender_choice, 
         get_expat_choice,

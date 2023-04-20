@@ -16,6 +16,7 @@ paths=dict(
     books = os.path.join(path_data,'books.csv'),
     events = os.path.join(path_data,'events.csv'),
     dwellings = os.path.join(path_data,'dwellings.csv'),
+    authors = os.path.join(path_data,'creators.csv'),
 )
 
 # Three datasets
@@ -29,6 +30,7 @@ urls = dict(
     books = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/books.csv',
     events = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
     dwellings = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
+    authors = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.2/creators.csv',
 )
 
 # Synthesized
@@ -68,6 +70,7 @@ from IPython.display import Markdown, HTML, clear_output
 
 
 from .utils import *
+from .authors import *
 from .books import *
 from .people import *
 from .dwellings import *

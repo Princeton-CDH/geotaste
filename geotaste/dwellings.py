@@ -66,9 +66,6 @@ def find_dwelling_id(event_row, sep=DWELLING_ID_SEP, verbose=True, dispreferred 
     elif len(df)==1: 
         return df.index[0], '✅ Only one dwelling'
     
-    ## @TODO: 
-    # Prefer Paris, prefer French, ...
-        
     
     # ok, if multiple:
     else:
@@ -83,36 +80,38 @@ def find_dwelling_id(event_row, sep=DWELLING_ID_SEP, verbose=True, dispreferred 
         elif len(df)==1:
             return df.index[0], f'✅ One dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
         else:
-            # if start date?
-            borrow_start = event_row.start_date
-            borrow_end = event_row.end_date
 
-            dwelling_starts = df.start_date
-            dwelling_ends = df.end_date
-            never_dwelling = not any(dwelling_starts)
-
-            ###
-            if not borrow_start and borrow_end:
-                return sep.join(df.index), '❌ Multiple dwellings after dispreferred filter (no event time info)'
-            elif never_dwelling:
-                return sep.join(df.index), '❌ Multiple dwellings after dispreferred filter (no dwelling time info)'
+            # Remove the non-Parisians?
+            df = df[df.dist_from_SCO < 50]  # less than 50km
+            if len(df)==0: 
+                return '', f'❓ No dwelling after dispreferred filter + 50km filter'
+            elif len(df)==1:
+                return df.index[0], f'✅ One dwelling after dispreferred filter + 50km filter'
             else:
-                if borrow_start:
-                    # If we know when the borrow began, then exclude dwellings which end before that date
-                    df = df[df.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
-                if borrow_end:
-                    # If we know when the borrow ended, then exclude dwellings which begin after that date
-                    df = df[df.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
-                
-                # No longer ambiguous?
-                if len(df)==0: return '', '❓ No dwelling after time filter'
-                elif len(df)==1: return df.index[0], '✅ One dwelling after time filter'
-                else: # Still ambiguous
-                    df = df[~df.street_address.isin(dispreferred)]
-                    if len(df)==0: return '', '❓ No dwelling after time and dispreferred filter'
-                    elif len(df)==1: return df.index[0], '✅ One dwelling after time and dispreferred filter'
-                    else:
-                        return sep.join(df.index), '❌ Multiple dwellings after time and dispreferred filter'
+                # if start date?
+                borrow_start = event_row.start_date
+                borrow_end = event_row.end_date
+
+                # dwelling_starts = df.start_date
+                # dwelling_ends = df.end_date
+                # never_dwelling = not any(dwelling_starts)
+
+                ###
+                if not borrow_start and borrow_end:
+                    return sep.join(df.index), '❌ Multiple dwellings after dispreferred filter (no event time info)'
+                else:
+                    if borrow_start:
+                        # If we know when the borrow began, then exclude dwellings which end before that date
+                        df = df[df.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
+                    if borrow_end:
+                        # If we know when the borrow ended, then exclude dwellings which begin after that date
+                        df = df[df.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
+                    
+                    # No longer ambiguous?
+                    if len(df)==0: return '', '❓ No dwelling after time filter'
+                    elif len(df)==1: return df.index[0], '✅ One dwelling after time filter'
+                    else:# Still ambiguous
+                        return sep.join(df.index), '❌ Multiple dwellings after time + dispreferred + Paris filter'
             
 
 def find_dwellings_for_member_events(df, sep=DWELLING_ID_SEP):
