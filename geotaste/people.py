@@ -29,3 +29,53 @@ def parse_generation(birth_year):
     if (1901<=birth_year<=1927):
         return 'Greatest Generation (1901-1927)'
     return ''
+
+
+
+
+def get_member_choices():
+    df = get_members_df()
+
+    choices = [
+        # author name (sort alphabetically)
+        get_select(df.sort_name, 'sort_name', 'Name', sort_by_value=True),
+        
+        
+        # title
+        get_select(df.title, 'title', 'Title', maxrows=5),
+
+        # # age of author
+        get_int_slider(df.birth_year, 'birth_year', 'Birth year'),
+        get_int_slider(df.death_year, 'death_year', 'Death year'),
+
+        # gender (sort alphabetically)
+        get_select(df.generation, 'generation', 'Generation', sort_by_value=False),
+        
+        # gender (sort alphabetically)
+        get_select(df.gender, 'gender', 'Gender', sort_by_value=True),
+
+        # nationality
+        get_select(flatten_from(df.nationalities), 'nationalities_set', 'Nationality', sort_by_value=False),
+
+        # membership
+        get_select(flatten_from(df.membership_years), 'membership_years_set', 'Membership', sort_by_value=True),
+
+        # expat
+        get_select(df.is_expat, 'is_expat', 'Is Expat?', sort_by_value=True),
+        get_select(df.has_wikipedia, 'has_wikipedia', 'Has Wiki?', sort_by_value=True),
+        get_select(df.has_viaf, 'has_viaf', 'Has VIAF?', sort_by_value=True),
+
+        # # language
+        # get_dropdown(df.author_language, 'author_language', 'Language'),
+
+        
+    ]
+    return {ch.name:ch for ch in choices}
+
+
+
+def parse_member_choices(choices):
+    return parse_choices(
+        choices,
+        df=get_members_df()
+    )

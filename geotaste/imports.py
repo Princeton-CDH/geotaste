@@ -70,6 +70,7 @@ from IPython.display import Markdown, HTML, clear_output
 
 
 from .utils import *
+from .choices import *
 from .authors import *
 from .books import *
 from .people import *
