@@ -22,3 +22,41 @@ def get_authors_df():
     
     return df.set_index('author_id')
 
+def get_author_choices():
+    from .choices import get_dropdown, get_int_slider
+
+    # Author filters
+    df = get_authors_df()
+
+    choices = [
+        # author name (sort alphabetically)
+        get_dropdown(df.author_name, 'author_name', 'Name', sort_by_value=True),
+        
+        # gender (sort alphabetically)
+        get_dropdown(df.author_gender, 'author_gender', 'Gender', sort_by_value=True),
+
+        # nationality
+        get_dropdown(df.author_nationality, 'author_nationality', 'Nationality'),
+
+        # language
+        get_dropdown(df.author_language, 'author_language', 'Language'),
+
+        # age of author
+        get_int_slider(df.author_birth_year, 'author_birth_year', 'Birth year')
+    ]
+    return {ch.name:ch for ch in choices}
+
+
+
+def parse_author_choices(choices):
+    from .choices import parse_choices
+
+    return parse_choices(
+        choices,
+        get_authors_df()
+    )
+
+def show_author_choices(choices):
+    printm('### Author choices')
+    for v in choices.values():
+        display(v)
