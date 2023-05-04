@@ -60,11 +60,11 @@ from functools import lru_cache as cache
 import numpy as np
 from collections import Counter
 from pprint import pprint,pformat
-from ipywidgets import Dropdown, interact, interactive
+from ipywidgets import Dropdown, interact, interactive, widgets
 from folium.plugins import HeatMap
 from IPython.display import display, HTML
 import requests,json
-from ipywidgets import *
+# from ipywidgets import *
 from IPython.display import Markdown, HTML, clear_output
 
 
