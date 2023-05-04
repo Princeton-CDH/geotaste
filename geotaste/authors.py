@@ -2,7 +2,7 @@ from .imports import *
 
 
 ################
-#### BOOKS #####
+#### AUTHORS #####
 ################
 
 def get_author_id(x): return ''.join(y for y in x if y.isalpha() or y==' ').lower().replace(' ','-')

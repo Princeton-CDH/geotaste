@@ -143,8 +143,9 @@ def draw_choropleth(
     return hmap
 
 
-def get_col_choice(col, sort_by_count=True, description=''):
-    DF=get_combined_df()
+def get_col_choice(col, sort_by_count=True, description='',
+        df=None):
+    DF=get_combined_df() if df is None else df
     counts = DF[col].value_counts()
     try:
         books = sorted(list(set(DF[col])), key=lambda x: -counts[x] if sort_by_count else x)
