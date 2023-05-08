@@ -30,16 +30,16 @@ def get_author_choices():
 
     choices = [
         # author name (sort alphabetically)
-        get_dropdown(df.author_name, 'author_name', 'Name', sort_by_value=True),
+        get_select(df.author_name, 'author_name', 'Name', sort_by_value=True),
         
         # gender (sort alphabetically)
-        get_dropdown(df.author_gender, 'author_gender', 'Gender', sort_by_value=True),
+        get_select(df.author_gender, 'author_gender', 'Gender', sort_by_value=True),
 
         # nationality
-        get_dropdown(df.author_nationality, 'author_nationality', 'Nationality'),
+        get_select(df.author_nationality, 'author_nationality', 'Nationality'),
 
         # language
-        get_dropdown(df.author_language, 'author_language', 'Language'),
+        get_select(df.author_language, 'author_language', 'Language'),
 
         # age of author
         get_int_slider(df.author_birth_year, 'author_birth_year', 'Birth year')

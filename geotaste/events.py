@@ -52,3 +52,29 @@ def get_event_dwellings_df(lim=None):
     odf = find_dwellings_for_member_events(df_events)
     odf['event_dwelling_id'] = odf.apply(get_event_dwelling_id, axis=1)
     return odf.set_index('event_dwelling_id')
+
+
+
+def get_event_choices():
+    df = get_events_df()
+
+    choices = [
+        get_select(df.event_type, name='event_type', desc='Event type'),
+        get_select(df.borrow_status, name='borrow_status', desc='Borrow status'),
+        get_int_slider(df.subscription_duration_days, 'subscription_duration_days', 'subscription_duration_days'),
+        
+        get_date_picker(name='start_date_min', desc='Start (min)'),
+        get_date_picker(name='start_date_max', desc='Start (max)'),
+
+        get_date_picker(name='end_date_min', desc='End (min)'),
+        get_date_picker(name='end_date_max', desc='End (max)'),
+        
+    ]
+    return {ch.name:ch for ch in choices}
+
+
+def parse_event_choices(choices):
+    df = get_events_df()
+    df,desc = parse_choices(choices, df)
+    return df,desc
+
