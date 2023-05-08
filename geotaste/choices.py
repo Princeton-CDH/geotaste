@@ -82,9 +82,10 @@ def flatten_from(l, sep=';', remove_empty=False):
 
 
 
-def parse_choices(choices, df, parse_sliders=True, sep_set=';'):
+def parse_choices(choices, df, parse_sliders=True, sep_set=';',except_keys=set()):
     desc={}
     for key,choice in choices.items():
+        if key in except_keys: continue
         name=choice.name
         value=choice.value
         if value==EMPTY_VAL: value=''
@@ -113,7 +114,28 @@ def parse_choices(choices, df, parse_sliders=True, sep_set=';'):
                 )
                 df = df.query(f'{minv} <= {choice.name}_q <= {maxv}')
                 desc[name]=value
+
+        elif type(choice) in {widgets.DatePicker} and value is not None:
+            value = str(value)
+            desc[name] = value
+
+            if name.endswith('_min'):
+                name_orig=name[:-4]
+                df = df[~(df[name_orig].apply(str) < value)]
+            elif name.endswith('_max'):
+                name_orig=name[:-4]
+                df = df[~(df[name_orig].apply(str) > value)]
+            
+        
     return df, desc
 
 
+
+
+
+
+def get_date_picker(default=None, name='', desc=''):
+    obj = widgets.DatePicker(description=desc)
+    obj.name = name
+    return obj
 

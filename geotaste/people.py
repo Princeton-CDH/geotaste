@@ -41,6 +41,7 @@ def get_member_choices():
         get_select(df.sort_name, 'sort_name', 'Name', sort_by_value=True),
         
         
+        
         # title
         get_select(df.title, 'title', 'Title', maxrows=5),
 
@@ -48,30 +49,30 @@ def get_member_choices():
         get_int_slider(df.birth_year, 'birth_year', 'Birth year'),
         get_int_slider(df.death_year, 'death_year', 'Death year'),
 
-        # gender (sort alphabetically)
-        get_select(df.generation, 'generation', 'Generation', sort_by_value=False),
         
         # gender (sort alphabetically)
         get_select(df.gender, 'gender', 'Gender', sort_by_value=True),
 
         # nationality
         get_select(flatten_from(df.nationalities), 'nationalities_set', 'Nationality', sort_by_value=False),
+        get_select(df.is_expat, 'is_expat', 'Is Expat?', sort_by_value=True),
 
         # membership
         get_select(flatten_from(df.membership_years), 'membership_years_set', 'Membership', sort_by_value=True),
 
+        # arrond
+        get_select(flatten_from(df.arrondissements), 'arrondissements_set', 'Arrondissements', sort_by_value=False),
+
         # expat
-        get_select(df.is_expat, 'is_expat', 'Is Expat?', sort_by_value=True),
+        get_select(df.has_card, 'has_card', 'Has Card?', sort_by_value=True),
         get_select(df.has_wikipedia, 'has_wikipedia', 'Has Wiki?', sort_by_value=True),
         get_select(df.has_viaf, 'has_viaf', 'Has VIAF?', sort_by_value=True),
-
-        # # language
-        # get_dropdown(df.author_language, 'author_language', 'Language'),
+        # gender (sort alphabetically)
+        get_select(df.generation, 'generation', 'Generation', sort_by_value=False),
 
         
     ]
     return {ch.name:ch for ch in choices}
-
 
 
 def parse_member_choices(choices):
