@@ -1,6 +1,14 @@
 from .imports import *
 
 
+def ensure_dirname(file_path):
+    dirname = os.path.dirname(file_path)
+    if not os.path.exists(dirname):
+        try:
+            os.makedirs(dirname)
+        except Exception as e:
+            print('!!',e)
+
 
 def get_urlpath_df(name, force=False):
     url=urls.get(name)

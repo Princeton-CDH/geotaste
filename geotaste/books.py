@@ -66,3 +66,9 @@ def parse_book_choices(choices):
 
     
     return df,desc
+
+
+def show_book_choices():
+    choices = get_book_choices()
+    show_choices(choices, 'Book options')
+    return choices

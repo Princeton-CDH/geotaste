@@ -50,61 +50,83 @@ def get_dwellings_df():
 
     return odf.set_index('dwelling_id').sort_values('dist_from_SCO')
     
+@cache
+def get_dwelling_cache():
+    from sqlitedict import SqliteDict
+    cache_fn = os.path.join(path_data,'dwelling_id_cache.sqlitedict')
+    ensure_dirname(cache_fn)
+    return SqliteDict(cache_fn)
 
-
-
-def find_dwelling_id(event_row, sep=DWELLING_ID_SEP, verbose=True, dispreferred = DISPREFERRED_ADDRESSES):
-    memid = event_row.member_id
-    df_dwellings = get_dwellings_df()
-    df = df_dwellings[df_dwellings.member_id==memid].sort_values('dist_from_SCO')
+def find_dwelling_id(event_row, sep=DWELLING_ID_SEP, verbose=True, dispreferred = DISPREFERRED_ADDRESSES, cache=True):
     
-    # if no dwellign at all?
-    if not len(df): 
-        return '', '❓ No dwelling at all'
-    
-    # if only one?
-    elif len(df)==1: 
-        return df.index[0], '✅ Only one dwelling'
-    
-    
-    # ok, if multiple:
+    if cache: 
+        sqd = get_dwelling_cache()
+        res = sqd.get(event_row.name)
+        if res is None:
+            res = find_dwelling_id(
+                event_row,
+                sep=sep,
+                verbose=verbose,
+                dispreferred=dispreferred,
+                cache=False
+            )
+            sqd[event_row.name] = res
+            sqd.commit()
+        return res
     else:
-        # try dispreferred caveats
-        addresses = set(df.street_address)
-        bad_address = list(addresses & set(DISPREFERRED_ADDRESSES.keys()))
-        bad_address_str = ", ".join(bad_address)
-        bad_address_reason = dispreferred[bad_address_str] if bad_address else ''
-        df = df[~df.street_address.isin(dispreferred)]
-        if len(df)==0: 
-            return '', f'❓ No dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
-        elif len(df)==1:
-            return df.index[0], f'✅ One dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
-        else:
-            # if start date?
-            borrow_start = event_row.start_date
-            borrow_end = event_row.end_date
+        
+        memid = event_row.member_id
 
-            if borrow_start and borrow_end:
-                if borrow_start:
-                    # If we know when the borrow began, then exclude dwellings which end before that date
-                    df = df[df.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
-                if borrow_end:
-                    # If we know when the borrow ended, then exclude dwellings which begin after that date
-                    df = df[df.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
-                
-                # No longer ambiguous?
-                if len(df)==0: return '', '❓ No dwelling after time filter'
-                elif len(df)==1: return df.index[0], '✅ One dwelling time filter'
-                
-                
-            # Remove the non-Parisians?
-            df = df[df.dist_from_SCO < 50]  # less than 50km
+        df_dwellings = get_dwellings_df()
+        df = df_dwellings[df_dwellings.member_id==memid].sort_values('dist_from_SCO')
+        
+        # if no dwellign at all?
+        if not len(df): 
+            return '', '❓ No dwelling at all'
+        
+        # if only one?
+        elif len(df)==1: 
+            return df.index[0], '✅ Only one dwelling'
+        
+        
+        # ok, if multiple:
+        else:
+            # try dispreferred caveats
+            addresses = set(df.street_address)
+            bad_address = list(addresses & set(DISPREFERRED_ADDRESSES.keys()))
+            bad_address_str = ", ".join(bad_address)
+            bad_address_reason = dispreferred[bad_address_str] if bad_address else ''
+            df = df[~df.street_address.isin(dispreferred)]
             if len(df)==0: 
-                return '', f'❓ No dwelling after 50km filter'
+                return '', f'❓ No dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
             elif len(df)==1:
-                return df.index[0], f'✅ One dwelling after 50km filter'
-                
-        return sep.join(df.index), '❌ Multiple dwellings after all filters'
+                return df.index[0], f'✅ One dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
+            else:
+                # if start date?
+                borrow_start = event_row.start_date
+                borrow_end = event_row.end_date
+
+                if borrow_start and borrow_end:
+                    if borrow_start:
+                        # If we know when the borrow began, then exclude dwellings which end before that date
+                        df = df[df.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
+                    if borrow_end:
+                        # If we know when the borrow ended, then exclude dwellings which begin after that date
+                        df = df[df.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
+                    
+                    # No longer ambiguous?
+                    if len(df)==0: return '', '❓ No dwelling after time filter'
+                    elif len(df)==1: return df.index[0], '✅ One dwelling time filter'
+                    
+                    
+                # Remove the non-Parisians?
+                df = df[df.dist_from_SCO < 50]  # less than 50km
+                if len(df)==0: 
+                    return '', f'❓ No dwelling after 50km filter'
+                elif len(df)==1:
+                    return df.index[0], f'✅ One dwelling after 50km filter'
+                    
+            return sep.join(df.index), '❌ Multiple dwellings after all filters'
             
 
 def find_dwellings_for_member_events(df, sep=DWELLING_ID_SEP):

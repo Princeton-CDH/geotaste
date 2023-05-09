@@ -109,3 +109,44 @@ def get_combined_df(lim=None, **kwargs):
         suffixes=('','_member')
     ).set_index('event_dwelling_id')
     return odf
+
+
+
+
+
+
+# book_choices = show_book_choices()
+
+def get_combined_filtered_events_from_choices(data):
+    return get_combined_filtered_events_for(**data)
+
+
+def get_combined_filtered_events_for(
+        books=None, 
+        members=None,
+        events=None, 
+        authors=None,
+        authors_key_author='author_sort_name',
+        books_key_author='author',
+        key_sep=';'
+        ):
+    
+    if books is None: books=get_books_df()
+    if members is None: members=get_members_df()
+    if events is None: events=get_events_df()
+    if authors is None: authors=get_authors_df()
+
+    # make sure in member ids
+    ok_members = set(members.index)
+
+    ok_authors = set(authors[authors_key_author])
+    def is_ok_author(x):  
+        return bool({y.strip() for y in x.split(key_sep) if y.strip()} & ok_authors)
+    books=books[books[books_key_author].apply(is_ok_author)]
+    ok_books = set(books.index)
+
+    # find synthesized data
+    df = events[(events.member_id.isin(ok_members)) & (events.book_id.isin(ok_books))]
+    
+    # return located data (via members)
+    return find_dwellings_for_member_events(df)
