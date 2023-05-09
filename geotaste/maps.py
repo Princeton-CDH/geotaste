@@ -465,3 +465,14 @@ def compare():
     clear_output()
     show_comparator()
 
+
+
+
+def get_map(zoom=True,**kwargs):
+    centroid = latlon_SCO
+    opts=dict(location=centroid, zoom_start=13, width='90%')
+    if not zoom: 
+        opts={**opts, **dict(zoom_control=False, scrollWheelZoom=False, dragging=False)}
+    opts={**opts, **kwargs}
+    map = folium.Map(**opts)
+    return map
