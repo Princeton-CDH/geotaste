@@ -1,0 +1,66 @@
+
+
+@font-face {
+    font-family: 'BrownStdBold';
+    src: url("Brown-Bold.otf") format("opentype"); 
+}  
+  
+@font-face {
+    font-family: 'BrownStdRegular';
+    src: url("Brown-Regular.otf") format("opentype"); 
+}
+
+
+body {
+    font-family: 'BrownStdRegular', monospace;
+    font-size: 22px;
+
+    /* display: flex; */
+    /* width: 100%; */
+    /* border:1px solid green; */
+    
+
+    & .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner table { 
+        font-family: inherit;
+    }
+}
+
+h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
+/* $font-stack-headline-bold: 'BrownStdBold', bold arial, sans-serif; */
+/* $font-stack-body-text: 'Lyon Text Web', Georgia, serif; */
+
+
+
+/* .tab-container { color: red; } */
+
+
+#layout-container {
+    /* height: 100%; */
+    /* border: 1px solid red; */
+    /* display: flex; */
+    /* width: 100vw; */
+    max-width:none;
+}
+
+#layout-col-left { padding: 15px; }
+
+#members-map { flex-grow: 1  }
+
+/* div { 
+    height: 1;
+    width: 1;
+} */
+
+
+/* Graph Layout ––––––––––––––––––––––––––––––––––––––––––––––––––*/
+.div-for-charts{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+  }
+
+  .mapboxgl-canvas, .mapboxgl-map {
+    min-width: 100%;
+  }
+  
