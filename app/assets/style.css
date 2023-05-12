@@ -41,8 +41,15 @@ h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
     /* width: 100vw; */
     max-width:none;
 }
-
-#layout-col-left { padding: 15px; }
+#layout-col-right { 
+    padding: 15px; 
+}
+#layout-col-left { 
+    padding: 15px; 
+    /* border: 1px solid red;  */
+    background-color: aliceblue;
+    min-height:100vh;
+}
 
 #members-map { flex-grow: 1  }
 
@@ -64,3 +71,4 @@ h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
     min-width: 100%;
   }
   
+  hr { margin-bottom:1em; }

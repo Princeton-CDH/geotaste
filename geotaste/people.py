@@ -10,7 +10,7 @@ from .imports import *
 def get_member_id(x): return x.split('/members/',1)[1][:-1] if '/members/' in x else ''
 
 @cache
-def get_members_df(): 
+def get_members_df(with_dwellings=False): 
     df=get_urlpath_df('members').fillna('')
     df['is_expat'] = df['nationalities'].apply(lambda x: 'France' not in x)
     df['has_wikipedia'] = df['wikipedia_url']!=''
@@ -19,7 +19,19 @@ def get_members_df():
     df['generation'] = df['birth_year'].apply(parse_generation)
     df['member_id']=df.uri.apply(get_member_id)
     df['nation'] = df['nationalities'].apply(lambda x: x.split(';')[0])
-    return df.set_index('member_id')
+
+    df = df.set_index('member_id')
+
+    if with_dwellings:
+        from .dwellings import get_dwellings_df
+        dfdw = get_dwellings_df()
+        return df.merge(dfdw, on='member_id',how='outer')
+    
+    return df
+
+
+
+    
 
 
 def parse_generation(birth_year):
