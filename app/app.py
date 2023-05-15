@@ -1,6 +1,6 @@
-###########
-# IMPORTS #
-###########
+##################################################
+# IMPORTS
+##################################################
 
 ## Constants
 TITLE = 'Geography of Taste'
@@ -25,52 +25,59 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from flask_caching import Cache
-import diskcache
-from dash import Dash, dcc, html, Input, Output, DiskcacheManager, dash_table
+from dash import Dash, dcc, html, Input, Output, dash_table
 import pandas_dash
 
-#############
-# APP SETUP #
-#############
-
-## Setup plotly
-
-# Plotly mapbox public token
-mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
-px.set_mapbox_access_token(mapbox_access_token)
-
-## Setup dash
-
-# # Setup callback cache
-# callback_cache = diskcache.Cache(os.path.join(path_data,'callback.cache'))
-# background_callback_manager = DiskcacheManager(callback_cache)
-
-# Setup app
-app = Dash(
-    __name__, 
-    meta_tags=[{"name": "viewport", "content": "width=device-width"}],
-    # use_pages=True,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    title=TITLE,
-    # background_callback_manager=background_callback_manager
-)
-server = app.server # set aside for gunicorn
-
-# # # Setup data cache
-# CACHE_CONFIG = {
-#     'CACHE_TYPE': 'FileSystemCache',
-#     'CACHE_IGNORE_ERRORS': True,
-#     'CACHE_DIR':os.path.join(path_data,'app_cache')
-# }
-# cache = Cache()
-# cache.init_app(app.server, config=CACHE_CONFIG)
 
 
 
-########
-# DATA #
-########
+##################################################
+# UTILS
+##################################################
+
+def get_dropdown(
+        series, 
+        id=None, 
+        sort_alpha=False, 
+        default=None, 
+        default_all=None, 
+        multi=True, 
+        prefix='dropdown', 
+        **kwargs):
+    if id is None and hasattr(series,'name'): id=series.name
+    assert id is not None
+
+    # get options
+    opts = list(series.value_counts().index) if not sort_alpha else list(sorted(set(series)))
+    opts = [str(x) for x in opts]
+    opts_ld = [dict(label=x if x!='' else '(empty)', value=x) for x in opts]
+    
+    o_id = f'{str(prefix)+"-" if prefix else ""}{id if id else series.name}'
+    drop = dcc.Dropdown(
+        options=opts_ld,
+        value=(default if default is not None else (opts if default_all else [])),
+        id=o_id,
+        multi=multi,
+    )
+    drop.id_orig = id
+    return drop
+
+def get_labeled_dropdown(*args, label='', **kwargs):
+    dropdown = get_dropdown(*args, **kwargs)
+    if not label: 
+        label = dropdown.id_orig.replace('_',' ').title() + ('?' if dropdown.id_orig.startswith('is_') else '')
+    return dbc.Row([
+        html.Label(label),
+        dropdown,
+        html.Hr()
+    ])
+
+
+
+
+##################################################
+# DATA
+##################################################
 
 
 @cache
@@ -87,127 +94,51 @@ def get_total_data_events():
 
 
 ## Filtering
+def get_filtered_data_members(map_kind='all'): 
+    map_kind=str(map_kind).lower()
+    if 'all' in map_kind:
+        return get_total_data_members()
+    elif 'without' in map_kind:
+        df1=get_total_data_members()
+        df2=get_total_data_events()
+        does_have_records = set(df2.member_id)
+        return df1[~df1.member_id.isin(does_have_records)]
+    else:
+        return get_total_data_events()
 
-def get_filtered_data_members(): return get_total_data_members()
 
 
 
+##################################################
+# COMPONENTS
+##################################################
 
-# #@TODO: datatable
 
-
-
-
-##########
-# LAYOUT #
-##########
-
-def get_dropdown(series, id=None, sort_alpha=False, default=None, default_all=None, multi=True, prefix='dropdown', **kwargs):
-    if id is None and hasattr(series,'name'): id=series.name
-    assert id is not None
-
-    # get options
-    opts = list(series.value_counts().index) if not sort_alpha else list(sorted(set(series)))
-    opts = [str(x) for x in opts]
-    opts_ld = [dict(label=x if x!='' else '(empty)', value=x) for x in opts]
+def DashMembersMap(
+        dff = None, 
+        color_choro='arrond_id', 
+        color_points='is_expat',
+        map_kind='all'):
     
-    o_id = f'{str(prefix)+"-" if prefix else ""}{id if id else series.name}'
-    print(id,'...',o_id)
-    drop = dcc.Dropdown(
-        options=opts_ld,
-        value=(default if default is not None else (opts if default_all else [])),
-        id=o_id,
-        multi=multi
-    )
-    drop.id_orig = id
-    return drop
-
-def get_labeled_dropdown(*args, label='', **kwargs):
-    dropdown = get_dropdown(*args, **kwargs)
-    if not label: label = dropdown.id_orig.replace('_',' ').title() + ('?' if dropdown.id_orig.startswith('is_') else '')
-    return dbc.Row([
-        html.Label(label),
-        dropdown,
-        html.Hr()
-    ])
-
-
-
-
-
-
-def get_mantine(children=[]): 
-    return dmc.MantineProvider(
-        theme={
-            "fontFamily": "'Inter', sans-serif",
-            "primaryColor": "indigo",
-            "components": {
-                "Button": {"styles": {"root": {"fontWeight": 400}}},
-                "Alert": {"styles": {"title": {"fontWeight": 500}}},
-                "AvatarGroup": {"styles": {"truncated": {"fontWeight": 500}}},
-            },
-        },
-        inherit=True,
-        withGlobalStyles=True,
-        withNormalizeCSS=True,
-        children=children
-    )
-
-burger = dmc.Burger(id='burger')
-
-
-layout = dbc.Container(
-    dbc.Row(
-    [
-    dbc.Col([
-        html.H1(TITLE),
-        get_labeled_dropdown(COLORABLE_COLS, id='color_cols', sort_alpha=True),
-        get_labeled_dropdown(get_members_df().gender),
-        get_labeled_dropdown(get_members_df().is_expat, multi=False),
-
-    ], width=3, id='layout-col-left'),
     
-    dbc.Col([
-        dbc.Row([
-            dcc.Graph(id='members-map'),
-            html.Div(id='members-table')
-        ]),
-    ], width=9, id='layout-col-right'),
-
-]), id='layout-container')
-
-
-app.layout = get_mantine(layout)
-
-
-# Update Map Graph based on date-picker, selected data on histogram and location dropdown
-@app.callback(
-    [
-        Output("members-map", "figure"),
-        Output("members-table", "children"),
-    ],
-    [
-        Input('dropdown-is_expat', 'value'),
-        Input('dropdown-gender', 'value'),
-    ]
-)
-def DashMembersMap(is_expat=None, gender=None, color_by='arrond_id'):
-    dff = get_filtered_data_members().sample(frac=1)
+    # if is_expat:
+    #     dff = dff[dff.is_expat.apply(str).isin(is_expat)]
     
-    if is_expat:
-        dff = dff[dff.is_expat.apply(str).isin(is_expat)]
-    
-    if gender:
-        dff = dff[dff.gender.apply(str).isin(gender)]
+    # if gender:
+    #     dff = dff[dff.gender.apply(str).isin(gender)]
         
-    if nation:
-        dff = dff[dff.nation.apply(lambda x: bool(set(x.split(';')) & set(nation)))]
-        
+    # if nation:
+        # dff = dff[dff.nation.apply(lambda x: bool(set(x.split(';')) & set(nation)))]
+
+
+    dff = get_filtered_data_members(map_kind) if dff is None else dff
+    
+
     fig_choro = px.choropleth_mapbox(
         dff,
         geojson=get_geojson_arrondissement(),
         locations='arrond_id', 
-        color='arrond_id',
+        color=color_choro,
         center=dict(lat=latlon_SCO[0], lon=latlon_SCO[1]),
         zoom=12,
         opacity=.1
@@ -221,7 +152,7 @@ def DashMembersMap(is_expat=None, gender=None, color_by='arrond_id'):
         lon="lon", 
         center=dict(lat=latlon_SCO[0], lon=latlon_SCO[1]),
         # hover_name="member_id", 
-        color='is_expat',
+        color=color_points,
         # hover_data=["State", "Population"],
         # color_discrete_sequence=["fuchsia"], 
         zoom=12, 
@@ -238,67 +169,173 @@ def DashMembersMap(is_expat=None, gender=None, color_by='arrond_id'):
     
     fig3 = go.Figure(data=fig.data + fig_choro.data, layout = fig.layout)
     
-    return fig3, DashMembersDataTable()
+    return fig3
 
 
 
+def DashMembersDataTable(dff = None, ocols = ['name','title','gender','birth_year','death_year','nationalities','street_address', 'start_date', 'end_date']):
+    dff = get_filtered_data_members() if dff is None else dff
 
-if __name__ == "__main__":
-    app.run(
-        # host='0.0.0.0', 
-        debug=True,
-        port=8052,
-        # threaded=True,
-        # dev_tools_ui=Fas,
-        use_reloader=True,
-        use_debugger=True,
-        reloader_interval=1,
-        reloader_type='watchdog'
+    ddt, ddt_cols = dff[ocols].dash.to_dash_table()
+    return dash_table.DataTable(
+        data=ddt,
+        columns=ddt_cols,
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
     )
 
 
 
+##################################################
+# LAYOUT
+##################################################
+
+
+layout = dbc.Container(
+    dbc.Row([
+        dmc.Button("Open Drawer", id="drawer-demo-button"),
+        dmc.Drawer(
+            dbc.Col([
+                html.H1(TITLE),
+                html.P(children=[
+                    "The ",
+                    dcc.Link("Shakespeare & Co Project", href='https://shakespeareandco.princeton.edu/'),
+                    " uses the lending library records... (intro here.)"
+                ]),
+
+                # Below are filters for the map to the right. Who borrowed what when where among expats in early 20th century Paris?"),
+
+                html.H2('Map'),
+
+                # get_labeled_dropdown(
+                #     COLORABLE_COLS, 
+                #     id='color_cols', 
+                #     sort_alpha=True
+                # ),
+
+                get_labeled_dropdown(
+                    [
+                        'All members', 
+                        'Members with borrowing records', 
+                        'Members without borrowing records'
+                    ], 
+                    id='map_kind',
+                    default='Members with borrowing records',
+                    sort_alpha=True,
+                    multi=False
+                ),
 
 
 
+                html.H2('Members'),
+
+                get_labeled_dropdown(
+                    get_members_df().gender,
+                    id='gender',
+                ),
+                
+                html.Label('Is Expat?'),
+                dcc.RadioItems(
+                    options=['True','False'],
+                    id='dropdown-is_expat',
+                    inline=True
+                ),
+
+                get_labeled_dropdown(
+                    pd.Series([nat for nations in get_members_df().nationalities for nat in nations.split(';')]),
+                    id='nation'
+                ),
+
+
+                html.H2('Authors'),
+
+
+                html.H2('Books'),
+
+
+                # html.Div(id='members-table', children=[DashMembersDataTable()])
+                
+            ], width=4, id='layout-col-left'),
+        id='drawer-simple'),
+    
+    dbc.Col([
+        dbc.Row([
+            mapobj := dcc.Graph(id='members-map', figure=DashMembersMap(), className='div-for-charts'),
+            maptbl := html.Div(id='members-table', children=[DashMembersDataTable()])
+        ]),
+    ], width=8, id='layout-col-right'),
+
+]), id='layout-container')
 
 
 
-
-
-
-
-
-
-
-
-
-
-# def DashMembersDataTable(df=None):
-#     df = get_total_data_members() if df is None else df
-#     ocols = ['name','title','gender','birth_year','death_year','nationalities','street_address', 'start_date', 'end_date']
-#     ddt, ddt_cols = df[ocols].dash.to_dash_table(
-#         # column_properties={"country": {"presentation": "markdown"}}
-#     )
-#     return dash_table.DataTable(
-#         data=ddt,
-#         columns=ddt_cols,
-#         sort_action="native",
-#         sort_mode="multi",
-#         filter_action="native",
-#         merge_duplicate_headers=True,
-#         # virtualization=True,
-#         # style_cell={'color':TABLE_TEXT_COLOR},
-#         # style_table={'height':300},
-#         # style_as_list_view=True,
-#         # style_data_conditional=[
-#         #     {
-#         #         'if': {'row_index': 'odd'},
-#         #         'backgroundColor': 'rgba(255, 255, 255, .1)',
-#         #     }
-#         # ],
         
-#     )
+
+
+
+#############
+# APP SETUP #
+#############
+
+## Setup plotly
+# Plotly mapbox public token
+mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
+px.set_mapbox_access_token(mapbox_access_token)
+
+# Setup app
+app = Dash(
+    __name__, 
+    meta_tags=[{"name": "viewport", "content": "width=device-width"}],
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    title=TITLE,
+)
+server = app.server
+
+
+@app.callback(
+    [
+        Output(mapobj, "figure"),
+        Output(maptbl, 'children')
+    ],
+    [
+        Input('dropdown-map_kind', 'value'),
+        # Input('dropdown-nation', 'value'),
+        # Input('dropdown-gender', 'value'),
+    ]
+)
+def update_map_and_table(map_kind):
+    dff = get_filtered_data_members(map_kind)
+    members = set(dff.member_id)
+    df_tbl = get_total_data_members()
+    df_tbl = df_tbl[df_tbl.member_id.isin(members)]
+
+    return DashMembersMap(dff), DashMembersDataTable(df_tbl)
+
+    
+app.layout = layout
+
+
+
+@app.callback(
+    Output("drawer-simple", "opened"),
+    Input("drawer-demo-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def drawer_demo(n_clicks):
+    return True
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -508,4 +545,22 @@ if __name__ == "__main__":
    
 
 # #   
+
+
+
+
+
+if __name__ == "__main__":
+    app.run(
+        host='0.0.0.0', 
+        debug=True,
+        port=8052,
+        # threaded=True,
+        # dev_tools_ui=Fas,
+        use_reloader=True,
+        use_debugger=True,
+        reloader_interval=1,
+        reloader_type='watchdog'
+    )
+
 

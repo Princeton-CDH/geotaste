@@ -42,10 +42,10 @@ h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
     max-width:none;
 }
 #layout-col-right { 
-    padding: 15px; 
+    /* padding: 15px;  */
 }
 #layout-col-left { 
-    padding: 15px; 
+    /* padding: 15px;  */
     /* border: 1px solid red;  */
     background-color: aliceblue;
     min-height:100vh;
