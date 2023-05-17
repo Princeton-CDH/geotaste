@@ -1,5 +1,3 @@
-
-
 @font-face {
     font-family: 'BrownStdBold';
     src: url("Brown-Bold.otf") format("opentype"); 
@@ -13,7 +11,7 @@
 
 body {
     font-family: 'BrownStdRegular', monospace;
-    font-size: 22px;
+    font-size: 18px;
 
     /* display: flex; */
     /* width: 100%; */
@@ -25,10 +23,27 @@ body {
     }
 }
 
+
+
 h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
+
 /* $font-stack-headline-bold: 'BrownStdBold', bold arial, sans-serif; */
 /* $font-stack-body-text: 'Lyon Text Web', Georgia, serif; */
 
+h1 {
+    font-size:30px;
+}
+h2 { 
+    font-size:26px;
+}
+h3 {
+    font-size:22px;
+}
+h4 {
+    font-size:20px;
+}
+
+#layout-col-left label { font-weight:bold; }
 
 
 /* .tab-container { color: red; } */
@@ -49,6 +64,7 @@ h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
     /* border: 1px solid red;  */
     background-color: aliceblue;
     min-height:100vh;
+    padding-top:15px;
 }
 
 #members-map { flex-grow: 1  }
@@ -72,3 +88,9 @@ h1,h2,h3,h4,h4 { font-family: 'BrownStdBold', Georgia, serif; }
   }
   
   hr { margin-bottom:1em; }
+
+
+
+ #layout-col-left div.row { margin-bottom:1em;}
+ #layout-col-left label { margin-right:1em;}
+

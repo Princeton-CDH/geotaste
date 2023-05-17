@@ -18,7 +18,6 @@ from geotaste import *
 ## Non-sys imports
 import dash
 import dash_bootstrap_components as dbc
-import dash_mantine_components as dmc
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -36,43 +35,45 @@ import pandas_dash
 ##################################################
 
 def get_dropdown(
-        series, 
-        id=None, 
+        options=[], 
+        value=None,
+        id=None,
         sort_alpha=False, 
-        default=None, 
-        default_all=None, 
-        multi=True, 
-        prefix='dropdown', 
+        default=[], 
+        input_type=dcc.Dropdown,
         **kwargs):
     if id is None and hasattr(series,'name'): id=series.name
     assert id is not None
 
     # get options
-    opts = list(series.value_counts().index) if not sort_alpha else list(sorted(set(series)))
-    opts = [str(x) for x in opts]
-    opts_ld = [dict(label=x if x!='' else '(empty)', value=x) for x in opts]
-    
-    o_id = f'{str(prefix)+"-" if prefix else ""}{id if id else series.name}'
-    drop = dcc.Dropdown(
-        options=opts_ld,
-        value=(default if default is not None else (opts if default_all else [])),
-        id=o_id,
-        multi=multi,
+    if type(options) is pd.Series:
+        opts = list(options.value_counts().index) if not sort_alpha else list(sorted(set(options)))
+        opts = [str(x) for x in opts]
+        options = [dict(label=x if x!='' else '(empty)', value=x) for x in opts]
+    elif type(options) is list and options and type(options[0])!=dict:
+        options = [dict(label=x, value=x) for x in options]
+
+    drop = input_type(
+        id=id,
+        options=options,
+        value=value if value is not None else default,
+        **kwargs
     )
-    drop.id_orig = id
     return drop
 
 def get_labeled_dropdown(*args, label='', **kwargs):
     dropdown = get_dropdown(*args, **kwargs)
     if not label: 
-        label = dropdown.id_orig.replace('_',' ').title() + ('?' if dropdown.id_orig.startswith('is_') else '')
+        label = dropdown.id.replace('_',' ').title() + ('?' if dropdown.id.startswith('is_') else '')
     return dbc.Row([
-        html.Label(label),
-        dropdown,
-        html.Hr()
+        dbc.Col(html.Label(label), width=4),
+        dbc.Col(dropdown, width=8),
+        # html.Hr()
     ])
 
-
+def get_labeled_checklist(*args, **kwargs):
+    kwargs['input_type']=dcc.Checklist
+    return get_labeled_dropdown(*args, **kwargs)
 
 
 ##################################################
@@ -194,75 +195,90 @@ def DashMembersDataTable(dff = None, ocols = ['name','title','gender','birth_yea
 
 layout = dbc.Container(
     dbc.Row([
-        dmc.Button("Open Drawer", id="drawer-demo-button"),
-        dmc.Drawer(
-            dbc.Col([
-                html.H1(TITLE),
-                html.P(children=[
-                    "The ",
-                    dcc.Link("Shakespeare & Co Project", href='https://shakespeareandco.princeton.edu/'),
-                    " uses the lending library records... (intro here.)"
-                ]),
+        dbc.Col([
+            html.H1(TITLE),
+            html.P(children=[
+                "The ",
+                dcc.Link("Shakespeare & Co Project", href='https://shakespeareandco.princeton.edu/'),
+                " uses the lending library records... (intro here.)"
+            ]),
 
-                # Below are filters for the map to the right. Who borrowed what when where among expats in early 20th century Paris?"),
+            # Below are filters for the map to the right. Who borrowed what when where among expats in early 20th century Paris?"),
 
-                html.H2('Map'),
+            # html.H2('Map'),
 
-                # get_labeled_dropdown(
-                #     COLORABLE_COLS, 
-                #     id='color_cols', 
-                #     sort_alpha=True
-                # ),
+            # get_labeled_dropdown(
+            #     COLORABLE_COLS, 
+            #     id='color_cols', 
+            #     sort_alpha=True
+            # ),
 
-                get_labeled_dropdown(
-                    [
-                        'All members', 
-                        'Members with borrowing records', 
-                        'Members without borrowing records'
-                    ], 
-                    id='map_kind',
-                    default='Members with borrowing records',
-                    sort_alpha=True,
-                    multi=False
-                ),
+            get_labeled_checklist(
+                [
+                    'With borrowing records', 
+                    'Without borrowing records'
+                ], 
+                id='map_kind',
+                value=['With borrowing records'],
+                label='Members',
+                sort_alpha=True,
+            ),
 
 
 
-                html.H2('Members'),
+            # html.H2('Members'),
 
-                get_labeled_dropdown(
-                    get_members_df().gender,
-                    id='gender',
-                ),
-                
-                html.Label('Is Expat?'),
-                dcc.RadioItems(
-                    options=['True','False'],
-                    id='dropdown-is_expat',
-                    inline=True
-                ),
+            get_labeled_dropdown(
+                get_members_df().gender,
+                id='gender',
+                label='Member gender',
+                input_type=dcc.Checklist
+            ),
+            
+            # dbc.Row([
+            #     dbc.Col(html.Label('Expat'), width=4),
+            #     dbc.Col(dcc.Checklist(
+            #         options=[{'label':'Expat', 'value':'True'}, {'label':'Local', 'value':'False'}],
+            #         # value='Expat',
+            #         value=['True','False'],
+            #         id='dropdown-is_expat',
+            #         inline=True
+            #     ), width=8),
+            # ]),
+            get_labeled_dropdown(
+                get_members_df().is_expat,
+                id='is_expat',
+                input_type=dcc.Checklist
+            ),
+            
 
-                get_labeled_dropdown(
-                    pd.Series([nat for nations in get_members_df().nationalities for nat in nations.split(';')]),
-                    id='nation'
-                ),
+            get_labeled_dropdown(
+                pd.Series([nat for nations in get_members_df().nationalities for nat in nations.split(';')]),
+                id='nation'
+            ),
 
 
-                html.H2('Authors'),
+            # html.H2('Authors'),
 
 
-                html.H2('Books'),
+            # html.H2('Books'),
 
 
-                # html.Div(id='members-table', children=[DashMembersDataTable()])
-                
-            ], width=4, id='layout-col-left'),
-        id='drawer-simple'),
+            # html.Div(id='members-table', children=[DashMembersDataTable()])
+            
+        ], width=4, id='layout-col-left'),
     
     dbc.Col([
-        dbc.Row([
-            mapobj := dcc.Graph(id='members-map', figure=DashMembersMap(), className='div-for-charts'),
-            maptbl := html.Div(id='members-table', children=[DashMembersDataTable()])
+        
+        
+        # dbc.Row([
+        dbc.Tabs([
+            dbc.Tab([
+                mapobj := dcc.Graph(id='members-map', figure=DashMembersMap(), className='div-for-charts')
+            ], label='Map'),
+            dbc.Tab([
+                maptbl := html.Div(id='members-table', children=[DashMembersDataTable()])
+            ], label='Table')
         ]),
     ], width=8, id='layout-col-right'),
 
@@ -270,8 +286,8 @@ layout = dbc.Container(
 
 
 
-        
 
+dbc.Tabs()
 
 
 #############
@@ -291,6 +307,7 @@ app = Dash(
     title=TITLE,
 )
 server = app.server
+app.layout = layout
 
 
 @app.callback(
@@ -299,7 +316,7 @@ server = app.server
         Output(maptbl, 'children')
     ],
     [
-        Input('dropdown-map_kind', 'value'),
+        Input('map_kind', 'value'),
         # Input('dropdown-nation', 'value'),
         # Input('dropdown-gender', 'value'),
     ]
@@ -313,17 +330,8 @@ def update_map_and_table(map_kind):
     return DashMembersMap(dff), DashMembersDataTable(df_tbl)
 
     
-app.layout = layout
 
 
-
-@app.callback(
-    Output("drawer-simple", "opened"),
-    Input("drawer-demo-button", "n_clicks"),
-    prevent_initial_call=True,
-)
-def drawer_demo(n_clicks):
-    return True
 
 
 
