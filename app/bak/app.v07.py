@@ -216,10 +216,9 @@ def DashMembersDataTable(dff = None, ocols = ['name','title','gender','birth_yea
 
 
 
-
 ## Is expat?
 def get_is_expat(id='is_expat'):
-    data = [["True","Only expats"], ["False","Only French"], ["", "Show both"]]
+    data = [["True","Yes"], ["False","No"], ["", "Both"]]
     radio_is_expat = dmc.RadioGroup(
         [dmc.Radio(l, value=k) for k, l in data],
         id=id,
@@ -353,6 +352,10 @@ layout = dbc.Container(
 
 
 
+
+dbc.Tabs()
+
+
 #############
 # APP SETUP #
 #############
@@ -370,10 +373,7 @@ app = Dash(
     title=TITLE,
 )
 server = app.server
-app.layout = dmc.MantineProvider(
-    theme={"colorScheme": "dark"},
-    children=[layout]
-)
+app.layout = layout
 
 
 @app.callback(
@@ -396,6 +396,229 @@ def update_map_and_table(map_kind):
     return DashMembersMap(dff), DashMembersDataTable(df_tbl)
 
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def DashTab(children=[], id='', label=''):
+#     return dcc.Tab(
+#         children,
+#         id,
+#         label,
+#     )
+
+# def DashMembersTab():
+#     df = get_total_data_members()
+    
+#     # is_expat = dcc.RadioItems(
+#     #     options=df.dash.to_options('is_expat'),
+#     #     value='True',
+#     #     id='radio-is_expat'
+#     # )
+#     is_expat = dcc.Dropdown(
+#         options=['True','False'],
+#         value=['True','False'],
+#         id='dropdown-is_expat',
+#         multi=True
+#     )
+    
+#     all_nations = [k for k,v in Counter([nat for nations in df.nationalities for nat in nations.split(';')]).most_common()]
+#     nations = dcc.Dropdown(
+#         options=all_nations,
+#         value=[],
+#         id='dropdown-nation',
+#         multi=True,
+#     )
+
+#     genders_l = list(df.gender.value_counts().index)
+#     genders = dcc.Dropdown(
+#         options=genders_l,
+#         value=genders_l,
+#         id='dropdown-gender',
+#         multi=True,
+#     )
+    
+    
+    
+#     return DashTab(
+#         children=[
+#             html.Label('The library member is an expat (i.e. not French).'),
+#             is_expat,
+            
+#             html.Label('Nationality of member'), nations,
+
+#             html.Label('Gender of member'), genders
+            
+#         ],
+#         id='members_tab',
+#         label='Filter members',
+#     )
+
+# def DashBooksTab():
+#     df = get_books_df().fillna('')
+#     authors = list(df['author'].value_counts().index)
+    
+#     content = [
+#         dcc.Dropdown(
+#             options=authors,
+#             value='Woolf, Virginia',
+#             id='dropdown-author'
+#         )
+#     ]
+    
+#     return DashTab(
+#         content,
+#         id='books_tab',
+#         label='Books',
+#     )
+
+# def DashEventsTab():
+#     return DashTab(
+#         id='events_tab',
+#         label='Events',
+#     )
+
+
+# def DashTabLayout():
+#     return dcc.Tabs(
+#             [
+#                 DashMembersTab(),
+#                 DashBooksTab(),
+#                 DashEventsTab()
+#             ]
+#         )
+
+
+
+    
+# # Update Map Graph based on date-picker, selected data on histogram and location dropdown
+# @app.callback(
+#     [
+#         Output("members-map", "figure"),
+#         Output("members-table", "children"),
+#     ],
+#     [
+#         Input('dropdown-is_expat', 'value'),
+#         Input('dropdown-nation', 'value'),
+#         Input('dropdown-gender', 'value'),
+#     ]
+# )
+# def DashMembersMap(is_expat=None, nation=None, gender=None, color_by='arrond_id'):
+#     dff = get_filtered_data_members().sample(frac=1)
+    
+#     if is_expat:
+#         dff = dff[dff.is_expat.apply(str).isin(is_expat)]
+    
+#     if gender:
+#         dff = dff[dff.gender.apply(str).isin(gender)]
+        
+#     if nation:
+#         dff = dff[dff.nation.apply(lambda x: bool(set(x.split(';')) & set(nation)))]
+        
+#     fig_choro = px.choropleth_mapbox(
+#         dff,
+#         geojson=get_geojson_arrondissement(),
+#         locations='arrond_id', 
+#         color='arrond_id',
+#         center=dict(lat=latlon_SCO[0], lon=latlon_SCO[1]),
+#         zoom=12,
+#         opacity=.1
+#     )
+#     # fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        
+
+#     fig = px.scatter_mapbox(
+#         dff, 
+#         lat="lat", 
+#         lon="lon", 
+#         center=dict(lat=latlon_SCO[0], lon=latlon_SCO[1]),
+#         # hover_name="member_id", 
+#         color='is_expat',
+#         # hover_data=["State", "Population"],
+#         # color_discrete_sequence=["fuchsia"], 
+#         zoom=12, 
+#         # size=10
+#         # marker=dict(size=100),
+#         # height=300
+#     )
+#     fig.update_layout(
+#         mapbox=dict(
+#             style="stamen-toner",
+#         ),
+#     )
+#     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    
+#     fig3 = go.Figure(data=fig.data + fig_choro.data, layout = fig.layout)
+    
+#     return fig3, DashMembersDataTable()
+
+
+
+
+
+
+
+# def DashLeftLayout():
+#     return dbc.Col(
+#         children=[
+#             html.H1(TITLE),
+#             DashTabLayout()
+#         ],
+#         width=4,
+#         id='layout-col-left'
+#     )
+
+
+# def DashMemberMapTab():
+#     return dbc.Tab(
+#         dbc.Row([
+#             dcc.Graph(id='members-map'),
+#             html.Div(id='members-table')
+#         ]),
+#         id='members_map_tab',
+#         label='Map members'
+#     )
+
+# def DashEventsMapTab():
+#     return dbc.Tab(
+#         dcc.Graph(id='events-map'),
+#         id='events_map_tab',
+#         label='Map events'
+#     ) 
+
+# def DashRightLayout():
+#     return dbc.Col(
+#         dbc.Tabs([
+#             DashMemberMapTab(),
+#             DashEventsMapTab()
+#         ]),
+#         width=8,
+#         id='layout-col-right'
+#     )
+
+# def DashLayout():
+#     return dbc.Container([
+#         dbc.Row([
+#             DashLeftLayout(), 
+#             DashRightLayout()
+#         ], id='layout-container-row1'),
+#     ], id='layout-container')
+   
+
+# #   
 
 
 
