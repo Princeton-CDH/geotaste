@@ -63,17 +63,33 @@ def get_dropdown(
 
 def get_labeled_dropdown(*args, label='', **kwargs):
     dropdown = get_dropdown(*args, **kwargs)
-    if not label: 
-        label = dropdown.id.replace('_',' ').title() + ('?' if dropdown.id.startswith('is_') else '')
+    return get_labeled_element(dropdown, label)
+
+def get_labeled_element(element, label=''):
+    if not label:
+        label = element.id.replace('_',' ').title() + ('?' if element.id.startswith('is_') else '')
     return dbc.Row([
         dbc.Col(html.Label(label), width=4),
-        dbc.Col(dropdown, width=8),
-        # html.Hr()
+        dbc.Col(element, width=8),
     ])
+
+def get_labeled_slider(series, label='', step=10, id=None):
+    s = pd.to_numeric(series, errors='coerce')
+    slider = dcc.RangeSlider(
+        id=id,
+        min=s.min() // step * step,
+        max=s.max() // step * step + step,
+        step=step,
+        marks=None,
+        tooltip={"placement": "bottom", "always_visible": True}
+    )
+    return get_labeled_element(slider, label)
 
 def get_labeled_checklist(*args, **kwargs):
     kwargs['input_type']=dcc.Checklist
     return get_labeled_dropdown(*args, **kwargs)
+
+
 
 
 ##################################################
@@ -200,12 +216,11 @@ layout = dbc.Container(
             html.P(children=[
                 "The ",
                 dcc.Link("Shakespeare & Co Project", href='https://shakespeareandco.princeton.edu/'),
-                " uses the lending library records... (intro here.)"
+                " uses the lending library records... Below are filters for the map to the right. Who borrowed what when where among expats in early 20th century Paris?"
             ]),
 
-            # Below are filters for the map to the right. Who borrowed what when where among expats in early 20th century Paris?"),
+            html.Hr(),
 
-            # html.H2('Map'),
 
             # get_labeled_dropdown(
             #     COLORABLE_COLS, 
@@ -224,28 +239,13 @@ layout = dbc.Container(
                 sort_alpha=True,
             ),
 
-
-
-            # html.H2('Members'),
-
-            get_labeled_dropdown(
+            get_labeled_checklist(
                 get_members_df().gender,
                 id='gender',
                 label='Member gender',
-                input_type=dcc.Checklist
             ),
             
-            # dbc.Row([
-            #     dbc.Col(html.Label('Expat'), width=4),
-            #     dbc.Col(dcc.Checklist(
-            #         options=[{'label':'Expat', 'value':'True'}, {'label':'Local', 'value':'False'}],
-            #         # value='Expat',
-            #         value=['True','False'],
-            #         id='dropdown-is_expat',
-            #         inline=True
-            #     ), width=8),
-            # ]),
-            get_labeled_dropdown(
+            get_labeled_checklist(
                 get_members_df().is_expat,
                 id='is_expat',
                 input_type=dcc.Checklist
@@ -256,6 +256,33 @@ layout = dbc.Container(
                 pd.Series([nat for nations in get_members_df().nationalities for nat in nations.split(';')]),
                 id='nation'
             ),
+
+            get_labeled_slider(
+                get_members_df().birth_year,
+                id='birth_year'
+            ),
+
+            get_labeled_checklist(
+                get_members_df().generation,
+                id='generation'
+            ),
+
+            get_labeled_checklist(
+                get_members_df().has_wikipedia,
+                id='has_wikipedia',
+                inline=True
+            ),
+
+            get_labeled_checklist(
+                get_members_df().has_viaf,
+                id='has_viaf',
+                inline=True
+            ),
+
+            html.Hr(),
+
+
+            
 
 
             # html.H2('Authors'),
