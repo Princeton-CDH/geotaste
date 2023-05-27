@@ -55,19 +55,21 @@ def DashMembersMap(
         # hover_data=["State", "Population"],
         # color_discrete_sequence=["fuchsia"], 
         zoom=12, 
-        # size=10
-        # marker=dict(size=100),
+        hover_name='name',
+        hover_data=['uri', 'title', 'gender', 'has_card', 'birth_year', 'death_year', 'membership_years'],
         height=600,
-        # legend=False
+        size_max=40
     )
     fig.update_layout(
         mapbox=dict(
             style="stamen-toner",
+            pitch=45
         ),
     )
+    fig.update_traces(marker=dict(size=10))
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     
-    fig3 = go.Figure(data=fig.data + fig_choro.data, layout = fig.layout)
+    fig3 = go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
     
     return fig3
 
@@ -101,6 +103,7 @@ def get_map_graph():
 def get_map_table():
     return dmc.Container(
         DashMembersDataTable(),
+        id='members-tbl',
         className='datatbl-container',
         # fluid=True
         # size='xl'

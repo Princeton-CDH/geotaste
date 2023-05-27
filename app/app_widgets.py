@@ -254,7 +254,28 @@ def get_members_panel():
             get_member_dob(),
             get_member_generation(),
             get_is_expat(),
-            # get_member_nation(),
+            get_member_nation(),
             get_member_has_wikipedia()
+        ],
+    )
+
+
+
+def get_books_panel():
+    from app_layout import get_paper
+    return get_paper(
+        children=[
+            dmc.Title('Books', order=3),
+            
+        ],
+    )
+
+
+def get_events_panel():
+    from app_layout import get_paper
+    return get_paper(
+        children=[
+            dmc.Title('Events', order=3),
+            
         ],
     )
