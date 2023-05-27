@@ -34,8 +34,8 @@ def get_side_col():
         children=[
             get_header(),
             get_members_panel(),
-            get_members_panel(),
-            get_members_panel()
+            get_books_panel(),
+            get_events_panel(),
         ],
         className='layout-side-col grid-col',
         span=4,

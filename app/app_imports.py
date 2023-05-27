@@ -26,7 +26,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from dash import Dash, dcc, html, Input, Output, dash_table, callback
+from dash import Dash, dcc, html, Input, Output, dash_table, callback, State
 import pandas_dash
 
 
