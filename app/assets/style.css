@@ -1,0 +1,131 @@
+.grid-col {}
+
+
+
+body {
+    min-height:100vh;
+    max-height:100vh;
+    height:100vh;
+    overflow-x:hidden;
+}
+
+.div-for-charts {
+    display: flex;
+    flex-direction: column;
+    height:85vh;
+}
+
+.layout-grid {
+    max-width: none;
+    /* max-width:99vw; */
+    /* border:1px solid red; */
+}
+
+h1,h2,h3,h4,h5 { margin-top:0;}
+
+.layout-side-col {
+    /* min-height:100vh; */
+    /* padding-top:15px;*/
+    height:100vh;
+    overflow:auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+
+
+    &::-webkit-scrollbar {
+        display:none;
+    }
+
+}
+
+
+
+.layout-main-col {
+    /* display:flex; */
+    /* width:100%; */
+    /* max-width: none; */
+    height:100vh;
+    overflow:scroll;
+    padding:25px;
+    /* border:1px solid red; */
+}
+
+
+
+.mantine-InputWrapper-label {
+    font-weight:500;
+    font-size:18px;
+    margin-bottom:1em;
+    /* letter-spacing: .1em; */
+}
+
+
+.mantine-InputWrapper-label {
+    /* margin-top:2em; */
+}
+
+.layout-right-col .mantine-Container-root {
+    padding:0;
+}
+
+.widget-group {
+    /* margin-top:1em; */
+}
+
+.mantine-Group-root {
+    /* margin-top:.5em; */
+    
+}
+
+.card {
+    margin:10px 0px;
+    padding:10px;
+    /* color: red; */
+}
+
+.paper { 
+    padding:10px;
+    margin:10px 5px;
+}
+
+.slider {
+    /* width:80%; */
+    padding:0 10px;
+}
+
+.datatbl-container {
+    /* border: 1px solid brown; */
+    overflow: scroll;
+    display:flex;
+    width:auto;
+    margin:none;
+    max-width:none;
+    height:25vh;
+    font-size:.8em;
+    padding:0;
+
+    scrollbar-width: none;  /* Firefox */
+
+
+    &::-webkit-scrollbar {
+        display:none;
+    }
+}
+
+div {
+    width:auto;
+    margin:none;
+    max-width:none;
+    flex-grow:1;
+}
+
+.map-graph {
+    /* flex-grow:0; */
+    height: 55vh;
+}
+
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner table { 
+    font-family: inherit;
+}
+
+.map-table-stack { }
