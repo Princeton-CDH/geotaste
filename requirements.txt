@@ -1,0 +1,4 @@
+ipytest
+dash
+plotly
+pandas
