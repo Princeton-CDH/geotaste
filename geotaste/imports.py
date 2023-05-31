@@ -19,7 +19,7 @@ PATHS=dict(
     books = os.path.join(PATH_DATA,'1.3-beta','books.csv'),
     events = os.path.join(PATH_DATA,'1.3-beta','events.csv'),
     dwellings = os.path.join(PATH_DATA,'1.3-beta','dwellings.csv'),
-    authors = os.path.join(PATH_DATA,'1.2','creators.csv'),
+    creators = os.path.join(PATH_DATA,'1.2','creators.csv'),
 )
 
 ### other vars

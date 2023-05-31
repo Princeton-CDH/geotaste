@@ -11,20 +11,27 @@ class Dataset:
     id:str=''
     path:str = ''
     cols:list = []
+    cols_sep:list = []
+    sep:str = ';'
+    fillna = ''
 
     def __init__(self, path:str='', cols:list=[]):
         if path: self.path=path
         if cols: self.cols=cols
-        assert self.path
-        assert os.path.exists(self.path)
 
     @cached_property
     def _data(self):  
-        return pd.read_csv(self.path)
+        df=pd.read_csv(self.path)
+        if self.fillna is not None: 
+            df=df.fillna(self.fillna)
+        return df
         
     @property
     def data(self):  
-        return self._data[self.cols] if self.cols else self._data
+        df=self._data
+        for c in self.cols_sep: df[c]=df[c].fillna('').apply(lambda x: str(x).split(self.sep))
+        if self.cols: df=df[self.cols]
+        return df
 
 
 
@@ -49,6 +56,9 @@ class DwellingsDataset(Dataset):
         # 'country_id',
         'arrrondissement'
     ]
+
+
+
 
 
 
@@ -96,13 +106,12 @@ class MembersDataset(Dataset):
             lambda x: x.split('/members/',1)[1][:-1] if '/members/' in x else ''
         )    
         
-        for c in self.cols_sep:
-            df[c]=df[c].apply(lambda x: x.split(self.sep))
-        
         # other
         df = df.set_index('member')
         return df
     
+
+
 
 
 
@@ -129,10 +138,17 @@ class BooksDataset(Dataset):
         'circulation_years',
         'updated'
     ]
+
+    cols_sep:list = [
+        'author',
+        'editor'
+    ]
     
 
 class AuthorsDataset(Dataset):
     path:str = PATHS.get('authors') 
+
+    
 
 
 
