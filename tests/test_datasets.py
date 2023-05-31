@@ -34,7 +34,7 @@ def test_dataset():
 
 
 def test_members_dataset():
-    obj = MembersDataset()
+    obj = Members()
     df = obj.data
     assert 'James Joyce' in set(df.name)
 
@@ -47,7 +47,7 @@ def test_members_dataset():
 
 
 def test_authors_dataset():
-    obj = AuthorsDataset()
+    obj = Authors()
     df = obj.data
     assert 'James Joyce' in set(df.name)
 

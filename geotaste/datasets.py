@@ -35,7 +35,7 @@ class Dataset:
 
 
 
-class DwellingsDataset(Dataset):
+class Dwellings(Dataset):
     path:str = PATHS.get('dwellings')
     cols:list = [
         'member_uri',
@@ -62,7 +62,7 @@ class DwellingsDataset(Dataset):
 
 
 
-class MembersDataset(Dataset):
+class Members(Dataset):
     path:str = PATHS.get('members')
     sep:str = ';'
     cols:list = [
@@ -96,7 +96,7 @@ class MembersDataset(Dataset):
     def data(self):
         df=super().data.fillna('')
         df = df.merge(
-            DwellingsDataset().data,
+            Dwellings().data,
             left_on='uri',
             right_on='member_uri',
             how='outer'
@@ -115,7 +115,7 @@ class MembersDataset(Dataset):
 
 
 
-class BooksDataset(Dataset):
+class Books(Dataset):
     path:str = PATHS.get('books')
     cols:list = [
         'uri',
@@ -145,7 +145,7 @@ class BooksDataset(Dataset):
     ]
     
 
-class AuthorsDataset(Dataset):
+class Authors(Dataset):
     path:str = PATHS.get('authors') 
 
     
