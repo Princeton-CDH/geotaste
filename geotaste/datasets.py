@@ -28,7 +28,7 @@ class Dataset:
             df=df.fillna(self.fillna)
         return df
         
-    @property
+    @cached_property
     def data(self):  
         df=self._data
         for c in self.cols_sep: df[c]=df[c].fillna('').apply(lambda x: str(x).split(self.sep))
@@ -150,8 +150,8 @@ class DwellingsDataset(Dataset):
 class MemberDwellingsDataset(Dataset):
     @cached_property
     def data(self):
-        df_dwellings = Dwellings().data
-        df_members = Members().data
+        df_dwellings = DwellingsDataset().data
+        df_members = MembersDataset().data
 
         return df_members.reset_index().merge(
             df_dwellings,
@@ -316,6 +316,51 @@ class CreationsDataset(Dataset):
 
 
 
+
+
+
+class EventsDataset(Dataset):
+    path:str = PATHS.get('events')
+    cols:list = [
+        'event_type',
+        'start_date',
+        'end_date',
+        'member_uris',
+        'member_names',
+        'member_sort_names',
+        'subscription_price_paid',
+        'subscription_deposit',
+        'subscription_duration',
+        'subscription_duration_days',
+        'subscription_volumes',
+        'subscription_category',
+        'subscription_purchase_date',
+        'reimbursement_refund',
+        'borrow_status',
+        'borrow_duration_days',
+        'purchase_price',
+        'currency',
+        'item_uri',
+        'item_title',
+        'item_volume',
+        'item_authors',
+        'item_year',
+        'item_notes',
+        'source_type',
+        'source_citation',
+        'source_manifest',
+        'source_image'
+    ]
+
+    cols_sep:list = [
+        'member_uris', 
+        'member_names', 
+        'member_sort_names'
+    ]
+
+    
+
+
 class MemberBookEventsDataset(Dataset):
     @cached_property
     def data(self):
@@ -334,12 +379,29 @@ class MemberBookEventsDataset(Dataset):
         new_df = pd.DataFrame(new_l)
         return new_df
 
-MemberBookEventsDataset().data.iloc[0]
 
 
 
+def get_geojson_arrondissement(force=False):
+    import os,json,requests
+    
+    url='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
+    fn=os.path.join(PATH_DATA,'arrondissements.geojson')
+    if force or not os.path.exists(fn):
+        data = requests.get(url)
+        with open(fn,'wb') as of: 
+            of.write(data.content)
 
-
+    # load        
+    with open(fn) as f:
+        jsond=json.load(f)
+        
+    # anno
+    for d in jsond['features']:
+        d['id'] = str(d['properties']['c_ar'])
+        d['properties']['arrond_id'] = d['id']
+    
+    return jsond
 
 
 
@@ -357,5 +419,5 @@ MemberBookEventsDataset().data.iloc[0]
 def Members(): return MembersDataset()
 @cache
 def Books(): return BooksDataset()
-
-
+@cache
+def Events(): return MemberBookEventsDataset()

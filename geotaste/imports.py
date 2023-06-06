@@ -2,7 +2,10 @@ import os
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 from functools import cached_property, lru_cache
-cache = lru_cache(maxsize=None)
+# cache = lru_cache(maxsize=None)
+# from diskcache import Cache
+from joblib import Memory
+
 
 #########
 # SETUP #
@@ -11,6 +14,9 @@ cache = lru_cache(maxsize=None)
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.join(PATH_REPO,'data')
+PATH_CACHE = os.path.join(PATH_DATA,'cache')
+# cache = Cache(PATH_CACHE)
+cache = Memory(PATH_CACHE, verbose=1).cache
 
 # Paths
 PATHS=dict(
