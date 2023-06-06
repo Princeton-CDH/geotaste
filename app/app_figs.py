@@ -31,7 +31,7 @@ def plot_members_map(
         lon="lon", 
         center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
         # hover_name="member_id", 
-        color='arrrondissement',
+        # color='arrrondissement',
         # hover_data=["State", "Population"],
         # color_discrete_sequence=["fuchsia"], 
         zoom=12, 
@@ -43,13 +43,18 @@ def plot_members_map(
     fig.update_layout(
         mapbox=dict(
             style="stamen-toner",
-            pitch=45
+            # pitch=45
         ),
     )
-    fig.update_traces(marker=dict(size=10))
+    fig.update_traces(marker=dict(size=6, color='#811818'))
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return [fig]    
     # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
+
+def plot_members_dob():
+    fig=px.histogram(Members().data, 'birth_year')
+    fig.update_layout(clickmode='event+select', dragmode='select', selectdirection='h')
+    return fig
 
 
 
@@ -115,3 +120,5 @@ def filter_figdf(figdf):
     figdf['lat']=pd.to_numeric(figdf['latitude'], 'coerce')
     figdf['lon']=pd.to_numeric(figdf['longitude'], 'coerce')
     return figdf[figdf.lat.notna() & figdf.lon.notna()]
+
+
