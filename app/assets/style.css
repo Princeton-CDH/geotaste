@@ -1,0 +1,14 @@
+.container { max-width: none; }
+
+
+.tabs {
+    margin-block-end: 0;
+    margin-block-start: 0;
+    padding-inline-start: 0;
+    margin-right: -2em;
+    /* height:46px; */
+}
+
+::before, ::after {
+    box-sizing: inherit;
+}

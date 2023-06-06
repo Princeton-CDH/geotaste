@@ -2,3 +2,4 @@ ipytest
 dash
 plotly
 pandas
+dash_bootstrap_components

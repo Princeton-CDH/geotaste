@@ -1,7 +1,8 @@
 import os
 import pandas as pd
-from functools import cached_property
-
+pd.options.mode.chained_assignment = None  # default='warn'
+from functools import cached_property, lru_cache
+cache = lru_cache(maxsize=None)
 
 #########
 # SETUP #
@@ -33,3 +34,14 @@ DWELLING_ID_SEP='; '
 ####
 
 
+from .utils import *
+from .datasets import *
+# from .arronds import *
+# from .authors import *
+# from .books import *
+# from .choices import *
+# from .combined import *
+# from .dwellings import *
+# from .events import *
+# from .maps import *
+# from .people import *
