@@ -1,5 +1,6 @@
 ipytest
-dash
+# dash
 plotly
 pandas
+git+https://github.com/oegedijk/dash_oop_components
 dash_bootstrap_components
