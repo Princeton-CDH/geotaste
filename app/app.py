@@ -122,7 +122,7 @@ member_tbl_card = dbc.Card([
 ### LAYOUT
 
 sidecol = dbc.Col(
-    width=6,
+    # width=6,
     class_name='sidecol',
     children=[
         member_name_card,
@@ -131,8 +131,11 @@ sidecol = dbc.Col(
     ]
 )
 
+offcanvas = dbc.Offcanvas(sidecol, is_open=False)
+button_offcanvas = dbc.Button("Filter", n_clicks=0)
+
 maincol = dbc.Col(
-    width=6,
+    # width=6,
     class_name='maincol',
     children=[
         member_filter_card,
@@ -147,7 +150,11 @@ storages = dbc.Container(
 
 app.layout = layout_container = dbc.Container([
     navbar_row := dbc.Row(navbar, class_name='navbar_row'),
-    content_row := dbc.Row([sidecol, maincol], class_name='content_row'),
+    content_row := dbc.Row([
+        offcanvas,
+        button_offcanvas, 
+        maincol
+    ], class_name='content_row'),
     storages
 ])
 
@@ -164,6 +171,17 @@ app.layout = layout_container = dbc.Container([
 
 
 ### Callbacks
+
+
+@app.callback(
+    Output(offcanvas, "is_open"),
+    Input(button_offcanvas, "n_clicks"),
+    State(offcanvas, "is_open")
+)
+def toggle_offcanvas(n1, is_open):
+    if n1:
+        return not is_open
+    return is_open
 
 @callback(
     [
