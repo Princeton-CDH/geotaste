@@ -14,7 +14,8 @@ class Dataset:
     cols_sep:list = []
     cols_rename:dict = {}
     sep:str = ';'
-    fillna = ''
+    fillna:object = ''
+    cols_q:list = []
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
         if path: self.path=path
@@ -22,8 +23,8 @@ class Dataset:
         for k,v in kwargs.items(): setattr(self,k,v)
 
     @cached_property
-    def _data(self):  
-        df=pd.read_csv(self.path, engine='python', on_bad_lines='warn')
+    def _data(self):
+        df=pd.read_csv(self.path, on_bad_lines='warn')
         if self.fillna is not None: 
             df=df.fillna(self.fillna)
         return df
@@ -31,11 +32,15 @@ class Dataset:
     @cached_property
     def data(self):  
         df=self._data
-        for c in self.cols_sep: df[c]=df[c].fillna('').apply(lambda x: str(x).split(self.sep))
+        for c in self.cols_sep: 
+            df[c]=df[c].fillna('').apply(lambda x: str(x).split(self.sep))
+        for c in self.cols_q:
+            df[c]=pd.to_numeric(df[c], errors='coerce')
         if self.cols: 
             badcols = list(set(df.columns) - set(self.cols))
             df=df.drop(badcols, axis=1)
-        if self.cols_rename: df = df.rename(self.cols_rename, axis=1)
+        if self.cols_rename: 
+            df = df.rename(self.cols_rename, axis=1)
         return df
 
 
@@ -69,11 +74,15 @@ class MembersDataset(Dataset):
         'nationalities',
         'membership_years'
     ]
+    cols_q = [
+        'birth_year',
+        'death_year',
+    ]
     
 
     @cached_property
     def data(self):
-        df=super().data.fillna('')
+        df=super().data
         df['member'] = df['uri'].apply(
             lambda x: x.split('/members/',1)[1][:-1] if '/members/' in x else ''
         )
@@ -144,6 +153,10 @@ class DwellingsDataset(Dataset):
         'start_date':'dwelling_start_date',
         'end_date':'dwelling_end_date',
     }
+    cols_q = [
+        'latitude',
+        'longitude',
+    ]
 
 
 
@@ -152,13 +165,12 @@ class MemberDwellingsDataset(Dataset):
     def data(self):
         df_dwellings = DwellingsDataset().data
         df_members = MembersDataset().data
-
         return df_members.reset_index().merge(
             df_dwellings,
             left_on='uri',
             right_on='member_uri',
             how='inner'
-        ).drop('member_uri',axis=1).fillna('').set_index('member')
+        ).drop('member_uri',axis=1).set_index('member')
 
 
 class BooksDataset(Dataset):
@@ -415,9 +427,11 @@ def get_geojson_arrondissement(force=False):
 
 
 
-@cache
+# @cache
 def Members(): return MembersDataset()
-@cache
+# @cache
+def MemberDwellings(): return MemberDwellingsDataset()
+# @cache
 def Books(): return BooksDataset()
-@cache
+# @cache
 def Events(): return MemberBookEventsDataset()

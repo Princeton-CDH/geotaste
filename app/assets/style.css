@@ -33,3 +33,16 @@ h5 { font-size:1em; }
     margin-left:10px;
     margin-right:20px; */
 }
+
+.card {
+    margin:10px;
+}
+
+.btn-link {
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    color: inherit;
+}
+

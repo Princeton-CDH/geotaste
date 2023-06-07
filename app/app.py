@@ -70,104 +70,150 @@ member_name_card = dbc.Card([
 
 
 member_dob_card = dbc.Card([
-    html.H4("Filter by date of birth"),
-    graph_members_dob := dcc.Graph(figure=plot_members_dob())
+    dbc.Row([
+        dbc.Col(
+            html.H4("Filter by date of birth"),
+            # width=11
+        ),
+        dbc.Col(
+            button_clear_dob := dbc.Button(
+                "Clear", 
+                color="link", 
+                n_clicks=0
+            ),
+            # width=1,
+            style={'text-align':'right'}
+        )
+    ]),
+    dbc.Row([
+        graph_members_dob := dcc.Graph(figure=plot_members_dob()),
+    ])
 ], body=True)
 
 member_gender_card = dbc.Card([
-    html.H4("Filter by member gender"),
-    input_gender := dbc.Checklist(
-        options=gender_series,
-        value=gender_series,
-        switch=True,
-    ),
-], body=True)
+    dbc.CardHeader("Filter by member gender"),
+    dbc.CardBody(
+        input_gender := dbc.Checklist(
+            options=gender_series,
+            value=[],
+            switch=True,
+        )
+    )
+])
 
-
-
-
-sidecols['members'] = html.Div([
-    # html.H3('Members'),
-    member_name_card,
-    member_dob_card,
-    member_gender_card,
-
-    # html.Hr(),
-
-    # dbc.Label('Date of birth'),
-    
-    
-    
-
-    
-
-
-], className='sidecol_members sidecol_showhide')
-
-sidecols['books'] = html.Div([
-    html.H2('Books'),
-], className='sidecol_books sidecol_showhide')
-
-sidecols['events'] = html.Div([
-    html.H2('Events'),
-], className='sidecol_events sidecol_showhide')
-
-
-
-
-maincol = dbc.Col(
-    width=9,
-    class_name='maincol',
-    children=[]
-)
-
+member_filter_card = dbc.Card([
+    dbc.CardHeader('Filter for members currently being applied'),
+    dbc.CardBody(
+        member_filter_pre := html.Pre('[none]')
+    )
+])
 
 member_map_card = dbc.Card([
-    html.H4('Map of members’ apartments in Paris'), 
-    map_members := dcc.Graph()
-], body=True)
+    dbc.CardHeader('Map of members’ apartments in Paris'), 
+    dbc.CardBody(map_members := dcc.Graph(figure=plot_members_map()))
+])
 
 member_tbl_card = dbc.Card([
-    html.H4('Data on the filtered members'), 
-    tbl_members := dbc.Container()
-], body=True)
-
-maincols = {}
-maincols['members'] = html.Div([
-    
-    ,
-
-    dbc.Card(, body=True)
-], className='maincol_showhide')
-
-maincols['books'] = html.Div([
-    map_books := dcc.Graph(),
-    tbl_books := dbc.Container()
-], className='maincol_showhide')
-
-maincols['events'] = html.Div([
-    map_events := dcc.Graph(),
-    tbl_events := dbc.Container()
-], className='maincol_showhide')
-
-# shared_cols = set(maincols.keys()) & set(sidecols.keys())
-shared_cols = {'members'}
+    dbc.CardHeader('Data on the filtered members'),
+    dbc.CardBody(tbl_members := dbc.Container())
+])
 
 
 ### LAYOUT
 
+sidecol = dbc.Col(
+    width=6,
+    class_name='sidecol',
+    children=[
+        member_name_card,
+        member_dob_card,
+        member_gender_card
+    ]
+)
+
+maincol = dbc.Col(
+    width=6,
+    class_name='maincol',
+    children=[
+        member_filter_card,
+        member_map_card,
+        member_tbl_card,
+    ]
+)
+
+storages = dbc.Container(
+    store_member_filter := dcc.Store(id='filter_data')
+)
+
 app.layout = layout_container = dbc.Container([
     navbar_row := dbc.Row(navbar, class_name='navbar_row'),
-    content_row := dbc.Row([
-        dbc.Row([
-            dbc.Col(sidecols[col], width=6, class_name='sidecol'),
-            dbc.Col(maincols[col], width=6, class_name='maincol'),
-        ], class_name=f'datatype_container datatype_container_{col}') 
-        for col in shared_cols
-    ], 
-    class_name='content_row'
-    )
+    content_row := dbc.Row([sidecol, maincol], class_name='content_row'),
+    storages
 ])
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Callbacks
+
+@callback(
+    [
+        Output(store_member_filter, "data", allow_duplicate=True),
+        Output(graph_members_dob, "figure", allow_duplicate=True),
+    ],
+    Input(button_clear_dob, 'n_clicks'),
+    [
+        State(store_member_filter, "data"),
+        State(graph_members_dob, 'figure'),
+    ],
+    prevent_initial_call=True
+)
+def clear_dob(n_clicks, filter_data, figdata):
+    if not n_clicks or not filter_data: raise PreventUpdate
+    if 'birth_year' in filter_data: filter_data.pop('birth_year')
+    fig = plot_members_dob()
+    return [filter_data,fig]
+
+
+
+
+
+
+
+@callback(
+    Output(store_member_filter, "data"),
+    [
+        Input(input_member, 'value'),
+        Input(input_gender, 'value'),
+        Input(graph_members_dob, 'selectedData'),
+    ],
+    State(store_member_filter, "data"),
+)
+def update_filter_from_dob(members, genders, selected_data, filter_data):
+    if filter_data is None: filter_data = {}
+    filter_data['member'] = members
+    filter_data['gender'] = genders
+
+    ## birth year
+    if selected_data:
+        try:
+            minx,maxx = selected_data['range']['x']
+            filter_data['birth_year'] = [(int(minx), int(maxx))]
+        except Exception as e:
+            sys.stderr.write(str(e))
+            print('!!',e)
+
+    return filter_data
+
 
 
 
@@ -176,22 +222,22 @@ app.layout = layout_container = dbc.Container([
 
 @callback(
     [
+        Output(member_filter_pre, 'children'),
         Output(map_members, 'figure'),
-        # Output(tbl_members, 'children')
     ],
-    [
-        Input(input_member, 'value'),
-        # Input(input_gender, 'value'),
-    ]
+    Input(store_member_filter, "data"),
+    State(map_members, 'figure'),
 )
-def set_members_data(member):
-    df = MemberDwellingsDataset().data.reset_index()
-    if member: df=df[df.member.isin(member)]
-    # if genders: df=df[df.gender.isin(genders)]
-    
-    fig = plot_members_map(df)
-    return fig
-    
+def update_pre_with_query_str(filter_data, fig_old):
+    ff = FigureFactory(MemberDwellings().data)
+    q = ff.filter_query(filter_data)
+    df = ff.filter_df(q=q)
+    # pre = f'{pformat(filter_data)}\nQ: {q}'
+    pre = f'Q: {q}' if q else '[none]'
+    fig_new = plot_members_map(df)
+    fig = go.Figure(fig_new.data, go.Figure(fig_old).layout)
+    return [pre,fig]
+
 
 
 if __name__=='__main__':
