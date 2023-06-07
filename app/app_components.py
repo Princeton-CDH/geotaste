@@ -23,8 +23,8 @@ class MemberPanel(DashComponent):
     def dob_card(self): return MemberDOBCard()
     @cached_property
     def gender_card(self): return MemberGenderCard()
-    @cached_property
-    def map_dwellings_card(self): return MemberDwellingsMapCard()
+    # @cached_property
+    # def map_dwellings_card(self): return MemberDwellingsMapCard()
 
 
     
@@ -35,7 +35,7 @@ class MemberPanel(DashComponent):
             self.name_card.layout(params),
             self.dob_card.layout(params),
             self.gender_card.layout(params),
-            self.map_dwellings_card.layout(params),
+            # self.map_dwellings_card.layout(params),
             self.store
         ])
     
@@ -53,24 +53,24 @@ class MemberPanel(DashComponent):
         @app.callback(
             [
                 Output(self.store_desc, 'children'),
-                Output(self.map_dwellings_card.graph, 'figure'),
+                # Output(self.map_dwellings_card.graph, 'figure'),
             ],
             Input(self.store, 'data'),
-            State(self.map_dwellings_card.graph, 'figure'),
+            # State(self.map_dwellings_card.graph, 'figure'),
             prevent_initial_call=True
         )
         def update_from_store(
                 filter_data, 
-                map_figdata
+                # map_figdata
                 ):
             q = to_query_string(filter_data)
-            # if not q: q = '[no filter]'
-            # return [q]
-            old_fig = go.Figure(map_figdata)
-            ff = MemberDwellingsFigureFactory(filter_data)
-            new_fig = ff.plot_map()
-            ofig = go.Figure(data=new_fig.data, layout=old_fig.layout)
-            return [q if q else '[no filter]', ofig]
+            if not q: q = '[no filter]'
+            return [q]
+            # old_fig = go.Figure(map_figdata)
+            # ff = MemberDwellingsFigureFactory(filter_data)
+            # new_fig = ff.plot_map()
+            # ofig = go.Figure(data=new_fig.data, layout=old_fig.layout)
+            # return [q if q else '[no filter]', ofig]
 
 
 
