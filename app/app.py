@@ -1,6 +1,7 @@
 from app_imports import *
 from app_figs import *
 from app_widgets import *
+from app_components import *
 
 
 ## Start app
@@ -33,67 +34,7 @@ gender_series = MemberDwellingsDataset().data.gender.replace({'':'(Unknown)'}).v
 sidecols = {}
 
 
-member_name_card = dbc.Card([
-    html.H4("Select members by name"),
-
-    input_member := dcc.Dropdown(
-        options = [dict(value=idx, label=lbl) for idx,lbl in zip(Members().data.index, Members().data.sort_name)],
-        value = [],
-        multi=True,
-        placeholder='Select individual members'
-    )
-], body=True)
-
-
-
-member_dob_card = dbc.Card([
-    dbc.Row([
-        dbc.Col(
-            html.H4("Filter by date of birth"),
-            # width=11
-        ),
-        dbc.Col(
-            button_clear_dob := dbc.Button(
-                "Clear", 
-                color="link", 
-                n_clicks=0
-            ),
-            # width=1,
-            style={'text-align':'right'}
-        )
-    ]),
-    dbc.Row([
-        graph_members_dob := dcc.Graph(figure=plot_members_dob()),
-    ])
-], body=True)
-
-member_gender_card = dbc.Card([
-    dbc.CardHeader("Filter by member gender"),
-    dbc.CardBody(
-        input_gender := dbc.Checklist(
-            options=gender_series,
-            value=[],
-            switch=True,
-        )
-    )
-])
-
-member_filter_card = dbc.Card([
-    dbc.CardHeader('Filter for members currently being applied'),
-    dbc.CardBody(
-        member_filter_pre := html.Pre('[none]')
-    )
-])
-
-member_map_card = dbc.Card([
-    dbc.CardHeader('Map of members’ apartments in Paris'), 
-    dbc.CardBody(map_members := dcc.Graph(figure=plot_members_map()))
-])
-
-member_tbl_card = dbc.Card([
-    dbc.CardHeader('Data on the filtered members'),
-    dbc.CardBody(tbl_members := dbc.Container())
-])
+member_name_card = MemberNameCard()
 
 
 ### LAYOUT
@@ -203,7 +144,7 @@ def clear_dob(n_clicks, filter_data, figdata):
 @callback(
     Output(store_member_filter, "data"),
     [
-        Input(input_member, 'value'),
+        Input(member_name_card.input_member, 'value'),
         Input(input_gender, 'value'),
         Input(graph_members_dob, 'selectedData'),
     ],
