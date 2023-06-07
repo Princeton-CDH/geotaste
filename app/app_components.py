@@ -9,73 +9,7 @@ class SimpleCard(dbc.Card):
         if header: children+=[dbc.CardHeader(header)]
         if body: children+=[dbc.CardBody(body)]
         if footer: children+=[dbc.CardFooter(footer)]
-        super().__init__(children)
-
-class MemberPanel(DashComponent):
-    @cached_property
-    def store(self): return dcc.Store(id=f'store__{self.name}')
-    @cached_property
-    def store_desc(self): return html.P('[no filter]')
-
-    @cached_property
-    def name_card(self): return MemberNameCard()
-    @cached_property
-    def dob_card(self): return MemberDOBCard()
-    @cached_property
-    def gender_card(self): return MemberGenderCard()
-    # @cached_property
-    # def map_dwellings_card(self): return MemberDwellingsMapCard()
-
-
-    
-    def layout(self, params=None):
-        return dbc.Container([
-            html.H2('Member Panel'),
-            self.store_desc,
-            self.name_card.layout(params),
-            self.dob_card.layout(params),
-            self.gender_card.layout(params),
-            # self.map_dwellings_card.layout(params),
-            self.store
-        ])
-    
-
-    def component_callbacks(self, app):
-        @app.callback(
-            Output(self.store, 'data'),
-            Input(self.dob_card.store, 'data'),
-            State(self.store, 'data'),
-        )
-        def update_store_from_dob_store(new_data, current_data):
-            if current_data is None: current_data = {}
-            return {**current_data, **new_data}
-        
-        @app.callback(
-            [
-                Output(self.store_desc, 'children'),
-                # Output(self.map_dwellings_card.graph, 'figure'),
-            ],
-            Input(self.store, 'data'),
-            # State(self.map_dwellings_card.graph, 'figure'),
-            prevent_initial_call=True
-        )
-        def update_from_store(
-                filter_data, 
-                # map_figdata
-                ):
-            q = to_query_string(filter_data)
-            if not q: q = '[no filter]'
-            return [q]
-            # old_fig = go.Figure(map_figdata)
-            # ff = MemberDwellingsFigureFactory(filter_data)
-            # new_fig = ff.plot_map()
-            # ofig = go.Figure(data=new_fig.data, layout=old_fig.layout)
-            # return [q if q else '[no filter]', ofig]
-
-
-
-
-
+        super().__init__(children, outline=True)
 
 
 
@@ -108,22 +42,24 @@ class MemberDOBCard(DashComponent):
                 self.button_clear,
                 ],
             body = [
-                self.filter_desc,
                 self.graph,
-                self.store
-            ]
+                self.store,
+                self.filter_desc,
+            ],
         )
     
     @cached_property
-    def filter_desc(self): return html.P('?')
+    def filter_desc(self): return html.Div()
 
     @cached_property
     def graph(self):
         return dcc.Graph(figure=self.plot())
     
+    def ff(self, filter_data={}):
+        return MemberFigureFactory(filter_data)
+
     def plot(self, filter_data={}, ff=None):
-        if ff is None: ff=MemberFigureFactory(filter_data)
-        return ff.plot_dob()
+        return self.ff(filter_data).plot_dob()
 
     @cached_property
     def button_clear(self):
@@ -160,6 +96,24 @@ class MemberDOBCard(DashComponent):
         )
         def clear_selection(n_clicks):
             return {}, self.plot()
+        
+        @app.callback(
+            Output(self.filter_desc, 'children'),
+            Input(self.store, 'data')
+        )
+        def f(filter_data, key='birth_year'):
+            df0 = self.ff().df
+            df = self.ff(filter_data).df
+            res = filter_data.get(key)
+            minv,maxv = df0[key].dropna().apply(int).min(), df0[key].dropna().apply(int).max()
+            
+            if res:
+                obj = res[0]
+                if len(obj)==2:
+                    minv,maxv = obj
+            return dcc.Markdown(f'Selecting members born between **{minv}** and **{maxv}**, yielding *{len(df):,}* of the *{len(df0):,}* in total.')# ({int(len(df)/len(df0)*100)}%).')
+                
+            
     
 
 class MemberGenderCard(DashComponent):
@@ -238,18 +192,72 @@ class GeotasteLayout(DashComponent):
             self.member_panel_comparison.layout(params)
         ])
 
+   
+  
+class MemberPanel(DashComponent):
+    def __init__(self, title='Member Panel', **kwargs):
+        super().__init__(title=title, **kwargs) 
+
+    @cached_property
+    def store(self): return dcc.Store(id=f'store__{self.name}')
+    @cached_property
+    def store_desc(self): return html.P('[no filter]')
+
+    @cached_property
+    def name_card(self): return MemberNameCard()
+    @cached_property
+    def dob_card(self): return MemberDOBCard()
+    @cached_property
+    def gender_card(self): return MemberGenderCard()
+    
+    def layout(self, params=None): 
+        body = dbc.Container([
+            html.H3(self.title),
+            self.store_desc,
+            self.name_card.layout(params),
+            self.dob_card.layout(params),
+            self.gender_card.layout(params),
+            # self.map_dwellings_card.layout(params),
+            self.store
+        ])
+        return body
+    
+
+    def component_callbacks(self, app):
+        @app.callback(
+            Output(self.store, 'data'),
+            Input(self.dob_card.store, 'data'),
+            State(self.store, 'data'),
+        )
+        def update_store_from_dob_store(new_data, current_data):
+            if current_data is None: current_data = {}
+            return {**current_data, **new_data}
+        
+        @app.callback(
+            Output(self.store_desc, 'children'),
+            Input(self.store, 'data'),
+        )
+        def update_from_store(filter_data):
+            q = to_query_string(filter_data)
+            if not q: q = '[no filter]'
+            return [q]
+
+
+
+
 class MemberPanelComparison(DashComponent):
     def __init__(self):
         super().__init__()
-        self.navbar = Navbar()
         self.member_panel_L = MemberPanel(name='member-panel-L')
         self.member_panel_R = MemberPanel(name='member_panel_R')
 
     def layout(self, params=None):
-        return dbc.Row([
+        # header = html.H2('Comparing members'),
+        body = dbc.Row([
             dbc.Col(width=6, children=[self.member_panel_L.layout(params)]),
             dbc.Col(width=6, children=[self.member_panel_R.layout(params)])
         ])
+        return body
 
 ### Callbacks
 
