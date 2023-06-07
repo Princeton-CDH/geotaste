@@ -14,29 +14,6 @@ server = app.server
 
 
 
-## Set layout
-navbar = dbc.Navbar(
-    dbc.Container([
-        dbc.Row(
-            [
-                dbc.Col(
-                    html.Img(src="/assets/SCo_logo_graphic.png", height="30px")
-                ),
-                dbc.Col(
-                    dbc.NavbarBrand(
-                        "Geography of Taste", 
-                    ),
-                ),
-            ],
-            align="center",
-            style={'margin':'auto'},
-        ),
-    ]),
-    color="light",
-    dark=False,
-)
-
-
 
 ### MEMBERS SIDE COL
 df_members = Members().data
@@ -121,22 +98,8 @@ member_tbl_card = dbc.Card([
 
 ### LAYOUT
 
-sidecol = dbc.Col(
-    # width=6,
-    class_name='sidecol',
-    children=[
-        member_name_card,
-        member_dob_card,
-        member_gender_card
-    ]
-)
-
-offcanvas = dbc.Offcanvas(sidecol, is_open=False)
-button_offcanvas = dbc.Button("Filter", n_clicks=0)
-
-maincol = dbc.Col(
-    # width=6,
-    class_name='maincol',
+leftcol = dbc.Col(
+    width=6,
     children=[
         member_filter_card,
         member_map_card,
@@ -144,18 +107,64 @@ maincol = dbc.Col(
     ]
 )
 
+rightcol = dbc.Col(
+    width=6,
+    children=[
+        member_filter_card,
+        member_map_card,
+        member_tbl_card,
+    ]
+)
+
+offcanvas = dbc.Modal([
+    member_name_card,
+    member_dob_card,
+    member_gender_card
+], is_open=False)
+button_offcanvas = dbc.Button("Filter", n_clicks=0)
+
+
 storages = dbc.Container(
     store_member_filter := dcc.Store(id='filter_data')
 )
 
+
+
+## Set layout
+navbar = dbc.Navbar(
+    dbc.Container([
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Img(src="/assets/SCo_logo_graphic.png", height="30px")
+                ),
+                dbc.Col(
+                    dbc.NavbarBrand(
+                        "Geography of Taste", 
+                    ),
+                ),
+                dbc.Col(
+                    button_offcanvas
+                )
+            ],
+            align="center",
+            style={'margin':'auto'},
+        ),
+    ]),
+    color="light",
+    dark=False,
+)
+
+
+
 app.layout = layout_container = dbc.Container([
     navbar_row := dbc.Row(navbar, class_name='navbar_row'),
     content_row := dbc.Row([
-        offcanvas,
-        button_offcanvas, 
-        maincol
-    ], class_name='content_row'),
-    storages
+        leftcol,
+        rightcol,
+    ]),
+    
+    offcanvas,
 ])
 
 
