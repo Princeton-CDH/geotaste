@@ -55,3 +55,38 @@ p {
 }
 
 .offcanvas { width:40vw; }
+
+.card-footer:empty {
+    display: none;
+}
+.card-footer span:empty { display: none; }
+
+.hidden { display:none }
+.visible { display:inherit}
+
+
+.card-footer {
+    /* padding: 0.5rem 1rem; */
+    background-color: rgba(0,0,0,0);
+    color: red;
+    /* border-top: none; */
+    border-top: 1px solid rgba(0,0,0,.125);
+
+    & div { margin:0;padding:0;}
+    & p { margin:0;padding:0}
+
+}
+
+.card-header {
+    font-weight: bold;
+}
+.card .card .card-header {
+    font-weight:normal;
+    /* opacity: 0.75; */
+    /* display: none; */
+}
+/* 
+.card .card, .card .card .card-header, .card .card .card-footer {
+    background-color: rgba(0,0,0,0);
+    border: none;
+} */

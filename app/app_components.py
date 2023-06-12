@@ -31,25 +31,50 @@ class MemberNameCard(DashComponent):
     )
 
 
+
+
+
+
+
+
+
 class MemberDOBCard(DashComponent):
+    desc = 'Filter by date of birth'
+
+
     @cached_property
     def store(self): return dcc.Store(id=f'store__{self.name}')
 
-    def layout(self, params=None):
-        return SimpleCard(
-            header = [
-                "Filter by date of birth | ",
-                self.button_clear,
-                ],
-            body = [
-                self.graph,
-                self.store,
-                self.filter_desc,
-            ],
+    @cached_property
+    def header(self):
+        return dbc.CardHeader(
+            dbc.Row([
+                dbc.Col(self.desc),
+                dbc.Col(self.button_clear, style={'text-align':'right'})
+            ])
         )
     
     @cached_property
-    def filter_desc(self): return html.Div()
+    def body(self):
+        return dbc.CardBody([
+            self.graph,
+            self.store,
+        ])
+    
+    @cached_property
+    def footer(self):
+        return dbc.CardFooter()
+
+
+    def layout(self, params=None):
+        return dbc.Card([
+            self.header, 
+            self.body,
+            self.footer,
+        ])
+    
+    @cached_property
+    def filter_desc(self): return html.Span()
 
     @cached_property
     def graph(self):
@@ -77,6 +102,7 @@ class MemberDOBCard(DashComponent):
             State(self.store, "data"),
         )
         def update_selection(selected_data, filter_data):
+            print('GOT:',selected_data)
             if filter_data is None: filter_data = {}
             if selected_data:
                 try:
@@ -98,20 +124,23 @@ class MemberDOBCard(DashComponent):
             return {}, self.plot()
         
         @app.callback(
-            Output(self.filter_desc, 'children'),
-            Input(self.store, 'data')
+            Output(self.footer, 'children', allow_duplicate=True),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
         )
-        def f(filter_data, key='birth_year'):
+        def update_filter_desc(filter_data, key='birth_year'):
             df0 = self.ff().df
             df = self.ff(filter_data).df
             res = filter_data.get(key)
             minv,maxv = df0[key].dropna().apply(int).min(), df0[key].dropna().apply(int).max()
-            
+            o = ''            
             if res:
                 obj = res[0]
                 if len(obj)==2:
                     minv,maxv = obj
-            return dcc.Markdown(f'Selecting members born between **{minv}** and **{maxv}**, yielding *{len(df):,}* of the *{len(df0):,}* in total.')# ({int(len(df)/len(df0)*100)}%).')
+            o = dcc.Markdown(f'*Filtering members born between **{minv}** and **{maxv}** yields *{len(df):,}* of *{len(df0):,}* members of the library.*')
+            return o
+
                 
             
     
@@ -248,22 +277,71 @@ class MemberPanel(DashComponent):
 class MemberPanelComparison(DashComponent):
     def __init__(self):
         super().__init__()
-        self.member_panel_L = MemberPanel(name='member-panel-L')
-        self.member_panel_R = MemberPanel(name='member_panel_R')
+        self.left = MemberPanel(name='member-panel-L')
+        self.right = MemberPanel(name='member_panel_R')
+
+    @cached_property
+    def name_card(self):
+        return MemberPanelComparisonRow(
+            self.left,
+            self.right,
+            'name_card',
+            'Filter by member name'
+        )
+    
+    @cached_property
+    def dob_card(self):
+        return MemberPanelComparisonRow(
+            self.left,
+            self.right,
+            'dob_card',
+            'Filter by date of birth'
+        )
+    
+    @cached_property
+    def gender_card(self):
+        return MemberPanelComparisonRow(
+            self.left,
+            self.right,
+            'gender_card',
+            'Filter by member gender'
+        )
+    
+    def layout(self, params=None):
+        return dbc.Container([
+            self.name_card.layout(params),
+            self.dob_card.layout(params),
+            self.gender_card.layout(params),
+        ])
+
+
+
+class MemberPanelComparisonRow(DashComponent):
+    def __init__(self, left_panel, right_panel, widget_name, header=[], footer=[]):
+        super().__init__()
+        self.left_widget = getattr(left_panel, widget_name)
+        self.right_widget = getattr(right_panel, widget_name)
+        self.header = header
+        self.footer = footer
 
     def layout(self, params=None):
-        # header = html.H2('Comparing members'),
-        body = dbc.Row([
-            dbc.Col(width=6, children=[self.member_panel_L.layout(params)]),
-            dbc.Col(width=6, children=[self.member_panel_R.layout(params)])
-        ])
-        return body
+        return SimpleCard(
+            header=self.header,
+            body=dbc.Row([
+                dbc.Col(self.left_widget.layout(params), width=6),
+                dbc.Col(self.right_widget.layout(params), width=6),
+            ])
+        )
+
+
 
 ### Callbacks
 
 
 
-
+class MemberDOBComparison(DashComponent):
+    def __init__(self, left_member_panel, right_member_panel):
+        pass
 
 
 
