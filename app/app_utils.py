@@ -56,4 +56,4 @@ def filter_df(df, filter_data={}, return_query=False):
     if not fd: return '' if return_query else df
     q=to_query_string(fd)
     if return_query: return q
-    return df.query(q)
+    return df.query(q) if q else df

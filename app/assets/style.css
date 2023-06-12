@@ -1,4 +1,8 @@
-.container { max-width: none; }
+.container, .row, .col { 
+    max-width: none; 
+    padding: 0;
+    margin: 0;
+}
 
 
 .tabs {
@@ -90,3 +94,7 @@ p {
     background-color: rgba(0,0,0,0);
     border: none;
 } */
+
+.content-container {
+    padding: 0 1rem;
+}

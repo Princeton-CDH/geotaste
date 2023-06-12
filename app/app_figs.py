@@ -7,93 +7,6 @@ from app_imports import *
 ##################################################
 
 
-def plot_members_map(
-        df = None,
-        ):
-    if df is None: 
-        df = MemberDwellingsDataset().data.reset_index()
-
-    # fig_choro = px.choropleth_mapbox(
-    #     df,
-    #     geojson=get_geojson_arrondissement(),
-    #     locations='arrrondissement', 
-    #     color='arrrondissement',
-    #     center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
-    #     zoom=12,
-    #     opacity=.1
-    # )
-    # fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    fig = px.scatter_mapbox(
-        df, 
-        lat="latitude", 
-        lon="longitude", 
-        center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
-        # hover_name="member_id", 
-        # color='arrrondissement',
-        # hover_data=["State", "Population"],
-        # color_discrete_sequence=["fuchsia"], 
-        zoom=12, 
-        hover_name='name',
-        # hover_data=['uri', 'title', 'gender', 'has_card', 'birth_year', 'death_year', 'membership_years'],
-        height=600,
-        size_max=40
-    )
-    fig.update_layout(
-        mapbox=dict(
-            style="stamen-toner",
-            # pitch=45
-        ),
-    )
-    fig.update_traces(marker=dict(size=6, color='#811818'))
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    return fig
-    # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
-
-def plot_members_dob():
-    fig=px.histogram(Members().data, 'birth_year', height=200)
-    fig.update_layout(
-        clickmode='event+select', 
-        dragmode='select', 
-        selectdirection='h',
-        margin={"r":0,"t":0,"l":0,"b":0}
-    )
-    return fig
-
-
-
-def DashMembersDataTable(dff = None, ocols = ['name','title','gender','birth_year','death_year','nationalities','street_address', 'start_date', 'end_date']):
-    dff = get_filtered_data_members() if dff is None else dff
-    ddt, ddt_cols = dff[ocols].dash.to_dash_table()
-    return dash_table.DataTable(
-        data=ddt,
-        columns=ddt_cols,
-        sort_action="native",
-        sort_mode="multi",
-        filter_action="native",
-        page_action="native",
-        page_size=5
-        
-    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class FigureFactory(DashFigureFactory):
     def __init__(self, filter_data = {}, df = None):
         self.filter_data = filter_data
@@ -142,6 +55,7 @@ class FigureFactory(DashFigureFactory):
             zoom=12,
             **kwargs):
         
+        print(color,'color???')
         fig = px.scatter_mapbox(
             self.df, 
             lat=lat,
@@ -158,7 +72,7 @@ class FigureFactory(DashFigureFactory):
         )
         if mapbox_style: mapbox_opts['style']=mapbox_style
         fig.update_layout(mapbox=mapbox_opts)
-        fig.update_traces(marker=dict(size=6, color='#811818'))
+        # fig.update_traces(marker=dict(size=6, color='#811818'))
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         return fig
     
@@ -171,13 +85,19 @@ class MemberFigureFactory(FigureFactory):
             filter_data=filter_data
         )
 
-    def plot_dob(self):
-        fig=px.histogram(self.df, 'birth_year', height=200)
+    def plot_dob(self, color=None):
+        fig=px.histogram(
+            self.df, 
+            'birth_year', 
+            height=200, 
+            color_discrete_sequence=[color] if color else None,
+            template='simple_white'
+            )
         fig.update_layout(
             clickmode='event+select', 
             dragmode='select', 
             selectdirection='h',
-            margin={"r":0,"t":0,"l":0,"b":0}
+            margin={"r":0,"t":0,"l":0,"b":0},
         )
         return fig
 
@@ -190,11 +110,12 @@ class MemberDwellingsFigureFactory(FigureFactory):
             filter_data=filter_data
         )
     
-    def plot_map(self):
+    def plot_map(self, color=None, **kwargs):
         fig = super().plot_map(
             center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
             zoom=12, 
             hover_name='name',
+            **kwargs
         )
         fig.update_layout(
             mapbox=dict(
@@ -202,7 +123,8 @@ class MemberDwellingsFigureFactory(FigureFactory):
                 # pitch=45
             ),
         )
-        fig.update_traces(marker=dict(size=6, color='#811818'))
+        if color: fig.update_traces(marker=dict(size=6, color=color))
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         return fig
         # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
+
