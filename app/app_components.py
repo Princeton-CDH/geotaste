@@ -209,28 +209,7 @@ class MemberDwellingsMapCard(BaseComponent):
             body=[self.graph]
         )
 
-class Navbar(BaseComponent):
-    def layout(self, params=None):
-        return dbc.Navbar(
-            dbc.Container([
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            html.Img(src="/assets/SCo_logo_graphic.png", height="30px")
-                        ),
-                        dbc.Col(
-                            dbc.NavbarBrand(
-                                "Geography of Taste", 
-                            ),
-                        ),
-                    ],
-                    align="center",
-                    style={'margin':'auto'},
-                ),
-            ]),
-            color="light",
-            dark=False,
-        )
+
 
 
 
@@ -248,6 +227,9 @@ class GeotasteLayout(BaseComponent):
                 className='content-container'
             )
         ], className='layout-container')
+
+
+
 
 class MemberPanelComparison(BaseComponent):
     def __init__(self):
@@ -285,15 +267,30 @@ class MemberPanelComparison(BaseComponent):
     def component_callbacks(self, app):
         @app.callback(
             Output(self.comparison_map_card.graph, 'figure'),
-            [Input(self.member_panel_L.store, 'data'), Input(self.member_panel_R.store, 'data')]
+            [
+                Input(self.member_panel_L.store, 'data'), 
+                Input(self.member_panel_R.store, 'data')
+            ],
+            [
+                State(self.member_panel_L.map_dwellings_card.graph, 'figure'),
+                State(self.member_panel_R.map_dwellings_card.graph, 'figure'),
+            ]
         )
-        def redraw_map(filter_data_L, filter_data_R):
-            dfL = MemberDwellingsFigureFactory(filter_data_L).df
-            dfR = MemberDwellingsFigureFactory(filter_data_R).df
+        def redraw_map(filter_data_L, filter_data_R, map_figdata_L, map_figdata_R):
+            fig1 = go.Figure(map_figdata_L)
+            fig2 = go.Figure(map_figdata_R)
+            
+            if not fig1.data: fig1=self.member_panel_L.map_dwellings_card.plot_map()
+            if not fig2.data: fig2=self.member_panel_R.map_dwellings_card.plot_map()
+            return go.Figure(
+                layout=fig1.layout,
+                data=fig1.data+fig2.data,
+            )
+        
 
-            df = pd.concat([dfL.assign(color='red'), dfR.assign(color='blue')])
-            ff = MemberDwellingsFigureFactory(df=df)
-            return ff.plot_map()
+
+            
+
         
         
 
@@ -365,85 +362,35 @@ class MemberPanel(BaseComponent):
 
 
 
-class MemberPanelComparisonByRow(BaseComponent):
-    def __init__(self):
-        super().__init__()
-        self.left = MemberPanel(name='member-panel-L')
-        self.right = MemberPanel(name='member_panel_R')
 
-    @cached_property
-    def name_card(self):
-        return MemberPanelComparisonRow(
-            self.left,
-            self.right,
-            'name_card',
-            'Filter by member name'
-        )
-    
-    @cached_property
-    def dob_card(self):
-        return MemberPanelComparisonRow(
-            self.left,
-            self.right,
-            'dob_card',
-            'Filter by date of birth'
-        )
-    
-    @cached_property
-    def gender_card(self):
-        return MemberPanelComparisonRow(
-            self.left,
-            self.right,
-            'gender_card',
-            'Filter by member gender'
-        )
-    
+
+
+
+
+
+
+
+
+
+class Navbar(BaseComponent):
     def layout(self, params=None):
-        return dbc.Container([
-            self.name_card.layout(params),
-            self.dob_card.layout(params),
-            self.gender_card.layout(params),
-        ])
-
-
-
-class MemberPanelComparisonRow(BaseComponent):
-    def __init__(self, left_panel, right_panel, widget_name, header=[], footer=[]):
-        super().__init__()
-        self.left_widget = getattr(left_panel, widget_name)
-        self.right_widget = getattr(right_panel, widget_name)
-        self.header = header
-        self.footer = footer
-
-    def layout(self, params=None):
-        return SimpleCard(
-            header=self.header,
-            body=dbc.Row([
-                dbc.Col(self.left_widget.layout(params), width=6),
-                dbc.Col(self.right_widget.layout(params), width=6),
-            ])
+        return dbc.Navbar(
+            dbc.Container([
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Img(src="/assets/SCo_logo_graphic.png", height="30px")
+                        ),
+                        dbc.Col(
+                            dbc.NavbarBrand(
+                                "Geography of Taste", 
+                            ),
+                        ),
+                    ],
+                    align="center",
+                    style={'margin':'auto'},
+                ),
+            ]),
+            color="light",
+            dark=False,
         )
-
-
-
-### Callbacks
-
-
-
-class MemberDOBComparison(BaseComponent):
-    def __init__(self, left_panel, right_panel, widget_name, header=[], footer=[]):
-        super().__init__()
-        self.left_widget = getattr(left_panel, widget_name)
-        self.right_widget = getattr(right_panel, widget_name)
-        self.header = header
-        self.footer = footer
-
-    def layout(self, params=None):
-        return SimpleCard(
-            header=self.header,
-            body=dbc.Row([
-                dbc.Col(self.left_widget.layout(params), width=6),
-                dbc.Col(self.right_widget.layout(params), width=6),
-            ])
-        )    
-

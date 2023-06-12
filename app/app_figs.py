@@ -123,7 +123,7 @@ class MemberDwellingsFigureFactory(FigureFactory):
                 # pitch=45
             ),
         )
-        if color: fig.update_traces(marker=dict(size=6, color=color))
+        if color: fig.update_traces(marker=dict(size=10, color=color))
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         return fig
         # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)

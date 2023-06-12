@@ -18,3 +18,5 @@ def get_range_slider(series, label='', step=10, value=None, marks={},**kwargs):
     )
     return slider
 
+
+
