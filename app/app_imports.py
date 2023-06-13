@@ -1,6 +1,12 @@
+## Constants
+LEFT_COLOR='#7d6ab6'
+RIGHT_COLOR='#1a6b47'
+BOTH_COLOR='#354469'
+
 ## Sys imports
 from datetime import datetime as dt
 import copy,time,sys,os
+import random
 
 ## Non-sys imports
 import dash
@@ -17,8 +23,8 @@ import numpy as np
 import pandas as pd
 # import pandas_dash
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-
-
+import logging
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
 import plotly.express as px
 import plotly.graph_objects as go
 

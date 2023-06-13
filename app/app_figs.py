@@ -66,7 +66,7 @@ class FigureFactory(DashFigureFactory):
             # color='arrrondissement',
             # hover_data=["State", "Population"],
             zoom=zoom, 
-            height=600,
+            height=400,
             size_max=40,
             **kwargs
         )
@@ -127,4 +127,76 @@ class MemberDwellingsFigureFactory(FigureFactory):
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         return fig
         # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
+
+
+
+
+
+
+
+class ComparisonFigureFactory(FigureFactory):
+    def __init__(self, filter_data_L={}, filter_data_R={}, df=None):
+        super().__init__(df=MemberDwellings().data if df is None else df)
+        self.filter_data_L = filter_data_L
+        self.filter_data_R = filter_data_R
+    @cached_property
+    def df_L(self): return filter_df(self._df, self.filter_data_L)
+    @cached_property
+    def df_R(self): return filter_df(self._df, self.filter_data_R)
+
+    @cached_property
+    def df(self):
+        ids_L = set(self.df_L.index)
+        ids_R = set(self.df_R.index)
+        ids_both = ids_L & ids_R
+        ids_only_L = ids_L - ids_R
+        ids_only_R = ids_R - ids_L
+        
+        df_both = self.df_L.loc[list(ids_both)].assign(present_in='Both', present_in_str = f'Both')
+        df_only_L = self.df_L.loc[list(ids_only_L)].assign(present_in='Left', present_in_str=f'Left ({to_query_string(self.filter_data_L)})')
+        df_only_R = self.df_R.loc[list(ids_only_R)].assign(present_in='Right', present_in_str=f'Right ({to_query_string(self.filter_data_R)})')
+        df = pd.concat([df_only_L, df_both, df_only_R])
+        return df    
+
+
+
+class MemberComparisonFigureFactory(ComparisonFigureFactory):
+    def plot_map(self, **kwargs):
+
+        def get_color(x):
+            if x.startswith('Left'): return LEFT_COLOR
+            if x.startswith('Right'): return RIGHT_COLOR
+            return BOTH_COLOR
+        
+        figdf = self.df.sample(frac=1)
+        color_map = {label:get_color(label) for label in figdf.present_in_str.apply(str).unique()}
+        print(color_map)
+
+        fig = px.scatter_mapbox(
+            self.df,
+            lat='latitude',
+            lon='longitude', 
+            center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
+            zoom=12, 
+            hover_name='name',
+            color='present_in_str',
+            # hover_data=["State", "Population"],
+            height=600,
+            size_max=40,
+            mapbox_style="stamen-toner",
+            color_discrete_map=color_map,
+            **kwargs
+        )
+        fig.update_traces(marker=dict(size=10))
+        fig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01
+            )
+        )
+        return fig
+    
 

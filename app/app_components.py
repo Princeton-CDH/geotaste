@@ -2,7 +2,6 @@ from typing import Any
 from app_imports import *
 from app_figs import *
 
-
 class BaseComponent(DashComponent):
     def __init__(self, title="Dash", name=None,
                  no_store=None, no_attr=None, no_config=None,
@@ -195,13 +194,12 @@ class MemberDwellingsMapCard(BaseComponent):
 
     @cached_property
     def graph(self):
-        return dcc.Graph()#figure=self.plot_map())
+        return dcc.Graph(figure=self.plot_map())
     
-    @cached_property
-    def ff(self): return MemberDwellingsFigureFactory()
+    def ff(self, *args, **kwargs): return MemberDwellingsFigureFactory(*args, **kwargs)
     
     def plot_map(self):
-        return self.ff.plot_map(**self._kwargs)
+        return self.ff().plot_map(**self._kwargs)
 
     def layout(self,params=None):
         return SimpleCard(
@@ -210,7 +208,9 @@ class MemberDwellingsMapCard(BaseComponent):
         )
 
 
-
+class MemberDwellingsComparisonMapCard(MemberDwellingsMapCard):
+    @cached_property
+    def graph(self): return dcc.Graph()
 
 
 class GeotasteLayout(BaseComponent):
@@ -235,8 +235,8 @@ class MemberPanelComparison(BaseComponent):
     def __init__(self):
         super().__init__()
         self.navbar = Navbar()
-        self.member_panel_L = MemberPanel(name='member_panel_L', color='#7d6ab6')
-        self.member_panel_R = MemberPanel(name='member_panel_R', color='#1a6b47')
+        self.member_panel_L = MemberPanel(name='member_panel_L', color=LEFT_COLOR)
+        self.member_panel_R = MemberPanel(name='member_panel_R', color=RIGHT_COLOR)
 
     def layout(self, params=None):
         return dbc.Container([
@@ -262,7 +262,7 @@ class MemberPanelComparison(BaseComponent):
     
     @cached_property
     def comparison_map_card(self):
-        return MemberDwellingsMapCard()
+        return MemberDwellingsComparisonMapCard()
     
     def component_callbacks(self, app):
         @app.callback(
@@ -271,20 +271,14 @@ class MemberPanelComparison(BaseComponent):
                 Input(self.member_panel_L.store, 'data'), 
                 Input(self.member_panel_R.store, 'data')
             ],
-            [
-                State(self.member_panel_L.map_dwellings_card.graph, 'figure'),
-                State(self.member_panel_R.map_dwellings_card.graph, 'figure'),
-            ]
+            State(self.comparison_map_card.graph, 'figure'),
         )
-        def redraw_map(filter_data_L, filter_data_R, map_figdata_L, map_figdata_R):
-            fig1 = go.Figure(map_figdata_L)
-            fig2 = go.Figure(map_figdata_R)
-            
-            if not fig1.data: fig1=self.member_panel_L.map_dwellings_card.plot_map()
-            if not fig2.data: fig2=self.member_panel_R.map_dwellings_card.plot_map()
+        def redraw_map(filter_data_L, filter_data_R, old_figdata):
+            fig_old = go.Figure(old_figdata)
+            fig = MemberComparisonFigureFactory(filter_data_L, filter_data_R).plot_map()
             return go.Figure(
-                layout=fig1.layout,
-                data=fig1.data+fig2.data,
+                layout=fig_old.layout if fig_old.data else fig.layout,
+                data=fig.data
             )
         
 
@@ -306,7 +300,7 @@ class MemberPanel(BaseComponent):
     @cached_property
     def store(self): return dcc.Store(id=f'store__{self.name}')
     @cached_property
-    def store_desc(self): return html.P('[no filter]')
+    def store_desc(self): return html.H3('[no filter]', style={'color':self.color, 'text-align':'center'} if self.color else {})
 
     @cached_property
     def name_card(self): return MemberNameCard(**self._kwargs)
@@ -315,16 +309,15 @@ class MemberPanel(BaseComponent):
     @cached_property
     def gender_card(self): return MemberGenderCard(**self._kwargs)
     @cached_property
-    def map_dwellings_card(self): return MemberDwellingsMapCard(**self._kwargs)
+    def map_card(self): return MemberDwellingsMapCard(**self._kwargs)
     
     def layout(self, params=None): 
         body = dbc.Container([
-            html.H3(self.title),
             self.store_desc,
             self.name_card.layout(params),
             self.dob_card.layout(params),
             self.gender_card.layout(params),
-            self.map_dwellings_card.layout(params),
+            self.map_card.layout(params),
             self.store
         ])
         return body
@@ -346,16 +339,15 @@ class MemberPanel(BaseComponent):
         @app.callback(
             [
                 Output(self.store_desc, 'children'),
-                Output(self.map_dwellings_card.graph, 'figure')
+                Output(self.map_card.graph, 'figure')
             ],
             Input(self.store, 'data'),
         )
         def datastore_updated(filter_data):
             q = to_query_string(filter_data)
             if not q: q = '[no filter]'
-            
-            ff = MemberDwellingsFigureFactory(filter_data)
-            fig = ff.plot_map(**self._kwargs)
+            # return [q]
+            fig = self.map_card.ff(filter_data).plot_map(**self._kwargs)
             
             return [q, fig]
 
