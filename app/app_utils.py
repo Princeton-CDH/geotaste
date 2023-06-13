@@ -1,3 +1,6 @@
+import pandas as pd
+import numbers
+
 
 def is_l(x): return type(x) in {list,tuple}
 def iter_minmaxs(l):
@@ -35,12 +38,12 @@ def to_query_string(filter_data={}):
             if is_l(v):
                 if v and is_l(v[0]):
                     qx = [
-                        f'{minv}<={k}<={maxv}'
+                        f'{minv} <= {k} <= {maxv}'
                         for minv,maxv in iter_minmaxs(v)
                     ]
                 else:
                     qx = [
-                        f'{k}=={vx}' if type(vx) in {int,float} else f'{k}=="{vx}"'
+                        f'{k} == {vx}' if type(vx) in {int,float} else f'{k} == "{vx}"'
                         for vx in v
                     ]
             elif type(v)==str:
@@ -52,8 +55,64 @@ def to_query_string(filter_data={}):
 
 
 def filter_df(df, filter_data={}, return_query=False):
-    fd = {k:v for k,v in filter_data.items() if k in set(df.columns)}
+
+    fd = {
+        k:v 
+        for k,v in filter_data.items() 
+        if k in set(df.columns)
+    }
     if not fd: return '' if return_query else df
     q=to_query_string(fd)
     if return_query: return q
-    return df.query(q) if q else df
+    if not q: return df
+    
+    
+    
+    ## do query ...
+    # print('\n\n\n\n#### FILTERING: #### \n\n')
+    # print(df)
+    # print('fd',fd)
+    # print('q',q)
+    
+    # ensure quant cols!
+    q_cols = {
+        k 
+        for k,v in fd.items()
+        if (
+            (is_numeric(v))
+            or 
+            (is_listy(v) and v and is_numeric(v[0]))
+            or (is_listy(v) and v and is_listy(v[0]) and v[0] and is_numeric(v[0][0]))
+        )
+    }
+    # print('q_cols',q_cols)
+    
+    df = df.sample(frac=1)
+    for qcol in q_cols:
+        df[qcol] = pd.to_numeric(df[qcol], errors='coerce')
+
+    # print(df)
+
+    odf = df.query(q)
+    # print(odf)
+
+    # for key in fd:
+    #     print(df[key])
+    #     print(q)
+    #     print(odf[key])
+
+    return odf
+
+
+
+
+def is_numeric(x):
+    return isinstance(x, numbers.Number)
+
+def is_listy(x):
+    return type(x) in {tuple,list}
+
+def ensure_dict(x):
+    if x is None: return {}
+    if type(x) is dict: return x
+    return dict(x)

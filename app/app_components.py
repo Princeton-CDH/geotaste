@@ -3,13 +3,52 @@ from app_imports import *
 from app_figs import *
 
 class BaseComponent(DashComponent):
-    def __init__(self, title="Dash", name=None,
-                 no_store=None, no_attr=None, no_config=None,
-                 **kwargs):
-        super().__init__(title=title, name=name,
-                 no_store=no_store, no_attr=no_attr, no_config=no_config)
-        for k,v in kwargs.items(): setattr(self,k,v)
+    # some will have
+    figure_class = None
+
+    ## hookups to FigureFactories
+    def ff(self, filter_data={}):
+        return self.figure_class(ensure_dict(filter_data))
+
+    def plot(self, filter_data={}):
+        return self.ff(ensure_dict(filter_data)).plot(**self._kwargs)
+    
+
+    ## all components can have a memory -- only activated if nec
+    @cached_property
+    def store(self): return dcc.Store(id=self.id('filter_data'))
+
+    def __init__(
+            self,
+
+            # Dash arguments
+            title="Dash Component", 
+            name=None,
+            no_store=None,
+            no_attr=None,
+            no_config=None,
+            
+            # other kwargs: color, ...
+            **kwargs
+            ):
+
+        # invoke Dash component init    
+        super().__init__(
+            title=title, 
+            name=name,
+            no_store=no_store, 
+            no_attr=no_attr, 
+            no_config=no_config
+        )
+
+        # ensure some exist
+        self.color = None
+        
+        # overwritten here
+        for k,v in kwargs.items(): 
+            setattr(self,k,v)
         self._kwargs = kwargs
+
 
 
 
@@ -44,16 +83,16 @@ class MemberNameCard(BaseComponent):
 
 
 
+class FilterCard(BaseComponent):
+    desc = 'Filter by X'
+    key='relevant_col'
 
 
 
 
-class MemberDOBCard(BaseComponent):
-    desc = 'Filter by date of birth'
-
-
-    @cached_property
-    def store(self): return dcc.Store(id=f'store__{self.name}')
+class FilterCard(BaseComponent):
+    desc = 'Filter by X'
+    key='relevant_col'
 
     @cached_property
     def header(self):
@@ -82,20 +121,11 @@ class MemberDOBCard(BaseComponent):
             self.body,
             self.footer,
         ])
-    
-    @cached_property
-    def filter_desc(self): return html.Span()
 
     @cached_property
     def graph(self):
         return dcc.Graph(figure=self.plot())
     
-    def ff(self, filter_data={}):
-        return MemberFigureFactory(filter_data)
-
-    def plot(self, filter_data={}, ff=None):
-        return self.ff(filter_data).plot_dob(**self._kwargs)
-
     @cached_property
     def button_clear(self):
         return dbc.Button(
@@ -104,7 +134,57 @@ class MemberDOBCard(BaseComponent):
             n_clicks=0
         )
     
+    def component_callbacks(self, app):        
+        @app.callback(
+            Output(self.footer, 'children', allow_duplicate=True),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def update_filter_desc(filter_data):
+            print('update_filter_desc',filter_data)
+            return dcc.Markdown(self.ff(ensure_dict(filter_data)).filter_desc)
+        
+        ## CLEAR?
+        @app.callback(
+            Output(self.store, "data", allow_duplicate=True),
+            Input(self.button_clear, 'n_clicks'),
+            State(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def clear_selection(n_clicks, filter_data):
+            filter_data = ensure_dict(filter_data)
+            if self.key in filter_data: filter_data.pop(self.key)
+            return filter_data
+
+        @app.callback(
+            Output(self.footer, 'children', allow_duplicate=True),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def update_filter_desc(filter_data):
+            print('update_filter_desc',filter_data)
+            if self.figure_class is None: raise PreventUpdate
+            return dcc.Markdown(self.ff(ensure_dict(filter_data)).filter_desc)
+
+
+
+class FilterPlotCard(FilterCard):
     def component_callbacks(self, app):
+
+        ## CLEAR? -- OVERWRITTEN
+        @app.callback(
+            [
+                Output(self.store, "data", allow_duplicate=True),
+                Output(self.graph, "figure", allow_duplicate=True),
+            ],
+            Input(self.button_clear, 'n_clicks'),
+            State(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def clear_selection(n_clicks, filter_data):
+            filter_data = ensure_dict(filter_data)
+            if self.key in filter_data: filter_data.pop(self.key)
+            return filter_data, self.plot(filter_data)
 
         @app.callback(
             Output(self.store, "data"),
@@ -112,56 +192,47 @@ class MemberDOBCard(BaseComponent):
             State(self.store, "data"),
         )
         def update_selection(selected_data, filter_data):
-            print('GOT:',selected_data)
-            if filter_data is None: filter_data = {}
+            filter_data = ensure_dict(filter_data)
             if selected_data:
+                # pprint(selected_data)
                 try:
-                    minx,maxx = selected_data['range']['x']
-                    filter_data['birth_year'] = [(int(minx), int(maxx))]
+                    xrange = selected_data['range']['x']
+                    print('xrange selected:',xrange)
+                    minx,maxx = xrange
+                    filter_data[self.key] = [(int(minx), int(maxx))]
+                    print(filter_data)
                 except Exception as e:
                     pass
             return filter_data
         
-        @app.callback(
-            [
-                Output(self.store, "data", allow_duplicate=True),
-                Output(self.graph, "figure", allow_duplicate=True),
-            ],
-            Input(self.button_clear, 'n_clicks'),
-            prevent_initial_call=True
-        )
-        def clear_selection(n_clicks):
-            return {}, self.plot()
         
-        # @app.callback(
-        #     Output(self.footer, 'children', allow_duplicate=True),
-        #     Input(self.store, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # def update_filter_desc(filter_data, key='birth_year'):
-        #     df0 = self.ff().df
-        #     df = self.ff(filter_data).df
-        #     res = filter_data.get(key)
-        #     minv,maxv = df0[key].dropna().apply(int).min(), df0[key].dropna().apply(int).max()
-        #     o = ''            
-        #     if res:
-        #         obj = res[0]
-        #         if len(obj)==2:
-        #             minv,maxv = obj
-        #     o = dcc.Markdown(f'*Filtering members born between **{minv}** and **{maxv}** yields *{len(df):,}* of *{len(df0):,}* members of the library.*')
-        #     return o
 
-                
+
+
+
+class MemberDOBCard(FilterPlotCard):
+    desc = 'Filter by date of birth'
+    key='birth_year'
+    figure_class = MemberDOBFigure    
+    
+    
+class MembershipYearCard(FilterPlotCard):
+    desc = 'Filter by years of membership'
+    key='membership_year'
+    figure_class = MembershipYearFigure
+
+
             
     
 
-class MemberGenderCard(BaseComponent):
-    @cached_property
-    def store(self): return dcc.Store(id=f'store__{self.name}')
-    
+class MemberGenderCard(FilterPlotCard):
+    desc = 'Filter by gender of member'
+    key='gender'
+    figure_class = MemberGenderFigure
+
     @cached_property
     def series(self):
-        return MemberDwellingsDataset().data.gender.replace({'':'(Unknown)'}).value_counts().index
+        return self.ff().df[self.key].value_counts().index
 
     @cached_property
     def input(self):
@@ -184,10 +255,25 @@ class MemberGenderCard(BaseComponent):
         @app.callback(
             Output(self.store, "data"),
             Input(self.input, 'value'),
+            State(self.store, "data"),
         )
-        def update_store(values):
-            print(values)
-            return {'gender':values}
+        def update_store(values, filter_data):
+            filter_data = ensure_dict(filter_data)
+            filter_data[self.key] = values
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class MemberDwellingsMapCard(BaseComponent):
@@ -218,6 +304,7 @@ class GeotasteLayout(BaseComponent):
         super().__init__()
         self.navbar = Navbar()
         self.member_panel_comparison = MemberPanelComparison()
+
 
     def layout(self, params=None):
         return dbc.Container([
@@ -274,12 +361,13 @@ class MemberPanelComparison(BaseComponent):
             State(self.comparison_map_card.graph, 'figure'),
         )
         def redraw_map(filter_data_L, filter_data_R, old_figdata):
+            fig_new = MemberComparisonFigureFactory(ensure_dict(filter_data_L), ensure_dict(filter_data_R)).plot_map()
             fig_old = go.Figure(old_figdata)
-            fig = MemberComparisonFigureFactory(filter_data_L, filter_data_R).plot_map()
-            return go.Figure(
-                layout=fig_old.layout if fig_old.data else fig.layout,
-                data=fig.data
+            fig_out = go.Figure(
+                layout=fig_old.layout if fig_old.data else fig_new.layout,
+                data=fig_new.data
             )
+            return fig_out
         
 
 
@@ -307,6 +395,8 @@ class MemberPanel(BaseComponent):
     @cached_property
     def dob_card(self): return MemberDOBCard(**self._kwargs)
     @cached_property
+    def membership_year_card(self): return MembershipYearCard(**self._kwargs)
+    @cached_property
     def gender_card(self): return MemberGenderCard(**self._kwargs)
     @cached_property
     def map_card(self): return MemberDwellingsMapCard(**self._kwargs)
@@ -316,6 +406,7 @@ class MemberPanel(BaseComponent):
             self.store_desc,
             self.name_card.layout(params),
             self.dob_card.layout(params),
+            self.membership_year_card.layout(params),
             self.gender_card.layout(params),
             self.map_card.layout(params),
             self.store
@@ -333,8 +424,7 @@ class MemberPanel(BaseComponent):
             State(self.store, 'data'),
         )
         def update_store_from_dob_store(new_data1, new_data2, current_data):
-            if current_data is None: current_data = {}
-            return {**current_data, **new_data1, **new_data2}
+            return {**ensure_dict(current_data), **ensure_dict(new_data1), **ensure_dict(new_data2)}
         
         @app.callback(
             [
