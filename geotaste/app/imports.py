@@ -37,8 +37,11 @@ import plotly.graph_objects as go
 
 ## Setup plotly
 # Plotly mapbox public token
-mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
-px.set_mapbox_access_token(mapbox_access_token)
+try:
+    mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
+    px.set_mapbox_access_token(mapbox_access_token)
+except FileNotFoundError:
+    pass
 
 # geotaste imports
 from ..imports import *
