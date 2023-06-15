@@ -86,7 +86,7 @@ class MembersDataset(Dataset):
         df['member'] = df['uri'].apply(
             lambda x: x.split('/members/',1)[1][:-1] if '/members/' in x else ''
         )
-        # df['member'] = df['sort_name']
+        df['membership_years'] = [[int(y) for y in x if y] for x in df['membership_years']]
         
         # other
         df = df.set_index('member')

@@ -116,3 +116,22 @@ def ensure_dict(x):
     if x is None: return {}
     if type(x) is dict: return x
     return dict(x)
+
+
+
+
+def hasone(x:list, y:list):
+    res = bool(set(x)&set(y))
+    # print(['hasone',x,y,res])
+    return res
+
+def isin(x:object, y:list):
+    res = bool(x in set(y))
+    # print(['isin',x,y,res])
+    return res
+
+def isin_or_hasone(x:object, y:list):
+    if type(x) in {list,set,tuple}:
+        return hasone(x,y)
+    else:
+        return isin(x,y)

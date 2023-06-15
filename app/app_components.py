@@ -141,7 +141,7 @@ class FilterCard(BaseComponent):
             prevent_initial_call=True
         )
         def update_filter_desc(filter_data):
-            print('update_filter_desc',filter_data)
+            print('update_I filter_desc',filter_data)
             return dcc.Markdown(self.ff(ensure_dict(filter_data)).filter_desc)
         
         ## CLEAR?
@@ -194,15 +194,16 @@ class FilterPlotCard(FilterCard):
         def update_selection(selected_data, filter_data):
             filter_data = ensure_dict(filter_data)
             if selected_data:
-                # pprint(selected_data)
-                try:
+                if 'range' in selected_data:
                     xrange = selected_data['range']['x']
                     print('xrange selected:',xrange)
                     minx,maxx = xrange
                     filter_data[self.key] = [(int(minx), int(maxx))]
-                    print(filter_data)
-                except Exception as e:
-                    pass
+                
+                elif 'points' in selected_data:
+                    active_cats = [pd['x'] for pd in selected_data['points']]
+                    filter_data[self.key] = active_cats
+                
             return filter_data
         
         
@@ -230,36 +231,36 @@ class MemberGenderCard(FilterPlotCard):
     key='gender'
     figure_class = MemberGenderFigure
 
-    @cached_property
-    def series(self):
-        return self.ff().df[self.key].value_counts().index
+    # @cached_property
+    # def series(self):
+    #     return self.ff().df[self.key].value_counts().index
 
-    @cached_property
-    def input(self):
-        return dbc.Checklist(
-            options=self.series,
-            value=[],
-            switch=True,
-        )
+    # @cached_property
+    # def input(self):
+    #     return dbc.Checklist(
+    #         options=self.series,
+    #         value=[],
+    #         switch=True,
+    #     )
 
-    def layout(self,params=None):
-        return dbc.Card([
-            dbc.CardHeader("Filter by member gender"),
-            dbc.CardBody([
-                self.input,
-                self.store,
-            ])
-        ])
+    # def layout(self,params=None):
+    #     return dbc.Card([
+    #         dbc.CardHeader("Filter by member gender"),
+    #         dbc.CardBody([
+    #             self.input,
+    #             self.store,
+    #         ])
+    #     ])
     
-    def component_callbacks(self, app):
-        @app.callback(
-            Output(self.store, "data"),
-            Input(self.input, 'value'),
-            State(self.store, "data"),
-        )
-        def update_store(values, filter_data):
-            filter_data = ensure_dict(filter_data)
-            filter_data[self.key] = values
+    # def component_callbacks(self, app):
+    #     @app.callback(
+    #         Output(self.store, "data"),
+    #         Input(self.input, 'value'),
+    #         State(self.store, "data"),
+    #     )
+    #     def update_store(values, filter_data):
+    #         filter_data = ensure_dict(filter_data)
+    #         filter_data[self.key] = values
 
 
 
@@ -420,11 +421,13 @@ class MemberPanel(BaseComponent):
             [
                 Input(self.dob_card.store, 'data'),
                 Input(self.gender_card.store, 'data'),
+                Input(self.membership_year_card.store, 'data'),
+
             ],
             State(self.store, 'data'),
         )
-        def update_store_from_dob_store(new_data1, new_data2, current_data):
-            return {**ensure_dict(current_data), **ensure_dict(new_data1), **ensure_dict(new_data2)}
+        def update_store_from_dob_store(new_data1, new_data2, new_data3, current_data):
+            return {**ensure_dict(current_data), **ensure_dict(new_data1), **ensure_dict(new_data2), **ensure_dict(new_data3)}
         
         @app.callback(
             [
