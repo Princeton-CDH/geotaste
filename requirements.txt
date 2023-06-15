@@ -1,12 +1,6 @@
-folium
-pandas
-numpy
-gspread
-gspread_dataframe
-pointpats
-fastdist
-utm
-ipywidgets
-gunicorn
-dash
+ipytest
+# dash
 plotly
+pandas
+git+https://github.com/oegedijk/dash_oop_components
+dash_bootstrap_components
