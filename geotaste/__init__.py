@@ -1,3 +1,3 @@
-__version__=1.0
+__version__=0.3
 
 from .geotaste import *
