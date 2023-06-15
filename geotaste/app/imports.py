@@ -41,16 +41,12 @@ mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
 px.set_mapbox_access_token(mapbox_access_token)
 
 # geotaste imports
-sys.path.insert(0,os.path.join(os.path.dirname(__file__), '..'))
-from geotaste import *
-
-
-
+from ..imports import *
 
 
 # local imports
-from app_utils import *
-from app_widgets import *
-from app_figs import *
-from app_components import *
-from app_layout import *
+from .utils import *
+from .widgets import *
+from .figs import *
+from .components import *
+from .layout import *

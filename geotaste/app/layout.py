@@ -1,4 +1,4 @@
-from app_imports import *
+from .imports import *
 
 
 
@@ -42,13 +42,13 @@ class MemberPanelComparison(BaseComponent):
                 ),
             ]),
             
-            # dbc.Row(
-            #     dbc.Col(
-            #         self.comparison_map_card.layout(params),
-            #         width=12,
-            #         className='comparison_map_card_col'
-            #     )
-            # )
+            dbc.Row(
+                dbc.Col(
+                    self.comparison_map_card.layout(params),
+                    width=12,
+                    className='comparison_map_card_col'
+                )
+            )
         ])
     
     @cached_property
