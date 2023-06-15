@@ -1,4 +1,4 @@
-from app_imports import *
+from .imports import *
 
 
 def is_l(x): return type(x) in {list,tuple}
