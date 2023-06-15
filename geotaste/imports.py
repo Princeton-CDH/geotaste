@@ -1,81 +1,54 @@
-import os,sys
-path_here = os.path.abspath(os.path.dirname(__file__))
-path_home = os.path.expanduser('~')
-path_data = os.path.abspath(os.path.join(path_home,'geotaste_data'))
-try:
-    if not os.path.exists(path_data):
-        os.makedirs(path_data)
-except Exception:
-    pass
+from typing import *
+import os
+import pandas as pd
+pd.options.mode.chained_assignment = None  # default='warn'
+from functools import cached_property, lru_cache
+# cache = lru_cache(maxsize=None)
+# from diskcache import Cache
+from joblib import Memory
+
+
+#########
+# SETUP #
+#########
+
+PATH_HERE = os.path.abspath(os.path.dirname(__file__))
+PATH_REPO = os.path.dirname(PATH_HERE)
+PATH_DATA = os.path.join(PATH_REPO,'data')
+PATH_CACHE = os.path.join(PATH_DATA,'cache')
+# cache = Cache(PATH_CACHE)
+cache = Memory(PATH_CACHE, verbose=1).cache
 
 # Paths
-paths=dict(
-    here=path_here,
-    data=path_data,
-    members = os.path.join(path_data,'members.csv'),
-    books = os.path.join(path_data,'books.csv'),
-    events = os.path.join(path_data,'events.csv'),
-    dwellings = os.path.join(path_data,'dwellings.csv'),
-    authors = os.path.join(path_data,'creators.csv'),
+PATHS=dict(
+    here=PATH_HERE,
+    data=PATH_DATA,
+    members = os.path.join(PATH_DATA,'1.3-beta','members.csv'),
+    books = os.path.join(PATH_DATA,'1.3-beta','books.csv'),
+    events = os.path.join(PATH_DATA,'1.3-beta','events.csv'),
+    dwellings = os.path.join(PATH_DATA,'1.3-beta','dwellings.csv'),
+    creators = os.path.join(PATH_DATA,'1.2','creators.csv'),
 )
 
-# Three datasets
-urls_1point2 = dict(
-    members = 'https://dataspace.princeton.edu/bitstream/88435/dsp01dv13zx35z/2/SCoData_members_v1.2_2022-01.csv',
-    books = 'https://dataspace.princeton.edu/bitstream/88435/dsp01jm214s28p/2/SCoData_books_v1.2_2022-01.csv',
-    events = 'https://dataspace.princeton.edu/bitstream/88435/dsp019306t2441/2/SCoData_events_v1.2_2022-01.csv',
-)
-urls = dict(
-    members = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
-    books = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/books.csv',
-    events = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
-    dwellings = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
-    authors = 'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.2/creators.csv',
-)
-
-# Synthesized
-url_gsheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPt6EM6c2O8D566ctN3_dmPjxqEKmegBpcHzLCPLNZoNFkiiH9JWisbFB_DDrEnQM4JT8wytc_iL5Y/pub?gid=0&single=true&output=csv'
-
-
-## other vars
-latlon_SCO = (48.85107555543428, 2.3385039932538567)
-
-
-
+### other vars
+LATLON_SCO = (48.85107555543428, 2.3385039932538567)
 DISPREFERRED_ADDRESSES = {
     '11 rue Scribe': 'American Express',
     'Berkeley Street': 'Thomas Cook', # @CHECK
     '': 'Empty street address'
 }
 DWELLING_ID_SEP='; '
-
-
-
-## imports
-import warnings
-warnings.filterwarnings('ignore')
-import pandas as pd
-import folium
-from functools import lru_cache as cache
-import numpy as np
-from collections import Counter
-from pprint import pprint,pformat
-from ipywidgets import Dropdown, interact, interactive, widgets
-from folium.plugins import HeatMap
-from IPython.display import display, HTML
-import requests,json
-# from ipywidgets import *
-from IPython.display import Markdown, HTML, clear_output
-
+####
 
 
 from .utils import *
-from .choices import *
-from .authors import *
-from .books import *
-from .people import *
-from .dwellings import *
-from .events import *
-from .arronds import *
-from .combined import *
-from .maps import *
+from .datasets import *
+# from .arronds import *
+# from .authors import *
+# from .books import *
+# from .choices import *
+# from .combined import *
+# from .dwellings import *
+# from .events import *
+# from .maps import *
+# from .people import *
