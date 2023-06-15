@@ -1,4 +1,4 @@
-from app_imports import *
+from .imports import *
 
 
 def get_range_slider(series, label='', step=10, value=None, marks={},**kwargs):

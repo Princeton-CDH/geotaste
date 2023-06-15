@@ -1,4 +1,4 @@
-from app_imports import *
+from .imports import *
 
 
 
