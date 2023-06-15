@@ -1,5 +1,4 @@
-import pandas as pd
-import numbers
+from app_imports import *
 
 
 def is_l(x): return type(x) in {list,tuple}
@@ -54,7 +53,20 @@ def to_query_string(filter_data={}):
     return q
 
 
-def filter_df(df, filter_data={}, return_query=False):
+def filter_df_extensionally(df:pd.DataFrame, selected:dict, key:str='extension'):
+    # if top level dict given...
+    if key in selected: selected=selected[key]
+    # find intersection with index
+    intersection = set(df.index) & set(selected.keys())
+    # return that subset
+    return df.loc[list(intersection)]
+
+def filter_df(df, d, ik=INTENSION_KEY, ek=EXTENSION_KEY):
+    if not d: return df
+    if ek in d: return filter_df_extensionally(df, d)
+    raise Exception
+
+def filter_df_old(df, filter_data={}, return_query=False):
 
     fd = {
         k:v 
@@ -135,3 +147,51 @@ def isin_or_hasone(x:object, y:list):
         return hasone(x,y)
     else:
         return isin(x,y)
+
+
+
+
+
+def describe_filters(store_data, records_name='records'):
+    if not store_data or not INTENSION_KEY in store_data or not EXTENSION_KEY in store_data:
+        return ''
+
+    def format_intension(d):
+        ol=[]
+        for key,l in d.items():
+            is_quant = all(is_numeric(x) for x in l)
+            if is_quant and len(l)>2:
+                o=f'{l[0]} to {l[-1]}'
+            else:
+                o=' and '.join(f'{repr(x)}' for x in l)
+            o=f'_{o}_ on  `{key}`'
+            ol.append(o)
+        return "; ".join(ol)
+
+    len_ext=len(store_data[EXTENSION_KEY])
+    fmt_int=format_intension(store_data[INTENSION_KEY])
+    return f'Filtering {fmt_int} yields _{len_ext}_ {records_name}.'
+
+
+def first(x, default=None):
+    for y in x: return y
+    return default
+
+
+def intersect_filters(*filters_d, ik=INTENSION_KEY, ek=EXTENSION_KEY):
+    filters_d=[d for d in filters_d if d and ik in d and ek in d]
+    if not filters_d: return {}
+    
+    outd = {ik:{},ek:{}}    
+    key_sets = []
+    for fd in filters_d:
+        outd[ik]={**outd[ik], **fd[ik]}
+        key_sets.append(set(fd[ek].keys()))
+    shared_keys = set.intersection(*key_sets)
+    for key in shared_keys: outd[ek][key]={}
+    for fd in filters_d:
+        keyname=first(fd[ik])
+        for key in fd[ek]:
+            if key in shared_keys:
+                outd[ek][key][keyname]=fd[ek][key]
+    return outd

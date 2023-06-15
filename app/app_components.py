@@ -1,23 +1,9 @@
-from typing import Any
 from app_imports import *
-from app_figs import *
+
+BLANKSTR='‎‎‎‎'
+BLANK = dcc.Markdown('\[no filter\]')
 
 class BaseComponent(DashComponent):
-    # some will have
-    figure_class = None
-
-    ## hookups to FigureFactories
-    def ff(self, filter_data={}):
-        return self.figure_class(ensure_dict(filter_data))
-
-    def plot(self, filter_data={}):
-        return self.ff(ensure_dict(filter_data)).plot(**self._kwargs)
-    
-
-    ## all components can have a memory -- only activated if nec
-    @cached_property
-    def store(self): return dcc.Store(id=self.id('filter_data'))
-
     def __init__(
             self,
 
@@ -50,49 +36,42 @@ class BaseComponent(DashComponent):
         self._kwargs = kwargs
 
 
-
-
-class SimpleCard(dbc.Card):
-    def __init__(self, body=[], header=[], footer=[], **kwargs):
-        children = []
-        if header: children+=[dbc.CardHeader(header)]
-        if body: children+=[dbc.CardBody(body)]
-        if footer: children+=[dbc.CardFooter(footer)]
-        super().__init__(children, outline=True, **kwargs)
-
-
-
-
-class MemberNameCard(BaseComponent):
-    def layout(self, params=None):
-        return SimpleCard(
-            body=[self.input_member],
-            header=['Select members by name']
-        )
+class FilterComponent(BaseComponent):
+    desc = 'Filter by X'
+    key='relevant_col'
+    records_name='members'
+    
+    # some will have
+    figure_class = None
 
     @cached_property
-    def input_member(self):
-        return dcc.Dropdown(
-        options = [dict(value=idx, label=lbl) for idx,lbl in zip(Members().data.index, Members().data.sort_name)],
-        value = [],
-        multi=True,
-        placeholder='Select individual members'
-    )
+    def figure_obj(self): return self.figure_class()
+    def plot(self, filter_data={}): 
+        if filter_data:
+            return self.ff(filter_data).plot(**self._kwargs)
+        else:
+            return self.figure_obj.plot(**self._kwargs)
+    
+    
+
+    ## all components can have a memory -- only activated if nec
+    @cached_property
+    def store(self): return dcc.Store(id=self.id('store'), data={})
+
+    @cached_property
+    def store_desc(self): 
+        return html.Div(
+            '[no filter]', 
+            style={
+                'color':self.color if self.color else 'inherit', 
+                # 'text-align':'center'
+            }
+        )
 
 
 
 
-
-class FilterCard(BaseComponent):
-    desc = 'Filter by X'
-    key='relevant_col'
-
-
-
-
-class FilterCard(BaseComponent):
-    desc = 'Filter by X'
-    key='relevant_col'
+class FilterCard(FilterComponent):
 
     @cached_property
     def header(self):
@@ -106,13 +85,14 @@ class FilterCard(BaseComponent):
     @cached_property
     def body(self):
         return dbc.CardBody([
+            BLANK,
             self.graph,
-            self.store,
+            self.store
         ])
     
     @cached_property
     def footer(self):
-        return dbc.CardFooter()
+        return dbc.CardFooter(self.store_desc)
 
 
     def layout(self, params=None):
@@ -136,77 +116,87 @@ class FilterCard(BaseComponent):
     
     def component_callbacks(self, app):        
         @app.callback(
-            Output(self.footer, 'children', allow_duplicate=True),
+            Output(self.store_desc, 'children'),
             Input(self.store, 'data'),
             prevent_initial_call=True
         )
-        def update_filter_desc(filter_data):
-            print('update_I filter_desc',filter_data)
-            return dcc.Markdown(self.ff(ensure_dict(filter_data)).filter_desc)
+        def store_data_updated(store_data):
+            print('store_data_updated',store_data)
+            res=describe_filters(store_data, records_name=self.records_name)
+            return dcc.Markdown(res) if res else BLANK
         
-        ## CLEAR?
-        @app.callback(
-            Output(self.store, "data", allow_duplicate=True),
-            Input(self.button_clear, 'n_clicks'),
-            State(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        def clear_selection(n_clicks, filter_data):
-            filter_data = ensure_dict(filter_data)
-            if self.key in filter_data: filter_data.pop(self.key)
-            return filter_data
-
-        @app.callback(
-            Output(self.footer, 'children', allow_duplicate=True),
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        def update_filter_desc(filter_data):
-            print('update_filter_desc',filter_data)
-            if self.figure_class is None: raise PreventUpdate
-            return dcc.Markdown(self.ff(ensure_dict(filter_data)).filter_desc)
+        # ## CLEAR?
+        # @app.callback(
+        #     Output(self.store, "data", allow_duplicate=True),
+        #     Input(self.button_clear, 'n_clicks'),
+        #     prevent_initial_call=True
+        # )
+        # def clear_selection(n_clicks):
+        #     return {}
 
 
 
 class FilterPlotCard(FilterCard):
     def component_callbacks(self, app):
+        # do my parent's too
+        super().component_callbacks(app)
 
-        ## CLEAR? -- OVERWRITTEN
+        # ## CLEAR? -- OVERWRITTEN
         @app.callback(
             [
                 Output(self.store, "data", allow_duplicate=True),
                 Output(self.graph, "figure", allow_duplicate=True),
             ],
             Input(self.button_clear, 'n_clicks'),
-            State(self.store, 'data'),
             prevent_initial_call=True
         )
-        def clear_selection(n_clicks, filter_data):
-            filter_data = ensure_dict(filter_data)
-            if self.key in filter_data: filter_data.pop(self.key)
-            return filter_data, self.plot(filter_data)
+        def clear_selection(n_clicks):
+            return {}, self.plot()
 
         @app.callback(
             Output(self.store, "data"),
             Input(self.graph, 'selectedData'),
-            State(self.store, "data"),
+            prevent_initial_call=True
         )
-        def update_selection(selected_data, filter_data):
-            filter_data = ensure_dict(filter_data)
-            if selected_data:
-                if 'range' in selected_data:
-                    xrange = selected_data['range']['x']
-                    print('xrange selected:',xrange)
-                    minx,maxx = xrange
-                    filter_data[self.key] = [(int(minx), int(maxx))]
-                
-                elif 'points' in selected_data:
-                    active_cats = [pd['x'] for pd in selected_data['points']]
-                    filter_data[self.key] = active_cats
-                
-            return filter_data
+        def graph_selection_updated(selected_data):
+            return self.figure_obj.selected(selected_data)
         
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class MemberNameCard(FilterCard):
+    def layout(self, params=None):
+        return SimpleCard(
+            body=[self.input_member],
+            header=['Select members by name']
+        )
+
+    @cached_property
+    def input_member(self):
+        return dcc.Dropdown(
+        options = [dict(value=idx, label=lbl) for idx,lbl in zip(Members().data.index, Members().data.sort_name)],
+        value = [],
+        multi=True,
+        placeholder='Select individual members'
+    )
+
 
 
 
@@ -273,11 +263,66 @@ class MemberGenderCard(FilterPlotCard):
 
 
 
+class MemberPanel(FilterCard):
+    # def __init__(self, title='Member Panel', color=None, **kwargs):
+    #     super().__init__(title=title, **kwargs) 
+    #     self.color = color
+
+    # @cached_property
+    # def store_desc(self): return html.H3('[no filter]', style={'color':self.color, 'text-align':'center'} if self.color else {})
+
+    @cached_property
+    def name_card(self): return MemberNameCard(**self._kwargs)
+    @cached_property
+    def dob_card(self): return MemberDOBCard(**self._kwargs)
+    @cached_property
+    def membership_year_card(self): return MembershipYearCard(**self._kwargs)
+    @cached_property
+    def gender_card(self): return MemberGenderCard(**self._kwargs)
+    @cached_property
+    def map_card(self): return MemberDwellingsMapCard(**self._kwargs)
+    
+    def layout(self, params=None): 
+        body = dbc.Container([
+            html.Div(self.store_desc, style={'text-align':'center'}),
+            self.name_card.layout(params),
+            self.membership_year_card.layout(params),
+            self.dob_card.layout(params),
+            self.gender_card.layout(params),
+            self.map_card.layout(params),
+            self.store
+        ])
+        return body
+    
+
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
+
+        @app.callback(
+            Output(self.store, 'data'),
+            [
+                Input(self.membership_year_card.store, 'data'),
+                Input(self.dob_card.store, 'data'),
+                Input(self.gender_card.store, 'data'),
+            ]
+        )
+        def component_filters_updated(*filters_d):
+            return intersect_filters(*filters_d)
+        
+        @app.callback(
+            Output(self.map_card.graph, 'figure'),
+            Input(self.store, 'data'),
+        )
+        def datastore_updated(store_data):
+            return MemberMap(store_data).plot(**self._kwargs)
 
 
 
 
-class MemberDwellingsMapCard(BaseComponent):
+
+
+
+class MemberDwellingsMapCard(FilterComponent):
 
     @cached_property
     def graph(self):
@@ -299,183 +344,5 @@ class MemberDwellingsComparisonMapCard(MemberDwellingsMapCard):
     @cached_property
     def graph(self): return dcc.Graph()
 
-
-class GeotasteLayout(BaseComponent):
-    def __init__(self):
-        super().__init__()
-        self.navbar = Navbar()
-        self.member_panel_comparison = MemberPanelComparison()
-
-
-    def layout(self, params=None):
-        return dbc.Container([
-            self.navbar.layout(params),
-            dbc.Container(
-                self.member_panel_comparison.layout(params),
-                className='content-container'
-            )
-        ], className='layout-container')
-
-
-
-
-class MemberPanelComparison(BaseComponent):
-    def __init__(self):
-        super().__init__()
-        self.navbar = Navbar()
-        self.member_panel_L = MemberPanel(name='member_panel_L', color=LEFT_COLOR)
-        self.member_panel_R = MemberPanel(name='member_panel_R', color=RIGHT_COLOR)
-
-    def layout(self, params=None):
-        return dbc.Container([
-            dbc.Row([
-                dbc.Col(
-                    self.member_panel_L.layout(params),
-                    width=6
-                ),
-                dbc.Col(
-                    self.member_panel_R.layout(params),
-                    width=6
-                ),
-            ]),
-            
-            dbc.Row(
-                dbc.Col(
-                    self.comparison_map_card.layout(params),
-                    width=12,
-                    className='comparison_map_card_col'
-                )
-            )
-        ])
-    
-    @cached_property
-    def comparison_map_card(self):
-        return MemberDwellingsComparisonMapCard()
-    
-    def component_callbacks(self, app):
-        @app.callback(
-            Output(self.comparison_map_card.graph, 'figure'),
-            [
-                Input(self.member_panel_L.store, 'data'), 
-                Input(self.member_panel_R.store, 'data')
-            ],
-            State(self.comparison_map_card.graph, 'figure'),
-        )
-        def redraw_map(filter_data_L, filter_data_R, old_figdata):
-            fig_new = MemberComparisonFigureFactory(ensure_dict(filter_data_L), ensure_dict(filter_data_R)).plot_map()
-            fig_old = go.Figure(old_figdata)
-            fig_out = go.Figure(
-                layout=fig_old.layout if fig_old.data else fig_new.layout,
-                data=fig_new.data
-            )
-            return fig_out
-        
-
-
-            
-
         
         
-
-
-
-   
-  
-class MemberPanel(BaseComponent):
-    # def __init__(self, title='Member Panel', color=None, **kwargs):
-    #     super().__init__(title=title, **kwargs) 
-    #     self.color = color
-
-    @cached_property
-    def store(self): return dcc.Store(id=f'store__{self.name}')
-    @cached_property
-    def store_desc(self): return html.H3('[no filter]', style={'color':self.color, 'text-align':'center'} if self.color else {})
-
-    @cached_property
-    def name_card(self): return MemberNameCard(**self._kwargs)
-    @cached_property
-    def dob_card(self): return MemberDOBCard(**self._kwargs)
-    @cached_property
-    def membership_year_card(self): return MembershipYearCard(**self._kwargs)
-    @cached_property
-    def gender_card(self): return MemberGenderCard(**self._kwargs)
-    @cached_property
-    def map_card(self): return MemberDwellingsMapCard(**self._kwargs)
-    
-    def layout(self, params=None): 
-        body = dbc.Container([
-            self.store_desc,
-            self.name_card.layout(params),
-            self.dob_card.layout(params),
-            self.membership_year_card.layout(params),
-            self.gender_card.layout(params),
-            self.map_card.layout(params),
-            self.store
-        ])
-        return body
-    
-
-    def component_callbacks(self, app):
-        @app.callback(
-            Output(self.store, 'data'),
-            [
-                Input(self.dob_card.store, 'data'),
-                Input(self.gender_card.store, 'data'),
-                Input(self.membership_year_card.store, 'data'),
-
-            ],
-            State(self.store, 'data'),
-        )
-        def update_store_from_dob_store(new_data1, new_data2, new_data3, current_data):
-            return {**ensure_dict(current_data), **ensure_dict(new_data1), **ensure_dict(new_data2), **ensure_dict(new_data3)}
-        
-        @app.callback(
-            [
-                Output(self.store_desc, 'children'),
-                Output(self.map_card.graph, 'figure')
-            ],
-            Input(self.store, 'data'),
-        )
-        def datastore_updated(filter_data):
-            q = to_query_string(filter_data)
-            if not q: q = '[no filter]'
-            # return [q]
-            fig = self.map_card.ff(filter_data).plot_map(**self._kwargs)
-            
-            return [q, fig]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Navbar(BaseComponent):
-    def layout(self, params=None):
-        return dbc.Navbar(
-            dbc.Container([
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            html.Img(src="/assets/SCo_logo_graphic.png", height="30px")
-                        ),
-                        dbc.Col(
-                            dbc.NavbarBrand(
-                                "Geography of Taste", 
-                            ),
-                        ),
-                    ],
-                    align="center",
-                    style={'margin':'auto'},
-                ),
-            ]),
-            color="light",
-            dark=False,
-        )
