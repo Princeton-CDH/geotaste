@@ -9,6 +9,7 @@ from .imports import *
 
 class Dataset:
     id:str=''
+    url:str = ''
     path:str = ''
     cols:list = []
     cols_sep:list = []
@@ -23,15 +24,30 @@ class Dataset:
         for k,v in kwargs.items(): setattr(self,k,v)
 
     @cached_property
-    def _data(self):
-        df=pd.read_csv(self.path, on_bad_lines='warn')
-        if self.fillna is not None: 
-            df=df.fillna(self.fillna)
+    def data_orig(self):
+        assert self.path # assert path string exists
+        if not os.path.exists(self.path):
+            if self.url:
+                # download and save
+                df=pd.read_csv(self.url)
+                # make dir if not exists
+                if not os.path.exists(os.path.dirname(self.path)):
+                    os.makedirs(os.path.dirname(self.path))
+                # save csv
+                df.to_csv(self.path, index=False)
+                # return loaded df
+                return df
+            else:
+                raise Exception('Neither URL nor path')
+        # read from saved file
+        df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
         
     @cached_property
     def data(self):  
-        df=self._data
+        df=self.data_orig
+        if self.fillna is not None: 
+            df=df.fillna(self.fillna)
         for c in self.cols_sep: 
             df[c]=df[c].fillna('').apply(lambda x: str(x).split(self.sep))
         for c in self.cols_q:
@@ -47,6 +63,7 @@ class Dataset:
 
 
 class MembersDataset(Dataset):
+    url:str = URLS.get('members')
     path:str = PATHS.get('members')
     sep:str = ';'
     cols:list = [
@@ -129,6 +146,7 @@ class MembersDataset(Dataset):
 
 
 class DwellingsDataset(Dataset):
+    url:str = URLS.get('dwellings')
     path:str = PATHS.get('dwellings')
     cols:list = [
         'member_uri',
@@ -174,6 +192,7 @@ class MemberDwellingsDataset(Dataset):
 
 
 class BooksDataset(Dataset):
+    url:str = URLS.get('books')
     path:str = PATHS.get('books')
     cols:list = [
         'uri',
@@ -219,6 +238,7 @@ class BooksDataset(Dataset):
 
 
 class CreatorsDataset(Dataset):
+    url:str = URLS.get('creators')
     path:str = PATHS.get('creators')
     cols:list = [
         # 'ID',
@@ -332,6 +352,7 @@ class CreationsDataset(Dataset):
 
 
 class EventsDataset(Dataset):
+    url:str = URLS.get('events')
     path:str = PATHS.get('events')
     cols:list = [
         'event_type',
@@ -397,7 +418,8 @@ class MemberBookEventsDataset(Dataset):
 def get_geojson_arrondissement(force=False):
     import os,json,requests
     
-    url='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
+    # download if nec
+    url=URLS.get('geojson_arrond')
     fn=os.path.join(PATH_DATA,'arrondissements.geojson')
     if force or not os.path.exists(fn):
         data = requests.get(url)
@@ -427,11 +449,11 @@ def get_geojson_arrondissement(force=False):
 
 
 
-# @cache
+@cache
 def Members(): return MembersDataset()
-# @cache
-def MemberDwellings(): return MemberDwellingsDataset()
-# @cache
+@cache
+def Dwellings(): return DwellingsDataset()
+@cache
 def Books(): return BooksDataset()
-# @cache
-def Events(): return MemberBookEventsDataset()
+@cache
+def Events(): return EventsDataset()
