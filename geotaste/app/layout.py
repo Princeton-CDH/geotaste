@@ -53,7 +53,7 @@ class MemberPanelComparison(BaseComponent):
     
     @cached_property
     def comparison_map_card(self):
-        return MemberDwellingsComparisonMapCard()
+        return MemberMapComparisonCard()
     
     # def component_callbacks(self, app):
     #     @app.callback(

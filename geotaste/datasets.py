@@ -452,7 +452,7 @@ def get_geojson_arrondissement(force=False):
 @cache
 def Members(): return MembersDataset()
 @cache
-def Dwellings(): return DwellingsDataset()
+def MemberDwellings(): return MemberDwellingsDataset()
 @cache
 def Books(): return BooksDataset()
 @cache

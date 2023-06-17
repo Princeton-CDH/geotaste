@@ -2,6 +2,7 @@ from .imports import *
 
 BLANKSTR='‎‎‎‎'
 BLANK = dcc.Markdown('\[no filter\]')
+BLANKDIV = html.Div(BLANKSTR)
 
 class BaseComponent(DashComponent):
     def __init__(
@@ -46,9 +47,10 @@ class FilterComponent(BaseComponent):
 
     @cached_property
     def figure_obj(self): return self.figure_class()
+
     def plot(self, filter_data={}): 
         if filter_data:
-            return self.ff(filter_data).plot(**self._kwargs)
+            return self.figure_class(filter_data).plot(**self._kwargs)
         else:
             return self.figure_obj.plot(**self._kwargs)
     
@@ -85,7 +87,7 @@ class FilterCard(FilterComponent):
     @cached_property
     def body(self):
         return dbc.CardBody([
-            BLANK,
+            BLANKDIV,
             self.graph,
             self.store
         ])
@@ -121,7 +123,6 @@ class FilterCard(FilterComponent):
             prevent_initial_call=True
         )
         def store_data_updated(store_data):
-            print('store_data_updated',store_data)
             res=describe_filters(store_data, records_name=self.records_name)
             return dcc.Markdown(res) if res else BLANK
         
@@ -209,68 +210,23 @@ class MemberDOBCard(FilterPlotCard):
     
 class MembershipYearCard(FilterPlotCard):
     desc = 'Filter by years of membership'
-    key='membership_year'
-    figure_class = MembershipYearFigure
-
-
-            
-    
+    key='membership_years'
+    figure_class = MembershipYearFigure    
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Filter by gender of member'
     key='gender'
     figure_class = MemberGenderFigure
 
-    # @cached_property
-    # def series(self):
-    #     return self.ff().df[self.key].value_counts().index
+class MemberMapCard(FilterPlotCard):
+    desc = 'Member addresses mapped'
+    # key='gender'
+    figure_class = MemberMap
 
-    # @cached_property
-    # def input(self):
-    #     return dbc.Checklist(
-    #         options=self.series,
-    #         value=[],
-    #         switch=True,
-    #     )
-
-    # def layout(self,params=None):
-    #     return dbc.Card([
-    #         dbc.CardHeader("Filter by member gender"),
-    #         dbc.CardBody([
-    #             self.input,
-    #             self.store,
-    #         ])
-    #     ])
-    
-    # def component_callbacks(self, app):
-    #     @app.callback(
-    #         Output(self.store, "data"),
-    #         Input(self.input, 'value'),
-    #         State(self.store, "data"),
-    #     )
-    #     def update_store(values, filter_data):
-    #         filter_data = ensure_dict(filter_data)
-    #         filter_data[self.key] = values
-
-
-
-
-
-
-
-
-
-
+class MemberMapComparisonCard(MemberMapCard): pass
 
 
 class MemberPanel(FilterCard):
-    # def __init__(self, title='Member Panel', color=None, **kwargs):
-    #     super().__init__(title=title, **kwargs) 
-    #     self.color = color
-
-    # @cached_property
-    # def store_desc(self): return html.H3('[no filter]', style={'color':self.color, 'text-align':'center'} if self.color else {})
-
     @cached_property
     def name_card(self): return MemberNameCard(**self._kwargs)
     @cached_property
@@ -280,7 +236,7 @@ class MemberPanel(FilterCard):
     @cached_property
     def gender_card(self): return MemberGenderCard(**self._kwargs)
     @cached_property
-    def map_card(self): return MemberDwellingsMapCard(**self._kwargs)
+    def map_card(self): return MemberMapCard(**self._kwargs)
     
     def layout(self, params=None): 
         body = dbc.Container([
@@ -310,11 +266,47 @@ class MemberPanel(FilterCard):
             return intersect_filters(*filters_d)
         
         @app.callback(
-            Output(self.map_card.graph, 'figure'),
+            [
+                Output(self.membership_year_card.graph, 'figure'),
+                Output(self.dob_card.graph, 'figure'),
+                Output(self.gender_card.graph, 'figure'),
+                Output(self.map_card.graph, 'figure'),
+            ],
             Input(self.store, 'data'),
+            State(self.map_card.graph, 'figure'),
         )
-        def datastore_updated(store_data):
-            return MemberMap(store_data).plot(**self._kwargs)
+        def datastore_updated(panel_data, map_figdata):
+            filtered_keys = set(panel_data.get('intension',{}).keys())
+            print(panel_data.get('intension'))
+            print(filtered_keys)
+
+            out = []
+
+            out.append(
+                dash.no_update 
+                if self.membership_year_card.key in filtered_keys 
+                else self.membership_year_card.plot(panel_data)
+            )
+            
+            out.append(
+                dash.no_update 
+                if self.dob_card.key in filtered_keys 
+                else self.dob_card.plot(panel_data)
+            )
+
+            out.append(
+                dash.no_update 
+                if self.gender_card.key in filtered_keys 
+                else self.gender_card.plot(panel_data)
+            )
+
+            old_fig = go.Figure(map_figdata)
+            new_fig = self.map_card.plot(panel_data)
+            out_fig = go.Figure(data=new_fig.data, layout=old_fig.layout)
+            out.append(out_fig)
+
+
+            return out
 
 
 
@@ -322,27 +314,27 @@ class MemberPanel(FilterCard):
 
 
 
-class MemberDwellingsMapCard(FilterComponent):
+# class MemberDwellingsMapCard(FilterComponent):
 
-    @cached_property
-    def graph(self):
-        return dcc.Graph(figure=self.plot_map())
+#     @cached_property
+#     def graph(self):
+#         return dcc.Graph(figure=self.plot_map())
     
-    def ff(self, *args, **kwargs): return MemberDwellingsFigureFactory(*args, **kwargs)
+#     def ff(self, *args, **kwargs): return MemberDwellingsFigureFactory(*args, **kwargs)
     
-    def plot_map(self):
-        return self.ff().plot_map(**self._kwargs)
+#     def plot_map(self):
+#         return self.ff().plot_map(**self._kwargs)
 
-    def layout(self,params=None):
-        return SimpleCard(
-            header=['Map of members’ apartments in Paris'],
-            body=[self.graph]
-        )
+#     def layout(self,params=None):
+#         return SimpleCard(
+#             header=['Map of members’ apartments in Paris'],
+#             body=[self.graph]
+#         )
 
 
-class MemberDwellingsComparisonMapCard(MemberDwellingsMapCard):
-    @cached_property
-    def graph(self): return dcc.Graph()
+# class MemberDwellingsComparisonMapCard(MemberDwellingsMapCard):
+#     @cached_property
+#     def graph(self): return dcc.Graph()
 
         
         
