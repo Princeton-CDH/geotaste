@@ -161,6 +161,7 @@ def describe_filters(store_data, records_name='records'):
         for key,l in d.items():
             is_quant = all(is_numeric(x) for x in l)
             if is_quant and len(l)>2:
+                l.sort()
                 o=f'{l[0]} to {l[-1]}'
             else:
                 o=' and '.join(f'{repr(x)}' for x in l)

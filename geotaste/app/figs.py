@@ -15,6 +15,7 @@ class FigureFactory(DashFigureFactory):
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
         self._df = df
+        self._data = self._df # overwrite
 
 
     # def filter_df(self, filter_data):
@@ -60,12 +61,40 @@ class FigureFactory(DashFigureFactory):
         odf = filter_df(self._df, self.filter_data)
         return odf
     
-    @property
+    @cached_property
     def series(self) -> pd.Series:
         try:
             return self._df[self.key]
         except KeyError:
             return pd.Series()
+        
+    @cached_property
+    def vals(self):
+        l = []
+        try:
+            s=self._data[self.key]
+        except KeyError:
+            return pd.Series()
+        for x in s:
+            if is_listy(x):
+                l+=list(x)
+            else:
+                l+=[x]
+        return pd.Series(l)
+    
+    @cached_property
+    def vals_q(self):
+        return pd.to_numeric(self.vals, errors='coerce')
+        
+    @cached_property
+    def series_q(self):
+        return pd.to_numeric(self.series,errors='coerce')
+    
+    @cached_property
+    def minval(self): return self.vals_q.min()
+    
+    @cached_property
+    def maxval(self): return self.vals_q.max()
 
     @cached_property
     def query_str(self) -> str:
@@ -80,6 +109,14 @@ class FigureFactory(DashFigureFactory):
             return f'All {len(self._df):,} {self.records_name}.'
         else:
             return f'Filtering {self.query_str} yields {len(self.df):,} of {len(self._df):,} {self.records_name}.'
+        
+    def get_figdf(self, x, quant=None, df=None):
+        figdf=(df if df is not None else self.df).sample(frac=1)
+        if quant is True: 
+            figdf[x] = pd.to_numeric(figdf[x], errors='coerce')
+        elif quant is False:
+            figdf[x] = figdf[x].fillna('').apply(str)
+        return figdf
     
     def plot_biplot(self, x, y, qual_col):
         return px.scatter(
@@ -109,12 +146,57 @@ class FigureFactory(DashFigureFactory):
             color_discrete_sequence=[color] if color else None,
             template='simple_white',
             category_orders=category_orders,
+            range_x=(self.minval, self.maxval),
             **kwargs
         )
         fig.update_layout(
             clickmode='event+select', 
-            dragmode='select' if quant else None, 
-            selectdirection='h' if quant else None
+            dragmode='select',# if quant else None, 
+            selectdirection='h',# if quant else None
+        )
+
+        fig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            xaxis = { 'fixedrange': True },
+            yaxis = { 'fixedrange': True },
+        )
+        return fig
+    
+
+
+    def plot_histogram_bar(
+            self, 
+            x, 
+            color=None, 
+            df=None, 
+            height=100, 
+            quant=None, 
+            category_orders=None, 
+            **kwargs):
+        
+        # figdf = self.get_figdf(x,quant=False)
+        if df is None: df = self.df
+        df_counts = pd.DataFrame(df[x].value_counts()).reset_index()
+
+        if quant is False and category_orders is None:
+            category_orders = {self.key:df_counts.index}
+        
+        
+        fig=px.bar(
+            df_counts,
+            x=x,
+            y='count', 
+            height=height,
+            color_discrete_sequence=[color] if color else None,
+            template='simple_white',
+            category_orders=category_orders,
+            range_x=(self.minval, self.maxval),
+            **kwargs
+        )
+        fig.update_layout(
+            clickmode='event+select', 
+            dragmode='select',# if quant else None, 
+            selectdirection='h',# if quant else None
         )
 
         fig.update_layout(
@@ -163,7 +245,7 @@ class FigureFactory(DashFigureFactory):
             zoom=zoom, 
             height=400,
             size_max=40,
-            **kwargs
+            # **kwargs
         )
         if mapbox_style: mapbox_opts['style']=mapbox_style
         fig.update_layout(mapbox=mapbox_opts)
@@ -174,46 +256,101 @@ class FigureFactory(DashFigureFactory):
 
 
 
-class MemberFigureFactory(FigureFactory):
-    def __init__(self, filter_data={}): 
+
+
+class MemberFigure(FigureFactory):
+    records_name='members'
+    key = ''
+    records_points_dim = 'x' # or 'y'
+
+    def __init__(self, filter_data={}, df=None): 
+        data = Members().data
         super().__init__(
-            df=Members().data,
+            df=data if df is None else df,
             filter_data=filter_data
         )
+        self._data = data
 
-    def plot_dob(self, color=None):
-        return super().plot_histogram(
-            x='birth_year',
-            color=color
+
+
+
+
+class MemberDOBFigure(MemberFigure):
+    key = 'birth_year'
+
+    def plot(self, color=None, **kwargs):
+        fig = super().plot_histogram_bar(
+            x=self.key,
+            color=color,
+            quant=False,
+            height=100
         )
+        fig.update_yaxes(visible=False)
+        fig.update_xaxes(title_text='')
+        return fig
+    
+    def selected_years(self, selectedData):
+        return self.selected_points_x(selectedData)
+    
     
 
+class MembershipYearFigure(MemberFigure):
+    records_name='annual subscriptions'
+    key='membership_years'
+
     @cached_property
-    def df_membership_years(self):
+    def figdf(self):
+        if not len(self.df): return pd.DataFrame()
         return pd.DataFrame([
-            {'member':member, 'membership_year':yr}
-            for member,years in zip(Members().data.index, Members().data.membership_years)
+            {'member':member, self.key:yr}
+            for member,years in zip(self.df.index, self.df.membership_years)
             for yr in years
-            if yr
-        ]).sort_values(['membership_year', 'member'])
+        ]).sort_values([self.key, 'member']).set_index('member')
 
-    def plot_membership_years(self, color=None):        
-        return super().plot_histogram(
-            x='membership_year',
+    def plot(self, color=None, **kwargs):        
+        fig = super().plot_histogram_bar(
+            x=self.key,
             color=color,
-            df=self.df_membership_years,
+            quant=False,
+            df=self.figdf,
+            height=100
         )
+        fig.update_yaxes(visible=False)
+        fig.update_xaxes(title_text='')
+        return fig
 
 
 
-class MemberDwellingsFigureFactory(FigureFactory):
+
+class MemberGenderFigure(MemberFigure):
+    key='gender'
+
+    def plot(self, color=None, **kwargs):
+        fig = super().plot_histogram_bar(
+            x=self.key,
+            color=color,
+            log_y=True,
+            quant=False,
+            height=100
+        )
+        fig.update_yaxes(visible=False)
+        fig.update_xaxes(title_text='')
+        return fig
+
+
+
+
+
+class MemberDwellingsFigure(FigureFactory):
     def __init__(self, filter_data={}, df=None):
         super().__init__(
             df=MemberDwellings().data if df is None else df,
             filter_data=filter_data
         )
-    
-    def plot_map(self, color=None, **kwargs):
+
+
+class MemberMap(MemberDwellingsFigure):
+    def plot(self, color=None, **kwargs):
         fig = super().plot_map(
             center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
             zoom=12, 
@@ -230,6 +367,20 @@ class MemberDwellingsFigureFactory(FigureFactory):
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         return fig
         # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -302,121 +453,3 @@ class MemberComparisonFigureFactory(ComparisonFigureFactory):
         )
         return fig
     
-
-
-
-
-
-import numpy as np
-
-class MemberFigure(FigureFactory):
-    records_name='members'
-    key = ''
-    records_points_dim = 'x' # or 'y'
-
-    def __init__(self, filter_data={}, df=None): 
-        super().__init__(
-            df=Members().data if df is None else df,
-            filter_data=filter_data
-        )
-
-
-
-
-class MemberDOBFigure(MemberFigure):
-    key = 'birth_year'
-
-    def plot(self, color=None):
-        return super().plot_histogram(
-            x=self.key,
-            color=color,
-            quant=True,
-            height=100
-        )
-    
-    def selected_years(self, selectedData):
-        return self.selected_points_x(selectedData)
-    
-    
-
-class MembershipYearFigure(MemberFigure):
-    records_name='annual subscriptions'
-    key='membership_years'
-
-    @cached_property
-    def figdf(self):
-        return pd.DataFrame([
-            {'member':member, self.key:yr}
-            for member,years in zip(Members().data.index, Members().data.membership_years)
-            for yr in years
-        ]).sort_values([self.key, 'member']).set_index('member')
-
-    def plot(self, color=None):        
-        return super().plot_histogram(
-            x=self.key,
-            color=color,
-            quant=True,
-            df=self.figdf,
-            height=100
-        )
-
-
-
-
-class MemberGenderFigure(MemberFigure):
-    key='gender'
-
-    def plot(self, color=None):
-        return super().plot_histogram(
-            x=self.key,
-            color=color,
-            log_y=True,
-            quant=False,
-            height=100
-        )
-
-
-
-
-
-class MemberDwellingsFigure(FigureFactory):
-    def __init__(self, filter_data={}, df=None):
-        super().__init__(
-            df=MemberDwellings().data if df is None else df,
-            filter_data=filter_data
-        )
-
-
-class MemberMap(MemberDwellingsFigure):
-    def plot(self, color=None, **kwargs):
-        fig = super().plot_map(
-            center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
-            zoom=12, 
-            hover_name='name',
-            **kwargs
-        )
-        fig.update_layout(
-            mapbox=dict(
-                style="stamen-toner",
-                # pitch=45
-            ),
-        )
-        if color: fig.update_traces(marker=dict(size=10, color=color))
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-        return fig
-        # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
