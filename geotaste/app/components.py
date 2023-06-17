@@ -63,7 +63,7 @@ class FilterComponent(BaseComponent):
     @cached_property
     def store_desc(self): 
         return html.Div(
-            '[no filter]', 
+            '', 
             style={
                 'color':self.color if self.color else 'inherit', 
                 # 'text-align':'center'
@@ -87,7 +87,7 @@ class FilterCard(FilterComponent):
     @cached_property
     def body(self):
         return dbc.CardBody([
-            BLANKDIV,
+            # BLANKDIV,
             self.graph,
             self.store
         ])
@@ -160,6 +160,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def graph_selection_updated(selected_data):
+            print(selected_data)
             return self.figure_obj.selected(selected_data)
         
         
@@ -218,6 +219,13 @@ class MemberGenderCard(FilterPlotCard):
     key='gender'
     figure_class = MemberGenderFigure
 
+class MemberNationalityCard(FilterPlotCard):
+    desc = 'Filter by nationality of member'
+    key='nationalities'
+    figure_class = MemberNationalityFigure
+
+
+
 class MemberMapCard(FilterPlotCard):
     desc = 'Member addresses mapped'
     # key='gender'
@@ -236,6 +244,8 @@ class MemberPanel(FilterCard):
     @cached_property
     def gender_card(self): return MemberGenderCard(**self._kwargs)
     @cached_property
+    def nation_card(self): return MemberNationalityCard(**self._kwargs)
+    @cached_property
     def map_card(self): return MemberMapCard(**self._kwargs)
     
     def layout(self, params=None): 
@@ -245,6 +255,7 @@ class MemberPanel(FilterCard):
             self.membership_year_card.layout(params),
             self.dob_card.layout(params),
             self.gender_card.layout(params),
+            self.nation_card.layout(params),
             self.map_card.layout(params),
             self.store
         ])
@@ -260,6 +271,8 @@ class MemberPanel(FilterCard):
                 Input(self.membership_year_card.store, 'data'),
                 Input(self.dob_card.store, 'data'),
                 Input(self.gender_card.store, 'data'),
+                Input(self.nation_card.store, 'data'),
+                Input(self.map_card.store, 'data'),
             ]
         )
         def component_filters_updated(*filters_d):
@@ -270,6 +283,7 @@ class MemberPanel(FilterCard):
                 Output(self.membership_year_card.graph, 'figure'),
                 Output(self.dob_card.graph, 'figure'),
                 Output(self.gender_card.graph, 'figure'),
+                Output(self.nation_card.graph, 'figure'),
                 Output(self.map_card.graph, 'figure'),
             ],
             Input(self.store, 'data'),
@@ -277,36 +291,47 @@ class MemberPanel(FilterCard):
         )
         def datastore_updated(panel_data, map_figdata):
             filtered_keys = set(panel_data.get('intension',{}).keys())
-            print(panel_data.get('intension'))
-            print(filtered_keys)
-
-            out = []
-
-            out.append(
-                dash.no_update 
-                if self.membership_year_card.key in filtered_keys 
-                else self.membership_year_card.plot(panel_data)
-            )
             
-            out.append(
-                dash.no_update 
-                if self.dob_card.key in filtered_keys 
-                else self.dob_card.plot(panel_data)
-            )
-
-            out.append(
-                dash.no_update 
-                if self.gender_card.key in filtered_keys 
-                else self.gender_card.plot(panel_data)
-            )
-
-            old_fig = go.Figure(map_figdata)
-            new_fig = self.map_card.plot(panel_data)
-            out_fig = go.Figure(data=new_fig.data, layout=old_fig.layout)
-            out.append(out_fig)
-
-
+            cards = [self.membership_year_card, self.dob_card, self.gender_card, self.nation_card, self.map_card]
+            out = [
+                (dash.no_update if card.key in filtered_keys else card.plot(panel_data))
+                for card in cards
+            ]
+            if out[-1]!=dash.no_update:
+                new_fig = out[-1]
+                old_fig = go.Figure(map_figdata)
+                out_fig = go.Figure(data=new_fig.data, layout=old_fig.layout)
+                out[-1] = out_fig
             return out
+
+            
+
+            # # membership year
+            # out.append(
+            #     dash.no_update 
+            #     if self.membership_year_card.key in filtered_keys 
+            #     else self.membership_year_card.plot(panel_data)
+            # )
+            
+            # out.append(
+            #     dash.no_update 
+            #     if self.dob_card.key in filtered_keys 
+            #     else self.dob_card.plot(panel_data)
+            # )
+
+            # out.append(
+            #     dash.no_update 
+            #     if self.gender_card.key in filtered_keys 
+            #     else self.gender_card.plot(panel_data)
+            # )
+
+            # old_fig = go.Figure(map_figdata)
+            # new_fig = self.map_card.plot(panel_data)
+            # out_fig = go.Figure(data=new_fig.data, layout=old_fig.layout)
+            # out.append(out_fig)
+
+
+            # return out
 
 
 

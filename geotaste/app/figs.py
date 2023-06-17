@@ -10,12 +10,14 @@ from .imports import *
 class FigureFactory(DashFigureFactory):
     records_name = 'records'
     key = ''
+    records_points_dim = 'xy'
 
     def __init__(self, filter_data = {}, df = None):
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
         self._df = df
         self._data = self._df # overwrite
+
 
 
     # def filter_df(self, filter_data):
@@ -32,11 +34,14 @@ class FigureFactory(DashFigureFactory):
         return [y for x,y in self.selected_points_xy(selectedData)]
     
     def selected_points(self, selectedData):
-        return (
-            self.selected_points_x(selectedData) 
-            if self.records_points_dim!='y' 
-            else self.selected_points_y(selectedData)
-        )
+        func = getattr(self, f'selected_points_{self.records_points_dim}')
+        return func(selectedData)
+    
+    def selected_points_locations(self, selectedData, key='location'):
+        return [d.get(key,'') for d in selectedData.get('points',[]) if d and key in d and d[key]]
+    
+    def selected_points_latlon(self, selectedData, keys=('lat', 'lon')):
+        return [(d.get(keys[0],np.nan), d.get(keys[1],np.nan)) for d in selectedData.get('points',[]) if keys[0] in d and keys[1] in d]
     
     def selected(self, selectedData):
         if not selectedData: return {}
@@ -271,6 +276,16 @@ class MemberFigure(FigureFactory):
         )
         self._data = data
 
+    
+    @cached_property
+    def figdf(self):
+        if not len(self.df): return pd.DataFrame()
+        return pd.DataFrame([
+            {'member':member, self.key:yr}
+            for member,years in zip(self.df.index, self.df[self.key])
+            for yr in years
+        ]).sort_values([self.key, 'member']).set_index('member')
+
 
 
 
@@ -298,14 +313,7 @@ class MembershipYearFigure(MemberFigure):
     records_name='annual subscriptions'
     key='membership_years'
 
-    @cached_property
-    def figdf(self):
-        if not len(self.df): return pd.DataFrame()
-        return pd.DataFrame([
-            {'member':member, self.key:yr}
-            for member,years in zip(self.df.index, self.df.membership_years)
-            for yr in years
-        ]).sort_values([self.key, 'member']).set_index('member')
+    
 
     def plot(self, color=None, **kwargs):        
         fig = super().plot_histogram_bar(
@@ -313,7 +321,7 @@ class MembershipYearFigure(MemberFigure):
             color=color,
             quant=False,
             df=self.figdf,
-            height=100
+            height=100,
         )
         fig.update_yaxes(visible=False)
         fig.update_xaxes(title_text='')
@@ -329,14 +337,60 @@ class MemberGenderFigure(MemberFigure):
         fig = super().plot_histogram_bar(
             x=self.key,
             color=color,
-            log_y=True,
+            # log_y=True,
             quant=False,
-            height=100
+            height=100,
+            text='count'
         )
         fig.update_yaxes(visible=False)
         fig.update_xaxes(title_text='')
         return fig
 
+
+class MemberNationalityFigure(MemberFigure):
+    records_name='member nationalities'
+    key='nationalities'
+    records_points_dim='locations'
+    
+    @cached_property
+    def figdf(self):
+        df = px.data.gapminder()
+        d=dict(zip(df.country, df.iso_alpha))
+        df=super().figdf.reset_index().set_index(self.key)
+        df['iso']=d
+        df['iso'].fillna('',inplace=True)
+        return df.reset_index().set_index('member')
+    
+    def plot(self, color=None, **kwargs):
+        fdf = pd.DataFrame(self.figdf['iso'].value_counts()).reset_index()
+        fig = px.choropleth(
+            fdf, 
+            locations="iso",
+            color="count",
+            color_continuous_scale=px.colors.sequential.Purples,
+            range_color=(0,400), #fdf['count'].min(), fdf['count'].max())
+            height=300,
+        )
+        fig.update_coloraxes(showscale=False)
+        fig.update_layout(
+            clickmode='event+select', 
+            dragmode='select',
+            margin={"r":0,"t":0,"l":0,"b":0}
+        )
+        fig.update_geos(
+            showframe=False,
+            showcoastlines=False,
+            projection_type='mollweide'
+        )
+        return fig
+    
+    def selected(self, selectedData):
+        if not selectedData: return {}
+        isos = self.selected_points_locations(selectedData)
+        xs = list(self.figdf[self.figdf.iso.isin(isos)][self.key].unique())
+        series = self.series[self.series.apply(lambda x: isin_or_hasone(x, xs))]
+        return {INTENSION_KEY:{self.key:xs} if self.key else xs, EXTENSION_KEY:dict(series)}
+    
 
 
 
@@ -368,7 +422,16 @@ class MemberMap(MemberDwellingsFigure):
         return fig
         # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
 
-
+    def selected(self, selectedData):
+        if not selectedData: return {}
+        latlons = self.selected_points_latlon(selectedData)
+        df = self.df.sample(frac=1)
+        key='latlon'
+        df[key]=list(zip(df['latitude'], df['longitude']))
+        df = df[df.latlon.isin(latlons)]
+        series = df[key]
+        o = {INTENSION_KEY:{key:[]}, EXTENSION_KEY:dict(series)}
+        return o
 
 
 
