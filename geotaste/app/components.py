@@ -63,7 +63,7 @@ class FilterComponent(BaseComponent):
     @cached_property
     def store_desc(self): 
         return html.Div(
-            '', 
+            BLANKSTR, 
             style={
                 'color':self.color if self.color else 'inherit', 
                 # 'text-align':'center'
@@ -224,12 +224,26 @@ class MemberNationalityCard(FilterPlotCard):
     key='nationalities'
     figure_class = MemberNationalityFigure
 
+class MemberTableCard(FilterPlotCard):
+    desc = 'Filter by gender of member'
+    figure_class = MemberTableFigure
+
+    @cached_property
+    def graph(self):
+        return html.Div(children=[self.plot()])
 
 
 class MemberMapCard(FilterPlotCard):
     desc = 'Member addresses mapped'
     # key='gender'
     figure_class = MemberMap
+
+
+
+
+
+
+
 
 class MemberMapComparisonCard(MemberMapCard): pass
 
@@ -247,6 +261,8 @@ class MemberPanel(FilterCard):
     def nation_card(self): return MemberNationalityCard(**self._kwargs)
     @cached_property
     def map_card(self): return MemberMapCard(**self._kwargs)
+    @cached_property
+    def table_card(self): return MemberTableCard(**self._kwargs)
     
     def layout(self, params=None): 
         body = dbc.Container([
@@ -257,6 +273,7 @@ class MemberPanel(FilterCard):
             self.gender_card.layout(params),
             self.nation_card.layout(params),
             self.map_card.layout(params),
+            self.table_card.layout(params),
             self.store
         ])
         return body
@@ -273,6 +290,7 @@ class MemberPanel(FilterCard):
                 Input(self.gender_card.store, 'data'),
                 Input(self.nation_card.store, 'data'),
                 Input(self.map_card.store, 'data'),
+                # Input(self.table_card.store, 'data'),
             ]
         )
         def component_filters_updated(*filters_d):
@@ -284,6 +302,7 @@ class MemberPanel(FilterCard):
                 Output(self.dob_card.graph, 'figure'),
                 Output(self.gender_card.graph, 'figure'),
                 Output(self.nation_card.graph, 'figure'),
+                Output(self.table_card.graph, 'children'),
                 Output(self.map_card.graph, 'figure'),
             ],
             Input(self.store, 'data'),
@@ -291,8 +310,9 @@ class MemberPanel(FilterCard):
         )
         def datastore_updated(panel_data, map_figdata):
             filtered_keys = set(panel_data.get('intension',{}).keys())
+            print('filtered_keys',filtered_keys)
             
-            cards = [self.membership_year_card, self.dob_card, self.gender_card, self.nation_card, self.map_card]
+            cards = [self.membership_year_card, self.dob_card, self.gender_card, self.nation_card, self.table_card, self.map_card]
             out = [
                 (dash.no_update if card.key in filtered_keys else card.plot(panel_data))
                 for card in cards

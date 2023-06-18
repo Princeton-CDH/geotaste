@@ -110,35 +110,35 @@ class MembersDataset(Dataset):
         return df
 
     
-    def data_table(
-            self, 
-            dff = None, 
-            cols = ['name','title','gender','birth_year','death_year','nationalities']
-            ):
-        from dash import dash_table
+    # def data_table(
+    #         self, 
+    #         df = None, 
+    #         cols = ['name','title','gender','birth_year','death_year','nationalities']
+    #         ):
+    #     from dash import dash_table
 
-        dff = self.data if dff is None else dff
+    #     dff = self.data if df is None else df
         
-        if cols: 
-            dff=dff[cols]
-        else:
-            cols = dff.columns
+    #     if cols: 
+    #         dff=dff[cols]
+    #     else:
+    #         cols = dff.columns
 
-        for col in set(cols) & set(self.cols_sep):
-            dff[col] = dff[col].apply(lambda x: self.sep.join(str(y) for y in x))
+    #     for col in set(cols) & set(self.cols_sep):
+    #         dff[col] = dff[col].apply(lambda x: self.sep.join(str(y) for y in x))
         
-        cols_l = [{'id':col, 'name':col} for col in cols] 
-        # ddt, ddt_cols = dff.dash.to_dash_table()
-        odt = dash_table.DataTable(
-            data=dff.to_dict('records'),
-            columns=cols_l,
-            sort_action="native",
-            sort_mode="multi",
-            filter_action="native",
-            page_action="native",
-            page_size=5
-        )
-        return odt
+    #     cols_l = [{'id':col, 'name':col} for col in cols] 
+    #     # ddt, ddt_cols = dff.dash.to_dash_table()
+    #     odt = dash_table.DataTable(
+    #         data=dff.to_dict('records'),
+    #         columns=cols_l,
+    #         sort_action="native",
+    #         sort_mode="multi",
+    #         filter_action="native",
+    #         page_action="native",
+    #         page_size=5
+    #     )
+    #     return odt
     
 
 

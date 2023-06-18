@@ -181,7 +181,8 @@ class FigureFactory(DashFigureFactory):
         
         # figdf = self.get_figdf(x,quant=False)
         if df is None: df = self.df
-        df_counts = pd.DataFrame(df[x].value_counts()).reset_index()
+        s=df[x].value_counts()
+        df_counts = pd.DataFrame(s).reset_index()
 
         if quant is False and category_orders is None:
             category_orders = {self.key:df_counts.index}
@@ -393,6 +394,31 @@ class MemberNationalityFigure(MemberFigure):
     
 
 
+class MemberTableFigure(MemberFigure):
+    cols = ['name','title','gender','birth_year','death_year','nationalities']
+
+    def plot(self, **kwargs):
+        print('plot',self.filter_data)
+
+        from dash import dash_table
+        cols = self.cols if self.cols else self.df.columns
+        dff = self.df[cols]
+        for col in set(cols) & set(Members().cols_sep):
+            dff[col] = dff[col].apply(lambda x: Members().sep.join(str(y) for y in x))
+        cols_l = [{'id':col, 'name':col} for col in cols] 
+        return dash_table.DataTable(
+            data=dff.to_dict('records'),
+            columns=cols_l,
+            sort_action="native",
+            sort_mode="multi",
+            filter_action="native",
+            page_action="native",
+            page_size=5,
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+            },
+        )
 
 
 class MemberDwellingsFigure(FigureFactory):
