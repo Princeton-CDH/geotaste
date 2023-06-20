@@ -1,6 +1,7 @@
-ipytest
-# dash
-plotly
 pandas
-git+https://github.com/oegedijk/dash_oop_components
+numpy
+dash
+plotly
+tqdm
 dash_bootstrap_components
+dash_oop_components @ git+https://github.com/quadrismegistus/dash_oop_components

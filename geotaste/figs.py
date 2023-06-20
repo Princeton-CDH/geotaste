@@ -45,14 +45,9 @@ class FigureFactory(DashFigureFactory):
     
     def selected(self, selectedData):
         if not selectedData: return {}
-
         xs = self.selected_points(selectedData) 
         if not xs: return {}
-
-        series = self.series[self.series.apply(lambda x: isin_or_hasone(x, xs))]
-        od = dict(series)
-        return {'intension':{self.key:xs} if self.key else xs, 'extension':od}
-
+        return filter_series(self.series, xs, test_func=isin_or_hasone)
     
     def selected_records(self, selectedData):
         return set(self.selected(selectedData).index)
@@ -182,6 +177,12 @@ class FigureFactory(DashFigureFactory):
         # figdf = self.get_figdf(x,quant=False)
         if df is None: df = self.df
         s=df[x].value_counts()
+
+        # make sure all types are there
+        missing_valtypes = set(self.vals) - set(s.index)
+        for xval in missing_valtypes: s[xval]=0
+        s=s.sort_index()
+
         df_counts = pd.DataFrame(s).reset_index()
 
         if quant is False and category_orders is None:
@@ -368,7 +369,7 @@ class MemberNationalityFigure(MemberFigure):
             fdf, 
             locations="iso",
             color="count",
-            color_continuous_scale=px.colors.sequential.Purples,
+            color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
             range_color=(0,400), #fdf['count'].min(), fdf['count'].max())
             height=300,
         )
@@ -381,7 +382,8 @@ class MemberNationalityFigure(MemberFigure):
         fig.update_geos(
             showframe=False,
             showcoastlines=False,
-            projection_type='mollweide'
+            # projection_type='mollweide'
+            projection_type='miller'
         )
         return fig
     
@@ -389,23 +391,19 @@ class MemberNationalityFigure(MemberFigure):
         if not selectedData: return {}
         isos = self.selected_points_locations(selectedData)
         xs = list(self.figdf[self.figdf.iso.isin(isos)][self.key].unique())
-        series = self.series[self.series.apply(lambda x: isin_or_hasone(x, xs))]
-        return {INTENSION_KEY:{self.key:xs} if self.key else xs, EXTENSION_KEY:dict(series)}
+        return filter_series(self.series, xs, test_func=isin_or_hasone)
     
 
 
-class MemberTableFigure(MemberFigure):
-    cols = ['name','title','gender','birth_year','death_year','nationalities']
+class TableFigure(FigureFactory):
+    cols = []
 
-    def plot(self, **kwargs):
-        print('plot',self.filter_data)
+    def plot(self, df=None, cols=[], page_size=5, **kwargs):
+        df = df if df is not None else self.df
+        cols = cols if cols else (self.cols if self.cols else df.columns)
+        dff = df[cols]
+        cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
 
-        from dash import dash_table
-        cols = self.cols if self.cols else self.df.columns
-        dff = self.df[cols]
-        for col in set(cols) & set(Members().cols_sep):
-            dff[col] = dff[col].apply(lambda x: Members().sep.join(str(y) for y in x))
-        cols_l = [{'id':col, 'name':col} for col in cols] 
         return dash_table.DataTable(
             data=dff.to_dict('records'),
             columns=cols_l,
@@ -413,125 +411,150 @@ class MemberTableFigure(MemberFigure):
             sort_mode="multi",
             filter_action="native",
             page_action="native",
-            page_size=5,
+            page_size=page_size,
             style_data={
                 'whiteSpace': 'normal',
                 'height': 'auto',
             },
         )
+    
+class MemberTableFigure(MemberFigure, TableFigure):
+    cols = ['name','title','gender','birth_year','death_year','nationalities']
+
+    def plot(self, **kwargs):
+        cols = self.cols if self.cols else self.df.columns
+        dff = self.df[[c for c in cols if c in set(self.df.columns)]]
+        for col in set(cols) & set(Members().cols_sep):
+            dff[col] = dff[col].apply(lambda x: Members().sep.join(str(y) for y in x))
+        return super().plot(df=dff)
+    
 
 
-class MemberDwellingsFigure(FigureFactory):
+
+
+class MemberMap(MemberFigure):
     def __init__(self, filter_data={}, df=None):
         super().__init__(
             df=MemberDwellings().data if df is None else df,
             filter_data=filter_data
         )
 
-
-class MemberMap(MemberDwellingsFigure):
     def plot(self, color=None, **kwargs):
-        fig = super().plot_map(
-            center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
-            zoom=12, 
-            hover_name='name',
-            **kwargs
-        )
-        fig.update_layout(
-            mapbox=dict(
-                style="stamen-toner",
-                # pitch=45
-            ),
-        )
-        if color: fig.update_traces(marker=dict(size=10, color=color))
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-        return fig
-        # return go.Figure(data=fig_choro.data + fig.data, layout = fig.layout)
-
-    def selected(self, selectedData):
-        if not selectedData: return {}
-        latlons = self.selected_points_latlon(selectedData)
-        df = self.df.sample(frac=1)
-        key='latlon'
-        df[key]=list(zip(df['latitude'], df['longitude']))
-        df = df[df.latlon.isin(latlons)]
-        series = df[key]
-        o = {INTENSION_KEY:{key:[]}, EXTENSION_KEY:dict(series)}
-        return o
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class ComparisonFigureFactory(FigureFactory):
-    def __init__(self, filter_data_L={}, filter_data_R={}, df=None):
-        super().__init__(df=MemberDwellings().data if df is None else df)
-        self.filter_data_L = filter_data_L
-        self.filter_data_R = filter_data_R
-    @cached_property
-    def df_L(self): return filter_df(self._df, self.filter_data_L)
-    @cached_property
-    def df_R(self): return filter_df(self._df, self.filter_data_R)
-
-    @cached_property
-    def df(self):
-        ids_L = set(self.df_L.index)
-        ids_R = set(self.df_R.index)
-        ids_both = ids_L & ids_R
-        ids_only_L = ids_L - ids_R
-        ids_only_R = ids_R - ids_L
-        
-        df_both = self.df_L.loc[list(ids_both)].assign(present_in='Both', present_in_str = f'Both')
-        df_only_L = self.df_L.loc[list(ids_only_L)].assign(present_in='Left', present_in_str=f'Left ({to_query_string(self.filter_data_L)})')
-        df_only_R = self.df_R.loc[list(ids_only_R)].assign(present_in='Right', present_in_str=f'Right ({to_query_string(self.filter_data_R)})')
-        df = pd.concat([df_only_L, df_both, df_only_R])
-        return df    
-
-
-
-class MemberComparisonFigureFactory(ComparisonFigureFactory):
-    def plot_map(self, **kwargs):
-
-        def get_color(x):
-            if x.startswith('Left'): return LEFT_COLOR
-            if x.startswith('Right'): return RIGHT_COLOR
-            return BOTH_COLOR
-        
-        figdf = self.df.sample(frac=1)
-        color_map = {label:get_color(label) for label in figdf.present_in_str.apply(str).unique()}
-        # print(color_map)
-
         fig = px.scatter_mapbox(
-            self.df,
+            self.df, 
             lat='latitude',
             lon='longitude', 
             center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
             zoom=12, 
             hover_name='name',
-            color='present_in_str',
-            # hover_data=["State", "Population"],
-            height=600,
+            height=400,
             size_max=40,
-            mapbox_style="stamen-toner",
-            color_discrete_map=color_map,
-            **kwargs
         )
         fig.update_traces(marker=dict(size=10))
-        fig.update_layout(
+        if color: fig.update_traces(marker=dict(color=color))
+        fig.update_mapboxes(style="stamen-toner")
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+        # counts_by_arrond = pd.DataFrame(self.df.arrond_id.value_counts()).reset_index()
+        counts_by_arrond = get_arrond_counts(self.df).reset_index()
+
+        fig_choro = px.choropleth_mapbox(
+            counts_by_arrond,
+            geojson=get_geojson_arrondissement(),
+            locations='arrond_id', 
+            color='count',
+            center=MAP_CENTER,
+            zoom=12,
+            color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
+            opacity=.5
+        )
+        fig_choro.update_mapboxes(style="stamen-toner")
+        fig_choro.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        ofig=go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
+        return ofig
+
+    def selected(self, selectedData):
+        if not selectedData: return {}
+        latlons = self.selected_points_latlon(selectedData)
+        s=pd.Series(list(zip(self.df['latitude'], self.df['longitude'])), name='latlon')
+        return filter_series(s, latlons, test_func=isin_or_hasone)
+
+
+
+
+
+
+
+
+
+
+class ComparisonMemberMap(MemberMap):
+    def __init__(
+            self, 
+            filter_data_L={}, 
+            filter_data_R={}, 
+            df=None):
+
+        if not filter_data_L and not filter_data_R:
+            super().__init__()
+            self.df['L_or_R'] = 'Both'
+        else:    
+            filter_data_comparison = compare_filters(
+                filter_data_L if filter_data_L else self.filter_data_total, 
+                filter_data_R if filter_data_R else self.filter_data_total,
+            )
+            super().__init__(filter_data = filter_data_comparison)
+
+    @property
+    def filter_data_total(self):
+        return {
+            INTENSION_KEY:{},
+            EXTENSION_KEY:{i:{} for i in Members().data.index}
+        }
+
+    @cached_property
+    def df_arronds(self):
+        df_L = self.df[self.df.L_or_R.isin({'L','Both'})]
+        df_R = self.df[self.df.L_or_R.isin({'R','Both'})]
+        df_arronds = compare_arrond_counts(df_L, df_R)
+        return df_arronds
+
+    def plot(self, **kwargs):
+        def get_color(x):
+            if x.startswith('L'): return LEFT_COLOR
+            if x.startswith('R'): return RIGHT_COLOR
+            return BOTH_COLOR
+        
+        color_map = {label:get_color(label) for label in self.df['L_or_R'].apply(str).unique()}
+        fig = px.scatter_mapbox(
+            self.df, 
+            lat='latitude',
+            lon='longitude', 
+            center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
+            zoom=12, 
+            hover_name='name',
+            color='L_or_R',
+            color_discrete_map=color_map,
+            # height=400,
+            size_max=40,
+            # **kwargs
+        )
+        fig.update_traces(marker=dict(size=10))
+        fig.update_mapboxes(style='stamen-toner')
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        
+        fig_choro = px.choropleth_mapbox(
+            self.df_arronds.reset_index(),
+            geojson=get_geojson_arrondissement(),
+            locations='arrond_id', 
+            color='perc_L->R',
+            center=MAP_CENTER,
+            zoom=12,
+            color_continuous_scale='puor',
+            opacity=.5
+        )
+        fig_choro.update_mapboxes(style="stamen-toner")
+        fig_choro.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
             legend=dict(
                 yanchor="top",
@@ -540,5 +563,91 @@ class MemberComparisonFigureFactory(ComparisonFigureFactory):
                 x=0.01
             )
         )
-        return fig
+        fig_choro.update_layout(
+            coloraxis=dict(
+                colorbar=dict(
+                    orientation='h', 
+                    y=-0.15)
+                ),
+        )
+        fig_choro.update_coloraxes(reversescale=True)
+        return go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
+
+
+
+class ComparisonMemberTable(TableFigure):
+    cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
     
+    def plot(self, **kwargs):
+        cols=self.cols
+        dff = self.df[cols]
+        cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
+
+        return dash_table.DataTable(
+            data=dff.to_dict('records'),
+            columns=cols_l,
+            sort_action="native",
+            # sort_mode="multi",
+            # filter_action="native",
+            # page_action="native",
+            # page_size=len(dff)+1,
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+            },
+        )
+
+
+
+
+## geojson/arrond utils
+
+def get_geojson_arrondissement(force=False):
+    import os,json,requests
+    
+    # download if nec
+    url=URLS.get('geojson_arrond')
+    fn=os.path.join(PATH_DATA,'arrondissements.geojson')
+    if force or not os.path.exists(fn):
+        data = requests.get(url)
+        with open(fn,'wb') as of: 
+            of.write(data.content)
+
+    # load        
+    with open(fn) as f:
+        jsond=json.load(f)
+        
+    # anno
+    for d in jsond['features']:
+        d['id'] = str(d['properties']['c_ar'])
+        d['properties']['arrond_id'] = d['id']
+    
+    return jsond
+
+
+@cache
+def get_all_arrond_ids():
+    return {
+        d['id'] 
+        for d in get_geojson_arrondissement()['features']
+    }
+
+def get_arrond_counts(df,key='arrond_id'):
+    arrond_counts = {n:0 for n in sorted(get_all_arrond_ids(), key=lambda x: int(x))}
+    for k,v in dict(df[key].value_counts()).items(): arrond_counts[k]=v    
+    arrond_df = pd.DataFrame([arrond_counts]).T.reset_index()
+    arrond_df.columns=[key, 'count']
+    arrond_df['perc']=arrond_df['count'] / sum(arrond_df['count']) * 100
+    return arrond_df.set_index(key)
+
+def compare_arrond_counts(df_L, df_R):
+    df_arronds_L = get_arrond_counts(df_L)
+    df_arronds_R = get_arrond_counts(df_R)
+    df_arronds_diff = df_arronds_R - df_arronds_L
+    odf=pd.DataFrame()
+    for c in df_arronds_diff:
+        odf[c+'_L']=df_arronds_L[c]
+        odf[c+'_R']=df_arronds_R[c]
+        odf[c+'_L->R']=df_arronds_diff[c]
+    odf=odf.sort_values('perc_L->R')
+    return odf

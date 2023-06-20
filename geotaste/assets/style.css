@@ -106,3 +106,14 @@ p {
 code { 
     color: inherit;
 }
+
+.comparison_map_card_col {
+    /* flex-grow:1; */
+
+    & .plotly {
+        height:700px;
+    }
+
+    & .dash-cell-value { font-size:0.9em; }
+
+}

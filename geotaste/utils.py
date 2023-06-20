@@ -1,7 +1,48 @@
 from .imports import *
 
 
-def is_l(x): return type(x) in {list,tuple}
+
+
+def hasone(x:list, y:list):
+    res = bool(set(x)&set(y))
+    # print(['hasone',x,y,res])
+    return res
+
+def isin(x:object, y:list):
+    res = bool(x in set(y))
+    # print(['isin',x,y,res])
+    return res
+
+def isin_or_hasone(x:object, y:list):
+    if not is_listy(y): 
+        y={y}
+    else:
+        y=set(y)
+    if type(x) in {list,set,tuple}:
+        return hasone(x,y)
+    else:
+        return isin(x,y)
+
+
+
+
+def is_numeric(x):
+    return isinstance(x, numbers.Number)
+
+def is_listy(x):
+    return type(x) in {tuple,list}
+
+def ensure_dict(x):
+    if x is None: return {}
+    if type(x) is dict: return x
+    return dict(x)
+
+
+
+
+
+
+def is_l(x): return type(x) in {list,tuple,set}
 def iter_minmaxs(l):
     if is_l(l):
         for x in l:
@@ -53,13 +94,18 @@ def to_query_string(filter_data={}):
     return q
 
 
-def filter_df_extensionally(df:pd.DataFrame, selected:dict, key:str='extension'):
-    # if top level dict given...
-    if key in selected: selected=selected[key]
-    # find intersection with index
-    intersection = set(df.index) & set(selected.keys())
-    # return that subset
-    return df.loc[list(intersection)]
+def filter_df_extensionally(df:pd.DataFrame, filter_data:dict):
+    intersection = set(df.index) & set(filter_data[EXTENSION_KEY].keys())
+    odf = df.loc[list(intersection)].sample(frac=1)
+
+    ## add any new info
+    stored_info = {infotype for objid,objvald in filter_data[EXTENSION_KEY].items() for infotype in objvald.keys()}
+    # for new_col in (stored_info - set(df.columns)):
+    for new_col in stored_info:
+        odf[new_col] = [filter_data[EXTENSION_KEY].get(objid,{}).get(new_col) for objid in odf.index]
+    
+    return odf
+    
 
 def filter_df(df, d, ik=INTENSION_KEY, ek=EXTENSION_KEY):
     if not d: return df
@@ -118,37 +164,6 @@ def filter_df_old(df, filter_data={}, return_query=False):
 
 
 
-def is_numeric(x):
-    return isinstance(x, numbers.Number)
-
-def is_listy(x):
-    return type(x) in {tuple,list}
-
-def ensure_dict(x):
-    if x is None: return {}
-    if type(x) is dict: return x
-    return dict(x)
-
-
-
-
-def hasone(x:list, y:list):
-    res = bool(set(x)&set(y))
-    # print(['hasone',x,y,res])
-    return res
-
-def isin(x:object, y:list):
-    res = bool(x in set(y))
-    # print(['isin',x,y,res])
-    return res
-
-def isin_or_hasone(x:object, y:list):
-    if type(x) in {list,set,tuple}:
-        return hasone(x,y)
-    else:
-        return isin(x,y)
-
-
 
 
 
@@ -159,12 +174,16 @@ def describe_filters(store_data, records_name='records'):
     def format_intension(d):
         ol=[]
         for key,l in d.items():
+            l = sorted(list(set([x for x in l if x is not None])))
             is_quant = all(is_numeric(x) for x in l)
-            if is_quant and len(l)>2:
-                l.sort()
+            if len(l)<3:
+                o = ' and '.join(str(x) for x in l)
+            elif is_quant:
+                # l.sort()
                 o=f'{l[0]} to {l[-1]}'
             else:
-                o=' and '.join(f'{repr(x)}' for x in l)
+                # o=' and '.join(f'{repr(x)}' for x in l)
+                o=f'{l[0]} ... {l[-1]}'
             o=f'_{o}_ on  `{key}`'
             ol.append(o)
         return "; ".join(ol)
@@ -191,8 +210,53 @@ def intersect_filters(*filters_d, ik=INTENSION_KEY, ek=EXTENSION_KEY):
     shared_keys = set.intersection(*key_sets)
     for key in shared_keys: outd[ek][key]={}
     for fd in filters_d:
-        keyname=first(fd[ik])
         for key in fd[ek]:
             if key in shared_keys:
-                outd[ek][key][keyname]=fd[ek][key]
+                outd[ek][key]={**outd[ek][key], **fd[ek][key]}
     return outd
+
+
+def compare_filters(filter_data_L, filter_data_R, key_LR='L_or_R'):
+    keys_L = set(filter_data_L.get('extension',{}).keys())
+    keys_R = set(filter_data_R.get('extension',{}).keys())
+
+    keys_L_only = keys_L - keys_R
+    keys_R_only = keys_R - keys_L
+    keys_both = keys_L & keys_R
+    keys_either = keys_L | keys_R
+
+    def get_key_type(key):
+        if key in keys_L_only: return 'L'
+        if key in keys_R_only: return 'R'
+        if key in keys_both: return 'Both'
+        return 'Neither'
+    
+    outd = {INTENSION_KEY:{}, EXTENSION_KEY:{}}
+    outd[INTENSION_KEY] = (
+        filter_data_L.get(INTENSION_KEY,{}), 
+        filter_data_R.get(INTENSION_KEY,{})
+    )
+    outd[EXTENSION_KEY] = {
+        str(key):{
+            key_LR:get_key_type(key),
+            **filter_data_L.get(EXTENSION_KEY,{}).get(key,{}),
+            **filter_data_R.get(EXTENSION_KEY,{}).get(key,{})
+        } for key in keys_either
+    }
+    return outd
+
+def filter_series(
+        series, 
+        vals, 
+        test_func = isin_or_hasone,
+        series_name=None):
+    key = series.name if series_name is None else series_name
+    matches = series.apply(
+        lambda x: test_func(x, vals)
+    )
+    series_matching = series[matches]
+    return {
+        INTENSION_KEY:{key:vals},
+        EXTENSION_KEY:{objid:({key:objval}) for objid,objval in dict(series_matching).items()}
+    }
+
