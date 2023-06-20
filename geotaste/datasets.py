@@ -59,6 +59,35 @@ class Dataset:
             df = df.rename(self.cols_rename, axis=1)
         return df
 
+    def filter(self, filter_data={}, **other_filter_data):
+        return intersect_filters(*[
+            self.filter_key(key,vals)
+            for key,vals in list(filter_data.items()) + list(other_filter_data.items())
+        ])
+
+    def series(self, key) -> pd.Series:
+        try:
+            return self.data[key]
+        except KeyError:
+            try:
+                return self.data_orig[key]
+            except KeyError:
+                pass
+        return pd.Series()
+
+    def filter_key(
+            self, 
+            key, 
+            vals, 
+            test_func = isin_or_hasone):
+        
+        return filter_series(
+            series=self.series(key),
+            vals=vals,
+            series_name=key,
+            test_func=test_func,
+        )
+
 
 
 
@@ -104,6 +133,7 @@ class MembersDataset(Dataset):
             lambda x: x.split('/members/',1)[1][:-1] if '/members/' in x else ''
         )
         df['membership_years'] = [[int(y) for y in x if y] for x in df['membership_years']]
+        df['gender']=df['gender'].replace({'':'Unknown'})
         
         # other
         df = df.set_index('member')
@@ -176,6 +206,11 @@ class DwellingsDataset(Dataset):
         'longitude',
     ]
 
+    @cached_property
+    def data(self):
+        df=super().data
+        df['arrond_id']=df['arrrondissement'].apply(lambda x: '' if not x else str(int(x)))
+        return df
 
 
 class MemberDwellingsDataset(Dataset):
@@ -415,38 +450,6 @@ class MemberBookEventsDataset(Dataset):
 
 
 
-def get_geojson_arrondissement(force=False):
-    import os,json,requests
-    
-    # download if nec
-    url=URLS.get('geojson_arrond')
-    fn=os.path.join(PATH_DATA,'arrondissements.geojson')
-    if force or not os.path.exists(fn):
-        data = requests.get(url)
-        with open(fn,'wb') as of: 
-            of.write(data.content)
-
-    # load        
-    with open(fn) as f:
-        jsond=json.load(f)
-        
-    # anno
-    for d in jsond['features']:
-        d['id'] = str(d['properties']['c_ar'])
-        d['properties']['arrond_id'] = d['id']
-    
-    return jsond
-
-
-
-
-
-
-
-
-
-
-
 
 
 @cache
@@ -457,3 +460,10 @@ def MemberDwellings(): return MemberDwellingsDataset()
 def Books(): return BooksDataset()
 @cache
 def Events(): return EventsDataset()
+
+
+
+
+
+
+

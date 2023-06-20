@@ -63,7 +63,8 @@ class FilterComponent(BaseComponent):
     @cached_property
     def store_desc(self): 
         return html.Div(
-            BLANKSTR, 
+            #BLANKSTR, 
+            '',
             style={
                 'color':self.color if self.color else 'inherit', 
                 # 'text-align':'center'
@@ -89,20 +90,19 @@ class FilterCard(FilterComponent):
         return dbc.CardBody([
             # BLANKDIV,
             self.graph,
-            self.store
+            # self.store
         ])
     
-    @cached_property
-    def footer(self):
-        return dbc.CardFooter(self.store_desc)
-
-
     def layout(self, params=None):
         return dbc.Card([
             self.header, 
             self.body,
             self.footer,
         ])
+    
+    @cached_property
+    def footer(self):
+        return dbc.CardFooter([self.store, self.store_desc])
 
     @cached_property
     def graph(self):
@@ -123,6 +123,7 @@ class FilterCard(FilterComponent):
             prevent_initial_call=True
         )
         def store_data_updated(store_data):
+            print('store_data_updated')
             res=describe_filters(store_data, records_name=self.records_name)
             return dcc.Markdown(res) if res else BLANK
         
@@ -152,6 +153,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def clear_selection(n_clicks):
+            print('clear_selection')
             return {}, self.plot()
 
         @app.callback(
@@ -160,7 +162,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def graph_selection_updated(selected_data):
-            print(selected_data)
+            print('graph_selection_updated')
             return self.figure_obj.selected(selected_data)
         
         
@@ -229,8 +231,7 @@ class MemberTableCard(FilterPlotCard):
     figure_class = MemberTableFigure
 
     @cached_property
-    def graph(self):
-        return html.Div(children=[self.plot()])
+    def graph(self): return html.Div(children=[self.plot()])
 
 
 class MemberMapCard(FilterPlotCard):
@@ -245,7 +246,38 @@ class MemberMapCard(FilterPlotCard):
 
 
 
-class MemberMapComparisonCard(MemberMapCard): pass
+class MemberMapComparisonCard(MemberMapCard): 
+    desc = 'Member addresses mapped'
+    # key='gender'
+    figure_class = ComparisonMemberMap
+
+    @cached_property
+    def graph(self):
+        return dcc.Graph()
+    
+    @cached_property
+    def table(self):
+        return html.Div()
+    
+    @cached_property
+    def body(self):
+        return dbc.CardBody([
+            dbc.Row([
+                dbc.Col(self.table, width=4),
+                dbc.Col(self.graph, width=8)
+            ])
+        ])
+    
+
+class MemberTableComparisonCard(MemberMapCard): 
+    desc = 'Member addresses mapped'
+    # key='gender'
+    figure_class = ComparisonMemberTable
+
+    @cached_property
+    def graph(self): return html.Div()
+
+
 
 
 class MemberPanel(FilterCard):
@@ -294,6 +326,7 @@ class MemberPanel(FilterCard):
             ]
         )
         def component_filters_updated(*filters_d):
+            print('component_filters_updated')
             return intersect_filters(*filters_d)
         
         @app.callback(
@@ -309,8 +342,8 @@ class MemberPanel(FilterCard):
             State(self.map_card.graph, 'figure'),
         )
         def datastore_updated(panel_data, map_figdata):
+            print('datastore_updated')
             filtered_keys = set(panel_data.get('intension',{}).keys())
-            print('filtered_keys',filtered_keys)
             
             cards = [self.membership_year_card, self.dob_card, self.gender_card, self.nation_card, self.table_card, self.map_card]
             out = [
