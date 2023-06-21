@@ -12,6 +12,7 @@ def run():
     )
     # move to here
     # app.run(8052, host='0.0.0.0')
-    app.run(8053, debug=True)
+    print('booting')
+    app.run(8053, debug=True, dev_tools_ui=False, dev_tools_hot_reload=True)
 
 if __name__=='__main__': run()

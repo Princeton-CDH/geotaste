@@ -1,17 +1,8 @@
 ## Constants
-
-# LEFT_COLOR='#7d6ab6'
-# RIGHT_COLOR='#1a6b47'
-# BOTH_COLOR='#354469'
-
-# LEFT_COLOR='#bf6927'
-# RIGHT_COLOR='#221fb5'
-# BOTH_COLOR='#2f9c76'
-
 LEFT_COLOR='#7d6ab6'
 RIGHT_COLOR='#bf6927'
 BOTH_COLOR='#606060'
-
+LOGO_SRC="/assets/SCo_logo_graphic.png"
 
 EXTENSION_KEY = 'extension'
 INTENSION_KEY = 'intension'

@@ -71,7 +71,7 @@ class FilterComponent(BaseComponent):
             '',
             style={
                 'color':self.color if self.color else 'inherit', 
-                # 'text-align':'center'
+                'textAlign':'center'
             }
         )
 
@@ -85,7 +85,7 @@ class FilterCard(FilterComponent):
         return dbc.CardHeader(
             dbc.Row([
                 dbc.Col(self.desc),
-                dbc.Col(self.button_clear, style={'text-align':'right'})
+                dbc.Col(self.button_clear, style={'textAlign':'right'})
             ])
         )
     
@@ -355,7 +355,7 @@ class MemberPanel(FilterCard):
     
     def layout(self, params=None): 
         body = dbc.Container([
-            html.Div(self.store_desc, style={'text-align':'center'}),
+            html.Div(self.store_desc, style={'textAlign':'center'}),
             self.name_card.layout(params),
             self.membership_year_card.layout(params),
             self.dob_card.layout(params),
