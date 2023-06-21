@@ -631,7 +631,7 @@ class ComparisonMemberTable(TableFigure):
             # sort_mode="multi",
             # filter_action="native",
             # page_action="native",
-            # page_size=len(dff)+1,
+            # page_size=5,
             style_data={
                 'whiteSpace': 'normal',
                 'height': 'auto',

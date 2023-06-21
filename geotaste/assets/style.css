@@ -100,7 +100,7 @@ p {
 } */
 
 .content-container {
-    padding: 0 50px;
+    /* padding: 0 50px; */
 }
 
 code { 
@@ -111,9 +111,25 @@ code {
     /* flex-grow:1; */
 
     & .plotly {
-        height:700px;
+        height:600px;
     }
 
     & .dash-cell-value { font-size:0.9em; }
 
 }
+
+.comparison_row {
+    /* overflow-y: scroll; */
+    /* height:55vh; */
+}
+
+.post_comparison_row {
+    /* height:45vh; */
+    /* overflow-y:hidden; */
+    /* height:600px;
+    position:absolute;
+    left:0;
+    bottom:0; */
+}
+
+/* .layout-container { height:100vh; } */

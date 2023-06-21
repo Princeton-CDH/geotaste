@@ -40,7 +40,7 @@ class MemberPanelComparison(BaseComponent):
                     self.member_panel_R.layout(params),
                     width=6
                 ),
-            ]),
+            ], className='comparison_row'),
             
             dbc.Row([
                 dbc.Col(
@@ -48,7 +48,7 @@ class MemberPanelComparison(BaseComponent):
                     width=12,
                     className='comparison_map_card_col'
                 )
-            ])
+            ], className='post_comparison_row')
         ])
     
     @cached_property
@@ -83,7 +83,9 @@ class MemberPanelComparison(BaseComponent):
 
             # table
             # print(fig.df_arronds)
-            table_fig = ComparisonMemberTable(df=round(fig.df_arronds,2).reset_index())
+            table_fig = ComparisonMemberTable(
+                df=round(fig.df_arronds,2).reset_index(),    
+            )
             table_ofig = table_fig.plot()
             return [ofig, table_ofig]
 
