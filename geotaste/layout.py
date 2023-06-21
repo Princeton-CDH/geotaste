@@ -6,19 +6,69 @@ from .imports import *
 class GeotasteLayout(BaseComponent):
     def __init__(self):
         super().__init__()
-        self.navbar = Navbar()
-        self.member_panel_comparison = MemberPanelComparison()
+        self.mp1 = MemberPanel(name='member_panel_1', color=LEFT_COLOR)
+        self.mp2 = MemberPanel(name='member_panel_2', color=RIGHT_COLOR)
 
+    @cached_property
+    def navbar(self):
+        return dbc.Navbar([
+            html.Img(src=LOGO_SRC, height="30px", className='logo-img'),
+            dbc.NavbarBrand("Geography of Taste", className='logo-title'),
+            self.tabs
+        ], color="light", dark=False)
+    
+    @cached_property
+    def tabs(self):
+        return dbc.Tabs([
+            dbc.Tab(label='Group 1', tab_id='tab1'),
+            dbc.Tab(label='Group 2', tab_id='tab2'),
+            dbc.Tab(label='Compare', tab_id='tab3'), 
+        ], className='tabs-container', active_tab='tab1')
+
+
+    @cached_property
+    def tab1_content(self):
+        return html.Div(self.mp1.layout(), style={'display':'none'})
+    
+    @cached_property
+    def tab2_content(self):
+        return html.Div(self.mp2.layout(), style={'display':'none'})
+    
+    @cached_property
+    def tab3_content(self):
+        return html.Div('Comparison', style={'display':'none'})
+
+    @cached_property
+    def content(self):
+        return dbc.Container([
+            self.tab1_content,
+            self.tab2_content,
+            self.tab3_content,
+        ], className='content-container')
+    
 
     def layout(self, params=None):
         return dbc.Container([
-            self.navbar.layout(params),
-            dbc.Container(
-                self.member_panel_comparison.layout(params),
-                className='content-container'
-            )
+            self.navbar,
+            self.content,
         ], className='layout-container')
 
+    
+    def component_callbacks(self, app):
+        @app.callback(
+            [
+                Output(self.tab1_content, 'style'),
+                Output(self.tab2_content, 'style'),
+                Output(self.tab3_content, 'style'),
+            ],
+            Input(self.tabs, 'active_tab')
+        )
+        def switch_tabs(tab_id):
+            tab_ids = ['tab1', 'tab2', 'tab3']
+            tab_index = tab_ids.index(tab_id)
+            out = [{'display':'none'} for _ in tab_ids]
+            out[tab_index] = {'display':'block'}
+            return out
 
 
 
