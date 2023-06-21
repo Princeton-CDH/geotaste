@@ -11,7 +11,7 @@ import os
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.expanduser('~/geotaste_data')
-PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
+PATH_ASSETS = os.path.join(PATH_HERE, 'app', 'assets')
 
 
 # Urls
@@ -94,8 +94,8 @@ except FileNotFoundError:
 
 from .utils import *
 from .datasets import *
-from .widgets import *
-from .figs import *
-from .components import *
-from .layout import *
+from .arronds import *
 from .app import *
+from .members import *
+from .books import *
+from .events import *
