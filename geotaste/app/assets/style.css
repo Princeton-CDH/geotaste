@@ -64,3 +64,14 @@ p {
 }
 
 
+
+/* .toprowmap { height:fit-content}  */
+
+/* .comparison_map { height:200px; } */
+.layout-container { height:100vh; }
+
+.layout-toprow { overflow-y: fixed; height:30vh;}
+
+.layout-mainrow { overflow-y: auto; height:50vh; }
+
+.layout-bottomrow { overflow-y: fixed; height: 20vh}

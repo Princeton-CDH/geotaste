@@ -154,7 +154,7 @@ class MemberMap(MemberFigure):
             custom_data=['member'],
             zoom=12, 
             hover_name='name',
-            height=400,
+            height=300,
             size_max=40,
         )
         fig.update_traces(marker=dict(size=10))
@@ -173,7 +173,8 @@ class MemberMap(MemberFigure):
             center=MAP_CENTER,
             zoom=12,
             color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
-            opacity=.5
+            opacity=.5,
+            height=300
         )
         fig_choro.update_mapboxes(style="stamen-toner")
         fig_choro.update_layout(
@@ -251,7 +252,7 @@ class ComparisonMemberMap(MemberMap):
         df_arronds = compare_arrond_counts(df_L, df_R)
         return df_arronds
 
-    def plot(self, **kwargs):
+    def plot(self, height=300, **kwargs):
         def get_color(x):
             if x.startswith('L'): return LEFT_COLOR
             if x.startswith('R'): return RIGHT_COLOR
@@ -267,7 +268,7 @@ class ComparisonMemberMap(MemberMap):
             hover_name='name',
             color='L_or_R',
             color_discrete_map=color_map,
-            # height=400,
+            height=height,
             size_max=40,
             # **kwargs
         )
@@ -283,24 +284,27 @@ class ComparisonMemberMap(MemberMap):
             center=MAP_CENTER,
             zoom=12,
             color_continuous_scale='puor',
-            opacity=.5
+            opacity=.5,
+            height=height
         )
         fig_choro.update_mapboxes(style="stamen-toner")
         fig_choro.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
             legend=dict(
                 yanchor="top",
-                y=0.99,
+                y=0.01,
                 xanchor="left",
-                x=0.01
+                x=0.99
             )
         )
         fig_choro.update_layout(
             coloraxis=dict(
                 colorbar=dict(
                     orientation='h', 
-                    y=-0.15)
-                ),
+                    y=-0.2,
+                    thickness=10
+                )
+            )
         )
         fig_choro.update_coloraxes(reversescale=True)
         return go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
