@@ -11,12 +11,25 @@ class FigureFactory(DashFigureFactory):
     records_name = 'records'
     key = ''
     records_points_dim = 'xy'
+    dataset_class = None
 
-    def __init__(self, filter_data = {}, df = None):
+    @cached_property
+    def dataset(self): return self.dataset_class() if self.dataset_class is not None else None
+    @cached_property
+    def data(self):
+        dset = self.dataset
+        return dset.data if dset is not None else pd.DataFrame()
+    @cached_property
+    def series(self):
+        if self.key and len(self.data) and self.key in set(self.data.columns): 
+            return self.data[self.key]
+        return pd.Series()
+        
+    def __init__(self, filter_data={}, df=None, **kwargs):
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
-        self._df = df
-        self._data = self._df # overwrite
+        self._data = data = self.data
+        self._df = df if df is not None else data
 
 
 
@@ -186,12 +199,18 @@ class FigureFactory(DashFigureFactory):
             height=100, 
             quant=None, 
             category_orders=None, 
+            series=None,
             **kwargs):
         
         # figdf = self.get_figdf(x,quant=False)
-        if df is None: df = self.df
-        if not x in set(df.columns): return go.Figure()
-        s=df[x].value_counts()
+        if series is None:
+            if df is None: df = self.df
+            if not x in set(df.columns): return go.Figure()
+            series=df[x]
+        else:
+            series=pd.Series(series)
+        
+        s=series.value_counts()
 
         # make sure all types are there
         missing_valtypes = set(self.vals) - set(s.index)

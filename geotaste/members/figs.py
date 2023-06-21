@@ -6,14 +6,7 @@ class MemberFigure(FigureFactory):
     records_name='members'
     key = ''
     records_points_dim = 'x' # or 'y'
-
-    def __init__(self, filter_data={}, df=None): 
-        data = Members().data
-        super().__init__(
-            df=data if df is None else df,
-            filter_data=filter_data
-        )
-        self._data = data
+    dataset_class = MembersDataset
 
     
     @cached_property
