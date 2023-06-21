@@ -66,7 +66,9 @@ class MemberMapComparisonCard(MemberMapCard):
 
     @cached_property
     def graph(self):
-        return dcc.Graph()
+        # fig=go.Figure()
+        # fig.update_layout(height=200)
+        return dcc.Graph()#figure=fig)
     
     @cached_property
     def table(self):
@@ -75,9 +77,9 @@ class MemberMapComparisonCard(MemberMapCard):
     @cached_property
     def body(self):
         return dbc.CardBody([
-            dbc.Row([
-                dbc.Col(self.table, width=4),
-                dbc.Col(self.graph, width=8)
+            dbc.Tabs([
+                dbc.Tab(self.graph, label='Map'),
+                dbc.Tab(self.table, label='Table'),
             ])
         ])
     
@@ -111,15 +113,22 @@ class MemberPanel(FilterCard):
     
     def layout(self, params=None): 
         body = dbc.Container([
-            html.Div(self.store_desc, style={'textAlign':'center'}),
-            self.name_card.layout(params),
-            self.membership_year_card.layout(params),
-            self.dob_card.layout(params),
-            self.gender_card.layout(params),
-            self.nation_card.layout(params),
-            self.map_card.layout(params),
-            self.table_card.layout(params),
-            self.store
+            # dbc.Row([
+            #     self.store, 
+            #     self.store_desc,
+            #     self.map_card.layout(params)
+            # ]),
+            dbc.Row([
+                self.store, 
+                self.store_desc,
+                self.name_card.layout(params),
+                self.membership_year_card.layout(params),
+                self.dob_card.layout(params),
+                self.gender_card.layout(params),
+                self.nation_card.layout(params),
+                # self.map_card.layout(params),
+                self.table_card.layout(params)
+            ])
         ])
         return body
     
