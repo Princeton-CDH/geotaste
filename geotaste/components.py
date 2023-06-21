@@ -44,9 +44,13 @@ class FilterComponent(BaseComponent):
     
     # some will have
     figure_class = None
+    dataset_class = None
 
     @cached_property
-    def figure_obj(self): return self.figure_class()
+    def figure_obj(self): return self.figure_class() if self.figure_class is not None else None
+
+    @cached_property
+    def dataset_obj(self): return self.dataset_class() if self.dataset_class is not None else None
 
     def plot(self, filter_data={}): 
         if filter_data:
@@ -87,11 +91,7 @@ class FilterCard(FilterComponent):
     
     @cached_property
     def body(self):
-        return dbc.CardBody([
-            # BLANKDIV,
-            self.graph,
-            # self.store
-        ])
+        return dbc.CardBody([self.graph])
     
     def layout(self, params=None):
         return dbc.Card([
@@ -181,25 +181,68 @@ class FilterPlotCard(FilterCard):
 
 
 
+class FilterInputCard(FilterCard):
+    desc = 'Filter by input'
+    key=''
+    
+    @cached_property
+    def body(self):
+        return dbc.CardBody([self.input])
+    
+    @cached_property
+    def input(self):
+        return dcc.Dropdown()
+    
+    def component_callbacks(self, app):
+        # do my parent's too
+        super().component_callbacks(app)
 
-
-
-
-class MemberNameCard(FilterCard):
-    def layout(self, params=None):
-        return SimpleCard(
-            body=[self.input_member],
-            header=['Select members by name']
+        # ## CLEAR? -- OVERWRITTEN
+        @app.callback(
+            [
+                Output(self.store, "data", allow_duplicate=True),
+                Output(self.input, "value", allow_duplicate=True),
+            ],
+            Input(self.button_clear, 'n_clicks'),
+            prevent_initial_call=True
         )
+        def clear_selection(n_clicks):
+            print('clear_selection')
+            return {}, []
+
+        @app.callback(
+            Output(self.store, "data"),
+            Input(self.input, 'value'),
+            prevent_initial_call=True
+        )
+        def input_value_changed(vals):
+            if not vals: raise PreventUpdate
+            if self.dataset_obj is not None:
+                return self.dataset_obj.filter_series(
+                    self.key,
+                    vals=vals
+                )
+            return {}
+    
+
+
+class MemberInputCard(FilterInputCard):
+    dataset_class = MembersDataset
+
+
+class MemberNameCard(MemberInputCard):
+    desc = 'Filter by member name'
+    key='sort_name'
 
     @cached_property
-    def input_member(self):
+    def input(self):
+        s=Members().data[self.key]
         return dcc.Dropdown(
-        options = [dict(value=idx, label=lbl) for idx,lbl in zip(Members().data.index, Members().data.sort_name)],
-        value = [],
-        multi=True,
-        placeholder='Select individual members'
-    )
+            options = [dict(value=lbl, label=lbl) for idx,lbl in zip(s.index, s)],
+            value = [],
+            multi=True,
+            placeholder='Select individual members'
+        )
 
 
 
@@ -226,12 +269,26 @@ class MemberNationalityCard(FilterPlotCard):
     key='nationalities'
     figure_class = MemberNationalityFigure
 
-class MemberTableCard(FilterPlotCard):
+
+
+
+class FilterTableCard(FilterPlotCard):
+    @cached_property
+    def table(self): return html.Div(children=[self.plot()])
+    
+    @cached_property
+    def body(self): return dbc.CardBody([self.table])
+
+    def component_callbacks(self, app):
+        pass
+
+
+
+class MemberTableCard(FilterTableCard):
     desc = 'Filter by gender of member'
     figure_class = MemberTableFigure
 
-    @cached_property
-    def graph(self): return html.Div(children=[self.plot()])
+    
 
 
 class MemberMapCard(FilterPlotCard):
@@ -335,7 +392,7 @@ class MemberPanel(FilterCard):
                 Output(self.dob_card.graph, 'figure'),
                 Output(self.gender_card.graph, 'figure'),
                 Output(self.nation_card.graph, 'figure'),
-                Output(self.table_card.graph, 'children'),
+                Output(self.table_card.table, 'children'),
                 Output(self.map_card.graph, 'figure'),
             ],
             Input(self.store, 'data'),

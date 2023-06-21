@@ -38,7 +38,21 @@ class FigureFactory(DashFigureFactory):
         return func(selectedData)
     
     def selected_points_locations(self, selectedData, key='location'):
-        return [d.get(key,'') for d in selectedData.get('points',[]) if d and key in d and d[key]]
+        return self.selected_points_key(selectedData, key)
+    
+    def selected_points_customdata(self, selectedData, key='customdata'):
+        return self.selected_points_key(selectedData, key)
+    
+    
+    def selected_points_key(self, selectedData, key):
+        return [
+            d.get(key,'') 
+            for d in selectedData.get('points',[]) 
+            if d 
+            and key in d 
+            and d[key]
+        ]
+
     
     def selected_points_latlon(self, selectedData, keys=('lat', 'lon')):
         return [(d.get(keys[0],np.nan), d.get(keys[1],np.nan)) for d in selectedData.get('points',[]) if keys[0] in d and keys[1] in d]
@@ -176,6 +190,7 @@ class FigureFactory(DashFigureFactory):
         
         # figdf = self.get_figdf(x,quant=False)
         if df is None: df = self.df
+        if not x in set(df.columns): return go.Figure()
         s=df[x].value_counts()
 
         # make sure all types are there
@@ -376,7 +391,7 @@ class MemberNationalityFigure(MemberFigure):
         fig.update_coloraxes(showscale=False)
         fig.update_layout(
             clickmode='event+select', 
-            dragmode='select',
+            # dragmode='select',
             margin={"r":0,"t":0,"l":0,"b":0}
         )
         fig.update_geos(
@@ -441,10 +456,11 @@ class MemberMap(MemberFigure):
 
     def plot(self, color=None, **kwargs):
         fig = px.scatter_mapbox(
-            self.df, 
+            self.df.reset_index(), 
             lat='latitude',
             lon='longitude', 
             center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
+            custom_data=['member'],
             zoom=12, 
             hover_name='name',
             height=400,
@@ -469,15 +485,40 @@ class MemberMap(MemberFigure):
             opacity=.5
         )
         fig_choro.update_mapboxes(style="stamen-toner")
-        fig_choro.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        fig_choro.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            clickmode='event+select', 
+        )
+        fig_choro.update_traces(marker_line_width=2)
         ofig=go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
         return ofig
 
     def selected(self, selectedData):
-        if not selectedData: return {}
-        latlons = self.selected_points_latlon(selectedData)
-        s=pd.Series(list(zip(self.df['latitude'], self.df['longitude'])), name='latlon')
-        return filter_series(s, latlons, test_func=isin_or_hasone)
+        if selectedData:
+            print('selectedData',selectedData)
+            latlons = self.selected_points_latlon(selectedData)
+            if latlons:
+                s=pd.Series(list(zip(self.df['latitude'], self.df['longitude'])), name='latlon', index=self.df.index)
+                matches = self.selected_points_customdata(selectedData)
+                members = [m[0] for m in matches if m]
+                return filter_series(
+                    s, 
+                    latlons, 
+                    test_func=isin_or_hasone, 
+                    matches=members
+                )
+            else:
+                locations = self.selected_points_locations(selectedData)
+                print('locations',locations)
+                if locations:
+                    s=self.df[['arrond_id']].reset_index().drop_duplicates().set_index(self.df.index.name)['arrond_id']
+                    o=filter_series(s, locations, test_func=isin_or_hasone)
+                    print(o)
+                    return o
+            
+        return {}
+
+        
 
 
 

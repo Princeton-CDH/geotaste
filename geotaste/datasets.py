@@ -75,18 +75,23 @@ class Dataset:
                 pass
         return pd.Series()
 
-    def filter_key(
+    def filter_series(
             self, 
             key, 
-            vals, 
-            test_func = isin_or_hasone):
+            vals = [], 
+            test_func = isin_or_hasone,
+            matches = []
+            ):
         
         return filter_series(
             series=self.series(key),
             vals=vals,
-            series_name=key,
             test_func=test_func,
+            series_name=key,
+            matches = matches
         )
+    
+    
 
 
 
