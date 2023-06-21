@@ -1,14 +1,14 @@
 from ..imports import *
-from .components import BaseComponent
-from ..members.components import MemberPanel
-
+from .components import *
+from ..members.components import *
+from ..books.components import *
 
 
 class GeotasteLayout(BaseComponent):
     def __init__(self):
-        super().__init__()
-        self.mp1 = MemberPanel(name='member_panel_1', color=LEFT_COLOR)
-        self.mp2 = MemberPanel(name='member_panel_2', color=RIGHT_COLOR)
+        super().__init__(title="Geography of Taste")
+        self.panel_L = MemberBookPanel(color=LEFT_COLOR)
+        self.panel_R = MemberBookPanel(color=RIGHT_COLOR)
 
     @cached_property
     def navbar(self):
@@ -29,11 +29,11 @@ class GeotasteLayout(BaseComponent):
 
     @cached_property
     def tab1_content(self):
-        return html.Div(self.mp1.layout(), style={'display':'none'})
+        return html.Div(self.panel_L.layout(), style={'display':'none'})
     
     @cached_property
     def tab2_content(self):
-        return html.Div(self.mp2.layout(), style={'display':'none'})
+        return html.Div(self.panel_R.layout(), style={'display':'none'})
     
     @cached_property
     def tab3_content(self):
@@ -143,19 +143,17 @@ class MemberPanelComparison(BaseComponent):
             
         
 
+class MemberBookPanel(FilterComponent):
+    def __init__(self, **kwargs):
+        self.member_panel = MemberPanel(**kwargs)
+        self.book_panel = BookPanel(**kwargs)
+        self.map_panel = MemberMapCard(**kwargs)
 
-            
-
-
-
-   
-  
-
-
-
-
-
-
-class Navbar(BaseComponent):
     def layout(self, params=None):
-        return get_navbar()
+        return dbc.Container([
+            dbc.Row([
+                dbc.Col(self.member_panel.layout(params)),
+                dbc.Col(self.book_panel.layout(params)),
+                dbc.Col(self.map_panel.layout(params)),
+            ])
+        ])
