@@ -1,5 +1,6 @@
-from .imports import *
-
+from ..imports import *
+from .components import BaseComponent
+from ..members.components import MemberPanel
 
 
 
