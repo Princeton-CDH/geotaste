@@ -174,7 +174,6 @@ def describe_filters(store_data, records_name='records'):
     def format_intension(d):
         ol=[]
         for key,l in d.items():
-            l = sorted(list(set([x for x in l if x is not None])))
             is_quant = all(is_numeric(x) for x in l)
             if len(l)<3:
                 o = ' and '.join(str(x) for x in l)
@@ -247,16 +246,20 @@ def compare_filters(filter_data_L, filter_data_R, key_LR='L_or_R'):
 
 def filter_series(
         series, 
-        vals, 
+        vals = [], 
         test_func = isin_or_hasone,
-        series_name=None):
+        series_name=None,
+        matches = []):
     key = series.name if series_name is None else series_name
-    matches = series.apply(
-        lambda x: test_func(x, vals)
-    )
-    series_matching = series[matches]
-    return {
+    if matches:
+        series_matching = series[[m for m in matches if m in set(series.index)]]
+    elif not vals:
+        series_matching = series
+    else:
+        series_matching = series[series.apply(lambda x: test_func(x, vals))]
+    
+    o = {
         INTENSION_KEY:{key:vals},
         EXTENSION_KEY:{objid:({key:objval}) for objid,objval in dict(series_matching).items()}
     }
-
+    return o

@@ -11,6 +11,7 @@ def run():
         assets_folder=PATH_ASSETS,
     )
     # move to here
-    app.run(8052, host='0.0.0.0')
+    # app.run(8052, host='0.0.0.0')
+    app.run(8053, debug=True)
 
 if __name__=='__main__': run()
