@@ -22,17 +22,22 @@ class GeotasteLayout(BaseComponent):
         self.panel_R = MemberPanel(color=RIGHT_COLOR)
 
     @cached_property
-    def navbar(self):
-        return dbc.Row(
-            html.Div([
+    def logo(self):
+        return html.Div([
                 html.Img(src=LOGO_SRC, className='logo-img'),
                 html.H1(self.title, className='logo-title'),
-                html.Img(src=LOGO_SRC, className='logo-img'),
-            ], className='logo'), 
-            # color="light", 
-            # dark=False, 
-            className='navbar-row',
-        )
+                # html.Img(src=LOGO_SRC, className='logo-img')
+        ], className='logo')
+
+    @cached_property
+    def navbar(self):
+        return dbc.Row([
+            # dbc.Col(self.logo, style={'text-align':'left'}),
+            # dbc.Col(self.toptabs, align={'text-align':'right'}),
+            self.toptabs
+        ], className='navbar-row')
+        
+
     @cached_property
     def comparison_map_card(self): return MemberMapComparisonCard()
     
@@ -53,31 +58,35 @@ class GeotasteLayout(BaseComponent):
     def toptab2(self, params=None):
         return html.Div(self.comparison_map_card.layout(params), style=STYLE_INVIS)
     
+    @cached_property
+    def toptab(self): return html.Div(BLANKSTR)
+    
 
     def dual_map_row(self, params=None):
         return dbc.Row([
-            dbc.Col(self.panel_L.map_card.layout(params), width=6),
-            dbc.Col(self.panel_R.map_card.layout(params), width=6),
+            dbc.Col(self.panel_L.map_card.layout(params, header=False), width=6),
+            dbc.Col(self.panel_R.map_card.layout(params, header=False), width=6),
         ], className='bimap-row')
     
     def dual_panel_row(self, params=None):
         return dbc.Row([
-            dbc.Col(self.panel_L.layout(params), width=6),
-            dbc.Col(self.panel_R.layout(params), width=6),
+            dbc.Col(self.panel_L.layout(params), width=6, className='panel_L panel'),
+            dbc.Col(self.panel_R.layout(params), width=6, className='panel_R panel'),
         ])
     
     def dual_store_descs(self, params=None):
         return dbc.Row([
-            dbc.Col(self.panel_L.store_desc, width=6),
-            dbc.Col(self.panel_R.store_desc, width=6),
+            dbc.Col(html.H2(['Left Group: ', self.panel_L.store_desc]), width=6, className='storedescs-col storedescs-col-L left-color'),
+            dbc.Col(html.H2(['Right Group: ', self.panel_R.store_desc]), width=6, className='storedescs-col storedescs-col-R right-color'),
         ], className='storedescs-row')
     
     
     def layout(self, params=None):
         return dbc.Container([
             dbc.Row(dbc.Col([
+                self.logo,
                 self.navbar,
-                self.toptabs,
+                # self.toptabs,
                 self.toptab1,
                 self.toptab2,
                 self.dual_store_descs(params),
