@@ -2,6 +2,11 @@
 LEFT_COLOR='#7d6ab6'
 RIGHT_COLOR='#bf6927'
 BOTH_COLOR='#606060'
+
+# LEFT_COLOR='#d2afff'
+# RIGHT_COLOR='#FF007F'
+
+
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 
 EXTENSION_KEY = 'extension'
