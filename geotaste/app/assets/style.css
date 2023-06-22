@@ -5,6 +5,11 @@
     width: 100%;
 }
 
+.row>* { 
+    padding:0;
+    /* margin:0; */
+}
+
 .navbar-row {
     height:50px;
     line-height:50px;  
@@ -15,6 +20,18 @@
     vertical-align: middle;
 
 }
+
+.tabs-container { 
+    /* border:1px solid blue; */
+    width:fit-content;
+    margin:0 auto;
+
+}
+
+
+
+
+
 /* 
 .tabs-container .tab {
     height:50px;
@@ -72,15 +89,18 @@
 
 
 .card {
-    margin:10px;
+    /* margin:10px; */
 }
 
 .card-header {
     font-weight: bold;
+    /* background-color: blue; */
+    padding-left:0;
+    padding-right:0;
 }
 
 .card-body { 
-    padding:.5rem;
+    /* padding:.5rem; */
 }
 
 .card-footer {
@@ -111,7 +131,7 @@ p {
 /* .toprowmap { height:fit-content}  */
 
 /* .comparison_map { height:200px; } */
-.layout-container { height:100vh; }
+.layout-container { height:100vh; border: 1px solid red;}
 
 /* .layout-toprow { overflow-y: fixed; height:40vh; border: 1px solid red; }
 
@@ -126,21 +146,49 @@ p {
     /* top:0; */
     /* left:0;  */
     /* border: 1px solid green;  */
-    height:490px; 
+    height:495px; 
     z-index: 1;
     /* background-color: white; */
     vertical-align: top;
+    border-bottom: 1px solid black;
+    padding-right:8px;
 }
 
 .layout-mainrow { 
     /* position:fixed;  */
-    height:100vh; 
+    height:100%; 
+    overflow-y: scroll;
+    overflow-x: hidden;
     /* padding-top:450px;  */
-    overflow-y: scroll; 
     /* border: 1px solid blue; */
     z-index: 0;
+
+
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: silver white;
 }
+
+.layout-mainrow::-webkit-scrollbar {
+    width: 8px; /* width of the entire scrollbar */
+}
+  
+.layout-mainrow::-webkit-scrollbar-thumb {
+    background-color: silver;
+    /* border-radius: 20px; */
+}
+  
+  
 
 .toptabs-row {
     /* border:1px solid red; */
 }
+
+
+
+body { 
+    overflow: hidden
+}
+
+
+
+
