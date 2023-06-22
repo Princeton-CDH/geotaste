@@ -2,7 +2,7 @@
 LEFT_COLOR='#7d6ab6'
 RIGHT_COLOR='#bf6927'
 BOTH_COLOR='#606060'
-LOGO_SRC="/assets/SCo_logo_graphic.png"
+LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 
 EXTENSION_KEY = 'extension'
 INTENSION_KEY = 'intension'
