@@ -22,65 +22,31 @@ class GeotasteLayout(BaseComponent):
             # dark=False, 
             className='navbar-row',
         )
-
-    
-    # @cached_property
-    # def tabs(self, cn1='custom-tab', cn1s='custom-tab--selected', cn2='custom-tabs', cn2x='tabs-container'):
-    #     return dcc.Tabs(
-    #         [
-    #             dcc.Tab(label='Juxtapose', value='juxtapose', className=cn1, selected_className=cn1s),
-    #             dcc.Tab(label='Contrast', value='contrast', className=cn1, selected_className=cn1s),
-    #         ], 
-    #         className=cn2x, 
-    #         value='juxtapose',
-    #         parent_className=cn2
-    #     )
-    
-    
     @cached_property
     def comparison_map_card(self): return MemberMapComparisonCard()
     
-    def layout_content_toptabs(self, params=None): 
-        return dbc.Container([
-            dbc.Row([
-                dbc.Tabs([
-                    dbc.Tab(self.comparison_map_card.graph, label='Map'),
-                    dbc.Tab(self.comparison_map_card.table, label='Table'),
-                ])
-            ], style={'marginLeft':'auto'}),
-            dbc.Row([
-                dbc.Col(self.panel_L.layout(params), width=6),
-                dbc.Col(self.panel_R.layout(params), width=6),
-            ])
-        ])
-    
-    def layout_3row(self, params=None):
-        return dbc.Container([
-            dbc.Row([
-                self.navbar,
-                dbc.Row([
-                    dbc.Col(self.panel_L.map_card.layout(params), width=6),
-                    dbc.Col(self.panel_R.map_card.layout(params), width=6),
-                ])
-            ], className='layout-toprow'),
 
-            dbc.Row([
-                dbc.Row([
-                    dbc.Col(self.panel_L.layout(params), width=6),
-                    dbc.Col(self.panel_R.layout(params), width=6),
-                ]),
-                dbc.Row(self.comparison_map_card.table)
-            ], className='layout-mainrow'),
-
-            dbc.Row(self.comparison_map_card.graph, className='layout-bottomrow'),
-        ], className='layout-container')
     
+    @cached_property
+    def toptabs(self):
+        return dbc.Tabs([
+            dbc.Tab(label='Juxtapose', tab_id='0'),
+            dbc.Tab(label='Contrast', tab_id='1'),
+        ], className='tabs-container', active_tab='0')
+
+    @cached_property
+    def toptab1(self, params=None):
+        return html.Div(self.dual_map_row(params), style={'display':'none'})
+    
+    @cached_property
+    def toptab2(self, params=None):
+        return html.Div(self.comparison_map_card.layout(params), style={'display':'none'})
+    
+
     def dual_map_row(self, params=None):
         return dbc.Row([
             dbc.Col(self.panel_L.map_card.layout(params), width=6),
             dbc.Col(self.panel_R.map_card.layout(params), width=6),
-            # dbc.Col([self.panel_L.map_card.graph, self.panel_L.map_card.store], width=6),
-            # dbc.Col([self.panel_R.map_card.graph, self.panel_R.map_card.store], width=6),
         ], className='bimap-row')
     
     def dual_panel_row(self, params=None):
@@ -95,37 +61,14 @@ class GeotasteLayout(BaseComponent):
             dbc.Col(self.panel_R.store_desc, width=6),
         ], className='storedescs-row')
     
-    def toptabs(self, params=None, tab_cn='toprow-tab', tabs_cn='toprow-tabs'):
-        tabs = dbc.Tabs(
-            [
-                dbc.Tab(
-                    self.dual_map_row(params), 
-                    label='Map juxtaposition',
-                    className=tab_cn,
-                    # selected_className=f'{tab_cn}--selected'
-                ),
-                dbc.Tab(
-                    self.comparison_map_card.layout(params), 
-                    label='Map contrast',
-                    className=tab_cn,
-                    # selected_className=f'{tab_cn}--selected'
-                ),
-                # dbc.Tab(
-                #     self.comparison_map_card.table, 
-                #     label='Table contrast',
-                #     className=tab_cn,
-                #     # selected_className=f'{tab_cn}--selected'
-                # )
-            ],
-            # parent_className=tabs_cn
-        )
-        return dbc.Row(tabs, className='toptabs-row')
     
-    def layout_toptabs(self, params=None):
+    def layout(self, params=None):
         return dbc.Container([
             dbc.Row(dbc.Col([
                 self.navbar,
-                self.toptabs(params),
+                self.toptabs,
+                self.toptab1,
+                self.toptab2,
                 self.dual_store_descs(params),
             ]), className='layout-toprow', align='start'),
 
@@ -136,30 +79,26 @@ class GeotasteLayout(BaseComponent):
 
         ], className='layout-container')
     
-    def layout_tripletop(self, params=None):
-        return dbc.Container([
-            dbc.Row([
-                self.navbar,
-                self.comparison_map_card.graph,
-                self.dual_map_row(params),
-                self.dual_store_descs(params)
-            ], className='layout-toprow'),
-
-            dbc.Row([
-                self.dual_panel_row(params),
-                dbc.Row(self.comparison_map_card.table)
-            ], className='layout-mainrow'),
-
-        ], className='layout-container')
-    
-
-    layout = layout_toptabs
-
 
 
 
 
     def component_callbacks(self, app):
+        @app.callback(
+            [
+                Output(self.toptab1, 'style'),
+                Output(self.toptab2, 'style'),
+            ],
+            Input(self.toptabs, 'active_tab')
+        )
+        def switch_tabs(tab_id, num_tabs=2):
+            tab_index = int(tab_id)
+            assert tab_index < num_tabs
+            out = [{'display':'none'} for _ in range(num_tabs)]
+            out[tab_index] = {'display':'block'}
+            return out
+
+
         @app.callback(
             [
                 Output(self.comparison_map_card.graph, 'figure'),
@@ -193,40 +132,6 @@ class GeotasteLayout(BaseComponent):
             return [ofig, table_ofig]
     
 
-
-
-
-
-
-class GeotasteTopmapLayout(GeotasteLayout):
-    def __init__(self):
-        super().__init__()
-        self.navbar = Navbar()
-        self.member_panel_L = MemberPanel(name='member_panel_L', color=LEFT_COLOR)
-        self.member_panel_R = MemberPanel(name='member_panel_R', color=RIGHT_COLOR)
-
-    def layout_content(self, params=None):
-        return dbc.Container([
-            dbc.
-            
-            dbc.Row([
-                dbc.Col(
-                    self.panel_L.layout(params),
-                    width=6
-                ),
-                dbc.Col(
-                    self.panel_R.layout(params),
-                    width=6
-                ),
-            ], className='comparison_row'),
-            
-            
-        ])
-    
-    
-
-            
-        
 
 class MemberBookPanel(FilterComponent):
     def __init__(self, **kwargs):

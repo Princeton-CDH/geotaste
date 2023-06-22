@@ -52,11 +52,22 @@ class FilterComponent(BaseComponent):
     @cached_property
     def dataset_obj(self): return self.dataset_class() if self.dataset_class is not None else None
 
-    def plot(self, filter_data={}): 
+    def plot(self, filter_data={}, existing_fig=None): 
+        # filter
         if filter_data:
-            return self.figure_class(filter_data).plot(**self._kwargs)
+            fig = self.figure_class(filter_data).plot(**self._kwargs)
         else:
-            return self.figure_obj.plot(**self._kwargs)
+            fig = self.figure_obj.plot(**self._kwargs)
+
+        # retain layout
+        if existing_fig is not None:
+            old_fig = go.Figure(existing_fig) if type(existing_fig)!=go.Figure else existing_fig
+            out_fig = go.Figure(data=fig.data, layout=old_fig.layout)
+        else:
+            out_fig = fig
+
+        # return
+        return out_fig
     
     
 
