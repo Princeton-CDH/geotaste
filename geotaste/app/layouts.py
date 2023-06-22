@@ -3,6 +3,17 @@ from .components import *
 from ..members.components import *
 from ..books.components import *
 
+STYLE_INVIS={'display':'none'}
+STYLE_VIS={'display':'block'}
+
+STYLE_INVIS={'opacity':0}
+STYLE_VIS={'opacity':1}
+
+STYLE_INVIS={'visibility':'hidden'}
+STYLE_VIS={'visibility':'visible'}
+
+STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
+STYLE_VIS = {'position': 'relative'}
 
 class GeotasteLayout(BaseComponent):
     def __init__(self):
@@ -36,11 +47,11 @@ class GeotasteLayout(BaseComponent):
 
     @cached_property
     def toptab1(self, params=None):
-        return html.Div(self.dual_map_row(params), style={'display':'none'})
+        return html.Div(self.dual_map_row(params), style=STYLE_INVIS)
     
     @cached_property
     def toptab2(self, params=None):
-        return html.Div(self.comparison_map_card.layout(params), style={'display':'none'})
+        return html.Div(self.comparison_map_card.layout(params), style=STYLE_INVIS)
     
 
     def dual_map_row(self, params=None):
@@ -94,8 +105,8 @@ class GeotasteLayout(BaseComponent):
         def switch_tabs(tab_id, num_tabs=2):
             tab_index = int(tab_id)
             assert tab_index < num_tabs
-            out = [{'display':'none'} for _ in range(num_tabs)]
-            out[tab_index] = {'display':'block'}
+            out = [STYLE_INVIS for _ in range(num_tabs)]
+            out[tab_index] = STYLE_VIS
             return out
 
 
@@ -174,7 +185,7 @@ class GeotasteTabLayout(GeotasteLayout):
 
     @cached_property
     def tab1_content(self):
-        return html.Div(self.panel_L.layout(), style={'display':'none'})
+        return html.Div(self.panel_L.layout(), style=STYLE_INVIS)
     
     @cached_property
     def tab2_content(self):
