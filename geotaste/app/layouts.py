@@ -12,11 +12,17 @@ class GeotasteLayout(BaseComponent):
 
     @cached_property
     def navbar(self):
-        return dbc.Navbar([
-            html.Img(src=LOGO_SRC, height="30px", className='logo-img'),
-            dbc.NavbarBrand("Geography of Taste", className='logo-title'),
-            # self.tabs
-        ], color="light", dark=False)
+        return dbc.Row(
+            html.Div([
+                html.Img(src=LOGO_SRC, className='logo-img'),
+                html.H1(self.title, className='logo-title'),
+                html.Img(src=LOGO_SRC, className='logo-img'),
+            ], className='logo'), 
+            # color="light", 
+            # dark=False, 
+            className='navbar-row',
+        )
+
     
     # @cached_property
     # def tabs(self, cn1='custom-tab', cn1s='custom-tab--selected', cn2='custom-tabs', cn2x='tabs-container'):
@@ -118,7 +124,7 @@ class GeotasteLayout(BaseComponent):
     def layout_toptabs(self, params=None):
         return dbc.Container([
             dbc.Row(dbc.Col([
-                dbc.Row(self.navbar),
+                self.navbar,
                 self.toptabs(params),
                 self.dual_store_descs(params),
             ]), className='layout-toprow', align='start'),
