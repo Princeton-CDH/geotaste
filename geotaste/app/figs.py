@@ -271,6 +271,7 @@ class FigureFactory(DashFigureFactory):
             mapbox_style='stamen-toner',
             mapbox_opts={},
             zoom=12,
+            height=400,
             **kwargs):
         
         # print(color,'color???')
@@ -284,7 +285,7 @@ class FigureFactory(DashFigureFactory):
             # color='arrrondissement',
             # hover_data=["State", "Population"],
             zoom=zoom, 
-            height=400,
+            height=height,
             size_max=40,
             # **kwargs
         )

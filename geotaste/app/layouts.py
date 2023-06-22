@@ -69,7 +69,7 @@ class GeotasteLayout(BaseComponent):
             ])
         ])
     
-    def layout(self, params=None):
+    def layout_3row(self, params=None):
         return dbc.Container([
             dbc.Row([
                 self.navbar,
@@ -90,7 +90,61 @@ class GeotasteLayout(BaseComponent):
             dbc.Row(self.comparison_map_card.graph, className='layout-bottomrow'),
         ], className='layout-container')
     
+    def dual_map_row(self, params=None):
+        return dbc.Row([
+            # dbc.Col(self.panel_L.map_card.layout(params), width=6),
+            # dbc.Col(self.panel_R.map_card.layout(params), width=6),
+            dbc.Col([self.panel_L.map_card.graph, self.panel_L.map_card.store], width=6),
+            dbc.Col([self.panel_R.map_card.graph, self.panel_R.map_card.store], width=6),
+        ], className='bimap-row')
+    
+    def dual_panel_row(self, params=None):
+        return dbc.Row([
+            dbc.Col(self.panel_L.layout(params), width=6),
+            dbc.Col(self.panel_R.layout(params), width=6),
+        ])
+    
+    def dual_store_descs(self, params=None):
+        return dbc.Row([
+            dbc.Col(self.panel_L.store_desc, width=6),
+            dbc.Col(self.panel_R.store_desc, width=6),
+        ], className='storedescs-row')
+    
+    def layout_toptabs(self, params=None):
+        return dbc.Container([
+            dbc.Row([
+                self.navbar,
+                dbc.Tabs([
+                    dbc.Tab(self.dual_map_row(params), label='Map juxtaposition'),
+                    # dbc.Tab(self.comparison_map_card.graph, label='Map contrast'),
+                    # dbc.Tab(self.comparison_map_card.table, label='Table')
+                    dbc.Tab(self.comparison_map_card.body, label='Map contrast')
+                ]),
+                self.dual_store_descs(params)
+            ], className='layout-toprow'),
 
+            dbc.Row([
+                self.dual_panel_row(params),
+            ], className='layout-mainrow'),
+
+        ], className='layout-container')
+    
+    def layout(self, params=None):
+        return dbc.Container([
+            dbc.Row([
+                self.navbar,
+                self.comparison_map_card.graph,
+                self.dual_map_row(params),
+                self.dual_store_descs(params)
+            ], className='layout-toprow'),
+
+            dbc.Row([
+                self.dual_panel_row(params),
+                dbc.Row(self.comparison_map_card.table)
+            ], className='layout-mainrow'),
+
+        ], className='layout-container')
+    
 
 
 
