@@ -97,7 +97,7 @@ class FilterCard(FilterComponent):
             dbc.Row([
                 dbc.Col(self.desc),
                 dbc.Col(self.button_clear, style={'textAlign':'right'})
-            ])
+            ], className='pl0 pr0 card_header_row')
         )
     
     @cached_property
