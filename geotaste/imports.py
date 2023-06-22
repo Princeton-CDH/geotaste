@@ -63,6 +63,7 @@ import copy,time,sys,os
 import random
 import pandas as pd
 import numbers
+import json
 
 ## Non-sys imports
 import pandas as pd
@@ -70,7 +71,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 from functools import cached_property, lru_cache
 cache = lru_cache(maxsize=None)
 import dash
-from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx
+from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
 import dash_bootstrap_components as dbc

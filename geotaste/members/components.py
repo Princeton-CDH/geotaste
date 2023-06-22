@@ -68,7 +68,7 @@ class MemberMapComparisonCard(MemberMapCard):
     def graph(self):
         # fig=go.Figure()
         # fig.update_layout(height=200)
-        return dcc.Graph()#figure=fig)
+        return dcc.Graph(figure=MemberMap().plot())
     
     @cached_property
     def table(self):
@@ -127,7 +127,7 @@ class MemberPanel(FilterCard):
             # ]),
             dbc.Row([
                 self.store, 
-                # self.store_desc,
+                self.store_desc,
                 self.name_card.layout(params),
                 self.membership_year_card.layout(params),
                 self.dob_card.layout(params),
