@@ -6,16 +6,16 @@
 }
 
 .navbar {
-    height:60px;
-    line-height:60px;  
+    height:50px;
+    line-height:50px;  
     margin: 0;
     padding:0;
 }
 
-.tabs-container {
+/* .tabs-container {
     height:60px;
     line-height:40px;
-}
+} */
 
 .logo-img { padding:0 10px; }
 .logo-title { padding:0 10px; }
@@ -70,8 +70,8 @@ p {
 /* .comparison_map { height:200px; } */
 .layout-container { height:100vh; }
 
-.layout-toprow { overflow-y: fixed; height:30vh;}
+.layout-toprow { overflow-y: fixed; height:60vh; border: 1px solid red; }
 
-.layout-mainrow { overflow-y: auto; height:50vh; }
+.layout-mainrow { overflow-y: scroll; height:40vh; border: 1px solid blue;}
 
-.layout-bottomrow { overflow-y: fixed; height: 20vh}
+/* .layout-bottomrow { overflow-y: fixed; height: 20vh} */

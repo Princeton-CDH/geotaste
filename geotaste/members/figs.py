@@ -154,7 +154,7 @@ class MemberMap(MemberFigure):
             custom_data=['member'],
             zoom=12, 
             hover_name='name',
-            height=300,
+            height=250,
             size_max=40,
         )
         fig.update_traces(marker=dict(size=10))
@@ -174,7 +174,7 @@ class MemberMap(MemberFigure):
             zoom=12,
             color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
             opacity=.5,
-            height=300
+            height=250
         )
         fig_choro.update_mapboxes(style="stamen-toner")
         fig_choro.update_layout(
@@ -252,7 +252,7 @@ class ComparisonMemberMap(MemberMap):
         df_arronds = compare_arrond_counts(df_L, df_R)
         return df_arronds
 
-    def plot(self, height=300, **kwargs):
+    def plot(self, height=250, **kwargs):
         def get_color(x):
             if x.startswith('L'): return LEFT_COLOR
             if x.startswith('R'): return RIGHT_COLOR

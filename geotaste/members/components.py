@@ -77,10 +77,14 @@ class MemberMapComparisonCard(MemberMapCard):
     @cached_property
     def body(self):
         return dbc.CardBody([
-            dbc.Tabs([
-                dbc.Tab(self.graph, label='Map'),
-                dbc.Tab(self.table, label='Table'),
-            ])
+            self.body_tabs
+        ])
+    
+    @cached_property
+    def body_tabs(self):
+        return dbc.Tabs([
+            dbc.Tab(self.graph, label='Map'),
+            dbc.Tab(self.table, label='Table'),
         ])
     
 
@@ -120,7 +124,7 @@ class MemberPanel(FilterCard):
             # ]),
             dbc.Row([
                 self.store, 
-                self.store_desc,
+                # self.store_desc,
                 self.name_card.layout(params),
                 self.membership_year_card.layout(params),
                 self.dob_card.layout(params),
