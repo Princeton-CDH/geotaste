@@ -170,17 +170,18 @@ class MemberPanel(FilterCard):
         def datastore_updated(panel_data, map_figdata):
             print('datastore_updated')
             filtered_keys = set(panel_data.get('intension',{}).keys())
+            print('filtered_keys',filtered_keys)
             
             cards = [self.membership_year_card, self.dob_card, self.gender_card, self.nation_card, self.table_card, self.map_card]
             out = [
-                (dash.no_update if card.key in filtered_keys else card.plot(panel_data))
+                (
+                    dash.no_update 
+                    if card.key in filtered_keys 
+                    else card.plot(
+                        filter_data = panel_data, 
+                        existing_fig=map_figdata if card is self.map_card else None
+                    )
+                )
                 for card in cards
             ]
-            if out[-1]!=dash.no_update:
-                new_fig = out[-1]
-                old_fig = go.Figure(map_figdata)
-                out_fig = go.Figure(data=new_fig.data, layout=old_fig.layout)
-                out[-1] = out_fig
             return out
-
-            
