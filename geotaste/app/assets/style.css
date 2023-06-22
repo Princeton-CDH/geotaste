@@ -6,15 +6,23 @@
 }
 
 .navbar {
-    height:50px;
-    line-height:50px;  
-    margin: 0;
+    height:66px;
+    line-height:66px;  
+    margin: 0 auto;
     padding:0;
+    border: 1px solid red;
+    text-align: center;
 }
-
-/* .tabs-container {
-    height:60px;
-    line-height:40px;
+/* 
+.tabs-container .tab {
+    height:50px;
+    line-height:50px;
+    margin:0;
+    padding:0;
+    margin-block-end: 0;
+    margin-block-start: 0;
+    padding-inline-start: 0;
+    vertical-align: middle;
 } */
 
 .logo-img { padding:0 10px; }
@@ -22,7 +30,38 @@
 /* .nav-link { margin:0; padding:0; } */
 .nav-tabs { border-bottom: none; }
 
+/* 
 
+.custom-tabs {
+    border-top-left-radius: 3px;
+    background-color: #f9f9f9;
+    padding: 0px 24px;
+    border-bottom: none;
+    border-bottom: 1px solid #d6d6d6;
+    margin-bottom: 3px;
+}
+
+.custom-tab {
+    color:#586069;
+    border-top-left-radius: 3px;
+    border-top: 3px solid transparent !important;
+    border-left: 0px !important;
+    border-right: 0px !important;
+    border-bottom: 0px !important;
+    background-color: #fafbfc;
+    padding: 0 12px !important;
+    font-family: "system-ui";
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+.custom-tab--selected {
+    color: black;
+    box-shadow: 1px 1px 0px white;
+    border-left: 1px solid lightgrey !important;
+    border-right: 1px solid lightgrey !important;
+    border-top: 3px solid #e36209 !important;
+} */
 
 
 
@@ -70,8 +109,34 @@ p {
 /* .comparison_map { height:200px; } */
 .layout-container { height:100vh; }
 
-.layout-toprow { overflow-y: fixed; height:60vh; border: 1px solid red; }
+/* .layout-toprow { overflow-y: fixed; height:40vh; border: 1px solid red; }
 
-.layout-mainrow { overflow-y: scroll; height:40vh; border: 1px solid blue;}
+.layout-mainrow { overflow-y: scroll; height:60vh; border: 1px solid blue;} */
 
 /* .layout-bottomrow { overflow-y: fixed; height: 20vh} */
+
+
+
+.layout-toprow { 
+    /* position: fixed;  */
+    /* top:0; */
+    /* left:0;  */
+    border: 1px solid green; 
+    height:490px; 
+    z-index: 1;
+    background-color: white;
+    vertical-align: top;
+}
+
+.layout-mainrow { 
+    /* position:fixed;  */
+    height:100vh; 
+    /* padding-top:450px;  */
+    overflow-y: scroll; 
+    border: 1px solid blue;
+    z-index: 0;
+}
+
+.toptabs-row {
+    border:1px solid red;
+}

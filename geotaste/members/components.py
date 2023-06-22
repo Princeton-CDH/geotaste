@@ -77,7 +77,7 @@ class MemberMapComparisonCard(MemberMapCard):
     @cached_property
     def body(self):
         return dbc.CardBody([
-            self.body_tabs
+            self.graph
         ])
     
     @cached_property
