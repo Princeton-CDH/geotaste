@@ -79,9 +79,18 @@ class FilterComponent(BaseComponent):
         return dcc.Store(id=self.id('store-'+self.__class__.__name__), data={})
 
     @cached_property
-    def store_desc(self): return html.Div(NOFILTER, className='store_desc')
+    def store_desc(self): return html.Span(NOFILTER, className='store_desc')
 
-
+    def component_callbacks(self, app):        
+        @app.callback(
+            Output(self.store_desc, 'children'),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def store_data_updated(store_data):
+            print('store_data_updated')
+            res=describe_filters(store_data, records_name=self.records_name)
+            return dcc.Markdown(res) if res else BLANK
 
 
 class FilterCard(FilterComponent):
@@ -139,16 +148,7 @@ class FilterCard(FilterComponent):
             className='button_clear'
         )
     
-    def component_callbacks(self, app):        
-        @app.callback(
-            Output(self.store_desc, 'children'),
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        def store_data_updated(store_data):
-            print('store_data_updated')
-            res=describe_filters(store_data, records_name=self.records_name)
-            return dcc.Markdown(res) if res else BLANK
+    
         
 
 

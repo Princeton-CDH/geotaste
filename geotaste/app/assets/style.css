@@ -20,7 +20,8 @@
     /* border: 1px solid red; */
     text-align: center;
     vertical-align: middle;
-
+    background-color: #F7F7F7;
+    border-bottom: 1px solid silver;
 }
 
 
@@ -33,7 +34,8 @@
 .tabs-container { 
     /* border:1px solid blue; */
     width:fit-content;
-    margin-left:auto;
+    /* margin-left:auto; */
+    margin: 0 auto;
     padding-right:8px;
 }
 
@@ -49,7 +51,12 @@
     vertical-align: middle;
 }
 
-.logo { margin:0 auto; height:50px; vertical-align: top; display:inline; }
+.logo { 
+    margin:0 auto; 
+    height:50px; 
+    vertical-align: top; 
+    display:inline; 
+}
 /* .logo { position: absolute; top:0; left:0; height:50px; } */
 .logo-img {  height:50px; display:inline; margin-top:-10px;}
 .logo-title { margin:0 10px; font-size:1.5rem; line-height:50px; display: inline;}
@@ -115,11 +122,11 @@ p {
     /* top:0; */
     /* left:0;  */
     /* border: 1px solid green;  */
-    height:400px; 
+    height:380px; 
     z-index: 1;
     /* background-color: white; */
     vertical-align: top;
-    border-bottom: 1px dashed black;
+    border-bottom: 1px solid black;
     padding-right:8px;
 }
 
@@ -129,7 +136,7 @@ p {
     overflow-y: scroll;
     overflow-x: hidden;
     /* padding-top:450px;  */
-    border: 1px solid blue;
+    /* border: 1px solid blue; */
     z-index: 0;
 
 
@@ -169,15 +176,20 @@ body {
 .storedescs-col {
     float: none;
     clear:both;
-    text-align:center;
+    /* text-align:center; */
 }
 
 .storedescs-row {
     & h2 {
-        font-size:1.2rem;
+        font-size:1rem;
         font-weight:normal;
     }
+
+    padding:5px;
 }
+
+.storedescs-col-L { text-align: left;}
+.storedescs-col-R { text-align: left;}
 
 
 .left-color {
@@ -186,4 +198,10 @@ body {
 
 .right-color {
     color: #bf6927;
+}
+
+.store_desc { 
+    display:inline; 
+    & div {display:inline}
+    & p {display:inline}
 }
