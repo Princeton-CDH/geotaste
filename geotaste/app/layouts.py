@@ -87,24 +87,20 @@ class GeotasteLayout(BaseComponent):
         )
         def screen_size_changed(xstr, n=0, height_top=400, min_height=100):
             x=json.loads(xstr)
-            # actually changed?
-            if x == self.last_window_size: raise PreventUpdate
-            self.last_window_size = x
-            print(time.time(), x, type(x))
-
-            # calc height
             height = x.get('height')
             if height and height > (height_top+min_height):
-                return {'height':f'{height - height_top}px', 'border':'1px solid red'}
-            else:
-                raise PreventUpdate
+                return {
+                    'height':f'{height - height_top}px', 
+                    # 'border':'1px solid red'
+                }
+            raise PreventUpdate
 
 
 class PanelComparison(BaseComponent):
     def __init__(self, *x, **y):
         super().__init__(*x,**y)
-        self.L = MemberPanel(name='L')
-        self.R = MemberPanel(name='R')
+        self.L = LeftPanel()
+        self.R = RightPanel()
         
     def layout_top(self, params=None):
         return html.H2('Top')
@@ -127,23 +123,36 @@ class PanelComparison(BaseComponent):
 
 
 
-class MemberBookEventPanel(BaseComponent):
-    def __init__(self, name='MemberBookEventPanel', **kwargs):
+class MemberBookEventPanel(FilterComponent):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.member_panel = MemberPanel(name=name,**kwargs)
+        self.member_panel = MemberPanel(**kwargs)
         # self.book_panel = BookPanel(**kwargs)
 
     def layout(self, params=None):
         return dbc.Container([
+            self.store,
             dbc.Row(self.member_panel.layout(params)),
             # dbc.Row(self.book_panel.layout(params))
         ])
+    
+
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
+
+        @app.callback(
+            Output(self.store, 'data'),
+            [
+                Input(self.member_panel.store, 'data'),
+            ]
+        )
+        def component_filters_updated(*filters_d):
+            return intersect_filters(*filters_d)
 
 
 class LeftPanel(MemberBookEventPanel):
     def __init__(self, **kwargs):
         super().__init__(
-            name='L',
             L_or_R='L', 
             color=LEFT_COLOR,
             **kwargs
@@ -152,7 +161,6 @@ class LeftPanel(MemberBookEventPanel):
 class RightPanel(MemberBookEventPanel):
     def __init__(self, **kwargs):
         super().__init__(
-            name='R',
             L_or_R='R', 
             color=RIGHT_COLOR, 
             **kwargs

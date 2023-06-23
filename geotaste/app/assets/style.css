@@ -1,3 +1,6 @@
+
+
+
 .container, .row, .col { 
     max-width: none; 
     padding: 0;
@@ -126,7 +129,7 @@ p {
     overflow-y: scroll;
     overflow-x: hidden;
     /* padding-top:450px;  */
-    /* border: 1px solid blue; */
+    border: 1px solid blue;
     z-index: 0;
 
 
