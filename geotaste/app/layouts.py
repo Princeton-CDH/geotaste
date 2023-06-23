@@ -94,15 +94,79 @@ class GeotasteLayout(BaseComponent):
             raise PreventUpdate
 
 
+
+
+
+
+
+
+
+
 class PanelComparison(BaseComponent):
     def __init__(self, *x, **y):
         super().__init__(*x,**y)
         self.L = LeftPanel()
         self.R = RightPanel()
+
+    @cached_property
+    def comparison_map_graph(self):
+        return dcc.Graph(figure=go.Figure())
+    
+    
+    @cached_property
+    def comparison_map_row(self, params=None):
+        return dbc.Row([
+            dbc.Col(self.comparison_map_graph, width=12)
+        ], className='comparemap-row')
+
+    @cached_property
+    def dueling_maps_row(self, params=None):
+        return dbc.Row([
+            dbc.Col(self.L.map_graph, width=6),
+            dbc.Col(self.R.map_graph, width=6),
+        ], className='bimap-row')
+    
+    @cached_property
+    def dueling_descs_row(self, params=None):
+        return dbc.Row([
+            dbc.Col(
+                html.H2([
+                    'Left Group: ', 
+                    self.L.store_desc
+                ]), 
+                width=6, 
+                className='storedescs-col storedescs-col-L left-color'
+            ),
+            dbc.Col(
+                html.H2([
+                    'Right Group: ', 
+                    self.R.store_desc
+                ]),
+                width=6, 
+                className='storedescs-col storedescs-col-R right-color'
+            ),
+        ], className='storedescs-row')
+    
+        
+    @cached_property
+    def toptabs(self):
+        return dbc.Tabs([
+            dbc.Tab(label='Juxtapose', tab_id='juxtapose'),
+            dbc.Tab(label='Contrast', tab_id='contrast'),
+        ], className='tabs-container', active_tab='juxtapose')
+
+    @cached_property
+    def toptab(self): 
+        return dbc.Container([
+            self.dueling_maps_row,
+            self.comparison_map_row,
+        ], className='toptab-container')
         
     def layout_top(self, params=None):
         return dbc.Container([
-            self.layout_dueling_maps(params)
+            dbc.Row(self.toptabs, className='toptabs-row'),
+            dbc.Row(self.toptab, 'toptab-row'),
+            self.dueling_descs_row
         ])
     
     def layout_main(self, params=None):
@@ -117,23 +181,40 @@ class PanelComparison(BaseComponent):
         ])
     
 
-    
-    def layout_dueling_maps(self, params=None):
-        mmap1=MemberMap(self.L.member_panel.filter_data)
-        mmap2=MemberMap(self.R.member_panel.filter_data)
-
-        graph1=dcc.Graph(figure=mmap1.plot(**self.L._kwargs))
-        graph2=dcc.Graph(figure=mmap2.plot(**self.R._kwargs))
-
-
-        return dbc.Row([
-            dbc.Col(graph1, width=6),
-            dbc.Col(graph2, width=6),
-        ], className='bimap-row')
-    
 
 
 
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
+
+        @app.callback(
+            [
+                Output(self.dueling_maps_row, 'style'),
+                Output(self.comparison_map_row, 'style'),
+            ],
+            Input(self.toptabs, 'active_tab')
+        )
+        def switch_tabs(tab_id, num_tabs=2):
+            if tab_id=='juxtapose':
+                return STYLE_VIS, STYLE_INVIS
+            else:
+                return STYLE_INVIS, STYLE_VIS
+        
+        @app.callback(
+            Output(self.comparison_map_graph, 'figure'),
+            [
+                Input(self.L.store, 'data'), 
+                Input(self.R.store, 'data')
+            ],
+            State(self.comparison_map_graph, 'figure'),
+        )
+        def redraw_map(filter_data_L, filter_data_R, old_figdata):
+            fig = ComparisonMemberMap(filter_data_L, filter_data_R)
+            self.comparison_map_fig = fig
+            return combine_figs(
+                fig_new=fig.plot(),
+                fig_old=old_figdata
+            )
 
 
 
@@ -143,6 +224,9 @@ class MemberBookEventPanel(FilterComponent):
         super().__init__(**kwargs)
         self.member_panel = MemberPanel(**kwargs)
         self.book_panel = BookPanel(**kwargs)
+        
+        # defaults
+        self.map_fig = self.map_ff()
 
     def layout(self, params=None):
         return dbc.Container([
@@ -151,6 +235,13 @@ class MemberBookEventPanel(FilterComponent):
             dbc.Row(self.book_panel.layout(params))
         ])
     
+    def map_ff(self, filter_data={}):
+        if not filter_data: filter_data=self.filter_data
+        return MemberMap(filter_data)
+
+    @cached_property
+    def map_graph(self):
+        return dcc.Graph(figure=self.map_fig.plot(**self._kwargs))
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -159,11 +250,25 @@ class MemberBookEventPanel(FilterComponent):
             Output(self.store, 'data'),
             [ 
                 Input(self.member_panel.store, 'data'),
+                Input(self.book_panel.store, 'data'),
             ]
         )
         def component_filters_updated(*filters_d):
             self.filter_data = intersect_filters(*filters_d)
             return self.filter_data
+        
+        @app.callback(
+            Output(self.map_graph, 'figure'),
+            Input(self.store, 'data'),
+            State(self.map_graph, 'figure'),
+            prevent_initial_call=True
+        )
+        def redraw_map(filter_data, fig_old):
+            self.map_fig = self.map_ff(filter_data)
+            fig_new = self.map_fig.plot(**self._kwargs)
+            return combine_figs(fig_new,fig_old)
+
+        
 
 
 class LeftPanel(MemberBookEventPanel):
@@ -194,11 +299,6 @@ class RightPanel(MemberBookEventPanel):
     
 
     
-    # def dual_store_descs(self, params=None):
-    #     return dbc.Row([
-    #         dbc.Col(html.H2(['Left Group: ', self.panel_L.store_desc]), width=6, className='storedescs-col storedescs-col-L left-color'),
-    #         dbc.Col(html.H2(['Right Group: ', self.panel_R.store_desc]), width=6, className='storedescs-col storedescs-col-R right-color'),
-    #     ], className='storedescs-row')
     
     
 

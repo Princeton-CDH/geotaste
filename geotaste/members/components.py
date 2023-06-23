@@ -114,9 +114,6 @@ class MemberPanel(FilterCard):
     def map_card(self): return MemberMapCard(**self._kwargs)
     @cached_property
     def table_card(self): return MemberTableCard(**self._kwargs)
-
-    @cached_property
-    def store_desc(self): return html.Span(NOFILTER, className='store_desc')
     
     def layout(self, params=None): 
         body = dbc.Container([
@@ -127,14 +124,14 @@ class MemberPanel(FilterCard):
             # ]),
             dbc.Row([
                 self.store, 
-                self.store_desc,
                 self.name_card.layout(params),
                 self.membership_year_card.layout(params),
                 self.dob_card.layout(params),
                 self.gender_card.layout(params),
                 self.nation_card.layout(params),
                 self.map_card.layout(params),
-                self.table_card.layout(params)
+                self.table_card.layout(params),
+                self.store_desc,
             ])
         ])
         return body
