@@ -1,1 +1,1 @@
-web: gunicorn geotaste.app.app:server
+web: geotaste-app
