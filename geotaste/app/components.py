@@ -74,7 +74,8 @@ class FilterComponent(BaseComponent):
 
     ## all components can have a memory -- only activated if nec
     @cached_property
-    def store(self): return dcc.Store(id=self.id('store'), data={})
+    def store(self):
+        return dcc.Store(id=self.id('store-'+self.__class__.__name__), data={})
 
     @cached_property
     def store_desc(self): return html.Div(NOFILTER, className='store_desc')
