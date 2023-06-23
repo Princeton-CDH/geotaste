@@ -1,1 +1,1 @@
-web: geotaste-app
+web: python -c "from geotaste.app.app import app; app.run(8000)"
