@@ -28,6 +28,7 @@ class GeotasteLayout(BaseComponent):
         return html.Div([
             html.Img(src=LOGO_SRC, className='logo-img'),
             html.H1(self.title, className='logo-title'),
+            html.Img(src=LOGO_SRC, className='logo-img'),
         ], className='logo')
 
     @cached_property
