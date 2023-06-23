@@ -31,6 +31,7 @@ class BaseComponent(DashComponent):
 
         # ensure some exist
         self.color = None
+        self.filter_data = {}
         
         # overwritten here
         for k,v in kwargs.items(): 

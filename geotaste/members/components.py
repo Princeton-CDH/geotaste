@@ -156,7 +156,8 @@ class MemberPanel(FilterCard):
         )
         def component_filters_updated(*filters_d):
             print('component_filters_updated')
-            return intersect_filters(*filters_d)
+            self.filter_data = intersect_filters(*filters_d)
+            return self.filter_data
         
         @app.callback(
             [

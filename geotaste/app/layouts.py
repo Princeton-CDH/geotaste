@@ -86,12 +86,10 @@ class GeotasteLayout(BaseComponent):
             Input(self.store_window_size, 'children'),
         )
         def screen_size_changed(xstr, n=0, height_top=400, min_height=100):
-            x=json.loads(xstr)
-            height = x.get('height')
+            height=json.loads(xstr).get('height')
             if height and height > (height_top+min_height):
                 return {
                     'height':f'{height - height_top}px', 
-                    # 'border':'1px solid red'
                 }
             raise PreventUpdate
 
@@ -103,7 +101,9 @@ class PanelComparison(BaseComponent):
         self.R = RightPanel()
         
     def layout_top(self, params=None):
-        return html.H2('Top')
+        return dbc.Container([
+            self.layout_dueling_maps(params)
+        ])
     
     def layout_main(self, params=None):
         return dbc.Container([
@@ -117,6 +117,21 @@ class PanelComparison(BaseComponent):
         ])
     
 
+    
+    def layout_dueling_maps(self, params=None):
+        mmap1=MemberMap(self.L.member_panel.filter_data)
+        mmap2=MemberMap(self.R.member_panel.filter_data)
+
+        graph1=dcc.Graph(figure=mmap1.plot(**self.L._kwargs))
+        graph2=dcc.Graph(figure=mmap2.plot(**self.R._kwargs))
+
+
+        return dbc.Row([
+            dbc.Col(graph1, width=6),
+            dbc.Col(graph2, width=6),
+        ], className='bimap-row')
+    
+
 
 
 
@@ -127,13 +142,13 @@ class MemberBookEventPanel(FilterComponent):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.member_panel = MemberPanel(**kwargs)
-        # self.book_panel = BookPanel(**kwargs)
+        self.book_panel = BookPanel(**kwargs)
 
     def layout(self, params=None):
         return dbc.Container([
             self.store,
             dbc.Row(self.member_panel.layout(params)),
-            # dbc.Row(self.book_panel.layout(params))
+            dbc.Row(self.book_panel.layout(params))
         ])
     
 
@@ -142,12 +157,13 @@ class MemberBookEventPanel(FilterComponent):
 
         @app.callback(
             Output(self.store, 'data'),
-            [
+            [ 
                 Input(self.member_panel.store, 'data'),
             ]
         )
         def component_filters_updated(*filters_d):
-            return intersect_filters(*filters_d)
+            self.filter_data = intersect_filters(*filters_d)
+            return self.filter_data
 
 
 class LeftPanel(MemberBookEventPanel):
