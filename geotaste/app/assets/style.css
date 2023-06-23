@@ -13,15 +13,14 @@
 }
 
 .navbar-row {
-    /* height:50px; */
+    position:absolute; top:0; left:0;
     line-height:50px;  
-    /* margin: 0 auto; */
     padding:0;
-    /* border: 1px solid red; */
     text-align: center;
     vertical-align: middle;
     background-color: #F7F7F7;
     border-bottom: 1px solid silver;
+    z-index: 2;
 }
 
 
@@ -107,7 +106,8 @@ p {
 /* .toprowmap { height:fit-content}  */
 
 /* .comparison_map { height:200px; } */
-.layout-container { height:100vh; }
+/* .layout-container { height:100vh; } */
+.layout-belownavbar { height:100vh; max-height:100vh; min-height:100vh; padding-top:50px; margin-bottom:50px;}
 
 /* .layout-toprow { overflow-y: fixed; height:40vh; border: 1px solid red; }
 
@@ -122,22 +122,26 @@ p {
     /* top:0; */
     /* left:0;  */
     /* border: 1px solid green;  */
-    height:380px; 
+    height:500px; 
     z-index: 1;
     /* background-color: white; */
     vertical-align: top;
-    border-bottom: 1px solid black;
-    padding-right:8px;
+    /* border-bottom: 1px solid red; */
+    /* padding-right:8px; */
 }
 
 .layout-mainrow { 
+    border-top:1px solid black;
     /* position:fixed;  */
-    height:400px; 
+    /* height:400px;  */
+    height:100vh;
+    /* position:absolute; top:50; left:0;  */
+    /* padding-top:400px; */
     overflow-y: scroll;
     overflow-x: hidden;
     /* padding-top:450px;  */
     /* border: 1px solid blue; */
-    z-index: 0;
+    z-index: 3;
 
 
   scrollbar-width: thin; /* "auto" or "thin" */
@@ -162,7 +166,7 @@ p {
 
 
 body { 
-    /* overflow: hidden */
+    overflow: hidden
 }
 
 
@@ -204,4 +208,17 @@ body {
     display:inline; 
     & div {display:inline}
     & p {display:inline}
+}
+
+.comparison_map_graph {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    padding-bottom:50px;
+    /* position:fixed; top:0;right:0; */
+}
+
+.layout-rightcol {
+    border:1px solid green;
 }
