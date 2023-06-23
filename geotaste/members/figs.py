@@ -155,7 +155,7 @@ class MemberMap(MemberFigure):
             custom_data=['member'],
             zoom=12, 
             hover_name='name',
-            height=250,
+            # height=250,
             size_max=40,
             template=PLOTLY_TEMPLATE
         )
@@ -176,7 +176,7 @@ class MemberMap(MemberFigure):
             zoom=12,
             color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
             opacity=.5,
-            height=250,
+            # height=250,
             template=PLOTLY_TEMPLATE
         )
         fig_choro.update_mapboxes(style="stamen-toner")
@@ -186,6 +186,8 @@ class MemberMap(MemberFigure):
         )
         fig_choro.update_traces(marker_line_width=2)
         ofig=go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
+        ofig.update_layout(autosize=True)
+        ofig.layout._config = {'responsive':True}
         return ofig
 
     def selected(self, selectedData):
@@ -271,7 +273,7 @@ class ComparisonMemberMap(MemberMap):
             hover_name='name',
             color='L_or_R',
             color_discrete_map=color_map,
-            height=height,
+            # height=height,
             size_max=40,
             template=PLOTLY_TEMPLATE
             # **kwargs
@@ -289,7 +291,7 @@ class ComparisonMemberMap(MemberMap):
             zoom=12,
             color_continuous_scale='puor',
             opacity=.5,
-            height=height,
+            # height=height,
             template=PLOTLY_TEMPLATE
         )
         fig_choro.update_mapboxes(style="stamen-toner")
@@ -297,22 +299,30 @@ class ComparisonMemberMap(MemberMap):
             margin={"r":0,"t":0,"l":0,"b":0},
             legend=dict(
                 yanchor="top",
-                y=0.01,
+                y=0.99,
                 xanchor="left",
-                x=0.99
+                x=0.01
             )
         )
         fig_choro.update_layout(
             coloraxis=dict(
                 colorbar=dict(
                     orientation='h', 
-                    y=-0.2,
+                    y=0,
                     thickness=10
                 )
-            )
+            ),
+
         )
+        
         fig_choro.update_coloraxes(reversescale=True)
-        return go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
+        ofig=go.Figure(
+            data=fig_choro.data + fig.data, 
+            layout=fig_choro.layout
+        )
+        ofig.update_layout(autosize=True)
+        ofig.layout._config = {'responsive':True}
+        return ofig
 
 
 

@@ -39,66 +39,17 @@ class GeotasteLayout(BaseComponent):
     def content(self):
         return dbc.Row(self.panel_comparison.layout())
 
-    @cached_property
-    def store_window_size(self): 
-        return html.Div(style={'display':'none'})
-    
-    @cached_property
-    def top_row(self, params=None):
-        return dbc.Row(self.layout_top(params), className='layout-toprow')
-    @cached_property
-    def main_row(self, params=None):
-        return dbc.Row(self.layout_main(params), className='layout-mainrow')
-
     def layout(self, params=None):
-        return dbc.Container([
-                self.store_window_size,
-                self.top_row,
-                self.main_row,
-                # self.ticker,
-        ], className='layout-container')
-
-    def layout_top(self, params=None):
-        return dbc.Container([
-            dbc.Row(self.logo, className='navbar-row'),
-            dbc.Row(self.panels.layout_top(params), className='content-row')
-        ], className='layout-container')
-    
-    def layout_main(self, params=None):
-        return self.panels.layout_main(params)
-    
-
-    # def component_callbacks(self, app):
-    #     app.clientside_callback(
-    #             """
-    #             function(obj) {
-    #                 var w = window.innerWidth;
-    #                 var h = window.innerHeight;
-    #                 return JSON.stringify({'height': h, 'width': w});
-    #             }
-    #             """,
-    #             Output(self.store_window_size, 'children'),
-    #             Input(self.ticker, 'n_intervals'),
-    #         )
+        top_row = dbc.Row(self.panels.layout_top(params), className='layout-toprow')
+        main_row = dbc.Row(self.panels.layout_main(params), className='layout-mainrow')
         
+        left_col = dbc.Col([top_row, main_row], className='layout-leftcol', width=7)
+        right_col = dbc.Col(self.panels.comparison_map_graph, className='layout-rightcol', width=5)
 
-    #     @app.callback(
-    #         Output(self.main_row, 'style'),
-    #         Input(self.store_window_size, 'children'),
-    #     )
-    #     def screen_size_changed(xstr, n=0, height_top=400, min_height=100):
-    #         height=json.loads(xstr).get('height')
-    #         if height and height > (height_top+min_height):
-    #             return {
-    #                 'height':f'{height - height_top}px', 
-    #             }
-    #         raise PreventUpdate
-
-
-
-
-
-
+        return dbc.Container([
+            self.navbar,  # row
+            dbc.Row([left_col, right_col], className='layout-belownavbar')
+        ], className='layout-container')
 
 
 
@@ -111,7 +62,7 @@ class PanelComparison(BaseComponent):
 
     @cached_property
     def comparison_map_graph(self):
-        return dcc.Graph(figure=go.Figure())
+        return dcc.Graph(figure=go.Figure(), className='comparison_map_graph')
     
     
     @cached_property
@@ -165,8 +116,7 @@ class PanelComparison(BaseComponent):
         
     def layout_top(self, params=None):
         return dbc.Container([
-            dbc.Row(self.toptabs, className='toptabs-row'),
-            dbc.Row(self.toptab, 'toptab-row'),
+            self.dueling_maps_row,
             self.dueling_descs_row
         ])
     
@@ -187,19 +137,6 @@ class PanelComparison(BaseComponent):
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
-
-        @app.callback(
-            [
-                Output(self.dueling_maps_row, 'style'),
-                Output(self.comparison_map_row, 'style'),
-            ],
-            Input(self.toptabs, 'active_tab')
-        )
-        def switch_tabs(tab_id, num_tabs=2):
-            if tab_id=='juxtapose':
-                return STYLE_VIS, STYLE_INVIS
-            else:
-                return STYLE_INVIS, STYLE_VIS
         
         @app.callback(
             Output(self.comparison_map_graph, 'figure'),
