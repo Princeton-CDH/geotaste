@@ -19,7 +19,7 @@ class GeotasteLayout(BaseComponent):
     def __init__(self):
         super().__init__(title="Geography of Taste")
         self.panels = PanelComparison()
-        self.ticker = dcc.Interval(interval=1*1000, n_intervals=0)
+        # self.ticker = dcc.Interval(interval=1*1000, n_intervals=0)
         self.last_window_size = None
 
 
@@ -28,6 +28,7 @@ class GeotasteLayout(BaseComponent):
         return html.Div([
             html.Img(src=LOGO_SRC, className='logo-img'),
             html.H1(self.title, className='logo-title'),
+            html.Img(src=LOGO_SRC, className='logo-img'),
         ], className='logo')
 
     @cached_property
@@ -54,7 +55,7 @@ class GeotasteLayout(BaseComponent):
                 self.store_window_size,
                 self.top_row,
                 self.main_row,
-                self.ticker,
+                # self.ticker,
         ], className='layout-container')
 
     def layout_top(self, params=None):
@@ -67,31 +68,31 @@ class GeotasteLayout(BaseComponent):
         return self.panels.layout_main(params)
     
 
-    def component_callbacks(self, app):
-        app.clientside_callback(
-                """
-                function(obj) {
-                    var w = window.innerWidth;
-                    var h = window.innerHeight;
-                    return JSON.stringify({'height': h, 'width': w});
-                }
-                """,
-                Output(self.store_window_size, 'children'),
-                Input(self.ticker, 'n_intervals'),
-            )
+    # def component_callbacks(self, app):
+    #     app.clientside_callback(
+    #             """
+    #             function(obj) {
+    #                 var w = window.innerWidth;
+    #                 var h = window.innerHeight;
+    #                 return JSON.stringify({'height': h, 'width': w});
+    #             }
+    #             """,
+    #             Output(self.store_window_size, 'children'),
+    #             Input(self.ticker, 'n_intervals'),
+    #         )
         
 
-        @app.callback(
-            Output(self.main_row, 'style'),
-            Input(self.store_window_size, 'children'),
-        )
-        def screen_size_changed(xstr, n=0, height_top=400, min_height=100):
-            height=json.loads(xstr).get('height')
-            if height and height > (height_top+min_height):
-                return {
-                    'height':f'{height - height_top}px', 
-                }
-            raise PreventUpdate
+    #     @app.callback(
+    #         Output(self.main_row, 'style'),
+    #         Input(self.store_window_size, 'children'),
+    #     )
+    #     def screen_size_changed(xstr, n=0, height_top=400, min_height=100):
+    #         height=json.loads(xstr).get('height')
+    #         if height and height > (height_top+min_height):
+    #             return {
+    #                 'height':f'{height - height_top}px', 
+    #             }
+    #         raise PreventUpdate
 
 
 

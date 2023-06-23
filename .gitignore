@@ -7,3 +7,5 @@ test_*.ipynb
 .DS_Store
 cache
 *.cssx
+*.pyc
+.env
