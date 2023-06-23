@@ -114,6 +114,7 @@ class MemberNationalityFigure(MemberFigure):
             color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
             range_color=(0,400), #fdf['count'].min(), fdf['count'].max())
             height=300,
+            template=PLOTLY_TEMPLATE
         )
         fig.update_coloraxes(showscale=False)
         fig.update_layout(
@@ -156,6 +157,7 @@ class MemberMap(MemberFigure):
             hover_name='name',
             height=250,
             size_max=40,
+            template=PLOTLY_TEMPLATE
         )
         fig.update_traces(marker=dict(size=10))
         if color: fig.update_traces(marker=dict(color=color))
@@ -174,7 +176,8 @@ class MemberMap(MemberFigure):
             zoom=12,
             color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
             opacity=.5,
-            height=250
+            height=250,
+            template=PLOTLY_TEMPLATE
         )
         fig_choro.update_mapboxes(style="stamen-toner")
         fig_choro.update_layout(
@@ -270,6 +273,7 @@ class ComparisonMemberMap(MemberMap):
             color_discrete_map=color_map,
             height=height,
             size_max=40,
+            template=PLOTLY_TEMPLATE
             # **kwargs
         )
         fig.update_traces(marker=dict(size=10))
@@ -285,7 +289,8 @@ class ComparisonMemberMap(MemberMap):
             zoom=12,
             color_continuous_scale='puor',
             opacity=.5,
-            height=height
+            height=height,
+            template=PLOTLY_TEMPLATE
         )
         fig_choro.update_mapboxes(style="stamen-toner")
         fig_choro.update_layout(
