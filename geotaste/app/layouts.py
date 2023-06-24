@@ -43,7 +43,10 @@ class GeotasteLayout(BaseComponent):
         top_row = dbc.Row(self.panels.layout_top(params), className='layout-toprow')
         main_row = dbc.Row(self.panels.layout_main(params), className='layout-mainrow')
         
-        left_col = dbc.Col([top_row, main_row], className='layout-leftcol', width=7)
+        left_col = dbc.Col([
+            top_row, 
+            main_row
+        ], className='layout-leftcol', width=7)
         right_col = dbc.Col(self.panels.comparison_map_graph, className='layout-rightcol', width=5)
 
         return dbc.Container([
@@ -116,7 +119,7 @@ class PanelComparison(BaseComponent):
         
     def layout_top(self, params=None):
         return dbc.Container([
-            self.dueling_maps_row,
+            # self.dueling_maps_row,
             self.dueling_descs_row
         ])
     
@@ -195,16 +198,16 @@ class MemberBookEventPanel(FilterComponent):
             self.filter_data = intersect_filters(*filters_d)
             return self.filter_data
         
-        @app.callback(
-            Output(self.map_graph, 'figure'),
-            Input(self.store, 'data'),
-            State(self.map_graph, 'figure'),
-            prevent_initial_call=True
-        )
-        def redraw_map(filter_data, fig_old):
-            self.map_fig = self.map_ff(filter_data)
-            fig_new = self.map_fig.plot(**self._kwargs)
-            return combine_figs(fig_new,fig_old)
+        # @app.callback(
+        #     Output(self.map_graph, 'figure'),
+        #     Input(self.store, 'data'),
+        #     State(self.map_graph, 'figure'),
+        #     prevent_initial_call=True
+        # )
+        # def redraw_map(filter_data, fig_old):
+        #     self.map_fig = self.map_ff(filter_data)
+        #     fig_new = self.map_fig.plot(**self._kwargs)
+        #     return combine_figs(fig_new,fig_old)
 
         
 
