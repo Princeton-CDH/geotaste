@@ -146,7 +146,7 @@ class MemberMap(MemberFigure):
             filter_data=filter_data
         )
 
-    def plot(self, color=None, **kwargs):
+    def plot(self, color=None, height=250, **kwargs):
         fig = px.scatter_mapbox(
             self.df.reset_index(), 
             lat='latitude',
@@ -155,11 +155,11 @@ class MemberMap(MemberFigure):
             custom_data=['member'],
             zoom=12, 
             hover_name='name',
-            # height=250,
+            height=height,
             size_max=40,
             template=PLOTLY_TEMPLATE
         )
-        fig.update_traces(marker=dict(size=10))
+        fig.update_traces(marker=dict(size=7))
         if color: fig.update_traces(marker=dict(color=color))
         fig.update_mapboxes(style="stamen-toner")
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
@@ -171,12 +171,13 @@ class MemberMap(MemberFigure):
             counts_by_arrond,
             geojson=get_geojson_arrondissement(),
             locations='arrond_id', 
-            color='count',
+            # color='count',
+            color='perc',
             center=MAP_CENTER,
             zoom=12,
             color_continuous_scale='oranges' if color == RIGHT_COLOR else 'purples',
             opacity=.5,
-            # height=250,
+            height=height,
             template=PLOTLY_TEMPLATE
         )
         fig_choro.update_mapboxes(style="stamen-toner")
@@ -186,8 +187,8 @@ class MemberMap(MemberFigure):
         )
         fig_choro.update_traces(marker_line_width=2)
         ofig=go.Figure(data=fig_choro.data + fig.data, layout=fig_choro.layout)
-        ofig.update_layout(autosize=True)
-        ofig.layout._config = {'responsive':True}
+        # ofig.update_layout(autosize=True)
+        # ofig.layout._config = {'responsive':True}
         return ofig
 
     def selected(self, selectedData):
