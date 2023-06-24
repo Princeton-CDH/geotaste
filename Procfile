@@ -1,1 +1,1 @@
-web: python -c "from geotaste.app.app import app; app.run(8000)"
+web: gunicorn geotaste.app.app:server
