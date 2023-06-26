@@ -46,8 +46,8 @@ class GeotasteLayout(BaseComponent):
         left_col = dbc.Col([
             top_row, 
             main_row
-        ], className='layout-leftcol', width=7)
-        right_col = dbc.Col(self.panels.comparison_map_graph, className='layout-rightcol', width=5)
+        ], className='layout-leftcol', width=6)
+        right_col = dbc.Col(self.panels.comparison_map_graph, className='layout-rightcol', width=6)
 
         return dbc.Container([
             self.navbar,  # row

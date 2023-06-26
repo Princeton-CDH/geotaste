@@ -143,17 +143,18 @@ class MemberPanel(FilterCard):
         @app.callback(
             Output(self.store, 'data'),
             [
+                Input(self.name_card.store, 'data'),
                 Input(self.membership_year_card.store, 'data'),
                 Input(self.dob_card.store, 'data'),
                 Input(self.gender_card.store, 'data'),
                 Input(self.nation_card.store, 'data'),
                 Input(self.map_card.store, 'data'),
-                # Input(self.table_card.store, 'data'),
             ]
         )
         def component_filters_updated(*filters_d):
             print('component_filters_updated')
             self.filter_data = intersect_filters(*filters_d)
+            print('filtering now:',self.filter_data.get(INTENSION_KEY))
             return self.filter_data
         
         @app.callback(
