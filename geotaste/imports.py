@@ -1,8 +1,9 @@
 ## Constants
-LEFT_COLOR='#7d6ab6'
-RIGHT_COLOR='#bf6927'
+LEFT_COLOR='#AB9155' #'#7d6ab6'
+RIGHT_COLOR='#40B0A6' ##bf6927'
 BOTH_COLOR='#606060'
 PLOTLY_TEMPLATE='simple_white'
+UNKNOWN='(Unknown)'
 
 # LEFT_COLOR='#d2afff'
 # RIGHT_COLOR='#FF007F'
@@ -65,6 +66,7 @@ import random
 import pandas as pd
 import numbers
 import json
+from collections import Counter
 
 ## Non-sys imports
 import pandas as pd

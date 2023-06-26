@@ -1,7 +1,6 @@
 from ..imports import *
 
 
-
 ##################################################
 # COMPONENTS
 ##################################################
@@ -71,6 +70,7 @@ class FigureFactory(DashFigureFactory):
         return [(d.get(keys[0],np.nan), d.get(keys[1],np.nan)) for d in selectedData.get('points',[]) if keys[0] in d and keys[1] in d]
     
     def selected(self, selectedData):
+        print('selectedData', selectedData)
         if not selectedData: return {}
         xs = self.selected_points(selectedData) 
         if not xs: return {}
@@ -94,6 +94,14 @@ class FigureFactory(DashFigureFactory):
             return self._df[self.key]
         except KeyError:
             return pd.Series()
+    
+    @cached_property
+    def series(self) -> pd.Series:
+        try:
+            return self._df[self.key]
+        except KeyError:
+            return pd.Series()
+    
         
     @cached_property
     def vals(self):
@@ -102,12 +110,7 @@ class FigureFactory(DashFigureFactory):
             s=self._data[self.key]
         except KeyError:
             return pd.Series()
-        for x in s:
-            if is_listy(x):
-                l+=list(x)
-            else:
-                l+=[x]
-        return pd.Series(l)
+        return pd.Series(flatten_list(s))
     
     @cached_property
     def vals_q(self):
@@ -194,39 +197,44 @@ class FigureFactory(DashFigureFactory):
     def plot_histogram_bar(
             self, 
             x, 
+            y='count',
             color=None, 
             df=None, 
             height=100, 
             quant=None, 
             category_orders=None, 
             series=None,
+            series_name=None,
+            keep_missing_types=True,
             **kwargs):
         
         # figdf = self.get_figdf(x,quant=False)
         if series is None:
             if df is None: df = self.df
             if not x in set(df.columns): return go.Figure()
-            series=df[x]
+            l=flatten_list(df[x])
         else:
-            series=pd.Series(series)
-        
+            l = series
+
+        l = [x if x!='' else UNKNOWN for x in l]
+        series = pd.Series(l, name=x if not series_name else series_name)
         s=series.value_counts()
 
         # make sure all types are there
-        missing_valtypes = set(self.vals) - set(s.index)
-        for xval in missing_valtypes: s[xval]=0
-        s=s.sort_index()
+        if keep_missing_types:
+            vals = [x if x!='' else UNKNOWN for x in self.vals]
+            missing_valtypes = set(vals) - set(s.index)
+            for xval in missing_valtypes: s[xval]=0
+            s=s.sort_index()
 
         df_counts = pd.DataFrame(s).reset_index()
-
-        if quant is False and category_orders is None:
+        if not quant and category_orders is None:
             category_orders = {self.key:df_counts.index}
-        
         
         fig=px.bar(
             df_counts,
             x=x,
-            y='count', 
+            y=y, 
             height=height,
             color_discrete_sequence=[color] if color else None,
             category_orders=category_orders,
