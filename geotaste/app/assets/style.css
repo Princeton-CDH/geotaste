@@ -1,4 +1,9 @@
+@font-face {
+    font-family: SCo;
+    src: url(/assets/Brown-Regular.otf);
+  }
 
+  body { font-family: SCo;}
 
 
 .container, .row, .col { 
@@ -61,13 +66,16 @@
 .nav-tabs { border-bottom: none; }
 
 .card {
-    /* margin:10px; */
+    margin-bottom:2rem;
 }
+/* .panel_L { padding-right:5px; } */
+/* .panel_R { padding-left:5px; } */
+.panel { padding:0 5px;}
 
 .card-header {
-    font-weight: bold;
+    /* font-weight: bold; */
     /* background-color: blue; */
-    font-size:1.1em;
+    /* font-size:1.1em; */
     padding-left:.1rem;
 }
 
@@ -77,7 +85,7 @@
 
 .card-footer {
     padding:0.2em;
-    /* font-size:0.9em; */
+    font-size:0.8em;
     text-align: right;
     background-color: rgba(0,0,0,0);
     border-top: none;
@@ -97,6 +105,7 @@ p {
     padding: 0;
     text-decoration: none;
     color: inherit;
+    font-size:0.8rem;
 }
 
 
@@ -221,3 +230,6 @@ body {
 .layout-rightcol {
     border:1px solid green;
 }
+
+
+
