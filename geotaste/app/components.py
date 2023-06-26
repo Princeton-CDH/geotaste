@@ -128,7 +128,7 @@ class FilterCard(FilterComponent):
                 html.Div(self.store_desc, style={'float':'left'}),
             ],
             style={
-                'color':self.color if hasattr(self,'color') and self.color else 'inherit', 
+                'color':self.color if self.color else 'inherit', 
             }
         )
 

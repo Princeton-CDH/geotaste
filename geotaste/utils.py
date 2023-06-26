@@ -183,13 +183,13 @@ def describe_filters(store_data, records_name='records'):
             else:
                 # o=' and '.join(f'{repr(x)}' for x in l)
                 o=f'{l[0]} ... {l[-1]}'
-            o=f'_{o}_ on  `{key}`'
+            o=f'_{o}_ on  *{key}*'
             ol.append(o)
         return "; ".join(ol)
 
     len_ext=len(store_data[EXTENSION_KEY])
     fmt_int=format_intension(store_data[INTENSION_KEY])
-    return f'Filtering {fmt_int} yields _{len_ext}_ {records_name}.'
+    return f'Filtering {fmt_int} yields _{len_ext:,}_ {records_name}.'
 
 
 def first(x, default=None):
@@ -270,3 +270,22 @@ def combine_figs(fig_new, fig_old):
         layout=fig_old.layout if fig_old is not None and hasattr(fig_old,'data') and fig_old.data else fig_new.layout,
         data=fig_new.data
     )
+
+
+
+def flatten_list(s):
+    l=[]
+    for x in s:
+        if is_listy(x):
+            l+=flatten_list(x)
+        else:
+            l+=[x]
+    return l
+
+
+def make_counts_df(series):
+    return pd.DataFrame(
+        pd.Series(
+            (x if x!='' else UNKNOWN for x in flatten_list(series))
+        , name=series.name).value_counts()
+    ).reset_index()

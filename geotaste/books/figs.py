@@ -13,7 +13,7 @@ class BooksFigure(FigureFactory):
         return pd.DataFrame([
             {iname:i, self.key:v}
             for i,vals in zip(self.df.index, self.df[self.key])
-            for v in (vals if is_listy(vals) else [vals])
+            for v in flatten_list(vals)
         ]).sort_values([self.key, iname]).set_index(iname)
 
 class BookTitleFigure(BooksFigure):

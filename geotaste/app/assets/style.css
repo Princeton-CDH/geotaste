@@ -75,7 +75,7 @@
 .card-header {
     /* font-weight: bold; */
     /* background-color: blue; */
-    /* font-size:1.1em; */
+    font-size:.9rem;
     padding-left:.1rem;
 }
 
@@ -203,13 +203,9 @@ body {
 .storedescs-col-R { text-align: center;}
 
 
-.left-color {
-    color: #7d6ab6;
-}
+.left-color { color:#AB9155; }
 
-.right-color {
-    color: #bf6927;
-}
+.right-color { color: #40B0A6; }
 
 .store_desc { 
     display:inline; 

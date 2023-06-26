@@ -45,6 +45,10 @@ class MemberNationalityCard(FilterPlotCard):
     key='nationalities'
     figure_class = MemberNationalityFigure
 
+    @cached_property
+    def graph(self):
+        return dcc.Graph(figure=self.plot(), config={'displayModeBar':False})
+
 
 
 class MemberTableCard(FilterTableCard):
@@ -54,7 +58,7 @@ class MemberTableCard(FilterTableCard):
     
 
 class MemberMapCard(FilterPlotCard):
-    desc = 'Member addresses mapped'
+    desc = 'Filter by arrondissement'
     # key='gender'
     figure_class = MemberMap
 
@@ -130,7 +134,7 @@ class MemberPanel(FilterCard):
                 self.gender_card.layout(params),
                 self.nation_card.layout(params),
                 self.map_card.layout(params),
-                self.table_card.layout(params),
+                # self.table_card.layout(params),
                 self.store_desc,
             ])
         ])
@@ -163,7 +167,7 @@ class MemberPanel(FilterCard):
                 Output(self.dob_card.graph, 'figure'),
                 Output(self.gender_card.graph, 'figure'),
                 Output(self.nation_card.graph, 'figure'),
-                Output(self.table_card.table, 'children'),
+                # Output(self.table_card.table, 'children'),
                 Output(self.map_card.graph, 'figure'),
             ],
             Input(self.store, 'data'),
@@ -174,7 +178,14 @@ class MemberPanel(FilterCard):
             filtered_keys = set(panel_data.get('intension',{}).keys())
             print('filtered_keys',filtered_keys)
             
-            cards = [self.membership_year_card, self.dob_card, self.gender_card, self.nation_card, self.table_card, self.map_card]
+            cards = [
+                self.membership_year_card, 
+                self.dob_card, 
+                self.gender_card, 
+                self.nation_card, 
+                # self.table_card, 
+                self.map_card
+            ]
             out = [
                 (
                     dash.no_update 
