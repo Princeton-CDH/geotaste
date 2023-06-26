@@ -151,7 +151,7 @@ class FigureFactory(DashFigureFactory):
             x=x,
             y=y,
             color=qual_col,
-            template='plotly_dark',
+            template=PLOTLY_TEMPLATE,
             # trendline="ols",
             # trendline_color_override="orange",
             # trendline_scope='overall',
@@ -171,7 +171,7 @@ class FigureFactory(DashFigureFactory):
             x, 
             height=height,
             color_discrete_sequence=[color] if color else None,
-            template='simple_white',
+            template=PLOTLY_TEMPLATE,
             category_orders=category_orders,
             range_x=(self.minval, self.maxval),
             **kwargs
@@ -229,9 +229,9 @@ class FigureFactory(DashFigureFactory):
             y='count', 
             height=height,
             color_discrete_sequence=[color] if color else None,
-            template='simple_white',
             category_orders=category_orders,
             range_x=(self.minval, self.maxval),
+            template=PLOTLY_TEMPLATE,
             **kwargs
         )
         fig.update_layout(

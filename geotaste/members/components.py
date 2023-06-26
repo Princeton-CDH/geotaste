@@ -68,7 +68,7 @@ class MemberMapComparisonCard(MemberMapCard):
     def graph(self):
         # fig=go.Figure()
         # fig.update_layout(height=200)
-        return dcc.Graph()#figure=fig)
+        return dcc.Graph(figure=MemberMap().plot())
     
     @cached_property
     def table(self):
@@ -124,14 +124,14 @@ class MemberPanel(FilterCard):
             # ]),
             dbc.Row([
                 self.store, 
-                # self.store_desc,
                 self.name_card.layout(params),
                 self.membership_year_card.layout(params),
                 self.dob_card.layout(params),
                 self.gender_card.layout(params),
                 self.nation_card.layout(params),
-                # self.map_card.layout(params),
-                self.table_card.layout(params)
+                self.map_card.layout(params),
+                self.table_card.layout(params),
+                self.store_desc,
             ])
         ])
         return body
@@ -143,17 +143,19 @@ class MemberPanel(FilterCard):
         @app.callback(
             Output(self.store, 'data'),
             [
+                Input(self.name_card.store, 'data'),
                 Input(self.membership_year_card.store, 'data'),
                 Input(self.dob_card.store, 'data'),
                 Input(self.gender_card.store, 'data'),
                 Input(self.nation_card.store, 'data'),
                 Input(self.map_card.store, 'data'),
-                # Input(self.table_card.store, 'data'),
             ]
         )
         def component_filters_updated(*filters_d):
             print('component_filters_updated')
-            return intersect_filters(*filters_d)
+            self.filter_data = intersect_filters(*filters_d)
+            print('filtering now:',self.filter_data.get(INTENSION_KEY))
+            return self.filter_data
         
         @app.callback(
             [
