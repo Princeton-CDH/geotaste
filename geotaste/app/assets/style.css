@@ -24,10 +24,7 @@
 }
 
 
-.tabs-container {
-
-    & .nav-link { padding:0 .5rem; }
-}
+.tabs-container .nav-link { padding:0 .5rem; }
 
 
 .tabs-container { 
@@ -84,9 +81,10 @@
     text-align: right;
     background-color: rgba(0,0,0,0);
     border-top: none;
-    & div { margin:0;padding:0;}
-    & p { margin:0;padding:0}
 }
+
+.card-footer div { margin:0;padding:0;}
+.card-footer p { margin:0;padding:0}
 
 p {
     margin-top:0.5rem;
@@ -184,12 +182,12 @@ body {
 }
 
 .storedescs-row {
-    & h2 {
-        font-size:1.1rem;
-        font-weight:normal;
-    }
-
     padding:1rem;
+}
+
+.storedescs-row h2 {
+    font-size:1.1rem;
+    font-weight:normal;
 }
 
 .storedescs-col-L { text-align: center;}
@@ -206,9 +204,10 @@ body {
 
 .store_desc { 
     display:inline; 
-    & div {display:inline}
-    & p {display:inline}
 }
+
+.store_desc div {display:inline}
+.store_desc p {display:inline}
 
 .comparison_map_graph {
     display: flex;
