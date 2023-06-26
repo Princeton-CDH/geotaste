@@ -1,8 +1,9 @@
 from ..imports import *
 
 BLANKSTR='‎‎‎‎'
-BLANK = dcc.Markdown('\[no filter\]')
+BLANK = '(unfiltered)'
 BLANKDIV = html.Div(BLANKSTR)
+NOFILTER = BLANK
 
 class BaseComponent(DashComponent):
     def __init__(
@@ -30,6 +31,7 @@ class BaseComponent(DashComponent):
 
         # ensure some exist
         self.color = None
+        self.filter_data = {}
         
         # overwritten here
         for k,v in kwargs.items(): 
@@ -73,60 +75,12 @@ class FilterComponent(BaseComponent):
 
     ## all components can have a memory -- only activated if nec
     @cached_property
-    def store(self): return dcc.Store(id=self.id('store'), data={})
+    def store(self):
+        return dcc.Store(id=self.id('store-'+self.__class__.__name__), data={})
 
     @cached_property
-    def store_desc(self): 
-        return html.Div(
-            #BLANKSTR, 
-            '',
-            style={
-                'color':self.color if hasattr(self,'color') and self.color else 'inherit', 
-                'textAlign':'center'
-            }
-        )
+    def store_desc(self): return html.Span(NOFILTER, className='store_desc')
 
-
-
-
-class FilterCard(FilterComponent):
-
-    @cached_property
-    def header(self):
-        return dbc.CardHeader(
-            dbc.Row([
-                dbc.Col(self.desc),
-                dbc.Col(self.button_clear, style={'textAlign':'right'})
-            ])
-        )
-    
-    @cached_property
-    def body(self):
-        return dbc.CardBody([self.graph])
-    
-    def layout(self, params=None):
-        return dbc.Card([
-            self.header, 
-            self.body,
-            self.footer,
-        ])
-    
-    @cached_property
-    def footer(self):
-        return dbc.CardFooter([self.store, self.store_desc])
-
-    @cached_property
-    def graph(self):
-        return dcc.Graph(figure=self.plot())
-    
-    @cached_property
-    def button_clear(self):
-        return dbc.Button(
-            "Clear", 
-            color="link", 
-            n_clicks=0
-        )
-    
     def component_callbacks(self, app):        
         @app.callback(
             Output(self.store_desc, 'children'),
@@ -137,6 +91,64 @@ class FilterCard(FilterComponent):
             print('store_data_updated')
             res=describe_filters(store_data, records_name=self.records_name)
             return dcc.Markdown(res) if res else BLANK
+
+
+class FilterCard(FilterComponent):
+
+    @cached_property
+    def header_with_clear(self):
+        return dbc.CardHeader(
+            dbc.Row([
+                dbc.Col(self.desc),
+                dbc.Col(self.button_clear, style={'textAlign':'right'})
+            ], className='pl0 pr0 card_header_row')
+        )
+    
+    @cached_property
+    def header(self):
+        return dbc.CardHeader(self.desc)
+    
+    @cached_property
+    def body(self):
+        return dbc.CardBody([self.graph])
+    
+    def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
+        children = []
+        if header: children.append(self.header)
+        if body: children.append(self.body)
+        if footer: children.append(self.footer)
+        return dbc.Card(children, **kwargs)
+    
+    @cached_property
+    def footer(self):
+        return dbc.CardFooter(
+            [
+                self.store, 
+                html.Div(self.button_clear, style={'float':'right'}),
+                html.Div(self.store_desc, style={'float':'left'}),
+            ],
+            style={
+                'color':self.color if hasattr(self,'color') and self.color else 'inherit', 
+            }
+        )
+
+    @cached_property
+    def graph(self):
+        return dcc.Graph(figure=self.plot())
+    
+    @cached_property
+    def store_desc(self): return dbc.Button(NOFILTER, className='store_desc', color='link')
+
+    @cached_property
+    def button_clear(self):
+        return dbc.Button(
+            "[reset]", 
+            color="link", 
+            n_clicks=0,
+            className='button_clear'
+        )
+    
+    
         
 
 

@@ -263,3 +263,10 @@ def filter_series(
         EXTENSION_KEY:{objid:({key:objval}) for objid,objval in dict(series_matching).items()}
     }
     return o
+
+def combine_figs(fig_new, fig_old):
+    fig_old = go.Figure(fig_old) if type(fig_old)!=go.Figure else fig_old
+    return go.Figure(
+        layout=fig_old.layout if fig_old is not None and hasattr(fig_old,'data') and fig_old.data else fig_new.layout,
+        data=fig_new.data
+    )
