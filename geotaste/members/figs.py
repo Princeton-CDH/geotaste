@@ -478,7 +478,7 @@ class MemberArrondMap(MemberFigure):
             labels='arrond_id',
             height=height,
             template=PLOTLY_TEMPLATE,
-            mapbox_style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8'
+            # mapbox_style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8'
         )
 
         fig_choro.add_scattermapbox(
