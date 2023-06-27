@@ -478,25 +478,29 @@ class MemberArrondMap(MemberFigure):
             labels='arrond_id',
             height=height,
             template=PLOTLY_TEMPLATE,
+            mapbox_style='white-bg',
             # mapbox_style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8'
         )
+        fig_choro.update_traces(marker_line_width=2)
 
-        fig_choro.add_scattermapbox(
-            lon=gdf.lon,
-            lat=gdf.lat,
-            mode='text',
-            text=gdf.arrond_id,
-            hoverinfo='none'
+        # fig_choro.add_scattermapbox(
+        #     lon=gdf.lon,
+        #     lat=gdf.lat,
+        #     mode='text',
+        #     text=gdf.arrond_id,
+        #     hoverinfo='none'
 
-        )
+        # )
         ofig = fig_choro
 
         ofig.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
             clickmode='event+select', 
-            dragmode=False
+            dragmode=False,
         )
         ofig.update_coloraxes(colorbar=dict(orientation='h', y=-0.25, thickness=10))
+        ofig.update_xaxes(fixedrange = True)
+        ofig.update_yaxes(fixedrange = True)
         return ofig
     
     def selected(self, selectedData):
