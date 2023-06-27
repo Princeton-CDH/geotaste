@@ -405,7 +405,7 @@ class ComparisonMemberMap(MemberMap):
 
         )
         
-        fig_choro.update_coloraxes(reversescale=True)
+        # fig_choro.update_coloraxes(reversescale=True)
         ofig=go.Figure(
             data=fig_choro.data + fig.data, 
             layout=fig_choro.layout
