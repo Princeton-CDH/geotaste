@@ -167,7 +167,7 @@ class MemberNationalityFigure(MemberFigure):
             uniformtext_minsize=12,
             clickmode='event+select', 
             dragmode='select',# if quant else None, 
-            selectdirection='h',# if quant else None
+            selectdirection='v',# if quant else None
         )
         fig.update_xaxes(title_text='Number of members', visible=False)
         fig.update_yaxes(title_text='', tickangle=0, autorange='reversed')
