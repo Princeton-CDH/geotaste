@@ -262,7 +262,7 @@ class MemberMap(MemberFigure):
             margin={"r":0,"t":0,"l":0,"b":0},
             clickmode='event+select', 
         )
-        fig_choro.update_traces(marker_line_width=2)
+        # fig_choro.update_traces(marker_line_width=2)
         ofig = fig_choro
         ofig.update_layout(
             coloraxis=dict(
@@ -281,7 +281,6 @@ class MemberMap(MemberFigure):
 
     def selected(self, selectedData):
         if selectedData:
-            print('selectedData',selectedData)
             latlons = self.selected_points_latlon(selectedData)
             if latlons:
                 s=pd.Series(list(zip(self.df['latitude'], self.df['longitude'])), name='latlon', index=self.df.index)
@@ -438,3 +437,74 @@ class ComparisonMemberTable(TableFigure):
             },
         )
 
+
+
+
+
+
+
+
+class MemberArrondMap(MemberFigure):
+    def __init__(self, filter_data={}, df=None):
+        super().__init__(
+            df=MemberDwellings().data if df is None else df,
+            filter_data=filter_data
+        )
+
+    def plot(self, color=None, height=250, **kwargs):
+        import geopandas as gpd
+
+        counts_by_arrond = get_arrond_counts(self.df).reset_index()
+
+        geojson = get_geojson_arrondissement()
+        gdf = (
+            gpd.GeoDataFrame.from_features(geojson)
+            .merge(counts_by_arrond, on="arrond_id")
+            .assign(lat=lambda d: d.geometry.centroid.y, lon=lambda d: d.geometry.centroid.x)
+            .set_index("arrond_id", drop=False)
+        )
+
+        fig_choro = px.choropleth_mapbox(
+            counts_by_arrond,
+            geojson=geojson,
+            locations='arrond_id', 
+            color='count',
+            center=MAP_CENTER,
+            zoom=10,
+            color_continuous_scale=['rgba(64, 176, 166, 0)', RIGHT_COLOR] if color == RIGHT_COLOR else ['rgba(171, 145, 85, 0)', LEFT_COLOR],
+            opacity=.5,
+            hover_name='arrond_id',
+            hover_data=['count','perc'],
+            labels='arrond_id',
+            height=height,
+            template=PLOTLY_TEMPLATE,
+            mapbox_style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8'
+        )
+
+        fig_choro.add_scattermapbox(
+            lon=gdf.lon,
+            lat=gdf.lat,
+            mode='text',
+            text=gdf.arrond_id,
+            hoverinfo='none'
+
+        )
+        ofig = fig_choro
+
+        ofig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            clickmode='event+select', 
+            dragmode=False
+        )
+        ofig.update_coloraxes(colorbar=dict(orientation='h', y=-0.25, thickness=10))
+        return ofig
+    
+    def selected(self, selectedData):
+        if selectedData:
+            locations = self.selected_points_locations(selectedData)
+            if locations:
+                s=self.df[['arrond_id']].reset_index().drop_duplicates().set_index(self.df.index.name)['arrond_id']
+                o=filter_series(s, locations, test_func=isin_or_hasone)
+                return o
+        
+        return {}

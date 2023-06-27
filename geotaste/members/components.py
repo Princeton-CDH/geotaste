@@ -60,7 +60,7 @@ class MemberTableCard(FilterTableCard):
 class MemberMapCard(FilterPlotCard):
     desc = 'Filter by arrondissement'
     # key='gender'
-    figure_class = MemberMap
+    figure_class = MemberArrondMap
 
 
 class MemberMapComparisonCard(MemberMapCard): 
