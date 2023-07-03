@@ -289,3 +289,38 @@ def make_counts_df(series):
             (x if x!='' else UNKNOWN for x in flatten_list(series))
         , name=series.name).value_counts()
     ).reset_index()
+
+
+def delist_df(df, sep=' '):
+    def fix(y):
+        if is_listy(y): return sep.join(str(x) for x in y)
+        if is_numeric(y): y=round(y,2)
+        return y
+    df=df.copy()
+    for col in df:
+        df[col]=df[col].apply(fix)
+    return df
+
+
+def get_dash_table(df, cols=[], page_size=5):
+    cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
+    dff = delist_df(df[cols])
+    cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
+    return dash_table.DataTable(
+        data=dff.to_dict('records'),
+        columns=cols_l,
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
+        page_action="none",
+        page_size=page_size,
+        fixed_rows={'headers': True},
+        style_data={
+            'whiteSpace': 'normal',
+            # 'height': 'auto',
+        },
+        style_cell={
+            'minWidth': 95, 'maxWidth': 95, 'width': 95
+        },
+        style_table={'height':f'{page_size * 75}px', 'overflowY': 'auto', 'width':'100%'}
+    )

@@ -315,6 +315,9 @@ class MemberMap(MemberFigure):
 
 
 class ComparisonMemberMap(MemberMap):
+    cols_table = ['name','membership_years','birth_year','gender','nationalities','arrond_id','L_or_R']
+    
+
     def __init__(
             self, 
             filter_data_L={}, 
@@ -412,6 +415,24 @@ class ComparisonMemberMap(MemberMap):
         ofig.update_layout(autosize=True)
         ofig.layout._config = {'responsive':True}
         return ofig
+    
+    def table(self, cols=[], sep=' ', **kwargs):
+        df = pd.DataFrame(
+            g.assign(
+                arrond_id=sep.join(
+                    sorted(
+                        [x for x in g.arrond_id.unique() if x]
+                        , key=lambda x: int(x)
+                    )
+                )
+            ).iloc[0] 
+            for i,g in self.df.groupby(['uri','L_or_R'])
+        )
+        return get_dash_table(df, cols=list(self.cols_table if not cols else cols))
+    
+    def table_arrond(self, cols=[], **kwargs):
+        cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
+        return get_dash_table(self.df_arronds, cols=cols, page_size=5)
 
 
 
