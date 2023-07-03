@@ -61,7 +61,7 @@ class Dataset:
 
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
-            self.filter_key(key,vals)
+            self.filter_series(key,vals)
             for key,vals in list(filter_data.items()) + list(other_filter_data.items())
         ])
 
