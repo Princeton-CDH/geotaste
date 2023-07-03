@@ -274,3 +274,5 @@ layout-content-container {
     /* border:1px solid green; */
     height:100%;
 }
+
+p { font-weight:normal; font-weight:1em; }
