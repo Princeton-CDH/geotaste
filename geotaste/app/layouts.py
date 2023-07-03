@@ -4,7 +4,7 @@ from ..members.components import *
 from ..books.components import *
 
 STYLE_INVIS={'display':'none'}
-STYLE_VIS={'display':'block'}
+STYLE_VIS={'display':'flex'}
 
 
 # STYLE_INVIS={'visibility':'hidden'}
@@ -50,12 +50,16 @@ class GeotasteLayout(BaseComponent):
             top_row, 
             main_row
         ], className='layout-leftcol', width=6)
-        right_col = dbc.Col(self.panels.comparison_map_graph, className='layout-rightcol', width=6)
+        
+        right_col = dbc.Col(
+            self.panels.layout_content(params), 
+            className='layout-rightcol', 
+            width=6
+        )
 
-        return dbc.Container([
-            self.navbar,  # row
-            dbc.Row([left_col, right_col], className='layout-belownavbar')
-        ], className='layout-container')
+        notnavbar = dbc.Row([left_col, right_col], className='layout-belownavbar')
+
+        return dbc.Container([self.navbar, notnavbar], className='layout-container')
 
 
 
@@ -68,15 +72,22 @@ class PanelComparison(BaseComponent):
 
     @cached_property
     def comparison_map_graph(self):
-        return dcc.Graph(figure=go.Figure(), className='comparison_map_graph')
-    
+        return dcc.Graph(
+            figure=go.Figure(), 
+            className='comparison_map_graph'
+        )
     
     @cached_property
-    def comparison_map_row(self, params=None):
-        return dbc.Row([
-            dbc.Col(self.comparison_map_graph, width=12)
-        ], className='comparemap-row')
-
+    def comparison_map_graph_div(self):
+        return html.Div(self.comparison_map_graph)
+    
+    @cached_property
+    def comparison_map_table(self):
+        return html.Div(
+            html.Pre('Table placeholder'), 
+            className='comparison_map_table'
+        )
+    
     @cached_property
     def dueling_maps_row(self, params=None):
         return dbc.Row([
@@ -104,28 +115,24 @@ class PanelComparison(BaseComponent):
                 className='storedescs-col storedescs-col-R right-color'
             ),
         ], className='storedescs-row')
-    
-        
-    
-    @cached_property
-    def toptab(self): 
-        return dbc.Container([
-            self.dueling_maps_row,
-            self.comparison_map_row,
-        ], className='toptab-container')
-    
-
         
     def layout_top(self, params=None):
         return dbc.Container([
             self.dueling_descs_row,
-            # self.toptabs            
+            # self.toptabs       # -> this now moved up to navbar level in GeotasteLayout
         ])
     
     def layout_main(self, params=None):
         return dbc.Container([
             self.layout_dueling_panels(params)
         ])
+    
+    def layout_content(self, params=None):
+        return dbc.Container([
+            dbc.Row(self.graphtabs, className='content-tabs-row'),
+            dbc.Row(self.comparison_map_graph_div, className='content-map-row comparemap-row'),
+            dbc.Row(self.comparison_map_table, className='content-table-row')
+        ], className='layout-content-container')
     
     def layout_dueling_panels(self, params=None):
         return dbc.Row([
@@ -137,10 +144,17 @@ class PanelComparison(BaseComponent):
     @cached_property
     def toptabs(self):
         return dbc.Tabs([
-            dbc.Tab(label='Comparing members of the library', tab_id='members'),
-            dbc.Tab(label='Comparing books borrowed', tab_id='books'),
+            dbc.Tab(label='Where did members live?', tab_id='members'),
+            dbc.Tab(label='Which books were borrowed?', tab_id='books'),
             # dbc.Tab(label='Borrowing event', tab_id='events'),
         ], className='navtabs-container', active_tab='members')
+    
+    @cached_property
+    def graphtabs(self):
+        return dbc.Tabs([
+            dbc.Tab(label='Map', tab_id='map'),
+            dbc.Tab(label='Data', tab_id='table'),
+        ], className='graphtabs-container', active_tab='table')
     
 
 
@@ -162,14 +176,31 @@ class PanelComparison(BaseComponent):
             ],
             inputs=[Input(self.toptabs, 'active_tab')]
         )
-        def switch_tabs(tab_id, num_tabs=2):
+        def switch_toptabs(tab_id, num_tabs=2):
             invis=tuple([STYLE_INVIS for n in range(num_tabs)])
             vis=tuple([STYLE_VIS for n in range(num_tabs)])
             return (invis,vis) if tab_id=='books' else (vis,invis)
-
         
         @app.callback(
-            Output(self.comparison_map_graph, 'figure'),
+            [
+                Output(self.comparison_map_graph_div, 'style'),
+                Output(self.comparison_map_table, 'style'),
+            ],
+            [
+                Input(self.graphtabs, 'active_tab')
+            ]
+        )
+        def switch_graphtabs(tab_id, num_tabs=2):
+            invis=tuple([STYLE_INVIS for n in range(num_tabs)])
+            vis=tuple([STYLE_VIS for n in range(num_tabs)])
+            return (STYLE_INVIS,STYLE_VIS) if tab_id=='table' else (STYLE_VIS,STYLE_INVIS)
+        
+        
+        @app.callback(
+            [
+                Output(self.comparison_map_graph, 'figure'),
+                Output(self.comparison_map_table, 'children'),
+            ],
             [
                 Input(self.L.store, 'data'), 
                 Input(self.R.store, 'data')
@@ -179,10 +210,15 @@ class PanelComparison(BaseComponent):
         def redraw_map(filter_data_L, filter_data_R, old_figdata):
             fig = ComparisonMemberMap(filter_data_L, filter_data_R)
             self.comparison_map_fig = fig
-            return combine_figs(
+            ofig = combine_figs(
                 fig_new=fig.plot(),
                 fig_old=old_figdata
             )
+            tables = dbc.Container([
+                dbc.Row([html.H4('Data by members'), fig.table()], className='h-50 align-top', style={'display':'block'}),
+                dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-50 align-top', style={'display':'block'})
+            ])
+            return [ofig, tables]
 
 
 

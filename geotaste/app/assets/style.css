@@ -1,3 +1,12 @@
+h1 { font-size:2rem;}
+h2 { font-size:1.4rem;}
+h3 { font-size:1.3rem;}
+h4 { font-size:1.15rem;}
+h5 { font-size:1.1rem;}
+
+
+
+
 @font-face {
     font-family: SCo;
     src: url(/assets/Brown-Regular.otf);
@@ -221,6 +230,18 @@ body {
     padding-bottom:50px;
     /* position:fixed; top:0;right:0; */
 }
+.comparison_map_table {
+    /* display: flex; */
+    height: 100%;
+    width: 100%;
+    /* padding-bottom:50px; */
+    /* border: 1px solid red; */
+    /* position:fixed; top:0;right:0; */
+}
+
+layout-content-container {
+    height:100%;
+}
 
 .layout-rightcol {
     border:1px solid green;
@@ -244,4 +265,12 @@ body {
 .logo-col {
     width: fit-content;
     /* border: 1px solid red; */
+}
+
+
+.layout-content-container, .content-table-row {
+    display:flex;
+    flex-direction: column;
+    /* border:1px solid green; */
+    height:100%;
 }
