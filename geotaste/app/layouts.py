@@ -154,7 +154,7 @@ class PanelComparison(BaseComponent):
         return dbc.Tabs([
             dbc.Tab(label='Map', tab_id='map'),
             dbc.Tab(label='Data', tab_id='table'),
-        ], className='graphtabs-container', active_tab='table')
+        ], className='graphtabs-container', active_tab='map')
     
 
 
