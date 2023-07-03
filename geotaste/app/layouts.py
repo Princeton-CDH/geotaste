@@ -6,14 +6,12 @@ from ..books.components import *
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'block'}
 
-STYLE_INVIS={'opacity':0}
-STYLE_VIS={'opacity':1}
 
-STYLE_INVIS={'visibility':'hidden'}
-STYLE_VIS={'visibility':'visible'}
+# STYLE_INVIS={'visibility':'hidden'}
+# STYLE_VIS={'visibility':'visible'}
 
-STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
-STYLE_VIS = {'position': 'relative'}
+# STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
+# STYLE_VIS = {'position': 'relative'}
 
 class GeotasteLayout(BaseComponent):
     def __init__(self):
@@ -28,13 +26,18 @@ class GeotasteLayout(BaseComponent):
         return html.Div([
             html.Img(src=LOGO_SRC, className='logo-img'),
             html.H1(self.title, className='logo-title'),
-            html.Img(src=LOGO_SRC, className='logo-img'),
+            # html.Img(src=LOGO_SRC, className='logo-img'),
         ], className='logo')
 
     @cached_property
     def navbar(self):
-        return dbc.Row(self.logo, className='navbar-row')
-    
+        return dbc.Row([
+            dbc.Col(self.logo, className='logo-col', width=4),
+            dbc.Col(self.panels.toptabs, className='toptabs-col', width=8)
+        ], className='navbar-row')
+
+
+
     @cached_property
     def content(self):
         return dbc.Row(self.panel_comparison.layout())
@@ -103,24 +106,20 @@ class PanelComparison(BaseComponent):
         ], className='storedescs-row')
     
         
-    @cached_property
-    def toptabs(self):
-        return dbc.Tabs([
-            dbc.Tab(label='Juxtapose', tab_id='juxtapose'),
-            dbc.Tab(label='Contrast', tab_id='contrast'),
-        ], className='tabs-container', active_tab='juxtapose')
-
+    
     @cached_property
     def toptab(self): 
         return dbc.Container([
             self.dueling_maps_row,
             self.comparison_map_row,
         ], className='toptab-container')
+    
+
         
     def layout_top(self, params=None):
         return dbc.Container([
-            # self.dueling_maps_row,
-            self.dueling_descs_row
+            self.dueling_descs_row,
+            # self.toptabs            
         ])
     
     def layout_main(self, params=None):
@@ -135,11 +134,39 @@ class PanelComparison(BaseComponent):
         ])
     
 
+    @cached_property
+    def toptabs(self):
+        return dbc.Tabs([
+            dbc.Tab(label='Comparing members of the library', tab_id='members'),
+            dbc.Tab(label='Comparing books borrowed', tab_id='books'),
+            # dbc.Tab(label='Borrowing event', tab_id='events'),
+        ], className='navtabs-container', active_tab='members')
+    
+
 
 
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
+
+        @app.callback(
+            output=[
+                (
+                    Output(self.L.member_panel_row, 'style'),
+                    Output(self.R.member_panel_row, 'style'),
+                ),
+                (
+                    Output(self.L.book_panel_row, 'style'),
+                    Output(self.R.book_panel_row, 'style'),
+                )
+            ],
+            inputs=[Input(self.toptabs, 'active_tab')]
+        )
+        def switch_tabs(tab_id, num_tabs=2):
+            invis=tuple([STYLE_INVIS for n in range(num_tabs)])
+            vis=tuple([STYLE_VIS for n in range(num_tabs)])
+            return (invis,vis) if tab_id=='books' else (vis,invis)
+
         
         @app.callback(
             Output(self.comparison_map_graph, 'figure'),
@@ -172,9 +199,25 @@ class MemberBookEventPanel(FilterComponent):
     def layout(self, params=None):
         return dbc.Container([
             self.store,
-            dbc.Row(self.member_panel.layout(params)),
-            dbc.Row(self.book_panel.layout(params))
+            self.member_panel_row,
+            self.book_panel_row
         ])
+    
+    @cached_property
+    def member_panel_row(self, params=None):
+        return dbc.Row(
+            self.member_panel.layout(params), 
+            className='member-panel', 
+            id=dict(index=f'member-{self.L_or_R}', type='member-panel')
+        )
+    
+    @cached_property
+    def book_panel_row(self, params=None):
+        return dbc.Row(
+            self.book_panel.layout(params), 
+            className='book-panel', 
+            id=dict(index=f'book-{self.L_or_R}', type='book-panel')
+        )
     
     def map_ff(self, filter_data={}):
         if not filter_data: filter_data=self.filter_data
@@ -249,13 +292,7 @@ class RightPanel(MemberBookEventPanel):
     
 
     
-    # @cached_property
-    # def toptabs(self):
-    #     return dbc.Tabs([
-    #         dbc.Tab(label='Juxtapose', tab_id='0'),
-    #         dbc.Tab(label='Contrast', tab_id='1'),
-    #     ], className='tabs-container', active_tab='0')
-
+    
     # @cached_property
     # def toptab1(self, params=None):
     #     return html.Div(self.dual_map_row(params), style=STYLE_INVIS)
