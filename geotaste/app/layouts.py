@@ -215,8 +215,9 @@ class PanelComparison(BaseComponent):
                 fig_old=old_figdata
             )
             tables = dbc.Container([
-                dbc.Row([html.H4('Data by members'), fig.table()], className='h-50 align-top', style={'display':'block'}),
-                dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-50 align-top', style={'display':'block'})
+                dbc.Row([html.H4('Data by members'), fig.table()], className='h-20 align-top', style={'display':'block'}),
+                dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-20 align-top', style={'display':'block'}),
+                dbc.Row([html.H4('Degree of difference compared'), fig.table_diff()], className='h-20 align-top', style={'display':'block'})
             ])
             return [ofig, tables]
 
