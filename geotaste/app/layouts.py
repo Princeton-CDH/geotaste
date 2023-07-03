@@ -181,45 +181,54 @@ class PanelComparison(BaseComponent):
             vis=tuple([STYLE_VIS for n in range(num_tabs)])
             return (invis,vis) if tab_id=='books' else (vis,invis)
         
-        @app.callback(
-            [
-                Output(self.comparison_map_graph_div, 'style'),
-                Output(self.comparison_map_table, 'style'),
-            ],
-            [
-                Input(self.graphtabs, 'active_tab')
-            ]
-        )
-        def switch_graphtabs(tab_id, num_tabs=2):
-            invis=tuple([STYLE_INVIS for n in range(num_tabs)])
-            vis=tuple([STYLE_VIS for n in range(num_tabs)])
-            return (STYLE_INVIS,STYLE_VIS) if tab_id=='table' else (STYLE_VIS,STYLE_INVIS)
+        # @app.callback(
+        #     [
+        #         Output(self.comparison_map_graph_div, 'style'),
+        #         Output(self.comparison_map_table, 'style'),
+        #     ],
+        #     [
+        #         Input(self.graphtabs, 'active_tab')
+        #     ]
+        # )
+        # def switch_graphtabs(tab_id, num_tabs=2):
+        #     invis=tuple([STYLE_INVIS for n in range(num_tabs)])
+        #     vis=tuple([STYLE_VIS for n in range(num_tabs)])
+        #     return (STYLE_INVIS,STYLE_VIS) if tab_id=='table' else (STYLE_VIS,STYLE_INVIS)
         
         
         @app.callback(
             [
                 Output(self.comparison_map_graph, 'figure'),
+                Output(self.comparison_map_graph_div, 'style'),
                 Output(self.comparison_map_table, 'children'),
             ],
             [
                 Input(self.L.store, 'data'), 
-                Input(self.R.store, 'data')
+                Input(self.R.store, 'data'),
+                Input(self.graphtabs, 'active_tab'),
             ],
             State(self.comparison_map_graph, 'figure'),
         )
-        def redraw_map(filter_data_L, filter_data_R, old_figdata):
+        def redraw_map(filter_data_L, filter_data_R, tab_id, old_figdata):
             fig = ComparisonMemberMap(filter_data_L, filter_data_R)
             self.comparison_map_fig = fig
-            ofig = combine_figs(
-                fig_new=fig.plot(),
-                fig_old=old_figdata
-            )
-            tables = dbc.Container([
-                dbc.Row([html.H4('Data by members'), fig.table()], className='h-20 align-top', style={'display':'block'}),
-                dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-20 align-top', style={'display':'block'}),
-                dbc.Row([html.H4('Degree of difference compared'), fig.table_diff()], className='h-20 align-top', style={'display':'block'})
-            ])
-            return [ofig, tables]
+
+            if tab_id=='table':
+                tables = dbc.Container([
+                    dbc.Row([html.H4('Data by members'), fig.table()], className='h-20 align-top', style={'display':'block'}),
+                    dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-20 align-top', style={'display':'block'}),
+                    dbc.Row([html.H4('Degree of difference compared'), fig.table_diff()], className='h-20 align-top', style={'display':'block'})
+                ])
+
+                return [go.Figure(), STYLE_INVIS, tables]
+            else:
+                ofig = combine_figs(
+                    fig_new=fig.plot(),
+                    fig_old=old_figdata
+                )
+                ofig.update_layout(autosize=True)
+            
+                return [ofig, STYLE_VIS, BLANKDIV]
 
 
 
