@@ -127,11 +127,11 @@ class PanelComparison(BaseComponent):
             self.layout_dueling_panels(params)
         ])
     
+    
     def layout_content(self, params=None):
         return dbc.Container([
             dbc.Row(self.graphtabs, className='content-tabs-row'),
-            dbc.Row(self.comparison_map_graph_div, className='content-map-row comparemap-row'),
-            dbc.Row(self.comparison_map_table, className='content-table-row')
+            dbc.Row(self.graphtab, className='content-belowtabs-row content-map-row comparemap-row content-table-row'),
         ], className='layout-content-container')
     
     def layout_dueling_panels(self, params=None):
@@ -154,8 +154,10 @@ class PanelComparison(BaseComponent):
         return dbc.Tabs([
             dbc.Tab(label='Map', tab_id='map'),
             dbc.Tab(label='Data', tab_id='table'),
-        ], className='graphtabs-container', active_tab='map')
-    
+        ], className='graphtabs-container', active_tab='table')
+    @cached_property
+    def graphtab(self):
+        return html.Div(html.Pre('Loading...'), className='graphtab-div')
 
 
 
@@ -217,7 +219,7 @@ class PanelComparison(BaseComponent):
                 tables = dbc.Container([
                     dbc.Row([html.H4('Data by members'), fig.table()], className='h-20 align-top', style={'display':'block'}),
                     dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-20 align-top', style={'display':'block'}),
-                    dbc.Row([html.H4('Degree of difference compared'), fig.table_diff()], className='h-20 align-top', style={'display':'block'})
+                    dbc.Row([html.H4('Degree of difference compared'), html.P(dcc.Markdown(fig.desc_table_diff())), fig.table_diff()], className='h-20 align-top', style={'display':'block'})
                 ])
 
                 return [go.Figure(), STYLE_INVIS, tables]

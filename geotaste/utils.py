@@ -324,3 +324,10 @@ def get_dash_table(df, cols=[], page_size=5, height_table='25vh'):
         },
         style_table={'height':height_table, 'overflowY': 'auto', 'width':'100%', 'margin-bottom':'1rem', 'padding-bottom':'1rem', 'border-bottom':'1px solid black'}
     )
+
+
+def ordinal_str(n: int) -> str:
+    """
+    derive the ordinal numeral for a given number n
+    """
+    return f"{n:d}{'tsnrhtdd'[(n//10%10!=1)*(n%10<4)*n%10::4]}"

@@ -435,7 +435,19 @@ class ComparisonMemberMap(MemberMap):
         return get_dash_table(self.df_arronds, cols=cols, page_size=5)
     
     def table_diff(self, cols=[], **kwargs):
-        return get_dash_table(self.rank_diff())#, cols=['key_L', 'key_R', 'pvalue', 'statistic', 'is_self'])
+        return get_dash_table(self.rank_diff(), cols=['rank_diff', 'group1', 'group2', 'pvalue', 'statistic', 'is_self'])
+    
+    def desc_table_diff(self, **kwargs):
+        df=self.rank_diff()
+        dfq=df[df.is_self==1]
+        print(dfq)
+        if not len(dfq): return ''
+
+        row=dfq.iloc[0]
+        n1,n2=self.diffkeys()
+        return f'Statistically, the distribution across arrondissement of the members belonging to the **L**eft-hand group ({n1}) vs the **R**ight-hand group ({n2}) is the {ordinal_str(row.rank_diff)} largest noted thus far. It {"is" if row.pvalue<=0.05 else "is not"} statistically significant, with a pvalue of {row.pvalue:.02} and a Kolmogorov–Smirnov test statistic of {row.statistic}.'
+            
+
             
     def diffdb(self):
         from sqlitedict import SqliteDict
@@ -467,6 +479,7 @@ class ComparisonMemberMap(MemberMap):
                 ld.append(dict(group1=k1, group2=k2, **{kx:float(kv) for kx,kv in dict(val).items()}))
         df=pd.DataFrame(ld)
         df=df.sort_values('statistic',ascending=False) if len(df) else df
+        df['rank_diff'] = df.statistic.rank(ascending=False, method='first').astype(int)
         return df
 
     def rank_diff(self):
