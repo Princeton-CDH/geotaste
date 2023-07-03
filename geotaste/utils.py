@@ -302,7 +302,7 @@ def delist_df(df, sep=' '):
     return df
 
 
-def get_dash_table(df, cols=[], page_size=5):
+def get_dash_table(df, cols=[], page_size=5, height_table='30vh'):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -322,5 +322,5 @@ def get_dash_table(df, cols=[], page_size=5):
         style_cell={
             'minWidth': 95, 'maxWidth': 95, 'width': 95
         },
-        style_table={'height':f'{page_size * 75}px', 'overflowY': 'auto', 'width':'100%'}
+        style_table={'height':height_table, 'overflowY': 'auto', 'width':'100%'}
     )
