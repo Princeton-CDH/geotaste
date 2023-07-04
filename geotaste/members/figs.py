@@ -432,7 +432,7 @@ class ComparisonMemberMap(MemberMap):
     
     def table_arrond(self, cols=[], **kwargs):
         cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
-        return get_dash_table(self.df_arronds, cols=cols, page_size=5)
+        return get_dash_table(self.df_arronds, cols=cols)
     
     def table_diff(self, cols=[], **kwargs):
         return get_dash_table(self.rank_diff(), cols=['rank_diff', 'group1', 'group2', 'pvalue', 'statistic', 'is_self'])

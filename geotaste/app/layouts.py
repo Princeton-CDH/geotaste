@@ -130,8 +130,8 @@ class PanelComparison(BaseComponent):
     
     def layout_content(self, params=None):
         return dbc.Container([
-            dbc.Row(self.graphtabs, className='content-tabs-row h-10'),
-            dbc.Row(self.graphtab, className='content-belowtabs-row h-90'),
+            dbc.Row(self.graphtabs, className='content-tabs-row'),
+            dbc.Row(self.graphtab, className='content-belowtabs-row'),
         ], className='layout-content-container')
     
     def layout_dueling_panels(self, params=None):
@@ -178,12 +178,13 @@ class PanelComparison(BaseComponent):
 
         graphtabs = get_tabs(
             children=[
-                dict(children=map_tabs, label='Maps', tab_id='map'),
-                dict(children=tbl_tabs, label='Data', tab_id='tbl'),
-                dict(children=analyze_tabs, label='Analyze', tab_id='analyze')
+                dict(children=map_tabs, label='Map data', tab_id='map'),
+                dict(children=tbl_tabs, label='View data', tab_id='tbl'),
+                dict(children=analyze_tabs, label='Analyze data', tab_id='analyze')
             ], 
             tab_level=1, 
-            className='graphtabs-container', 
+            className='graphtabs-container',
+            active_tab='tbl'
         )
         return dbc.Container(graphtabs, className='graphtabs-container-container')
     
@@ -248,8 +249,7 @@ class PanelComparison(BaseComponent):
                             html.H4('Data by members'), 
                             fig.table()
                         ], 
-                        className='h-100 align-top', 
-                        style={'display':'block'}
+                        className='graphtab padded', 
                     )
                 elif 'tbl_arrond' in tab_ids_2_set:
                     return dbc.Container(
@@ -257,8 +257,7 @@ class PanelComparison(BaseComponent):
                             html.H4('Data by arrondissement'), 
                             fig.table_arrond()
                         ], 
-                        className='h-100 align-top', 
-                        style={'display':'block'}
+                        className='graphtab padded', 
                     )
             elif 'analyze' in tab_ids_1_set:
                 if 'tbl_diff' in tab_ids_2_set:
@@ -272,8 +271,7 @@ class PanelComparison(BaseComponent):
                             ), 
                             fig.table_diff()
                         ], 
-                        className='h-100 align-top', 
-                        style={'display':'block'}
+                        className='graphtab padded', 
                     )
             elif 'map' in tab_ids_1_set:
                 ofig = ff.plot()
@@ -282,7 +280,7 @@ class PanelComparison(BaseComponent):
                     figure=ofig, 
                     className='comparison_map_graph'
                 )
-                return [dbc.Container(ograph)]
+                return [dbc.Container(ograph, className='graphtab')]
 
 
 

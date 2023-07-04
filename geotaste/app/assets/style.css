@@ -223,7 +223,17 @@ p {
 }
 
 .layout-content-container {
+    display:flex;
+    flex-flow:column;
     height:100%;
+    /* border: 1px solid green; */
+}
+
+.content-belowtabs-row {
+    display:flex;
+    flex-grow:1;
+    flex-direction: column;
+    width:100%;
 }
 
 .layout-rightcol {
@@ -261,7 +271,51 @@ p {
     padding-bottom:1px;
 }
 
+.graphtabs-container .nav-link { 
+    height:50px;
+    line-height:50px;
+    padding:0 1rem;
+}
+
+
 .graphtabs-container-container { 
     border-bottom: 1px solid #dddddd; 
     height:100px;
+}
+
+.graphtab-div {
+    display:flex;
+    flex-direction: column;
+    height:100%;
+    flex-grow:1;
+    width:100%;
+    /* border:1px solid red; */
+    flex-flow:column;
+    overflow: scroll;
+}
+
+.graphtab {
+    display:flex;
+    flex-direction: column;
+    height:100%;
+    flex-grow:1;
+    width:100%;
+    /* border:1px solid blue; */
+}
+
+.padded {
+    padding:10px;
+}
+
+.dash-table-container {
+    display:flex;
+    flex-direction: column;
+    height:100v;
+    flex-grow:1;
+    width:100%;
+    /* border:1px solid blue; */
+}
+
+.dash-spreadsheet.dash-freeze-top, .dash-spreadsheet.dash-virtualized {
+    max-height: unset !important;
 }
