@@ -302,35 +302,36 @@ def delist_df(df, sep=' '):
     return df
 
 
-def get_dash_table(df, cols=[], page_size=25, height_table='100vh'):
+def get_dash_table(df, cols=[], page_size=10, height_table='80vh'):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
     return dash_table.DataTable(
         data=dff.to_dict('records'),
         columns=cols_l,
-        sort_action="native",
-        sort_mode="multi",
-        filter_action="native",
+        # sort_action="native",
+        # sort_mode="multi",
+        # filter_action="native",
+        # page_action="native",
         page_action="none",
         page_size=page_size,
         fixed_rows={'headers': True},
         style_data={
             'whiteSpace': 'normal',
-            # 'height': 'auto',
+            'height': 'auto',
         },
         style_cell={
             'minWidth': 95, 'maxWidth': 95, 'width': 95
         },
         style_table={
             'height':height_table, 
-            # 'display':'flex', 
-            'overflowY': 'auto', 
-            'width':'100%', 
-            # 'margin-bottom':'1rem', 
-            # 'padding-bottom':'1rem', 
-            # 'border-bottom':'1px solid black'
-        }
+            'overflowY':'scroll',
+            'display':'block',
+            # 'flex-didrection':'column',
+            # 'flex-grow':1,
+            # 'width':'100%',
+            # 'border':'1px solid #eeeee'
+        },
     )
 
 
