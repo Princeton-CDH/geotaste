@@ -163,29 +163,27 @@ def filter_df_old(df, filter_data={}, return_query=False):
 
 
 
-
+def format_intension(d):
+    ol=[]
+    for key,l in d.items():
+        is_quant = all(is_numeric(x) for x in l)
+        if len(l)<3:
+            o = ' and '.join(str(x) for x in l)
+        elif is_quant:
+            # l.sort()
+            o=f'{l[0]} to {l[-1]}'
+        else:
+            # o=' and '.join(f'{repr(x)}' for x in l)
+            o=f'{l[0]} ... {l[-1]}'
+        # o=f'_{o}_ on  *{key}*'
+        o=f'{repr(o)} in {key}'
+        ol.append(o)
+    return "; ".join(ol)
 
 
 def describe_filters(store_data, records_name='records'):
     if not store_data or not INTENSION_KEY in store_data or not EXTENSION_KEY in store_data:
         return ''
-
-    def format_intension(d):
-        ol=[]
-        for key,l in d.items():
-            is_quant = all(is_numeric(x) for x in l)
-            if len(l)<3:
-                o = ' and '.join(str(x) for x in l)
-            elif is_quant:
-                # l.sort()
-                o=f'{l[0]} to {l[-1]}'
-            else:
-                # o=' and '.join(f'{repr(x)}' for x in l)
-                o=f'{l[0]} ... {l[-1]}'
-            o=f'_{o}_ on  *{key}*'
-            ol.append(o)
-        return "; ".join(ol)
-
     len_ext=len(store_data[EXTENSION_KEY])
     fmt_int=format_intension(store_data[INTENSION_KEY])
     return f'Filtering {fmt_int} yields _{len_ext:,}_ {records_name}.'
