@@ -19,8 +19,8 @@ def run():
     app.run(
         8111, 
         host='0.0.0.0',
-        debug=False,
-        dev_tools_ui=False
+        debug=True,
+        # dev_tools_ui=False
     )
 
 if __name__=='__main__': run()

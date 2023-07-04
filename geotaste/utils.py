@@ -309,23 +309,23 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh'):
     return dash_table.DataTable(
         data=dff.to_dict('records'),
         columns=cols_l,
-        # sort_action="native",
-        # sort_mode="multi",
-        # filter_action="native",
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
         # page_action="native",
         page_action="none",
         page_size=page_size,
         fixed_rows={'headers': True},
         style_data={
             'whiteSpace': 'normal',
-            'height': 'auto',
+            # 'height': 'auto',
         },
         style_cell={
             'minWidth': 95, 'maxWidth': 95, 'width': 95
         },
         style_table={
             'height':height_table, 
-            'overflowY':'scroll',
+            'overflowY':'auto',
             'display':'block',
             # 'flex-didrection':'column',
             # 'flex-grow':1,
