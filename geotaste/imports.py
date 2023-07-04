@@ -118,4 +118,3 @@ from .books import *
 from .events import *
 from .combined import *
 from .comparison import *
-print('fully loaded:',dir())

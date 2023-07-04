@@ -4,7 +4,6 @@ from ..imports import *
 class PanelComparison(BaseComponent):
     def __init__(self, *x, **y):
         from ..combined import MemberBookEventPanel
-
         super().__init__(*x,**y)
         self.L = MemberBookEventPanel(name='comparison-panel-L', L_or_R='L', color=LEFT_COLOR)
         self.R = MemberBookEventPanel(name='comparison-panel-R', L_or_R='R', color=RIGHT_COLOR)
@@ -213,7 +212,7 @@ class PanelComparison(BaseComponent):
             ]
         )
         def reset_ff(filter_data_L, filter_data_R):
-            raise PreventUpdate            
+            return compare_filters(filter_data_L, filter_data_R)
 
 
 

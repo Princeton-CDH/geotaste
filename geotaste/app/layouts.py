@@ -1,20 +1,14 @@
 from ..imports import *
 from .components import *
 
-# from ..members.components import *
-# from ..books.components import *
-# from .panels import *
-
-
 
 class GeotasteLayout(BaseComponent):
     def __init__(self):
         from ..comparison import PanelComparison
 
 
-        super().__init__(title="Geography of Taste")
+        super().__init__(title="Shakespeare & Co. Labs")
         self.panels = PanelComparison()
-        # self.ticker = dcc.Interval(interval=1*1000, n_intervals=0)
         self.last_window_size = None
 
 
@@ -23,7 +17,7 @@ class GeotasteLayout(BaseComponent):
         return html.Div([
             html.Img(src=LOGO_SRC, className='logo-img'),
             html.H1(self.title, className='logo-title'),
-            # html.Img(src=LOGO_SRC, className='logo-img'),
+            html.Img(src=LOGO_SRC, className='logo-img'),
         ], className='logo')
 
     @cached_property
