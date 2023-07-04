@@ -445,7 +445,7 @@ class ComparisonMemberMap(MemberMap):
 
         row=dfq.iloc[0]
         n1,n2=self.diffkeys()
-        return f'Statistically, the distribution across arrondissement of the members belonging to the **L**eft-hand group ({n1}) vs the **R**ight-hand group ({n2}) is the {ordinal_str(row.rank_diff)} largest noted thus far. It {"is" if row.pvalue<=0.05 else "is not"} statistically significant, with a pvalue of {row.pvalue:.02} and a Kolmogorov–Smirnov test statistic of {row.statistic}.'
+        return f'Statistically, the spatial difference (difference in distribution across arrondissement) of the members is the ***{ordinal_str(row.rank_diff)}*** largest noted thus far. It ***{"is" if row.pvalue<=0.05 else "is not"}*** statistically significant, with a pvalue of ***{row.pvalue:.02}*** and a Kolmogorov–Smirnov test statistic of ***{row.statistic:.02}***.'
             
 
             

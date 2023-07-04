@@ -302,7 +302,7 @@ def delist_df(df, sep=' '):
     return df
 
 
-def get_dash_table(df, cols=[], page_size=5, height_table='25vh'):
+def get_dash_table(df, cols=[], page_size=25, height_table='100vh'):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -313,7 +313,7 @@ def get_dash_table(df, cols=[], page_size=5, height_table='25vh'):
         sort_mode="multi",
         filter_action="native",
         page_action="none",
-        # page_size=page_size,
+        page_size=page_size,
         fixed_rows={'headers': True},
         style_data={
             'whiteSpace': 'normal',
@@ -322,7 +322,15 @@ def get_dash_table(df, cols=[], page_size=5, height_table='25vh'):
         style_cell={
             'minWidth': 95, 'maxWidth': 95, 'width': 95
         },
-        style_table={'height':height_table, 'overflowY': 'auto', 'width':'100%', 'margin-bottom':'1rem', 'padding-bottom':'1rem', 'border-bottom':'1px solid black'}
+        style_table={
+            'height':height_table, 
+            # 'display':'flex', 
+            'overflowY': 'auto', 
+            'width':'100%', 
+            # 'margin-bottom':'1rem', 
+            # 'padding-bottom':'1rem', 
+            # 'border-bottom':'1px solid black'
+        }
     )
 
 
@@ -331,3 +339,15 @@ def ordinal_str(n: int) -> str:
     derive the ordinal numeral for a given number n
     """
     return f"{n:d}{'tsnrhtdd'[(n//10%10!=1)*(n%10<4)*n%10::4]}"
+
+
+
+
+
+def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
+    return dbc.Tabs(
+        children=[dbc.Tab(**d) for d in children], 
+        active_tab=active_tab if active_tab else (children[0].get('tab_id') if children else None), 
+        id=dict(type=f'tab_level_{tab_level}', index=int(time.time())),
+        **kwargs
+    )
