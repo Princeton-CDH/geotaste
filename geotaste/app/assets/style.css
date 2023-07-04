@@ -291,7 +291,7 @@ p {
     width:100%;
     /* border:1px solid red; */
     flex-flow:column;
-    overflow: scroll;
+    /* overflow: scroll; */
 }
 
 .graphtab {

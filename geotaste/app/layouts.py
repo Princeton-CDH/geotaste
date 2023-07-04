@@ -247,6 +247,7 @@ class PanelComparison(BaseComponent):
                     return dbc.Container(
                         [
                             html.H4('Data by members'), 
+                            html.P('Lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description '),
                             fig.table()
                         ], 
                         className='graphtab padded', 
