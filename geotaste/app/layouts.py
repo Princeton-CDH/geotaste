@@ -49,12 +49,12 @@ class GeotasteLayout(BaseComponent):
         left_col = dbc.Col([
             top_row, 
             main_row
-        ], className='layout-leftcol', width=6)
+        ], className='layout-leftcol', width=5)
         
         right_col = dbc.Col(
             self.panels.layout_content(params), 
             className='layout-rightcol', 
-            width=6
+            width=7
         )
 
         notnavbar = dbc.Row([left_col, right_col], className='layout-belownavbar')
@@ -130,8 +130,8 @@ class PanelComparison(BaseComponent):
     
     def layout_content(self, params=None):
         return dbc.Container([
-            dbc.Row(self.graphtabs, className='content-tabs-row'),
-            dbc.Row(self.graphtab, className='content-belowtabs-row content-map-row comparemap-row content-table-row'),
+            dbc.Row(self.graphtabs, className='content-tabs-row h-10'),
+            dbc.Row(self.graphtab, className='content-belowtabs-row h-90'),
         ], className='layout-content-container')
     
     def layout_dueling_panels(self, params=None):
@@ -151,13 +151,48 @@ class PanelComparison(BaseComponent):
     
     @cached_property
     def graphtabs(self):
-        return dbc.Tabs([
-            dbc.Tab(label='Map', tab_id='map'),
-            dbc.Tab(label='Data', tab_id='table'),
-        ], className='graphtabs-container', active_tab='table')
+        map_tabs = get_tabs([
+            dict(label='Left vs. Right Groups', tab_id='map_LR'),
+            dict(label='Left Group', tab_id='map_L'),
+            dict(label='Right', tab_id='map_R'),
+        ], tab_level=2, className='graphtabs-container')
+        
+        tbl_tabs = get_tabs(
+            children=[
+                dict(label='By member', tab_id='tbl_members'),
+                dict(label='By arrond.', tab_id='tbl_arrond'),
+                
+            ], 
+            tab_level=2, className='graphtabs-container'
+        )
+
+        analyze_tabs = get_tabs(
+            children=[
+                dict(
+                    label='Magnitude of difference',
+                    tab_id='tbl_diff'),                
+            ], 
+            tab_level=2, 
+            className='graphtabs-container'
+        )
+
+        graphtabs = get_tabs(
+            children=[
+                dict(children=map_tabs, label='Maps', tab_id='map'),
+                dict(children=tbl_tabs, label='Data', tab_id='tbl'),
+                dict(children=analyze_tabs, label='Analyze', tab_id='analyze')
+            ], 
+            tab_level=1, 
+            className='graphtabs-container', 
+        )
+        return dbc.Container(graphtabs, className='graphtabs-container-container')
+    
     @cached_property
     def graphtab(self):
-        return html.Div(html.Pre('Loading...'), className='graphtab-div')
+        return dbc.Container(
+            children=[html.Pre('Loading...')],
+            className='graphtab-div'
+        )
 
 
 
@@ -183,54 +218,71 @@ class PanelComparison(BaseComponent):
             vis=tuple([STYLE_VIS for n in range(num_tabs)])
             return (invis,vis) if tab_id=='books' else (vis,invis)
         
-        # @app.callback(
-        #     [
-        #         Output(self.comparison_map_graph_div, 'style'),
-        #         Output(self.comparison_map_table, 'style'),
-        #     ],
-        #     [
-        #         Input(self.graphtabs, 'active_tab')
-        #     ]
-        # )
-        # def switch_graphtabs(tab_id, num_tabs=2):
-        #     invis=tuple([STYLE_INVIS for n in range(num_tabs)])
-        #     vis=tuple([STYLE_VIS for n in range(num_tabs)])
-        #     return (STYLE_INVIS,STYLE_VIS) if tab_id=='table' else (STYLE_VIS,STYLE_INVIS)
-        
         
         @app.callback(
-            [
-                Output(self.comparison_map_graph, 'figure'),
-                Output(self.comparison_map_graph_div, 'style'),
-                Output(self.comparison_map_table, 'children'),
-            ],
+            Output(self.graphtab, 'children'),
             [
                 Input(self.L.store, 'data'), 
                 Input(self.R.store, 'data'),
-                Input(self.graphtabs, 'active_tab'),
-            ],
-            State(self.comparison_map_graph, 'figure'),
+                Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
+                Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
+                # Input(self.graphtabs, 'active_tab'),
+
+            ]
         )
-        def redraw_map(filter_data_L, filter_data_R, tab_id, old_figdata):
-            fig = ComparisonMemberMap(filter_data_L, filter_data_R)
-            self.comparison_map_fig = fig
-
-            if tab_id=='table':
-                tables = dbc.Container([
-                    dbc.Row([html.H4('Data by members'), fig.table()], className='h-20 align-top', style={'display':'block'}),
-                    dbc.Row([html.H4('Data by arrondissement'), fig.table_arrond()], className='h-20 align-top', style={'display':'block'}),
-                    dbc.Row([html.H4('Degree of difference compared'), html.P(dcc.Markdown(fig.desc_table_diff())), fig.table_diff()], className='h-20 align-top', style={'display':'block'})
-                ])
-
-                return [go.Figure(), STYLE_INVIS, tables]
-            else:
-                ofig = combine_figs(
-                    fig_new=fig.plot(),
-                    fig_old=old_figdata
-                )
-                ofig.update_layout(autosize=True)
+        def redraw_map(filter_data_L, filter_data_R, tab_ids_1, tab_ids_2):
+            print(f'Tab ID 1: {tab_ids_1}')
+            print()
+            print(f'Tab ID 2: {tab_ids_2}')
             
-                return [ofig, STYLE_VIS, BLANKDIV]
+            ff = fig = ComparisonMemberMap(filter_data_L, filter_data_R)
+            self.comparison_map_fig = ff
+
+            tab_ids_1_set=set(tab_ids_1)
+            tab_ids_2_set=set(tab_ids_2)
+
+            if 'tbl' in tab_ids_1_set:
+                if 'tbl_members' in tab_ids_2_set:
+                    return dbc.Container(
+                        [
+                            html.H4('Data by members'), 
+                            fig.table()
+                        ], 
+                        className='h-100 align-top', 
+                        style={'display':'block'}
+                    )
+                elif 'tbl_arrond' in tab_ids_2_set:
+                    return dbc.Container(
+                        [
+                            html.H4('Data by arrondissement'), 
+                            fig.table_arrond()
+                        ], 
+                        className='h-100 align-top', 
+                        style={'display':'block'}
+                    )
+            elif 'analyze' in tab_ids_1_set:
+                if 'tbl_diff' in tab_ids_2_set:
+                    return dbc.Container(
+                        [
+                            html.H4('Degree of difference compared'),
+                            html.P(
+                                dcc.Markdown(
+                                    fig.desc_table_diff()
+                                )
+                            ), 
+                            fig.table_diff()
+                        ], 
+                        className='h-100 align-top', 
+                        style={'display':'block'}
+                    )
+            elif 'map' in tab_ids_1_set:
+                ofig = ff.plot()
+                ofig.update_layout(autosize=True)
+                ograph = dcc.Graph(
+                    figure=ofig, 
+                    className='comparison_map_graph'
+                )
+                return [dbc.Container(ograph)]
 
 
 
