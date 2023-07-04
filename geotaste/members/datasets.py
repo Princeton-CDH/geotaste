@@ -96,10 +96,9 @@ class DwellingsDataset(Dataset):
 
 class MemberDwellingsDataset(Dataset):
     
-    @cached_property
-    def data(self):
+    @staticmethod
+    def add_dwellings(df_members):
         df_dwellings = DwellingsDataset().data
-        df_members = MembersDataset().data
         return df_members.reset_index().merge(
             df_dwellings,
             left_on='uri',
@@ -107,7 +106,9 @@ class MemberDwellingsDataset(Dataset):
             how='inner'
         ).drop('member_uri',axis=1).set_index('member')
 
-
+    @cached_property
+    def data(self):        
+        return self.add_dwellings(MembersDataset().data)
 
 
 

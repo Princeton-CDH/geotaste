@@ -30,16 +30,16 @@ class ComparisonFigureFactory(FigureFactory):
         }
 
     @cached_property
-    def df_L(self): 
-        return self.df[self.df.L_or_R.isin({'L','Both'})]
-    
-    @cached_property
-    def df_R(self): 
-        return self.df[self.df.L_or_R.isin({'R','Both'})]
-    
-    @cached_property
     def df_arronds(self): 
-        return compare_arrond_counts(self.df_L, self.df_R)
+        df_L=self.df_dwellings[self.df_dwellings.L_or_R.isin({'L','Both'})]
+        df_R=self.df_dwellings[self.df_dwellings.L_or_R.isin({'R','Both'})]
+        return compare_arrond_counts(df_L, df_R)
+    
+    @cached_property
+    def df_dwellings(self): 
+        return MemberDwellingsDataset.add_dwellings(self.df)
+    
+    
 
     def plot(self, height=250, **kwargs):
         def get_color(x):
@@ -47,9 +47,10 @@ class ComparisonFigureFactory(FigureFactory):
             if x.startswith('R'): return RIGHT_COLOR
             return BOTH_COLOR
         
-        color_map = {label:get_color(label) for label in self.df['L_or_R'].apply(str).unique()}
+        df = self.df_dwellings
+        color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         fig = px.scatter_mapbox(
-            self.df, 
+            df, 
             lat='latitude',
             lon='longitude', 
             center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
@@ -156,8 +157,9 @@ class ComparisonFigureFactory(FigureFactory):
         
         with self.diffdb() as cache:    
             if force or not key in cache:
-                from scipy.stats import kstest
-                stat = kstest(self.df_arronds.count_L, self.df_arronds.count_R)
+                from scipy.stats import kstest, mannwhitneyu
+                # stat = kstest(self.df_arronds.count_L, self.df_arronds.count_R)
+                stat = mannwhitneyu(self.df_arronds.count_L, self.df_arronds.count_R, method='exact')
                 # stat = kstest(self.df_arronds.perc_L, self.df_arronds.perc_R)
                 cache[key]={k:getattr(stat,k) for k in dir(stat) if k and k[0]!='_' if k not in {'count','index'}}
                 cache.commit()
@@ -169,10 +171,19 @@ class ComparisonFigureFactory(FigureFactory):
         with self.diffdb() as cache: 
             for key,val in cache.items():
                 k1,k2=json.loads(key)
-                ld.append(dict(group1=k1, group2=k2, **{kx:float(kv) for kx,kv in dict(val).items()}))
-        df=pd.DataFrame(ld)
-        df=df.sort_values('statistic',ascending=False) if len(df) else df
-        df['rank_diff'] = df.statistic.rank(ascending=False, method='first').astype(int)
+                ld.append(
+                    dict(
+                    group1=k1, 
+                    group2=k2, 
+                    group1_desc=format_intension(json.loads(k1)), 
+                    group2_desc=format_intension(json.loads(k2)), 
+                    **{kx:float(kv) for kx,kv in dict(val).items()}))
+        df=pd.DataFrame(ld)#.set_index(['group1','group2'])
+        if len(df):
+            df=df.sort_values('statistic',ascending=False)
+            df['rank_diff'] = df.statistic.rank(ascending=False, method='first').astype(int)
+            return df[['rank_diff','group1_desc','group2_desc','pvalue','statistic']]
+        
         return df
 
     def rank_diff(self):
