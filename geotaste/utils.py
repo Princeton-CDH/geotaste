@@ -5,12 +5,10 @@ from .imports import *
 
 def hasone(x:list, y:list):
     res = bool(set(x)&set(y))
-    # print(['hasone',x,y,res])
     return res
 
 def isin(x:object, y:list):
     res = bool(x in set(y))
-    # print(['isin',x,y,res])
     return res
 
 def isin_or_hasone(x:object, y:list):
@@ -95,6 +93,7 @@ def to_query_string(filter_data={}):
 
 
 def filter_df_extensionally(df:pd.DataFrame, filter_data:dict):
+    # print(type(df), df)
     intersection = set(df.index) & set(filter_data[EXTENSION_KEY].keys())
     odf = df.loc[list(intersection)].sample(frac=1)
 

@@ -95,6 +95,7 @@ class DwellingsDataset(Dataset):
 
 
 class MemberDwellingsDataset(Dataset):
+    
     @cached_property
     def data(self):
         df_dwellings = DwellingsDataset().data

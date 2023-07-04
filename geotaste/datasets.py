@@ -23,8 +23,7 @@ class Dataset:
         if cols: self.cols=cols
         for k,v in kwargs.items(): setattr(self,k,v)
 
-    @cached_property
-    def data_orig(self):
+    def read_df(self):
         assert self.path # assert path string exists
         if not os.path.exists(self.path):
             if self.url:
@@ -45,7 +44,7 @@ class Dataset:
         
     @cached_property
     def data(self):  
-        df=self.data_orig
+        df=self.read_df()
         if self.fillna is not None: 
             df=df.fillna(self.fillna)
         for c in self.cols_sep: 

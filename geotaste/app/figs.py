@@ -11,25 +11,30 @@ class FigureFactory(DashFigureFactory):
     key = ''
     records_points_dim = 'xy'
     dataset_class = None
+    
+    def __init__(self, filter_data={}, df=None, **kwargs):
+        if filter_data is None: filter_data = {}
+        self.filter_data = filter_data
+        self._df = df
 
     @cached_property
-    def dataset(self): return self.dataset_class() if self.dataset_class is not None else None
+    def dataset(self): 
+        return (self.dataset_class() if self.dataset_class is not None else None)
+    
     @cached_property
-    def data(self):
-        dset = self.dataset
-        return dset.data if dset is not None else pd.DataFrame()
+    def data_all(self):
+        return self._df if self._df is not None else (self.dataset.data if self.dataset is not None and self.dataset.data is not None else pd.DataFrame())
+    
+    @cached_property
+    def data(self):  # f
+        return filter_df(self.data_all, self.filter_data)
+    
     @cached_property
     def series(self):
         if self.key and len(self.data) and self.key in set(self.data.columns): 
             return self.data[self.key]
         return pd.Series()
-        
-    def __init__(self, filter_data={}, df=None, **kwargs):
-        if filter_data is None: filter_data = {}
-        self.filter_data = filter_data
-        self._data = data = self.data
-        self._df = df if df is not None else data
-
+    
 
 
     # def filter_df(self, filter_data):
@@ -84,21 +89,12 @@ class FigureFactory(DashFigureFactory):
 
     @cached_property
     def df(self) -> pd.DataFrame:
-        if self._df is None: return pd.DataFrame()
-        odf = filter_df(self._df, self.filter_data)
-        return odf
+        return self.data
     
     @cached_property
     def series(self) -> pd.Series:
         try:
-            return self._df[self.key]
-        except KeyError:
-            return pd.Series()
-    
-    @cached_property
-    def series(self) -> pd.Series:
-        try:
-            return self._df[self.key]
+            return self.data[self.key]
         except KeyError:
             return pd.Series()
     
