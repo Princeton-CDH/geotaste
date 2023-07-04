@@ -38,6 +38,11 @@ class BaseComponent(DashComponent):
             setattr(self,k,v)
         self._kwargs = kwargs
 
+    ## all components can have a memory -- only activated if nec
+    @cached_property
+    def store(self):
+        return dcc.Store(id=self.id('store-'+self.__class__.__name__), data={})
+
 
 class FilterComponent(BaseComponent):
     desc = 'Filter by X'

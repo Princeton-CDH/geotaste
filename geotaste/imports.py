@@ -8,6 +8,14 @@ UNKNOWN='(Unknown)'
 # LEFT_COLOR='#d2afff'
 # RIGHT_COLOR='#FF007F'
 
+STYLE_INVIS={'display':'none'}
+STYLE_VIS={'display':'flex'}
+
+# STYLE_INVIS={'visibility':'hidden'}
+# STYLE_VIS={'visibility':'visible'}
+
+# STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
+# STYLE_VIS = {'position': 'relative'}
 
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 
@@ -108,3 +116,6 @@ from .app import *
 from .members import *
 from .books import *
 from .events import *
+from .combined import *
+from .comparison import *
+print('fully loaded:',dir())
