@@ -90,23 +90,26 @@ class DwellingsDataset(Dataset):
     @cached_property
     def data(self):
         df=super().data
-        df['arrond_id']=df['arrrondissement'].apply(lambda x: '' if not x else str(int(x)))
-        return df
+        df['arrond_id']=df['arrrondissement'].apply(lambda x: 'X' if not x else str(int(x)))
+        return df.fillna('')
 
 
 class MemberDwellingsDataset(Dataset):
-    @cached_property
-    def data(self):
+    
+    @staticmethod
+    def add_dwellings(df_members):
         df_dwellings = DwellingsDataset().data
-        df_members = MembersDataset().data
         return df_members.reset_index().merge(
             df_dwellings,
             left_on='uri',
             right_on='member_uri',
-            how='inner'
-        ).drop('member_uri',axis=1).set_index('member')
+            how='outer',
+            suffixes=('_member','')
+        ).drop('member_uri',axis=1).set_index('member').fillna('?')
 
-
+    @cached_property
+    def data(self):        
+        return self.add_dwellings(MembersDataset().data)
 
 
 
