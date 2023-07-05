@@ -1,39 +1,31 @@
 from ..imports import *
+from ..combined.figs import CombinedFigureFactory
+
 
 
 class ComparisonFigureFactory(FigureFactory):
-    dataset_class = MembersDataset
-    
     cols_table = ['name','membership_years','birth_year','gender','nationalities','arrond_id','L_or_R']
+    indiv_ff = CombinedFigureFactory
 
-    def __init__(
-            self, 
-            filter_data_L={}, 
-            filter_data_R={}, 
-            df=None):
-
-        if not filter_data_L and not filter_data_R:
-            super().__init__()
-            self.df['L_or_R'] = 'Both'
-        else:    
-            filter_data_comparison = compare_filters(
-                filter_data_L if filter_data_L else self.filter_data_total, 
-                filter_data_R if filter_data_R else self.filter_data_total,
-            )
-            super().__init__(filter_data = filter_data_comparison)
-
-    @property
-    def filter_data_total(self):
-        return {
-            INTENSION_KEY:{},
-            EXTENSION_KEY:{i:{} for i in self.dataset.data.index}
-        }
+    def __init__(self, ff1, ff2, **kwargs):
+        super().__init__(**kwargs)
+        self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1)==dict else ff1
+        self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2)==dict else ff2
 
     @cached_property
+    def arrond_dists(self):
+        return measure_dists(self.ff1.arrond_percs, self.ff2.arrond_percs)
+    
+    @cached_property
     def df_arronds(self): 
-        df_L=self.df_dwellings[self.df_dwellings.L_or_R.isin({'L','Both'})]
-        df_R=self.df_dwellings[self.df_dwellings.L_or_R.isin({'R','Both'})]
-        return compare_arrond_counts(df_L, df_R).reset_index()
+        return analyze_contingency_tables(
+            self.L.valid_arronds,
+            self.R.valid_arronds,
+        )
+    
+    @cached_property
+    def signif_arronds(self):
+        return filter_signif(self.df_arronds)
     
     @cached_property
     def df_dwellings(self): 
@@ -188,6 +180,9 @@ class ComparisonFigureFactory(FigureFactory):
         df['median_p'] = df[pcols].median(axis=1)
         df['rank_diff'] = df['median_p'].rank(ascending=True, method='first').apply(force_int)
         return df
+
+
+
 
 
 
