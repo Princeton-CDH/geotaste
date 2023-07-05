@@ -40,12 +40,12 @@ class GeotasteLayout(BaseComponent):
         left_col = dbc.Col([
             top_row, 
             main_row
-        ], className='layout-leftcol', width=5)
+        ], className='layout-leftcol', width=6)
         
         right_col = dbc.Col(
             self.panels.layout_content(params), 
             className='layout-rightcol', 
-            width=7
+            width=6
         )
 
         notnavbar = dbc.Row([left_col, right_col], className='layout-belownavbar')

@@ -32,6 +32,11 @@ def get_all_arrond_ids():
         for d in get_geojson_arrondissement()['features']
     }
 
+def get_arrond_counts_series(df,key='arrond_id'):
+    arrond_counts = {n:0 for n in sorted(get_all_arrond_ids(), key=lambda x: int(x))}
+    for k,v in dict(df[key].value_counts()).items(): arrond_counts[k]=v    
+    return pd.Series(arrond_counts).sort_index()
+
 def get_arrond_counts(df,key='arrond_id'):
     arrond_counts = {n:0 for n in sorted(get_all_arrond_ids(), key=lambda x: int(x))}
     for k,v in dict(df[key].value_counts()).items(): arrond_counts[k]=v    
