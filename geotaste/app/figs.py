@@ -326,3 +326,12 @@ class TableFigure(FigureFactory):
             },
         )
     
+
+
+def get_color(x):
+    if x.startswith('L'): return LEFT_COLOR
+    if x.startswith('R'): return RIGHT_COLOR
+    return BOTH_COLOR
+
+def get_LR_colormap(L_or_R_series):
+    return {label:get_color(label) for label in L_or_R_series.apply(str).unique()}

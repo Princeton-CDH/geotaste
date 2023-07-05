@@ -1,4 +1,5 @@
 ## Constants
+MIN_P=.1
 LEFT_COLOR='#AB9155' #'#7d6ab6'
 RIGHT_COLOR='#40B0A6' ##bf6927'
 BOTH_COLOR='#606060'
@@ -79,6 +80,8 @@ from collections import Counter
 ## Non-sys imports
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
+import warnings
+warnings.filterwarnings('ignore')
 from functools import cached_property, lru_cache
 cache = lru_cache(maxsize=None)
 import dash
@@ -110,6 +113,7 @@ except FileNotFoundError:
     pass
 
 from .utils import *
+from .statutils import *
 from .datasets import *
 from .arronds import *
 from .app import *

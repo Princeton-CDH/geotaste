@@ -28,7 +28,7 @@ def is_numeric(x):
     return isinstance(x, numbers.Number)
 
 def is_listy(x):
-    return type(x) in {tuple,list}
+    return type(x) in {tuple,list,pd.Series}
 
 def ensure_dict(x):
     if x is None: return {}
@@ -373,3 +373,33 @@ class CachedData:
             autocommit=autocommit,
             **kwargs
         )
+    
+
+
+
+
+
+
+def measure_dists(
+        series1, 
+        series2, 
+        methods = [
+            'braycurtis', 
+            'canberra', 
+            'chebyshev', 
+            'cityblock', 
+            'correlation', 
+            'cosine', 
+            'euclidean', 
+            'jensenshannon', 
+            'minkowski', 
+        ],
+        series_name='dists',
+        calc = ['median']
+        ):
+    from scipy.spatial import distance
+    a=pd.Series(series1).values
+    b=pd.Series(series2).values
+    o=pd.Series({fname:getattr(distance,fname)(a,b) for fname in methods}, name=series_name)
+    for fname in calc: o[fname]=o.agg(fname)
+    return o
