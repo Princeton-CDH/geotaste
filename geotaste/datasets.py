@@ -63,6 +63,10 @@ class Dataset:
             self.filter_series(key,vals)
             for key,vals in list(filter_data.items()) + list(other_filter_data.items())
         ])
+    
+    def filter_df(self, filter_data={}):
+        if not filter_data: filter_data=self.filter_data
+        return filter_df(self.data, filter_data)
 
     def series(self, key) -> pd.Series:
         try:

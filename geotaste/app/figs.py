@@ -29,6 +29,10 @@ class FigureFactory(DashFigureFactory):
     def data(self):  # f
         return filter_df(self.data_all, self.filter_data)
     
+    @property
+    def filter_desc(self):
+        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
+    
     @cached_property
     def series(self):
         if self.key and len(self.data) and self.key in set(self.data.columns): 
@@ -103,7 +107,7 @@ class FigureFactory(DashFigureFactory):
     def vals(self):
         l = []
         try:
-            s=self._data[self.key]
+            s=self.data[self.key]
         except KeyError:
             return pd.Series()
         return pd.Series(flatten_list(s))
@@ -128,13 +132,6 @@ class FigureFactory(DashFigureFactory):
     
     @cached_property
     def filtered(self): return bool(self.filter_data)
-
-    @cached_property
-    def filter_desc(self):
-        if not self.filtered:
-            return f'All {len(self._df):,} {self.records_name}.'
-        else:
-            return f'Filtering {self.query_str} yields {len(self.df):,} of {len(self._df):,} {self.records_name}.'
         
     def get_figdf(self, x, quant=None, df=None):
         figdf=(df if df is not None else self.df).sample(frac=1)

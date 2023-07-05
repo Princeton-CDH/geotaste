@@ -163,7 +163,7 @@ def filter_df_old(df, filter_data={}, return_query=False):
 
 
 
-def format_intension(d):
+def format_intension(d, empty='(unfiltered)'):
     ol=[]
     for key,l in d.items():
         is_quant = all(is_numeric(x) for x in l)
@@ -178,7 +178,7 @@ def format_intension(d):
         # o=f'_{o}_ on  *{key}*'
         o=f'{repr(o)} in {key}'
         ol.append(o)
-    return "; ".join(ol)
+    return "; ".join(ol) if ol else empty
 
 
 def describe_filters(store_data, records_name='records'):
@@ -299,7 +299,7 @@ def delist_df(df, sep=' '):
     return df
 
 
-def get_dash_table(df, cols=[], page_size=10, height_table='80vh'):
+def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=60):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -309,21 +309,22 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh'):
         sort_action="native",
         sort_mode="multi",
         filter_action="native",
-        # page_action="native",
-        page_action="none",
+        page_action="native",
+        # page_action="none",
         page_size=page_size,
         fixed_rows={'headers': True},
-        style_data={
-            'whiteSpace': 'normal',
-            # 'height': 'auto',
-        },
         style_cell={
-            'minWidth': 95, 'maxWidth': 95, 'width': 95
+            'minWidth': 95, 'maxWidth': 95, 'width': 95,
+        },
+
+        style_data={
+            'minHeight': height_cell, 'maxHeight': height_cell, 'height': height_cell,
+            'whiteSpace': 'normal',
         },
         style_table={
-            'height':height_table, 
+            'height':height_cell * 12, 
             'overflowY':'auto',
-            'display':'block',
+            # 'display':'block',
             # 'flex-didrection':'column',
             # 'flex-grow':1,
             # 'width':'100%',
@@ -349,3 +350,26 @@ def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
         id=dict(type=f'tab_level_{tab_level}', index=int(time.time())),
         **kwargs
     )
+
+def force_int(x, errors=0):
+    try:
+        return int(x)
+    except ValueError:
+        return errors
+    
+
+
+
+class CachedData:
+    def __init__(self, *x, path_cache=None, **y):
+        self.path_cache = os.path.join(PATH_DATA, path_cache) if path_cache and not os.path.isabs(path_cache) else path_cache
+
+    def cache(self, tablename='unnamed', flag='c', autocommit=True, **kwargs):
+        from sqlitedict import SqliteDict
+        return SqliteDict(
+            filename=self.path_cache, 
+            tablename=tablename, 
+            flag=flag,
+            autocommit=autocommit,
+            **kwargs
+        )

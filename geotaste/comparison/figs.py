@@ -33,7 +33,7 @@ class ComparisonFigureFactory(FigureFactory):
     def df_arronds(self): 
         df_L=self.df_dwellings[self.df_dwellings.L_or_R.isin({'L','Both'})]
         df_R=self.df_dwellings[self.df_dwellings.L_or_R.isin({'R','Both'})]
-        return compare_arrond_counts(df_L, df_R)
+        return compare_arrond_counts(df_L, df_R).reset_index()
     
     @cached_property
     def df_dwellings(self): 
@@ -111,25 +111,16 @@ class ComparisonFigureFactory(FigureFactory):
         return ofig
     
     def table(self, cols=[], sep=' ', **kwargs):
-        df = pd.DataFrame(
-            g.assign(
-                arrond_id=sep.join(
-                    sorted(
-                        [x for x in g.arrond_id.unique() if x]
-                        , key=lambda x: int(x)
-                    )
-                )
-            ).iloc[0] 
-            for i,g in self.df.groupby(['uri','L_or_R'])
-        )
-        return get_dash_table(df, cols=list(self.cols_table if not cols else cols))
+        return get_dash_table(self.df, cols=list(self.cols_table if not cols else cols))
     
     def table_arrond(self, cols=[], **kwargs):
         cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
         return get_dash_table(self.df_arronds, cols=cols)
     
     def table_diff(self, cols=[], **kwargs):
-        return get_dash_table(self.rank_diff(), cols=['rank_diff', 'group1', 'group2', 'pvalue', 'statistic', 'is_self'])
+        odf=self.rank_diff().query('rank_diff!=0')
+        cols = ['rank_diff','group1_desc','group2_desc'] + [c for c in odf if c.endswith('_p')]
+        return get_dash_table(odf,cols)
     
     def desc_table_diff(self, **kwargs):
         df=self.rank_diff()
@@ -139,7 +130,7 @@ class ComparisonFigureFactory(FigureFactory):
 
         row=dfq.iloc[0]
         n1,n2=self.diffkeys()
-        return f'Statistically, the spatial difference (difference in distribution across arrondissement) of the members is the ***{ordinal_str(row.rank_diff)}*** largest noted thus far. It ***{"is" if row.pvalue<=0.05 else "is not"}*** statistically significant, with a pvalue of ***{row.pvalue:.02}*** and a Kolmogorov–Smirnov test statistic of ***{row.statistic:.02}***.'
+        return f'??'#Statistically, the spatial difference (difference in distribution across arrondissement) of the members is the ***{ordinal_str(row.rank_diff)}*** largest noted thus far. It ***{"is" if row.pvalue<=0.05 else "is not"}*** statistically significant, with a pvalue of ***{row.pvalue:.02}*** and a Mann-Whitney U test statistic of ***{row.statistic}***.'
             
 
             
@@ -157,11 +148,16 @@ class ComparisonFigureFactory(FigureFactory):
         
         with self.diffdb() as cache:    
             if force or not key in cache:
-                from scipy.stats import kstest, mannwhitneyu
-                # stat = kstest(self.df_arronds.count_L, self.df_arronds.count_R)
-                stat = mannwhitneyu(self.df_arronds.count_L, self.df_arronds.count_R, method='exact')
-                # stat = kstest(self.df_arronds.perc_L, self.df_arronds.perc_R)
-                cache[key]={k:getattr(stat,k) for k in dir(stat) if k and k[0]!='_' if k not in {'count','index'}}
+                from scipy.stats import kstest, mannwhitneyu, pearsonr
+                statd={}
+                lvals = self.df_arronds.count_L.fillna(0)
+                rvals = self.df_arronds.count_R.fillna(0)
+
+                for statname,statf in [('kstest',kstest), ('mannwhitneyu',mannwhitneyu), ('pearsonr',pearsonr)]:
+                    stat = statf(lvals,rvals)
+                    statd[statname]=stat.statistic
+                    statd[statname+'_p']=stat.pvalue
+                cache[key]=statd
                 cache.commit()
             return cache[key]
 
@@ -177,44 +173,21 @@ class ComparisonFigureFactory(FigureFactory):
                     group2=k2, 
                     group1_desc=format_intension(json.loads(k1)), 
                     group2_desc=format_intension(json.loads(k2)), 
-                    **{kx:float(kv) for kx,kv in dict(val).items()}))
+                    **{kx:(float(kv) if is_numeric_dtype(kv) else kv) for kx,kv in dict(val).items()}))
         df=pd.DataFrame(ld)#.set_index(['group1','group2'])
-        if len(df):
-            df=df.sort_values('statistic',ascending=False)
-            df['rank_diff'] = df.statistic.rank(ascending=False, method='first').astype(int)
-            return df[['rank_diff','group1_desc','group2_desc','pvalue','statistic']]
-        
+        if len(df): df['is_self']=[((k1,k2) == self.diffkeys()) for k1,k2 in zip(df.group1, df.group2)]
         return df
+        
+        
 
     def rank_diff(self):
-        res = self.measure_diff()
+        self.measure_diff()
         df = self.get_diffs()
-        df['is_self']=[((k1,k2) == self.diffkeys()) for k1,k2 in zip(df.group1, df.group2)]
+        if not len(df): return df
+        pcols=[c for c in df if c.endswith('_p')]
+        df['median_p'] = df[pcols].median(axis=1)
+        df['rank_diff'] = df['median_p'].rank(ascending=True, method='first').apply(force_int)
         return df
 
 
-
-
-
-class ComparisonMemberTable(TableFigure):
-    cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
-    
-    def plot(self, **kwargs):
-        cols=self.cols
-        dff = self.df[cols]
-        cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
-
-        return dash_table.DataTable(
-            data=dff.to_dict('records'),
-            columns=cols_l,
-            sort_action="native",
-            # sort_mode="multi",
-            # filter_action="native",
-            # page_action="native",
-            # page_size=5,
-            style_data={
-                'whiteSpace': 'normal',
-                'height': 'auto',
-            },
-        )
 

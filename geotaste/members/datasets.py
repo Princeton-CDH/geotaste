@@ -103,7 +103,8 @@ class MemberDwellingsDataset(Dataset):
             df_dwellings,
             left_on='uri',
             right_on='member_uri',
-            how='inner'
+            how='inner',
+            suffixes=('_member','')
         ).drop('member_uri',axis=1).set_index('member')
 
     @cached_property
