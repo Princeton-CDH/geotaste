@@ -5,12 +5,10 @@ from .imports import *
 
 def hasone(x:list, y:list):
     res = bool(set(x)&set(y))
-    # print(['hasone',x,y,res])
     return res
 
 def isin(x:object, y:list):
     res = bool(x in set(y))
-    # print(['isin',x,y,res])
     return res
 
 def isin_or_hasone(x:object, y:list):
@@ -30,7 +28,7 @@ def is_numeric(x):
     return isinstance(x, numbers.Number)
 
 def is_listy(x):
-    return type(x) in {tuple,list}
+    return type(x) in {tuple,list,pd.Series}
 
 def ensure_dict(x):
     if x is None: return {}
@@ -95,6 +93,7 @@ def to_query_string(filter_data={}):
 
 
 def filter_df_extensionally(df:pd.DataFrame, filter_data:dict):
+    # print(type(df), df)
     intersection = set(df.index) & set(filter_data[EXTENSION_KEY].keys())
     odf = df.loc[list(intersection)].sample(frac=1)
 
@@ -164,32 +163,32 @@ def filter_df_old(df, filter_data={}, return_query=False):
 
 
 
-
+def format_intension(d, empty=BLANK):
+    ol=[]
+    for key,l in d.items():
+        is_quant = all(is_numeric(x) for x in l)
+        if len(l)<3:
+            o = ' and '.join(str(x) for x in l)
+        elif is_quant:
+            # l.sort()
+            o=f'{l[0]} to {l[-1]}'
+        else:
+            # o=' and '.join(f'{repr(x)}' for x in l)
+            o=f'{l[0]} ... {l[-1]}'
+        # o=f'_{o}_ on  *{key}*'
+        o=f'{o} in {key}'
+        ol.append(o)
+    return "; ".join(ol) if ol else empty
 
 
 def describe_filters(store_data, records_name='records'):
     if not store_data or not INTENSION_KEY in store_data or not EXTENSION_KEY in store_data:
         return ''
-
-    def format_intension(d):
-        ol=[]
-        for key,l in d.items():
-            is_quant = all(is_numeric(x) for x in l)
-            if len(l)<3:
-                o = ' and '.join(str(x) for x in l)
-            elif is_quant:
-                # l.sort()
-                o=f'{l[0]} to {l[-1]}'
-            else:
-                # o=' and '.join(f'{repr(x)}' for x in l)
-                o=f'{l[0]} ... {l[-1]}'
-            o=f'_{o}_ on  *{key}*'
-            ol.append(o)
-        return "; ".join(ol)
-
     len_ext=len(store_data[EXTENSION_KEY])
     fmt_int=format_intension(store_data[INTENSION_KEY])
-    return f'Filtering {fmt_int} yields _{len_ext:,}_ {records_name}.'
+    return fmt_int
+    # return f'Filtering {fmt_int} yields _{len_ext:,}_ {records_name}.'
+    # return f'{fmt_int} -> {len_ext:,} {records_name}'
 
 
 def first(x, default=None):
@@ -289,3 +288,131 @@ def make_counts_df(series):
             (x if x!='' else UNKNOWN for x in flatten_list(series))
         , name=series.name).value_counts()
     ).reset_index()
+
+
+def delist_df(df, sep=' '):
+    def fix(y):
+        if is_listy(y): return sep.join(str(x) for x in y)
+        if is_numeric(y): y=round(y,2)
+        return y
+    df=df.copy()
+    for col in df:
+        df[col]=df[col].apply(fix)
+    return df
+
+
+def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=60):
+    cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
+    dff = delist_df(df[cols])
+    cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
+    return dash_table.DataTable(
+        data=dff.to_dict('records'),
+        columns=cols_l,
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
+        page_action="native",
+        # page_action="none",
+        page_size=page_size,
+        fixed_rows={'headers': True},
+        style_cell={
+            'minWidth': 95, 'maxWidth': 95, 'width': 95,
+        },
+
+        style_data={
+            'minHeight': height_cell, 'maxHeight': height_cell, 'height': height_cell,
+            'whiteSpace': 'normal',
+        },
+        style_table={
+            'height':height_cell * 12, 
+            'overflowY':'auto',
+            # 'display':'block',
+            # 'flex-didrection':'column',
+            # 'flex-grow':1,
+            # 'width':'100%',
+            # 'border':'1px solid #eeeee'
+        },
+    )
+
+
+def ordinal_str(n: int) -> str:
+    """
+    derive the ordinal numeral for a given number n
+    """
+    return f"{n:d}{'tsnrhtdd'[(n//10%10!=1)*(n%10<4)*n%10::4]}"
+
+
+
+
+
+def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
+    return dbc.Tabs(
+        children=[dbc.Tab(**d) for d in children], 
+        active_tab=active_tab if active_tab else (children[0].get('tab_id') if children else None), 
+        id=dict(type=f'tab_level_{tab_level}', index=int(time.time())),
+        **kwargs
+    )
+
+def force_int(x, errors=0):
+    try:
+        return int(x)
+    except ValueError:
+        return errors
+    
+
+
+
+class CachedData:
+    def __init__(self, *x, path_cache=None, **y):
+        self.path_cache = os.path.join(PATH_DATA, path_cache) if path_cache and not os.path.isabs(path_cache) else path_cache
+
+    def cache(self, tablename='unnamed', flag='c', autocommit=True, **kwargs):
+        from sqlitedict import SqliteDict
+        return SqliteDict(
+            filename=self.path_cache, 
+            tablename=tablename, 
+            flag=flag,
+            autocommit=autocommit,
+            **kwargs
+        )
+    
+
+
+
+
+
+
+def measure_dists(
+        series1, 
+        series2, 
+        methods = [
+            'braycurtis', 
+            'canberra', 
+            'chebyshev', 
+            'cityblock', 
+            'correlation', 
+            'cosine', 
+            'euclidean', 
+            'jensenshannon', 
+            'minkowski', 
+        ],
+        series_name='dists',
+        calc = ['median']
+        ):
+    from scipy.spatial import distance
+    a=pd.Series(series1).values
+    b=pd.Series(series2).values
+    o=pd.Series({fname:getattr(distance,fname)(a,b) for fname in methods}, name=series_name)
+    for fname in calc: o[fname]=o.agg(fname)
+    return o
+
+
+
+def combine_LR_df(dfL, dfR):
+    allL,allR = set(dfL.index),set(dfR.index)
+    L,R,both = allL-allR,allR-allL,allR&allL
+    return pd.concat([
+        dfL.loc[list(L)].assign(L_or_R='L'),
+        dfL.loc[list(both)].assign(L_or_R='L&R'),
+        dfR.loc[list(R)].assign(L_or_R='R'),
+    ])

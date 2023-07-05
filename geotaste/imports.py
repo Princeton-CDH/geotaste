@@ -1,4 +1,8 @@
 ## Constants
+MIN_P=.05
+BLANKSTR='‎‎‎‎'
+BLANK = 'unfiltered'
+NOFILTER = BLANK
 LEFT_COLOR='#AB9155' #'#7d6ab6'
 RIGHT_COLOR='#40B0A6' ##bf6927'
 BOTH_COLOR='#606060'
@@ -8,6 +12,14 @@ UNKNOWN='(Unknown)'
 # LEFT_COLOR='#d2afff'
 # RIGHT_COLOR='#FF007F'
 
+STYLE_INVIS={'display':'none'}
+STYLE_VIS={'display':'flex'}
+
+# STYLE_INVIS={'visibility':'hidden'}
+# STYLE_VIS={'visibility':'visible'}
+
+# STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
+# STYLE_VIS = {'position': 'relative'}
 
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 
@@ -71,10 +83,12 @@ from collections import Counter
 ## Non-sys imports
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
+import warnings
+warnings.filterwarnings('ignore')
 from functools import cached_property, lru_cache
 cache = lru_cache(maxsize=None)
 import dash
-from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH
+from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
 import dash_bootstrap_components as dbc
@@ -102,9 +116,12 @@ except FileNotFoundError:
     pass
 
 from .utils import *
+from .statutils import *
 from .datasets import *
 from .arronds import *
 from .app import *
 from .members import *
 from .books import *
 from .events import *
+from .combined import *
+from .comparison import *

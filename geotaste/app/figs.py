@@ -11,25 +11,34 @@ class FigureFactory(DashFigureFactory):
     key = ''
     records_points_dim = 'xy'
     dataset_class = None
+    
+    def __init__(self, filter_data={}, df=None, **kwargs):
+        if filter_data is None: filter_data = {}
+        self.filter_data = filter_data
+        self._df = df
 
     @cached_property
-    def dataset(self): return self.dataset_class() if self.dataset_class is not None else None
+    def dataset(self): 
+        return (self.dataset_class() if self.dataset_class is not None else None)
+    
     @cached_property
-    def data(self):
-        dset = self.dataset
-        return dset.data if dset is not None else pd.DataFrame()
+    def data_all(self):
+        return self._df if self._df is not None else (self.dataset.data if self.dataset is not None and self.dataset.data is not None else pd.DataFrame())
+    
+    @cached_property
+    def data(self):  # f
+        return filter_df(self.data_all, self.filter_data)
+    
+    @property
+    def filter_desc(self):
+        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
+    
     @cached_property
     def series(self):
         if self.key and len(self.data) and self.key in set(self.data.columns): 
             return self.data[self.key]
         return pd.Series()
-        
-    def __init__(self, filter_data={}, df=None, **kwargs):
-        if filter_data is None: filter_data = {}
-        self.filter_data = filter_data
-        self._data = data = self.data
-        self._df = df if df is not None else data
-
+    
 
 
     # def filter_df(self, filter_data):
@@ -84,21 +93,12 @@ class FigureFactory(DashFigureFactory):
 
     @cached_property
     def df(self) -> pd.DataFrame:
-        if self._df is None: return pd.DataFrame()
-        odf = filter_df(self._df, self.filter_data)
-        return odf
+        return self.data
     
     @cached_property
     def series(self) -> pd.Series:
         try:
-            return self._df[self.key]
-        except KeyError:
-            return pd.Series()
-    
-    @cached_property
-    def series(self) -> pd.Series:
-        try:
-            return self._df[self.key]
+            return self.data[self.key]
         except KeyError:
             return pd.Series()
     
@@ -107,7 +107,7 @@ class FigureFactory(DashFigureFactory):
     def vals(self):
         l = []
         try:
-            s=self._data[self.key]
+            s=self.data[self.key]
         except KeyError:
             return pd.Series()
         return pd.Series(flatten_list(s))
@@ -132,13 +132,6 @@ class FigureFactory(DashFigureFactory):
     
     @cached_property
     def filtered(self): return bool(self.filter_data)
-
-    @cached_property
-    def filter_desc(self):
-        if not self.filtered:
-            return f'All {len(self._df):,} {self.records_name}.'
-        else:
-            return f'Filtering {self.query_str} yields {len(self.df):,} of {len(self._df):,} {self.records_name}.'
         
     def get_figdf(self, x, quant=None, df=None):
         figdf=(df if df is not None else self.df).sample(frac=1)
@@ -333,3 +326,12 @@ class TableFigure(FigureFactory):
             },
         )
     
+
+
+def get_color(x):
+    if x.startswith('L'): return LEFT_COLOR
+    if x.startswith('R'): return RIGHT_COLOR
+    return BOTH_COLOR
+
+def get_LR_colormap(L_or_R_series):
+    return {label:get_color(label) for label in L_or_R_series.apply(str).unique()}

@@ -17,14 +17,14 @@ class Dataset:
     sep:str = ';'
     fillna:object = ''
     cols_q:list = []
+    filter_data:dict = {}
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
         if path: self.path=path
         if cols: self.cols=cols
         for k,v in kwargs.items(): setattr(self,k,v)
 
-    @cached_property
-    def data_orig(self):
+    def read_df(self):
         assert self.path # assert path string exists
         if not os.path.exists(self.path):
             if self.url:
@@ -45,7 +45,7 @@ class Dataset:
         
     @cached_property
     def data(self):  
-        df=self.data_orig
+        df=self.read_df()
         if self.fillna is not None: 
             df=df.fillna(self.fillna)
         for c in self.cols_sep: 
@@ -61,9 +61,13 @@ class Dataset:
 
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
-            self.filter_key(key,vals)
+            self.filter_series(key,vals)
             for key,vals in list(filter_data.items()) + list(other_filter_data.items())
         ])
+    
+    def filter_df(self, filter_data={}):
+        if not filter_data: filter_data=self.filter_data
+        return filter_df(self.data, filter_data)
 
     def series(self, key) -> pd.Series:
         try:

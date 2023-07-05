@@ -1,9 +1,6 @@
 from ..imports import *
 
-BLANKSTR='‎‎‎‎'
-BLANK = '(unfiltered)'
 BLANKDIV = html.Div(BLANKSTR)
-NOFILTER = BLANK
 
 class BaseComponent(DashComponent):
     def __init__(
@@ -38,6 +35,7 @@ class BaseComponent(DashComponent):
             setattr(self,k,v)
         self._kwargs = kwargs
 
+    
 
 class FilterComponent(BaseComponent):
     desc = 'Filter by X'
@@ -77,6 +75,16 @@ class FilterComponent(BaseComponent):
     @cached_property
     def store(self):
         return dcc.Store(id=self.id('store-'+self.__class__.__name__), data={})
+    
+    @property
+    def filter_desc(self):
+        # return describe_filters(self.filter_data)
+        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
+    
+    @property
+    def filter_key(self):
+        return self.filter_desc
+
 
     @cached_property
     def store_desc(self): return html.Span(NOFILTER, className='store_desc')
