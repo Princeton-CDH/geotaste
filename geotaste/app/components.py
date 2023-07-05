@@ -1,9 +1,6 @@
 from ..imports import *
 
-BLANKSTR='‎‎‎‎'
-BLANK = '(unfiltered)'
 BLANKDIV = html.Div(BLANKSTR)
-NOFILTER = BLANK
 
 class BaseComponent(DashComponent):
     def __init__(
@@ -81,7 +78,8 @@ class FilterComponent(BaseComponent):
     
     @property
     def filter_desc(self):
-        return describe_filters(self.filter_data)
+        # return describe_filters(self.filter_data)
+        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
     
     @property
     def filter_key(self):

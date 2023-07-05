@@ -65,8 +65,8 @@ def table_info(ctbl):
     count2=ctbl[0][1]
     support1=ctbl[0][0] + ctbl[1][0]
     support2=ctbl[0][1] + ctbl[1][1]
-    perc1=count1/support1*100
-    perc2=count2/support2*100
+    perc1=count1/support1*100 if support1 else np.nan
+    perc2=count2/support2*100 if support2 else np.nan
     perc_diff=perc2-perc1
     return {
         'count_L':count1,

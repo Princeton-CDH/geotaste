@@ -1,5 +1,8 @@
 ## Constants
-MIN_P=.1
+MIN_P=.05
+BLANKSTR='‎‎‎‎'
+BLANK = 'unfiltered'
+NOFILTER = BLANK
 LEFT_COLOR='#AB9155' #'#7d6ab6'
 RIGHT_COLOR='#40B0A6' ##bf6927'
 BOTH_COLOR='#606060'

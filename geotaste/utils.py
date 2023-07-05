@@ -163,7 +163,7 @@ def filter_df_old(df, filter_data={}, return_query=False):
 
 
 
-def format_intension(d, empty='(unfiltered)'):
+def format_intension(d, empty=BLANK):
     ol=[]
     for key,l in d.items():
         is_quant = all(is_numeric(x) for x in l)
@@ -176,7 +176,7 @@ def format_intension(d, empty='(unfiltered)'):
             # o=' and '.join(f'{repr(x)}' for x in l)
             o=f'{l[0]} ... {l[-1]}'
         # o=f'_{o}_ on  *{key}*'
-        o=f'{repr(o)} in {key}'
+        o=f'{o} in {key}'
         ol.append(o)
     return "; ".join(ol) if ol else empty
 
@@ -186,7 +186,9 @@ def describe_filters(store_data, records_name='records'):
         return ''
     len_ext=len(store_data[EXTENSION_KEY])
     fmt_int=format_intension(store_data[INTENSION_KEY])
-    return f'Filtering {fmt_int} yields _{len_ext:,}_ {records_name}.'
+    return fmt_int
+    # return f'Filtering {fmt_int} yields _{len_ext:,}_ {records_name}.'
+    # return f'{fmt_int} -> {len_ext:,} {records_name}'
 
 
 def first(x, default=None):
@@ -403,3 +405,14 @@ def measure_dists(
     o=pd.Series({fname:getattr(distance,fname)(a,b) for fname in methods}, name=series_name)
     for fname in calc: o[fname]=o.agg(fname)
     return o
+
+
+
+def combine_LR_df(dfL, dfR):
+    allL,allR = set(dfL.index),set(dfR.index)
+    L,R,both = allL-allR,allR-allL,allR&allL
+    return pd.concat([
+        dfL.loc[list(L)].assign(L_or_R='L'),
+        dfL.loc[list(both)].assign(L_or_R='L&R'),
+        dfR.loc[list(R)].assign(L_or_R='R'),
+    ])
