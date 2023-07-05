@@ -21,7 +21,10 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def df_members(self): return Members().filter_df(self.filter_data)
     @cached_property
-    def df_dwellings(self): return MemberDwellings().filter_df(self.filter_data)
+    def df_dwellings(self): 
+        odf=MemberDwellings().filter_df(self.filter_data).reset_index()
+        odf=odf.drop_duplicates(['member','arrond_id'])
+        return odf.set_index('member')
 
     ## calcs
     @cached_property

@@ -17,6 +17,7 @@ class Dataset:
     sep:str = ';'
     fillna:object = ''
     cols_q:list = []
+    filter_data:dict = {}
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
         if path: self.path=path

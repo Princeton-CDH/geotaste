@@ -7,7 +7,7 @@ class ComparisonFigureFactory(FigureFactory):
     cols_table = ['name','membership_years','birth_year','gender','nationalities','arrond_id','L_or_R']
     indiv_ff = CombinedFigureFactory
 
-    def __init__(self, ff1, ff2, **kwargs):
+    def __init__(self, ff1={}, ff2={}, **kwargs):
         super().__init__(**kwargs)
         self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1)==dict else ff1
         self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2)==dict else ff2
@@ -29,8 +29,13 @@ class ComparisonFigureFactory(FigureFactory):
     
     @cached_property
     def df_dwellings(self): 
-        return MemberDwellingsDataset.add_dwellings(self.df)
+        dfL = self.L.df_dwellings.assign(L_or_R='L')
+        dfR = self.R.df_dwellings.assign(L_or_R='R')
+        return pd.concat([dfL,dfR])
     
+    @cached_property
+    def df_members(self): 
+        return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
     def plot(self, height=250, **kwargs):
@@ -102,12 +107,12 @@ class ComparisonFigureFactory(FigureFactory):
         ofig.layout._config = {'responsive':True}
         return ofig
     
-    def table(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.df, cols=list(self.cols_table if not cols else cols))
+    def table_members(self, cols=[], sep=' ', **kwargs):
+        return get_dash_table(self.df_members.reset_index())
     
     def table_arrond(self, cols=[], **kwargs):
-        cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
-        return get_dash_table(self.df_arronds, cols=cols)
+        # cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
+        return get_dash_table(self.df_arronds.reset_index())
     
     def table_diff(self, cols=[], **kwargs):
         odf=self.rank_diff().query('rank_diff!=0')
