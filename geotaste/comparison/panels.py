@@ -2,8 +2,62 @@ from ..imports import *
 from .figs import *
 from ..combined import CombinedPanel
 
-class PanelComparison(FilterComponent):
+class PanelComparison(FilterPanel):
     figure_factory = ComparisonFigureFactory
+
+    
+
+    def layout(self, params=None):
+        return dbc.Container([
+            self.store,
+
+            dbc.Row([
+                
+                # left col -- 6
+                dbc.Col([
+                    dbc.Row([
+                        dbc.Col(
+                            html.H2(['Left Group: ',self.L.store_desc]), 
+                            width=6, 
+                            className='storedescs-col storedescs-col-L left-color'
+                        ),
+                        
+                        dbc.Col(
+                            html.H2(['Right Group: ',self.R.store_desc]),
+                            width=6, 
+                            className='storedescs-col storedescs-col-R right-color'
+                        ),
+                    ], className='layout-toprow'), 
+
+                    dbc.Row([
+                        dbc.Col(
+                            self.L.layout(params), 
+                            width=6, 
+                            className='panel_L panel'
+                        ),
+                        
+                        dbc.Col(
+                            self.R.layout(params), 
+                            width=6, 
+                            className='panel_R panel'
+                        ),
+                    ], 
+                    className='layout-mainrow'
+                    )
+                ], className='layout-leftcol', width=6),
+
+                # right col
+                dbc.Col(
+                    dbc.Container([
+                        dbc.Row(self.graphtabs, className='content-tabs-row'),
+                        dbc.Row(self.graphtab, className='content-belowtabs-row'),
+                    ]), 
+                    className='layout-rightcol', width=6)
+            ])
+        ], className='panel-comparison-layout layout-belownavbar')
+        
+    @cached_property
+    def subcomponents(self): return (self.L, self.R)
 
     @cached_property
     def L(self):
@@ -13,6 +67,7 @@ class PanelComparison(FilterComponent):
             color=LEFT_COLOR, 
             desc='Left-hand Group Panel'
         )
+    
     @cached_property
     def R(self):
         return CombinedPanel(
@@ -22,85 +77,11 @@ class PanelComparison(FilterComponent):
             desc='Right-hand Group Panel'
         )
     
-    @cached_property
-    def comparison_map_graph(self):
-        return dcc.Graph(
-            figure=go.Figure(), 
-            className='comparison_map_graph'
-        )
+    def intersect_filters(self, *filters_d):
+        self.log(f'intersecting {len(filters_d)} filters')
+        assert len(filters_d) == 2
+        return (filters_d[0], filters_d[1])
     
-    @cached_property
-    def comparison_map_graph_div(self):
-        return html.Div(self.comparison_map_graph)
-    
-    @cached_property
-    def comparison_map_table(self):
-        return html.Div(
-            html.Pre('Table placeholder'), 
-            className='comparison_map_table'
-        )
-    
-    @cached_property
-    def dueling_maps_row(self, params=None):
-        return dbc.Row([
-            dbc.Col(self.L.map_graph, width=6),
-            dbc.Col(self.R.map_graph, width=6),
-        ], className='bimap-row')
-    
-    @cached_property
-    def dueling_descs_row(self, params=None):
-        return dbc.Row([
-            dbc.Col(
-                html.H2([
-                    'Left Group: ', 
-                    # self.L.store_desc
-                ]), 
-                width=6, 
-                className='storedescs-col storedescs-col-L left-color'
-            ),
-            dbc.Col(
-                html.H2([
-                    'Right Group: ', 
-                    # self.R.store_desc
-                ]),
-                width=6, 
-                className='storedescs-col storedescs-col-R right-color'
-            ),
-        ], className='storedescs-row')
-        
-    def layout_top(self, params=None):
-        return dbc.Container([
-            self.store,
-            self.dueling_descs_row,
-            # self.toptabs       # -> this now moved up to navbar level in GeotasteLayout
-        ])
-    
-    def layout_main(self, params=None):
-        return dbc.Container([
-            self.layout_dueling_panels(params)
-        ])
-    
-    
-    def layout_content(self, params=None):
-        return dbc.Container([
-            dbc.Row(self.graphtabs, className='content-tabs-row'),
-            dbc.Row(self.graphtab, className='content-belowtabs-row'),
-        ], className='layout-content-container')
-    
-    def layout_dueling_panels(self, params=None):
-        return dbc.Row([
-            dbc.Col(self.L.layout(params), width=6, className='panel_L panel'),
-            dbc.Col(self.R.layout(params), width=6, className='panel_R panel'),
-        ])
-    
-
-    @cached_property
-    def toptabs(self):
-        return dbc.Tabs([
-            dbc.Tab(label='Members', tab_id='members'),
-            dbc.Tab(label='Books', tab_id='books'),
-            # dbc.Tab(label='Borrowing event', tab_id='events'),
-        ], className='navtabs-container', active_tab='members')
     
     @cached_property
     def graphtabs(self):
@@ -249,9 +230,9 @@ class PanelComparison(FilterComponent):
         def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_data_R):
             # print(f'Tab ID 1: {tab_ids_1}')
             # print(f'Tab ID 2: {tab_ids_2}')
-            # print(f'Triggered: {ctx.triggered_id}')
-            if str(ctx.triggered_id).startswith('store-'):
-                self.ff = ComparisonFigureFactory(filter_data_L, filter_data_R)
+            # self.log(f'Triggered: {ctx.triggered_id}')
+            # if str(ctx.triggered_id).startswith('store-'):
+            # self.ff = ComparisonFigureFactory(filter_data_L, filter_data_R)
             
             tab_ids_1_set=set(tab_ids_1)
             tab_ids_2_set=set(tab_ids_2)

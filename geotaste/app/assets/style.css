@@ -32,7 +32,7 @@ h5 { font-size:1.1rem;}
 }
 
 .navbar-row {
-    position:absolute; top:0; left:0;
+    /* position:absolute; top:0; left:0; */
     line-height:50px;  
     padding:0;
     text-align: center;
@@ -157,7 +157,6 @@ p {
 .layout-mainrow { 
     border-top:1px solid #dddddd;
     height:85vh;
-    display: block;
     overflow-y: scroll;
     overflow-x: hidden;
     z-index: 3;
