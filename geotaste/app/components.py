@@ -283,32 +283,32 @@ class FilterInputCard(FilterCard):
         # do my parent's too
         super().component_callbacks(app)
 
-        # # ## CLEAR? -- OVERWRITTEN
-        # @app.callback(
-        #     [
-        #         Output(self.store, "data", allow_duplicate=True),
-        #         Output(self.input, "value", allow_duplicate=True),
-        #     ],
-        #     Input(self.button_clear, 'n_clicks'),
-        #     prevent_initial_call=True
-        # )
-        # def clear_selection(n_clicks):
-        #     print('clear_selection')
-        #     return {}, []
+        # ## CLEAR? -- OVERWRITTEN
+        @app.callback(
+            [
+                Output(self.store, "data", allow_duplicate=True),
+                Output(self.input, "value", allow_duplicate=True),
+            ],
+            Input(self.button_clear, 'n_clicks'),
+            prevent_initial_call=True
+        )
+        def clear_selection(n_clicks):
+            self.log('clear_selection')
+            return {}, []
 
-        # @app.callback(
-        #     Output(self.store, "data", allow_duplicate=True),
-        #     Input(self.input, 'value'),
-        #     prevent_initial_call=True
-        # )
-        # def input_value_changed(vals):
-        #     if not vals: raise PreventUpdate
-        #     if self.dataset_obj is not None:
-        #         return self.dataset_obj.filter_series(
-        #             self.key,
-        #             vals=vals
-        #         )
-        #     return {}
+        @app.callback(
+            Output(self.store, "data", allow_duplicate=True),
+            Input(self.input, 'value'),
+            prevent_initial_call=True
+        )
+        def input_value_changed(vals):
+            if not vals: raise PreventUpdate
+            if self.dataset is not None:
+                return self.dataset.filter_series(
+                    self.key,
+                    vals=vals
+                )
+            return {}
     
 
 
