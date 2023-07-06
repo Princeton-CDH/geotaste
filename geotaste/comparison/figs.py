@@ -33,7 +33,10 @@ class ComparisonFigureFactory(FigureFactory):
     
     @cached_property
     def df_dwellings(self): 
-        return combine_LR_df(self.L.df_dwellings, self.R.df_dwellings)
+        return combine_LR_df(
+            self.L.df_dwellings, 
+            self.R.df_dwellings
+        )
 
     
     @cached_property
@@ -111,7 +114,7 @@ class ComparisonFigureFactory(FigureFactory):
         return ofig
     
     def table_members(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.df_members.reset_index())
+        return get_dash_table(self.df_members.reset_index(), cols=self.cols_table)
     
     def table_arrond(self, cols=[], **kwargs):
         # cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']

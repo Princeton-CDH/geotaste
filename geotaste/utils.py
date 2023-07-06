@@ -438,3 +438,17 @@ class Logmaker:
         name=self.__class__.__name__
         if hasattr(self,'name'): name+=f' ({self.name})'
         print(f'[{nowstr()}] {name}: {o}')
+
+
+
+
+def get_filter_data(filter_data={}):
+    if filter_data and not EXTENSION_KEY in filter_data:
+        x=set(filter_data.keys()) - set(MembersDataset.cols)
+        if x:
+            print(f'!! using CombinedDataset due to {x} !!')
+            filter_data = Combined().filter(**filter_data)
+        else:
+            print('using MembersDataset')
+            filter_data = Members().filter(**filter_data)
+    return filter_data

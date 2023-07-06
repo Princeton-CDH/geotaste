@@ -140,7 +140,7 @@ class CreationsDataset(Dataset):
                             'creator':creator,
                             'creator_role':col_creator,
                             **{f'creator_{k}':v for k,v in (creators_df.loc[creator] if creator in creators else {}).items()},
-                            **{f'book_{k}':v for k,v in rowd_nocr.items()},
+                            **{f'{k}':v for k,v in rowd_nocr.items()},
                         }
                         o.append(odx)
                         cdone+=1
@@ -149,7 +149,7 @@ class CreationsDataset(Dataset):
                     'book':book_id,
                     'creator':'?',
                     'creator_role':'author',
-                    **{f'book_{k}':v for k,v in rowd_nocr.items()},
+                    **{f'{k}':v for k,v in rowd_nocr.items()},
                 }
                 o.append(odx)
 

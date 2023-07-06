@@ -62,10 +62,17 @@ class CombinedDataset(Dataset):
                 }
                 new_l.append(new_row)
         new_df = pd.DataFrame(new_l)
-        return new_df
+        return new_df.merge(
+            CreationsDataset().data, on = 'book', how='outer', suffixes=('_combined','')
+        ).merge(
+            MembersDataset().data, on = 'member', how='outer', suffixes=('_combined','')
+        ).set_index('member')
 
 
 
 
 @cache
 def Events(): return EventsDataset()
+
+@cache
+def Combined(): return CombinedDataset()
