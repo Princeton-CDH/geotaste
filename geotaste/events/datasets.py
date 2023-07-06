@@ -43,33 +43,13 @@ class EventsDataset(Dataset):
         'member_sort_names'
     ]
 
-    
-
-
-class CombinedDataset(Dataset):
     @cached_property
     def data(self):
-        df_events=EventsDataset().data
-        new_l = []
-        for i,row in df_events.iterrows():
-            book = row.item_uri.split('/books/',1)[1][:-1] if '/books/' in row.item_uri else ''
-            for member_uri in row.member_uris:
-                member = member_uri.split('/members/',1)[1][:-1] if '/members/' in member_uri else ''
-                new_row = {
-                    'member':member,
-                    'book':book,
-                    **{k:v for k,v in row.items() if k.split('_')[0] not in {'member','item'}}
-                }
-                new_l.append(new_row)
-        new_df = pd.DataFrame(new_l)
-        return new_df.merge(
-            CreationsDataset().data, on = 'book', how='outer', suffixes=('_combined','')
-        ).merge(
-            MembersDataset().data, on = 'member', how='outer', suffixes=('_combined','')
-        ).set_index('member')
+        df=super().data
+        df['event']=[f'E{i+1:05}' for i in range(len(df))]
+        return df.set_index('event')
 
-
-
+    
 
 @cache
 def Events(): return EventsDataset()
