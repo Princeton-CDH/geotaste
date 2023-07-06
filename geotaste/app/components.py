@@ -272,12 +272,28 @@ class FilterPlotCard(FilterCard):
 class FilterInputCard(FilterCard):
     desc = 'Filter by input'
     key=''
+    placeholder = 'Select'
+    multi = True
     
     @cached_property
     def content(self):  return self.input
     @cached_property
     def input(self):
-        return dcc.Dropdown()
+        s=self.series
+        return dcc.Dropdown(
+            options = [
+                dict(value=lbl, label=lbl) 
+                for idx,lbl in zip(s.index, s)
+            ],
+            value = [],
+            multi=self.multi,
+            placeholder=self.placeholder
+        )
+
+    
+    @cached_property
+    def series(self):
+        return self.dataset.data[self.key]
     
     def component_callbacks(self, app):
         # do my parent's too

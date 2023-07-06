@@ -335,3 +335,20 @@ def get_color(x):
 
 def get_LR_colormap(L_or_R_series):
     return {label:get_color(label) for label in L_or_R_series.apply(str).unique()}
+
+
+class DatasetFigure(FigureFactory):
+    records_name='records'
+    key = ''
+    records_points_dim = 'x' # or 'y'
+    dataset_class = Dataset
+    
+    @cached_property
+    def figdf(self):
+        if not len(self.df): return pd.DataFrame()
+        iname = self.df.index.name
+        return pd.DataFrame([
+            {iname:i, self.key:v}
+            for i,vals in zip(self.df.index, self.df[self.key])
+            for v in flatten_list(vals)
+        ]).sort_values([self.key, iname]).set_index(iname)
