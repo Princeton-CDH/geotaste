@@ -1,19 +1,17 @@
 from ..imports import *
 from .components import *
 
-class BookPanel(FilterCard):
-    @cached_property
-    def content(self,params=None):
-        body = dbc.Container([
-            html.Div(self.store_desc, style={'textAlign':'center'}),
-            self.year_card.layout(params),
-            self.store
-        ])
-        return body
+class BookPanel(FilterPanel, FilterCard):
+    desc = 'Book filters'
+    records_name='books'
 
+    
     @cached_property
     def year_card(self): return BookYearCard(**self._kwargs)
     
+    @cached_property
+    def subcomponents(self):
+        return [self.year_card]
 
 
 

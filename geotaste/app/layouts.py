@@ -4,15 +4,12 @@ from .components import *
 
 class GeotasteLayout(BaseComponent):
     def __init__(self):
-        from ..combined import CombinedPanel
-        from ..comparison import PanelComparison
-
-
         super().__init__(title="Shakespeare & Co. Labs")
-        self.panels = PanelComparison()
-        self.last_window_size = None
-        self.cp = CombinedPanel()
-
+        
+    @cached_property
+    def panels(self): 
+        from ..comparison import PanelComparison
+        return PanelComparison()
 
     @cached_property
     def logo(self):
@@ -26,7 +23,7 @@ class GeotasteLayout(BaseComponent):
     def navbar(self):
         return dbc.Row([
             dbc.Col(self.logo, className='logo-col', width=4),
-            dbc.Col(self.panels.toptabs, className='toptabs-col', width=8)
+            # dbc.Col(self.panels.toptabs, className='toptabs-col', width=8)
         ], className='navbar-row')
 
 
@@ -36,8 +33,6 @@ class GeotasteLayout(BaseComponent):
         return dbc.Row(self.panel_comparison.layout())
 
     def layout(self, params=None):
-        return self.cp.member_panel.nation_card.layout()
-
         top_row = dbc.Row(self.panels.layout_top(params), className='layout-toprow')
         main_row = dbc.Row(self.panels.layout_main(params), className='layout-mainrow')
         

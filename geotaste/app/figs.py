@@ -6,7 +6,7 @@ from ..imports import *
 ##################################################
 
 
-class FigureFactory(DashFigureFactory):
+class FigureFactory(DashFigureFactory, Logmaker):
     records_name = 'records'
     key = ''
     records_points_dim = 'xy'
@@ -79,7 +79,7 @@ class FigureFactory(DashFigureFactory):
         return [(d.get(keys[0],np.nan), d.get(keys[1],np.nan)) for d in selectedData.get('points',[]) if keys[0] in d and keys[1] in d]
     
     def selected(self, selectedData):
-        print('selectedData', selectedData)
+        self.log('selectedData')
         if not selectedData: return {}
         xs = self.selected_points(selectedData) 
         if not xs: return {}

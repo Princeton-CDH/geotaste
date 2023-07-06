@@ -343,3 +343,7 @@ p {
     text-align: left;
     width:100%;
 }
+
+.card-body {
+    padding:10px;
+}

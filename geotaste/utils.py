@@ -428,5 +428,13 @@ def unserialize_d(d):
 def nowstr():
     from datetime import datetime
     current_datetime = datetime.now()
-    friendly_string = current_datetime.strftime("%Y-%m-%d_%H%M-%S")
+    friendly_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     return friendly_string
+
+
+class Logmaker:
+    def log(self, *x, **y):
+        o=' '.join(str(xx) for xx in x)
+        name=self.__class__.__name__
+        if hasattr(self,'name'): name+=f' ({self.name})'
+        print(f'[{nowstr()}] {name}: {o}')
