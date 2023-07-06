@@ -2,6 +2,7 @@
 MIN_P=.05
 BLANKSTR='‎‎‎‎'
 BLANK = ''
+UNFILTERED = '(unfiltered)'
 NOFILTER = BLANK
 LEFT_COLOR='#AB9155' #'#7d6ab6'
 RIGHT_COLOR='#40B0A6' ##bf6927'

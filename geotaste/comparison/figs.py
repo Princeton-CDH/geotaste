@@ -9,6 +9,10 @@ class ComparisonFigureFactory(FigureFactory):
 
     def __init__(self, ff1={}, ff2={}, **kwargs):
         super().__init__(**kwargs)
+
+        if is_listy(ff1) and not ff2 and len(ff1)==2:
+            ff1,ff2 = ff1
+
         self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1)==dict else ff1
         self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2)==dict else ff2
 

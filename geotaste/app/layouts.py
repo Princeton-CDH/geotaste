@@ -9,7 +9,7 @@ class GeotasteLayout(BaseComponent):
     @cached_property
     def panels(self): 
         from ..comparison import PanelComparison
-        return PanelComparison()
+        return PanelComparison(name='ComparisonPanel')
 
     @cached_property
     def logo(self):
@@ -33,23 +33,15 @@ class GeotasteLayout(BaseComponent):
         return dbc.Row(self.panel_comparison.layout())
 
     def layout(self, params=None):
-        top_row = dbc.Row(self.panels.layout_top(params), className='layout-toprow')
-        main_row = dbc.Row(self.panels.layout_main(params), className='layout-mainrow')
-        
-        left_col = dbc.Col([
-            top_row, 
-            main_row
-        ], className='layout-leftcol', width=6)
-        
-        right_col = dbc.Col(
-            self.panels.layout_content(params), 
-            className='layout-rightcol', 
-            width=6
+        return dbc.Container(
+            [
+                self.navbar,
+                self.panels.layout()
+            ],
+            className='layout-container'
         )
 
-        notnavbar = dbc.Row([left_col, right_col], className='layout-belownavbar')
-
-        return dbc.Container([self.navbar, notnavbar], className='layout-container')
+    
 
 
 

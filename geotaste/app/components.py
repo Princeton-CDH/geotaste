@@ -43,15 +43,12 @@ class FilterComponent(BaseComponent):
     # some will have
     figure_factory = None
     dataset_class = None
+    _ff = None
 
     @property
     def ff(self): 
+        if self._ff is not None: return self._ff
         if self.figure_factory is not None:
-            return self._ff(serialize_d(self.filter_data))
-    @cache
-    def _ff(self, filter_data=None):
-        if self.figure_factory is not None:
-            filter_data = unserialize_d(filter_data) if filter_data is not None else {}
             return self.figure_factory(self.filter_data)
     
     @cached_property
@@ -95,7 +92,7 @@ class FilterComponent(BaseComponent):
 
 
     @cached_property
-    def store_desc(self): return html.Span(BLANK, className='store_desc')
+    def store_desc(self): return html.Span(UNFILTERED, className='store_desc')
 
     def layout(self, params=None):
         return self.content
@@ -104,6 +101,10 @@ class FilterComponent(BaseComponent):
     def content(self): 
         # subclass!
         return ''
+    
+    def intersect_filters(self, *filters_d):
+        self.log(f'intersecting {len(filters_d)} filters')
+        return intersect_filters(*filters_d)
     
 
 
@@ -148,7 +149,7 @@ class FilterCard(FilterComponent):
     @cached_property
     def store_desc(self): 
         return dbc.Button(
-            '', 
+            UNFILTERED, 
             className='store_desc', 
             color='link',
             id=self.id(f'store_desc')
@@ -185,11 +186,11 @@ class FilterCard(FilterComponent):
         def store_data_updated(store_data):
             # filter cleared?
             if not store_data:
-                return BLANK, False
+                return UNFILTERED, False
 
             self.log('store_data_updated')
             res=describe_filters(store_data, records_name=self.records_name)
-            o1 = dcc.Markdown(res) if res else BLANK
+            o1 = dcc.Markdown(res) if res else UNFILTERED
             return o1, True
 
         ## buttons
