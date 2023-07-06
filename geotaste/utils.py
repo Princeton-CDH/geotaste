@@ -226,7 +226,7 @@ def compare_filters(filter_data_L, filter_data_R, key_LR='L_or_R'):
     def get_key_type(key):
         if key in keys_L_only: return 'L'
         if key in keys_R_only: return 'R'
-        if key in keys_both: return 'Both'
+        if key in keys_both: return 'L&R'
         return 'Neither'
     
     outd = {INTENSION_KEY:{}, EXTENSION_KEY:{}}

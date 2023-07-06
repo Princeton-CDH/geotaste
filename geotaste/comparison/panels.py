@@ -1,10 +1,11 @@
 from ..imports import *
 from .figs import *
+from .views import *
 from ..combined import CombinedPanel
 
 class PanelComparison(FilterPanel):
     figure_factory = ComparisonFigureFactory
-
+    default_view = MemberMapView
     
 
     def layout(self, params=None):
@@ -62,7 +63,7 @@ class PanelComparison(FilterPanel):
     @cached_property
     def L(self):
         return CombinedPanel(
-            name='CombinedPanel-L', 
+            name=self.id('L'), 
             L_or_R='L', 
             color=LEFT_COLOR, 
             desc='Left-hand Group Panel'
@@ -71,7 +72,7 @@ class PanelComparison(FilterPanel):
     @cached_property
     def R(self):
         return CombinedPanel(
-            name='CombinedPanel-R', 
+            name=self.id('R'),
             L_or_R='R', 
             color=RIGHT_COLOR, 
             desc='Right-hand Group Panel'
@@ -127,89 +128,29 @@ class PanelComparison(FilterPanel):
             children=[html.Pre('Loading...')],
             className='graphtab-div'
         )
-    
-    @property
-    def graphtab_tbl_members(self):
-        return dbc.Container(
-                [
-                    html.H4('Data by members'), 
-                    self.ff.table_members()
-                ], 
-                className='graphtab padded', 
-            )
-    
-    @property
-    def graphtab_tbl_arrond(self):
-        signif_df = self.ff.signif_arronds
-        if len(signif_df): 
-            signif_df['odds_ratio'] = signif_df['odds_ratio'].replace(np.inf, np.nan)
-            signif_df = signif_df[signif_df.odds_ratio.apply(is_numeric) & (~signif_df.odds_ratio.isna()) & (signif_df.odds_ratio!=0)]
 
-        arronds_str = f', '.join(f'the {ordinal_str(int(x))}' for x in signif_df.index)
-        arronds_str = f', '.join(ordinal_str(int(x)) for x in signif_df.index)
-        desc_top = f'''Comparing where library members in the left- and right-hand groups lived produces **{len(signif_df)}** statistically significant arrondissement{": " if arronds_str else ""}.'''
+    def determine_view(self, tab_ids_1=[], tab_ids_2=[], default=None):
+        tab_ids_1_set=set(tab_ids_1)
+        tab_ids_2_set=set(tab_ids_2)
+
+        if 'tbl' in tab_ids_1_set:
+            if 'tbl_members' in tab_ids_2_set: 
+                return MemberTableView
+                
+            elif 'tbl_arrond' in tab_ids_2_set:
+                return ArrondTableView
+                
+        elif 'analyze' in tab_ids_1_set:
+            if 'tbl_diff' in tab_ids_2_set:
+                return DifferenceDegreeView
         
-        signif_more_L=signif_df[signif_df.odds_ratio>1]
-        signif_more_R=signif_df[signif_df.odds_ratio<1]
-
-        def getdesc(signif_df, filter_desc, side='left'):
-            descs=['',f'The {side}-hand group (**{filter_desc}**) is...']
-            for arrond_id,row in signif_df.sort_values('odds_ratio', ascending=side!='left').iterrows():
-                ratio = row.odds_ratio
-                cL,cR,pL,pR=row.count_L,row.count_R,row.perc_L,row.perc_R
-                if side=='right':
-                    if ratio == 0: continue
-                    ratio=1/ratio
-                    cL,cR=cR,cL
-                    pL,pR=pR,pL
-                cL2 = int(cL * pL)
-                cR2 = int(cR * pR)
-                astr=ordinal_str(int(arrond_id))
-                # descs+=[f'* *{ratio:.1f}x* more likely to live in the **{astr}**', f'    * [{pL:.0f}% ({cL:.0f}) vs. {pR:.0f}% ({cR:.0f})\]']
-                # descs+=[f'* ***{ratio:.1f}x*** more likely to live in the **{astr}** ({pL:.1f}% vs. {pR:.1f}%)']
-                descs+=[f'* ***{ratio:.1f}x*** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})']
-            return '\n'.join(descs)
+        elif 'map' in tab_ids_1_set:
+            return MemberMapView
+            if 'map_L' in tab_ids_2_set: return 'map_members_L'
+            if 'map_R' in tab_ids_2_set: return 'map_members_R'
+            return 'map_members'
         
-        desc_L=getdesc(signif_more_L, self.L.filter_desc,side='left') if len(signif_more_L) else ''
-        desc_R=getdesc(signif_more_R, self.R.filter_desc,side='right') if len(signif_more_R) else ''
-        return dbc.Container(
-            [
-                html.H4('Data by arrondissement'), 
-                dcc.Markdown(desc_top),
-                dbc.Row([
-                    dbc.Col(dcc.Markdown(desc_L, className='left-color')),
-                    dbc.Col(dcc.Markdown(desc_R, className='right-color'))
-                ]),
-                self.ff.table_arrond()
-            ], 
-            className='graphtab padded', 
-        )
-    
-    @property
-    def graphtab_tbl_diff(self):
-        return dbc.Container(
-                [
-                    html.H4('Degree of difference compared'),
-                    html.P(
-                        dcc.Markdown(
-                            self.ff.desc_table_diff()
-                        )
-                    ), 
-                    self.ff.table_diff()
-                ], 
-                className='graphtab padded', 
-            )
-    
-    @property
-    def graphtab_map_members(self):
-        ofig = self.ff.plot()
-        ofig.update_layout(autosize=True)
-        ograph = dcc.Graph(
-            figure=ofig, 
-            className='comparison_map_graph'
-        )
-        return dbc.Container(ograph, className='graphtab')
-
+        return default if default is not None else self.default_view
 
 
 
@@ -222,36 +163,10 @@ class PanelComparison(FilterPanel):
             [
                 Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
                 Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-                Input(self.L.store, 'data'), 
-                Input(self.R.store, 'data'),
+                Input(self.store, 'data'),   # triggered by update! which means that self.filter_data and self.ff are updated as well
             ],
-            # prevent_initial_call=True
         )
-        def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_data_R):
-            # print(f'Tab ID 1: {tab_ids_1}')
-            # print(f'Tab ID 2: {tab_ids_2}')
-            # self.log(f'Triggered: {ctx.triggered_id}')
-            # if str(ctx.triggered_id).startswith('store-'):
-            # self.ff = ComparisonFigureFactory(filter_data_L, filter_data_R)
-            
-            tab_ids_1_set=set(tab_ids_1)
-            tab_ids_2_set=set(tab_ids_2)
-
-            if 'tbl' in tab_ids_1_set:
-                if 'tbl_members' in tab_ids_2_set:
-                    return self.graphtab_tbl_members
-                    
-                elif 'tbl_arrond' in tab_ids_2_set:
-                    return self.graphtab_tbl_arrond
-                    
-            elif 'analyze' in tab_ids_1_set:
-                if 'tbl_diff' in tab_ids_2_set:
-                    return self.graphtab_tbl_diff
-            
-            elif 'map' in tab_ids_1_set:
-                return self.graphtab_map_members
-            
-            return html.Pre('Unknown tab?')
-
-                
+        def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data):
+            viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
+            return viewfunc(self)
 

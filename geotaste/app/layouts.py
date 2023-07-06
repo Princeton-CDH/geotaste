@@ -9,7 +9,7 @@ class GeotasteLayout(BaseComponent):
     @cached_property
     def panels(self): 
         from ..comparison import PanelComparison
-        return PanelComparison(name='ComparisonPanel')
+        return PanelComparison()#name='ComparisonPanel')
 
     @cached_property
     def logo(self):
