@@ -1,7 +1,7 @@
 from ..imports import *
 from .components import *
 
-class BookPanel(FilterPanel, FilterCard):
+class BookPanel(FilterPlotPanel, FilterCard):
     desc = 'Book filters'
     records_name='books'
     
