@@ -2,10 +2,8 @@ from ..imports import *
 
 
 def run():
-    print('booting')
-
-    # layout = GeotasteLayout()
-    layout = MemberPanel()
+    layout = GeotasteLayout()
+    layout.log('booting')
     app = DashApp(
         layout, 
         bootstrap=True,

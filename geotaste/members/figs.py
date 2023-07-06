@@ -294,11 +294,9 @@ class MemberMap(MemberFigure):
                 )
             else:
                 locations = self.selected_points_locations(selectedData)
-                print('locations',locations)
                 if locations:
                     s=self.df[['arrond_id']].reset_index().drop_duplicates().set_index(self.df.index.name)['arrond_id']
                     o=filter_series(s, locations, test_func=isin_or_hasone)
-                    print(o)
                     return o
             
         return {}

@@ -122,7 +122,6 @@ class ComparisonFigureFactory(FigureFactory):
     def desc_table_diff(self, **kwargs):
         df=self.rank_diff()
         dfq=df[df.is_self==1]
-        print(dfq)
         if not len(dfq): return ''
 
         row=dfq.iloc[0]

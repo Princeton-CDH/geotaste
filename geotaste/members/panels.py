@@ -1,7 +1,10 @@
 from ..imports import *
 from .components import *
 
-class MemberPanel(FilterCard):
+class MemberPanel(FilterPanel, FilterCard):
+    desc = 'Member filters'
+    records_name='members'
+
     @cached_property
     def name_card(self): return MemberNameCard(**self._kwargs)
     @cached_property
@@ -14,42 +17,37 @@ class MemberPanel(FilterCard):
     def nation_card(self): return MemberNationalityCard(**self._kwargs)
     @cached_property
     def arrond_card(self): return MemberArrondCard(**self._kwargs)
-    
+
     @cached_property
-    def content(self,params=None):
-        body = dbc.Container([
-            dbc.Row([
-                self.store, 
-                self.name_card.layout(params),
-                self.membership_year_card.layout(params),
-                self.dob_card.layout(params),
-                self.gender_card.layout(params),
-                self.nation_card.layout(params),
-                self.arrond_card.layout(params),
-                self.store_desc,
-            ])
-        ])
-        return body
+    def subcomponents(self):
+        return [
+            self.name_card,
+            self.membership_year_card,
+            self.dob_card,
+            self.gender_card,
+            self.nation_card,
+            self.arrond_card,
+        ]
     
 
-    def component_callbacks(self, app):
-        super().component_callbacks(app)
+    # def component_callbacks(self, app):
+    #     super().component_callbacks(app)
 
-        @app.callback(
-            Output(self.store, 'data',allow_duplicate=True),
-            [
-                Input(self.name_card.store, 'data'),
-                Input(self.membership_year_card.store, 'data'),
-                Input(self.dob_card.store, 'data'),
-                Input(self.gender_card.store, 'data'),
-                Input(self.nation_card.store, 'data'),
-                Input(self.arrond_card.store, 'data'),
-            ],
-            prevent_initial_call=True
-        )
-        def component_filters_updated(*filters_d):
-            self.filter_data = intersect_filters(*filters_d)
-            return self.filter_data
+    #     @app.callback(
+    #         Output(self.store, 'data',allow_duplicate=True),
+    #         [
+    #             Input(self.name_card.store, 'data'),
+    #             Input(self.membership_year_card.store, 'data'),
+    #             Input(self.dob_card.store, 'data'),
+    #             Input(self.gender_card.store, 'data'),
+    #             Input(self.nation_card.store, 'data'),
+    #             Input(self.arrond_card.store, 'data'),
+    #         ],
+    #         prevent_initial_call=True
+    #     )
+    #     def component_filters_updated(*filters_d):
+    #         self.filter_data = intersect_filters(*filters_d)
+    #         return self.filter_data
         
         # @app.callback(
         #     [

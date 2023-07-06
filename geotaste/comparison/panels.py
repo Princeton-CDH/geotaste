@@ -1,17 +1,27 @@
 from ..imports import *
 from .figs import *
+from ..combined import CombinedPanel
 
-class PanelComparison(BaseComponent):
-    def __init__(self, *x, **y):
-        from ..combined import CombinedPanel
+class PanelComparison(FilterComponent):
+    figure_factory = ComparisonFigureFactory
 
-        super().__init__(*x,**y)
-        self.L = CombinedPanel(name='comparison-panel-L', L_or_R='L', color=LEFT_COLOR)
-        self.R = CombinedPanel(name='comparison-panel-R', L_or_R='R', color=RIGHT_COLOR)
-        self.ff = ComparisonFigureFactory()
-        self.store = dcc.Store(id=self.id('store'), data={})
-
-
+    @cached_property
+    def L(self):
+        return CombinedPanel(
+            name='CombinedPanel-L', 
+            L_or_R='L', 
+            color=LEFT_COLOR, 
+            desc='Left-hand Group Panel'
+        )
+    @cached_property
+    def R(self):
+        return CombinedPanel(
+            name='CombinedPanel-R', 
+            L_or_R='R', 
+            color=RIGHT_COLOR, 
+            desc='Right-hand Group Panel'
+        )
+    
     @cached_property
     def comparison_map_graph(self):
         return dcc.Graph(
@@ -43,7 +53,7 @@ class PanelComparison(BaseComponent):
             dbc.Col(
                 html.H2([
                     'Left Group: ', 
-                    self.L.store_desc
+                    # self.L.store_desc
                 ]), 
                 width=6, 
                 className='storedescs-col storedescs-col-L left-color'
@@ -51,7 +61,7 @@ class PanelComparison(BaseComponent):
             dbc.Col(
                 html.H2([
                     'Right Group: ', 
-                    self.R.store_desc
+                    # self.R.store_desc
                 ]),
                 width=6, 
                 className='storedescs-col storedescs-col-R right-color'
@@ -142,7 +152,6 @@ class PanelComparison(BaseComponent):
         return dbc.Container(
                 [
                     html.H4('Data by members'), 
-                    html.P('Lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description lots of description '),
                     self.ff.table_members()
                 ], 
                 className='graphtab padded', 
@@ -153,10 +162,7 @@ class PanelComparison(BaseComponent):
         signif_df = self.ff.signif_arronds
         if len(signif_df): 
             signif_df['odds_ratio'] = signif_df['odds_ratio'].replace(np.inf, np.nan)
-            print(signif_df.odds_ratio.unique())
             signif_df = signif_df[signif_df.odds_ratio.apply(is_numeric) & (~signif_df.odds_ratio.isna()) & (signif_df.odds_ratio!=0)]
-
-        print(signif_df)
 
         arronds_str = f', '.join(f'the {ordinal_str(int(x))}' for x in signif_df.index)
         arronds_str = f', '.join(ordinal_str(int(x)) for x in signif_df.index)
@@ -229,41 +235,21 @@ class PanelComparison(BaseComponent):
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-        @app.callback(
-            output=[
-                (
-                    Output(self.L.member_panel_row, 'style', allow_duplicate=True),
-                    Output(self.R.member_panel_row, 'style', allow_duplicate=True),
-                ),
-                (
-                    Output(self.L.book_panel_row, 'style', allow_duplicate=True),
-                    Output(self.R.book_panel_row, 'style', allow_duplicate=True),
-                )
-            ],
-            inputs=[Input(self.toptabs, 'active_tab')],
-            prevent_initial_call=True
-        )
-        def switch_toptabs(tab_id, num_tabs=2):
-            invis=tuple([STYLE_INVIS for n in range(num_tabs)])
-            vis=tuple([STYLE_VIS for n in range(num_tabs)])
-            return (invis,vis) if tab_id=='books' else (vis,invis)
-        
-
-
 
         @app.callback(
-            Output(self.graphtab, 'children', allow_duplicate=True),
+            Output(self.graphtab, 'children'),
             [
                 Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
                 Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
                 Input(self.L.store, 'data'), 
                 Input(self.R.store, 'data'),
-            ]
+            ],
+            # prevent_initial_call=True
         )
         def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_data_R):
-            print(f'Tab ID 1: {tab_ids_1}')
-            print(f'Tab ID 2: {tab_ids_2}')
-            print(f'Triggered: {ctx.triggered_id}')
+            # print(f'Tab ID 1: {tab_ids_1}')
+            # print(f'Tab ID 2: {tab_ids_2}')
+            # print(f'Triggered: {ctx.triggered_id}')
             if str(ctx.triggered_id).startswith('store-'):
                 self.ff = ComparisonFigureFactory(filter_data_L, filter_data_R)
             
@@ -272,20 +258,16 @@ class PanelComparison(BaseComponent):
 
             if 'tbl' in tab_ids_1_set:
                 if 'tbl_members' in tab_ids_2_set:
-                    print('returning tbl_members')
                     return self.graphtab_tbl_members
                     
                 elif 'tbl_arrond' in tab_ids_2_set:
-                    print('returning tbl_arrond')
                     return self.graphtab_tbl_arrond
                     
             elif 'analyze' in tab_ids_1_set:
                 if 'tbl_diff' in tab_ids_2_set:
-                    print('returning tbl_diff')
                     return self.graphtab_tbl_diff
             
             elif 'map' in tab_ids_1_set:
-                print('returning map')
                 return self.graphtab_map_members
             
             return html.Pre('Unknown tab?')

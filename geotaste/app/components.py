@@ -2,7 +2,7 @@ from ..imports import *
 
 BLANKDIV = html.Div(BLANKSTR)
 
-class BaseComponent(DashComponent):
+class BaseComponent(DashComponent, Logmaker):
     def __init__(
             self,
 
@@ -34,8 +34,6 @@ class BaseComponent(DashComponent):
         for k,v in kwargs.items(): 
             setattr(self,k,v)
         self._kwargs = kwargs
-
-    
 
 class FilterComponent(BaseComponent):
     desc = 'Filter by X'
@@ -97,7 +95,16 @@ class FilterComponent(BaseComponent):
 
 
     @cached_property
-    def store_desc(self): return html.Span(NOFILTER, className='store_desc')
+    def store_desc(self): return html.Span(BLANK, className='store_desc')
+
+    def layout(self, params=None):
+        return self.content
+
+    @cached_property
+    def content(self): 
+        # subclass!
+        return ''
+    
 
 
 class FilterCard(FilterComponent):
@@ -123,12 +130,6 @@ class FilterCard(FilterComponent):
         return dbc.Collapse(dbc.CardBody(self.content), is_open=True)
     
     
-    ## SUBCLASS
-    @cached_property
-    def content(self): 
-        # subclass!
-        return ''
-        
     @cached_property
     def footer(self):
         style_d={'color':self.color if self.color else 'inherit'}
@@ -150,7 +151,7 @@ class FilterCard(FilterComponent):
             '', 
             className='store_desc', 
             color='link',
-            id=self.id('store_desc')
+            id=self.id(f'store_desc')
         )
 
     @cached_property
@@ -176,30 +177,22 @@ class FilterCard(FilterComponent):
         @app.callback(
             [
                 Output(self.store_desc, 'children', allow_duplicate=True),
-                Output(self.body, 'is_open', allow_duplicate=True),
                 Output(self.footer, 'is_open', allow_duplicate=True)
             ],
             Input(self.store, 'data'),
-            [
-                State(self.body, 'is_open'),
-                State(self.footer, 'is_open')
-            ],
             prevent_initial_call=True
         )
-        def store_data_updated(store_data, body_open, footer_open):
+        def store_data_updated(store_data):
             # filter cleared?
             if not store_data:
-                return BLANK,body_open,footer_open
-            else:
-                print(f'[{nowstr()}] store_data_updated: {self.__class__.__name__} ({self.name})')
-                res=describe_filters(store_data, records_name=self.records_name)
-                o1 = dcc.Markdown(res) if res else BLANK
-                return (o1,True,True)
-        
+                return BLANK, False
 
+            self.log('store_data_updated')
+            res=describe_filters(store_data, records_name=self.records_name)
+            o1 = dcc.Markdown(res) if res else BLANK
+            return o1, True
 
         ## buttons
-
         @app.callback(
             Output(self.body, "is_open", allow_duplicate=True),
             Input(self.button_showhide, "n_clicks"),
@@ -242,14 +235,13 @@ class FilterPlotCard(FilterCard):
         @app.callback(
             [
                 Output(self.store, "data", allow_duplicate=True),
-                Output(self.footer, "is_open", allow_duplicate=True),
                 Output(self.graph, "figure", allow_duplicate=True),
             ],
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
         def clear_selection(n_clicks):
-            return {}, False, self.plot()
+            return {}, self.plot()
 
         @app.callback(
             Output(self.store, "data", allow_duplicate=True),
@@ -257,7 +249,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def graph_selection_updated(selected_data):
-            print('graph_selection_updated')
+            self.log('graph_selection_updated')
             return self.ff.selected(selected_data)
         
         
@@ -330,5 +322,4 @@ class FilterTableCard(FilterPlotCard):
 
     def component_callbacks(self, app):
         pass
-
 
