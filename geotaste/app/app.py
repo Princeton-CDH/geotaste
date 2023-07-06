@@ -1,18 +1,25 @@
-from .imports import *
+from ..imports import *
 
-PATH_ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
 
 def run():
     layout = GeotasteLayout()
+    layout.log('booting')
     app = DashApp(
         layout, 
         bootstrap=True,
-        meta_tags=[
-            {"name": "viewport", "content": "width=device-width, initial-scale=1"}
-        ],
+        meta_tags=[{
+            "name": "viewport",
+            "content": "width=device-width, initial-scale=1"
+        }],
         assets_folder=PATH_ASSETS,
     )
-    # move to here
-    app.run(8052)
+    server = app.app.server
+    app.run(
+        8111, 
+        host='0.0.0.0',
+        debug=True,
+        # dev_tools_ui=False
+    )
+    return server
 
 if __name__=='__main__': run()
