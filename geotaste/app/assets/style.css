@@ -99,8 +99,10 @@ h5 { font-size:1.1rem;}
 }
 
 .card-header {
+    padding:0;
+    padding-left:.5rem;
     font-size:.9rem;
-    padding-left:.1rem;
+    line-height:1.5rem;
 }
 
 .card-footer {
@@ -318,4 +320,26 @@ p {
 
 .dash-spreadsheet.dash-freeze-top, .dash-spreadsheet.dash-virtualized {
     max-height: unset !important;
+}
+
+
+.button_showhide {
+
+}
+
+.button_showhide_div {
+    height:100%;
+    display:flex;
+    align-items: center;
+    width:fit-content;
+    float:right;
+}
+
+.button_clear_div {
+    float:right;
+}
+
+.card-footer-desc {
+    text-align: left;
+    width:100%;
 }

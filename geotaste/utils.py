@@ -416,3 +416,17 @@ def combine_LR_df(dfL, dfR):
         dfL.loc[list(both)].assign(L_or_R='L&R'),
         dfR.loc[list(R)].assign(L_or_R='R'),
     ])
+
+
+def serialize_d(d):
+    return tuple(d.items())
+
+def unserialize_d(d):
+    return dict(d)
+
+
+def nowstr():
+    from datetime import datetime
+    current_datetime = datetime.now()
+    friendly_string = current_datetime.strftime("%Y-%m-%d_%H%M-%S")
+    return friendly_string

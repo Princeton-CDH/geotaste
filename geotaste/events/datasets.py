@@ -46,7 +46,7 @@ class EventsDataset(Dataset):
     
 
 
-class MemberBookEventsDataset(Dataset):
+class CombinedDataset(Dataset):
     @cached_property
     def data(self):
         df_events=EventsDataset().data

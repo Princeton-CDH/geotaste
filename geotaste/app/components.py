@@ -43,21 +43,30 @@ class FilterComponent(BaseComponent):
     records_name='members'
     
     # some will have
-    figure_class = None
+    figure_factory = None
     dataset_class = None
 
+    @property
+    def ff(self): 
+        if self.figure_factory is not None:
+            return self._ff(serialize_d(self.filter_data))
+    @cache
+    def _ff(self, filter_data=None):
+        if self.figure_factory is not None:
+            filter_data = unserialize_d(filter_data) if filter_data is not None else {}
+            return self.figure_factory(self.filter_data)
+    
     @cached_property
-    def figure_obj(self): return self.figure_class() if self.figure_class is not None else None
-
-    @cached_property
-    def dataset_obj(self): return self.dataset_class() if self.dataset_class is not None else None
+    def dataset(self): 
+        if self.dataset_class is not None:
+            return self.dataset_class()
 
     def plot(self, filter_data={}, existing_fig=None): 
         # filter
         if filter_data:
-            fig = self.figure_class(filter_data).plot(**self._kwargs)
+            fig = self.figure_factory(filter_data).plot(**self._kwargs)
         else:
-            fig = self.figure_obj.plot(**self._kwargs)
+            fig = self.ff.plot(**self._kwargs)
 
         # retain layout
         if existing_fig is not None:
@@ -74,7 +83,8 @@ class FilterComponent(BaseComponent):
     ## all components can have a memory -- only activated if nec
     @cached_property
     def store(self):
-        return dcc.Store(id=self.id('store-'+self.__class__.__name__), data={})
+        return dcc.Store(id=self.id(self.name), data={})
+        # return dcc.Store(id=self.id(f'store-{self.__class__.__name__}'), data={})
     
     @property
     def filter_desc(self):
@@ -89,73 +99,129 @@ class FilterComponent(BaseComponent):
     @cached_property
     def store_desc(self): return html.Span(NOFILTER, className='store_desc')
 
-    def component_callbacks(self, app):        
-        @app.callback(
-            Output(self.store_desc, 'children'),
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        def store_data_updated(store_data):
-            print('store_data_updated')
-            res=describe_filters(store_data, records_name=self.records_name)
-            return dcc.Markdown(res) if res else BLANK
-
 
 class FilterCard(FilterComponent):
-
-    @cached_property
-    def header_with_clear(self):
-        return dbc.CardHeader(
-            dbc.Row([
-                dbc.Col(self.desc),
-                dbc.Col(self.button_clear, style={'textAlign':'right'})
-            ], className='pl0 pr0 card_header_row')
-        )
-    
-    @cached_property
-    def header(self):
-        return dbc.CardHeader(self.desc)
-    
-    @cached_property
-    def body(self):
-        return dbc.CardBody([self.graph])
-    
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         children = []
         if header: children.append(self.header)
         if body: children.append(self.body)
         if footer: children.append(self.footer)
         return dbc.Card(children, **kwargs)
-    
-    @cached_property
-    def footer(self):
-        return dbc.CardFooter(
-            [
-                self.store, 
-                html.Div(self.button_clear, style={'float':'right'}),
-                html.Div(self.store_desc, style={'float':'left'}),
-            ],
-            style={
-                'color':self.color if self.color else 'inherit', 
-            }
-        )
+
 
     @cached_property
-    def graph(self):
-        return dcc.Graph(figure=self.plot())
+    def header(self):
+        return dbc.CardHeader(
+            [
+                html.Div(self.button_showhide, className='button_showhide_div'),
+                html.P(self.desc),
+            ]
+        )
     
     @cached_property
-    def store_desc(self): return dbc.Button(NOFILTER, className='store_desc', color='link')
+    def body(self):
+        return dbc.Collapse(dbc.CardBody(self.content), is_open=True)
+    
+    
+    ## SUBCLASS
+    @cached_property
+    def content(self): 
+        # subclass!
+        return ''
+        
+    @cached_property
+    def footer(self):
+        style_d={'color':self.color if self.color else 'inherit'}
+        return dbc.Collapse(
+            dbc.CardFooter(
+                [
+                    self.store,
+                    html.Div(self.button_clear, className='button_clear_div'),
+                    html.Div(self.store_desc, className='card-footer-desc')
+                ],
+                style=style_d
+            ),
+            is_open=False
+        )
+    
+    @cached_property
+    def store_desc(self): 
+        return dbc.Button(
+            '', 
+            className='store_desc', 
+            color='link',
+            id=self.id('store_desc')
+        )
 
     @cached_property
     def button_clear(self):
         return dbc.Button(
-            "[reset]", 
+            "[x]", 
             color="link", 
             n_clicks=0,
-            className='button_clear'
+            className='button_clear',
+            id=self.id('button_clear')
         )
     
+    @cached_property
+    def button_showhide(self):
+        return dbc.Button(
+            "[-]", 
+            color="link", 
+            n_clicks=0,
+            className='button_showhide'
+        )
+    
+    def component_callbacks(self, app):        
+        @app.callback(
+            [
+                Output(self.store_desc, 'children', allow_duplicate=True),
+                Output(self.body, 'is_open', allow_duplicate=True),
+                Output(self.footer, 'is_open', allow_duplicate=True)
+            ],
+            Input(self.store, 'data'),
+            [
+                State(self.body, 'is_open'),
+                State(self.footer, 'is_open')
+            ],
+            prevent_initial_call=True
+        )
+        def store_data_updated(store_data, body_open, footer_open):
+            # filter cleared?
+            if not store_data:
+                return BLANK,body_open,footer_open
+            else:
+                print(f'[{nowstr()}] store_data_updated: {self.__class__.__name__} ({self.name})')
+                res=describe_filters(store_data, records_name=self.records_name)
+                o1 = dcc.Markdown(res) if res else BLANK
+                return (o1,True,True)
+        
+
+
+        ## buttons
+
+        @app.callback(
+            Output(self.body, "is_open", allow_duplicate=True),
+            Input(self.button_showhide, "n_clicks"),
+            State(self.body, "is_open"),
+            prevent_initial_call=True
+        )
+        def toggle_collapse(n, is_open):
+            if n: return not is_open
+            return is_open
+        
+
+        # MUST BE SUBCLASSED??
+        # @app.callback(
+        #     [
+        #         Output(self.store, "data", allow_duplicate=True),
+        #         Output(self.footer, "is_open", allow_duplicate=True),
+        #     ],
+        #     Input(self.button_clear, 'n_clicks'),
+        #     prevent_initial_call=True
+        # )
+        # def clear_selection(n_clicks):
+        #     return {}, False
     
         
 
@@ -164,31 +230,35 @@ class FilterCard(FilterComponent):
 
 
 class FilterPlotCard(FilterCard):
+    @cached_property
+    def content(self): return self.graph
+    @cached_property
+    def graph(self): return dcc.Graph(figure=self.plot())
+
     def component_callbacks(self, app):
         # do my parent's too
         super().component_callbacks(app)
 
-        # ## CLEAR? -- OVERWRITTEN
         @app.callback(
             [
                 Output(self.store, "data", allow_duplicate=True),
+                Output(self.footer, "is_open", allow_duplicate=True),
                 Output(self.graph, "figure", allow_duplicate=True),
             ],
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
         def clear_selection(n_clicks):
-            print('clear_selection')
-            return {}, self.plot()
+            return {}, False, self.plot()
 
         @app.callback(
-            Output(self.store, "data"),
+            Output(self.store, "data", allow_duplicate=True),
             Input(self.graph, 'selectedData'),
             prevent_initial_call=True
         )
         def graph_selection_updated(selected_data):
             print('graph_selection_updated')
-            return self.figure_obj.selected(selected_data)
+            return self.ff.selected(selected_data)
         
         
 
@@ -211,9 +281,7 @@ class FilterInputCard(FilterCard):
     key=''
     
     @cached_property
-    def body(self):
-        return dbc.CardBody([self.input])
-    
+    def content(self):  return self.input
     @cached_property
     def input(self):
         return dcc.Dropdown()
@@ -222,32 +290,32 @@ class FilterInputCard(FilterCard):
         # do my parent's too
         super().component_callbacks(app)
 
-        # ## CLEAR? -- OVERWRITTEN
-        @app.callback(
-            [
-                Output(self.store, "data", allow_duplicate=True),
-                Output(self.input, "value", allow_duplicate=True),
-            ],
-            Input(self.button_clear, 'n_clicks'),
-            prevent_initial_call=True
-        )
-        def clear_selection(n_clicks):
-            print('clear_selection')
-            return {}, []
+        # # ## CLEAR? -- OVERWRITTEN
+        # @app.callback(
+        #     [
+        #         Output(self.store, "data", allow_duplicate=True),
+        #         Output(self.input, "value", allow_duplicate=True),
+        #     ],
+        #     Input(self.button_clear, 'n_clicks'),
+        #     prevent_initial_call=True
+        # )
+        # def clear_selection(n_clicks):
+        #     print('clear_selection')
+        #     return {}, []
 
-        @app.callback(
-            Output(self.store, "data"),
-            Input(self.input, 'value'),
-            prevent_initial_call=True
-        )
-        def input_value_changed(vals):
-            if not vals: raise PreventUpdate
-            if self.dataset_obj is not None:
-                return self.dataset_obj.filter_series(
-                    self.key,
-                    vals=vals
-                )
-            return {}
+        # @app.callback(
+        #     Output(self.store, "data", allow_duplicate=True),
+        #     Input(self.input, 'value'),
+        #     prevent_initial_call=True
+        # )
+        # def input_value_changed(vals):
+        #     if not vals: raise PreventUpdate
+        #     if self.dataset_obj is not None:
+        #         return self.dataset_obj.filter_series(
+        #             self.key,
+        #             vals=vals
+        #         )
+        #     return {}
     
 
 
@@ -256,8 +324,9 @@ class FilterTableCard(FilterPlotCard):
     @cached_property
     def table(self): return html.Div(children=[self.plot()])
     
+    
     @cached_property
-    def body(self): return dbc.CardBody([self.table])
+    def content(self): return self.table
 
     def component_callbacks(self, app):
         pass
