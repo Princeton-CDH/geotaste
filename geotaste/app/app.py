@@ -4,7 +4,8 @@ from ..imports import *
 def run():
     print('booting')
 
-    layout = GeotasteLayout()
+    # layout = GeotasteLayout()
+    layout = MemberPanel()
     app = DashApp(
         layout, 
         bootstrap=True,

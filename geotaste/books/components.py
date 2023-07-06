@@ -5,5 +5,5 @@ from ..app.components import FilterPlotCard, FilterCard
 class BookYearCard(FilterPlotCard):
     desc = 'Date of book\'s publication'
     key='year'
-    figure_class = BookYearFigure
+    figure_factory = BookYearFigure
 

@@ -24,23 +24,23 @@ class MemberNameCard(MemberInputCard):
 class MemberDOBCard(FilterPlotCard):
     desc = 'Filter by date of birth'
     key='birth_year'
-    figure_class = MemberDOBFigure    
+    figure_factory = MemberDOBFigure    
     
     
 class MembershipYearCard(FilterPlotCard):
     desc = 'Filter by years of membership'
     key='membership_years'
-    figure_class = MembershipYearFigure    
+    figure_factory = MembershipYearFigure    
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Filter by gender of member'
     key='gender'
-    figure_class = MemberGenderFigure
+    figure_factory = MemberGenderFigure
 
 class MemberNationalityCard(FilterPlotCard):
     desc = 'Filter by nationality of member'
     key='nationalities'
-    figure_class = MemberNationalityFigure
+    figure_factory = MemberNationalityFigure
 
     @cached_property
     def graph(self):
@@ -49,4 +49,4 @@ class MemberNationalityCard(FilterPlotCard):
 class MemberArrondCard(FilterPlotCard):
     desc = 'Filter by arrondissement'
     key='arrond_id'
-    figure_class = MemberArrondMap
+    figure_factory = MemberArrondMap
