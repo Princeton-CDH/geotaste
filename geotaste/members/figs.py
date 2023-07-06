@@ -2,22 +2,10 @@ from ..imports import *
 from ..app.figs import *
 from .datasets import *
 
-class MemberFigure(FigureFactory):
+class MemberFigure(DatasetFigure):
     records_name='members'
     key = ''
-    records_points_dim = 'x' # or 'y'
     dataset_class = MembersDataset
-
-    
-    @cached_property
-    def figdf(self):
-        if not len(self.df): return pd.DataFrame()
-        return pd.DataFrame([
-            {'member':member, self.key:yr}
-            for member,years in zip(self.df.index, self.df[self.key])
-            for yr in years
-        ]).sort_values([self.key, 'member']).set_index('member')
-
 
 
 class MemberTableFigure(MemberFigure, TableFigure):

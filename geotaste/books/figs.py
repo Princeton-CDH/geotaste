@@ -1,23 +1,15 @@
 from ..imports import *
 from .datasets import *
-from ..app.figs import FigureFactory
+from ..app.figs import DatasetFigure
 
-class BooksFigure(FigureFactory):
+class BooksFigure(DatasetFigure):
     records_name='books'
     dataset_class = BooksDataset
-    
-    @cached_property
-    def figdf(self):
-        if not len(self.df): return pd.DataFrame()
-        iname = self.df.index.name
-        return pd.DataFrame([
-            {iname:i, self.key:v}
-            for i,vals in zip(self.df.index, self.df[self.key])
-            for v in flatten_list(vals)
-        ]).sort_values([self.key, iname]).set_index(iname)
 
-class BookTitleFigure(BooksFigure):
-    key='title'
+class CreationsFigure(DatasetFigure):
+    records_name='works'
+    dataset_class = CreationsDataset
+    
 
 class BookYearFigure(BooksFigure):
     key='year'
@@ -29,3 +21,22 @@ class BookYearFigure(BooksFigure):
         fig.update_xaxes(range=[min_year, max_year], title_text='')
         fig.update_yaxes(visible=False)
         return fig
+
+
+class CreatorGenderFigure(CreationsFigure):
+    key='creator_Gender'
+
+    def plot(self, color=None, **kwargs):
+        fig = super().plot_histogram_bar(
+            x=self.key,
+            color=color,
+            # log_y=True,
+            quant=False,
+            height=100,
+            text='count'
+        )
+        fig.update_yaxes(visible=False)
+        fig.update_xaxes(title_text='')
+        return fig
+
+

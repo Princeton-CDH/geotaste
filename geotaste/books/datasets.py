@@ -124,7 +124,7 @@ class CreationsDataset(Dataset):
     @cached_property
     def data(self):
         books_df = Books().data
-        creators_df = Creators().data
+        creators_df = CreatorsDataset().data
         creators = set(creators_df.index)
 
         o=[]
@@ -153,7 +153,7 @@ class CreationsDataset(Dataset):
                 }
                 o.append(odx)
 
-        return pd.DataFrame(o).fillna(self.fillna)
+        return pd.DataFrame(o).fillna(self.fillna).set_index('book')
 
 
 
