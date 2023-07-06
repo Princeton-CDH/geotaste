@@ -432,12 +432,15 @@ def nowstr():
     return friendly_string
 
 
+from loguru import logger
 class Logmaker:
-    def log(self, *x, **y):
+    def log(self, *x, level='debug', **y):
         o=' '.join(str(xx) for xx in x)
         name=self.__class__.__name__
         if hasattr(self,'name'): name+=f' ({self.name})'
-        print(f'[{nowstr()}] {name}: {o}')
+        o = f'[{nowstr()}] {name}: {o}'
+        f=getattr(logger,level)
+        f(o)
 
 
 
@@ -452,3 +455,9 @@ def get_filter_data(filter_data={}):
             print('using MembersDataset')
             filter_data = Members().filter(**filter_data)
     return filter_data
+
+
+
+
+def selectrename_df(df, col2col={}):
+    return df[col2col.keys()].rename(columns=col2col)

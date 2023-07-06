@@ -79,7 +79,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
         return [(d.get(keys[0],np.nan), d.get(keys[1],np.nan)) for d in selectedData.get('points',[]) if keys[0] in d and keys[1] in d]
     
     def selected(self, selectedData):
-        self.log('selectedData')
+        logger.debug('selectedData')
         if not selectedData: return {}
         xs = self.selected_points(selectedData) 
         if not xs: return {}

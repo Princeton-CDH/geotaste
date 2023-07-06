@@ -107,6 +107,9 @@ logging.getLogger('werkzeug').setLevel(logging.ERROR)
 import plotly.express as px
 import plotly.graph_objects as go
 
+# setup logs
+from loguru import logger
+
 
 ## Setup plotly
 # Plotly mapbox public token

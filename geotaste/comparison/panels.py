@@ -79,7 +79,7 @@ class PanelComparison(FilterPanel):
         )
     
     def intersect_filters(self, *filters_d):
-        self.log(f'intersecting {len(filters_d)} filters')
+        logger.debug(f'intersecting {len(filters_d)} filters')
         assert len(filters_d) == 2
         return (filters_d[0], filters_d[1])
     

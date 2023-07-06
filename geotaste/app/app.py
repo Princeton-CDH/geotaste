@@ -3,7 +3,7 @@ from ..imports import *
 
 def run():
     layout = GeotasteLayout()
-    layout.log('booting')
+    logger.debug('booting')
     app = DashApp(
         layout, 
         bootstrap=True,

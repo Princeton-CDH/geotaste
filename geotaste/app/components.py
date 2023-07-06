@@ -103,7 +103,7 @@ class FilterComponent(BaseComponent):
         return ''
     
     def intersect_filters(self, *filters_d):
-        self.log(f'intersecting {len(filters_d)} filters')
+        logger.debug(f'intersecting {len(filters_d)} filters')
         return intersect_filters(*filters_d)
     
 
@@ -188,7 +188,7 @@ class FilterCard(FilterComponent):
             if not store_data:
                 return UNFILTERED, False
 
-            self.log('store_data_updated')
+            logger.debug('store_data_updated')
             res=describe_filters(store_data, records_name=self.records_name)
             o1 = dcc.Markdown(res) if res else UNFILTERED
             return o1, True
@@ -250,7 +250,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def graph_selection_updated(selected_data):
-            self.log('graph_selection_updated')
+            logger.debug('graph_selection_updated')
             return self.ff.selected(selected_data)
         
         
@@ -309,7 +309,7 @@ class FilterInputCard(FilterCard):
             prevent_initial_call=True
         )
         def clear_selection(n_clicks):
-            self.log('clear_selection')
+            logger.debug('clear_selection')
             return {}, []
 
         @app.callback(

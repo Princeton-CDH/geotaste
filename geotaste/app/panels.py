@@ -34,7 +34,7 @@ class FilterPanel(FilterComponent):
             prevent_initial_call=True
         )
         def subcomponent_filters_updated(*filters_d):
-            self.log('subcomponent filters updated')
+            logger.debug('subcomponent filters updated')
             self.filter_data = self.intersect_filters(*filters_d)
             return self.filter_data
         

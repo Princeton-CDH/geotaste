@@ -26,10 +26,10 @@ class CombinedFigureFactory(FigureFactory):
         filter_data=get_filter_data(self.filter_data)
         x=set(filter_data.get(INTENSION_KEY,{}).keys()) - set(MembersDataset.cols)
         if x:
-            self.log(f'using CombinedDataset due to {x} !??!?')
+            logger.debug(f'using CombinedDataset due to {x} !??!?')
             return Combined().filter_df(filter_data)
         else:
-            self.log('using MembersDataset')
+            logger.debug('using MembersDataset')
             return Members().filter_df(filter_data)
 
     @cached_property
