@@ -15,7 +15,7 @@ def run():
     )
     server = app.app.server
     app.run(
-        8112, 
+        8111, 
         host='0.0.0.0',
         debug=True,
         # dev_tools_ui=False
