@@ -13,7 +13,7 @@ class MemberNameCard(MemberInputCard):
 
     @cached_property
     def input(self):
-        s=MembersDataset().data[self.key]
+        s=Members().data[self.key]
         return dcc.Dropdown(
             options = [dict(value=lbl, label=lbl) for idx,lbl in zip(s.index, s)],
             value = [],

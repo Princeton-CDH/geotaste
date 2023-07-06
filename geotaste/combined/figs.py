@@ -1,10 +1,13 @@
 from ..imports import *
 
+
 class CombinedFigureFactory(FigureFactory):
-    def __init__(self, filter_data={}, df=None, **kwargs):
-        if filter_data and not EXTENSION_KEY in filter_data:
-            filter_data = Members().filter(**filter_data)
-        super().__init__(filter_data=filter_data, df=df, **kwargs)
+    def __init__(self, filter_data={}, df=None, **kwargs):    
+        super().__init__(
+            filter_data=get_filter_data(filter_data), 
+            df=df, 
+            **kwargs
+        )
 
     ## figs
     @cached_property
@@ -19,11 +22,20 @@ class CombinedFigureFactory(FigureFactory):
 
     ## datasets (filtered)
     @cached_property
-    def df_members(self): return Members().filter_df(self.filter_data)
+    def df_members(self): 
+        filter_data=get_filter_data(self.filter_data)
+        x=set(filter_data.get(INTENSION_KEY,{}).keys()) - set(MembersDataset.cols)
+        if x:
+            self.log(f'using CombinedDataset due to {x} !??!?')
+            return Combined().filter_df(filter_data)
+        else:
+            self.log('using MembersDataset')
+            return Members().filter_df(filter_data)
+
     @cached_property
     def df_dwellings(self): 
-        odf=MemberDwellings().filter_df(self.filter_data).reset_index()
-        odf=odf.drop_duplicates(['member','arrond_id'])
+        odf=MemberDwellingsDataset.add_dwellings(self.df_members).reset_index()
+        odf=odf.drop_duplicates(['member','arrond_id']) # @TODO ????
         return odf.set_index('member')
 
     ## calcs

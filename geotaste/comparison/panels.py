@@ -118,7 +118,7 @@ class PanelComparison(FilterPanel):
             ], 
             tab_level=1, 
             className='graphtabs-container',
-            active_tab='tbl'
+            active_tab='map'
         )
         return dbc.Container(graphtabs, className='graphtabs-container-container')
     

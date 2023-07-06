@@ -90,6 +90,9 @@ class DwellingsDataset(Dataset):
     @cached_property
     def data(self):
         df=super().data
+        df['member'] = df['member_uri'].apply(
+            lambda x: x.split('/members/',1)[1][:-1] if '/members/' in x else ''
+        )
         df['arrond_id']=df['arrrondissement'].apply(lambda x: 'X' if not x else str(int(x)))
         return df.fillna('')
 
@@ -101,15 +104,14 @@ class MemberDwellingsDataset(Dataset):
         df_dwellings = DwellingsDataset().data
         return df_members.reset_index().merge(
             df_dwellings,
-            left_on='uri',
-            right_on='member_uri',
-            how='outer',
+            on='member',
+            # how='outer',
             suffixes=('_member','')
         ).drop('member_uri',axis=1).set_index('member').fillna('?')
 
     @cached_property
     def data(self):        
-        return self.add_dwellings(MembersDataset().data)
+        return self.add_dwellings(Members().data)
 
 
 
