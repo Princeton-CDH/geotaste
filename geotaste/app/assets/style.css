@@ -142,7 +142,7 @@ p {
     height:100vh; 
     max-height:100vh; 
     min-height:100vh; 
-    padding-top:50px; 
+    /* padding-top:50px;  */
     padding-bottom:150px;
 }
 
