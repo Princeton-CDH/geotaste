@@ -3,11 +3,11 @@ from .figs import *
 
 class PanelComparison(BaseComponent):
     def __init__(self, *x, **y):
-        from ..combined import MemberBookEventPanel
+        from ..combined import CombinedPanel
 
         super().__init__(*x,**y)
-        self.L = MemberBookEventPanel(name='comparison-panel-L', L_or_R='L', color=LEFT_COLOR)
-        self.R = MemberBookEventPanel(name='comparison-panel-R', L_or_R='R', color=RIGHT_COLOR)
+        self.L = CombinedPanel(name='comparison-panel-L', L_or_R='L', color=LEFT_COLOR)
+        self.R = CombinedPanel(name='comparison-panel-R', L_or_R='R', color=RIGHT_COLOR)
         self.ff = ComparisonFigureFactory()
         self.store = dcc.Store(id=self.id('store'), data={})
 
@@ -232,39 +232,27 @@ class PanelComparison(BaseComponent):
         @app.callback(
             output=[
                 (
-                    Output(self.L.member_panel_row, 'style'),
-                    Output(self.R.member_panel_row, 'style'),
+                    Output(self.L.member_panel_row, 'style', allow_duplicate=True),
+                    Output(self.R.member_panel_row, 'style', allow_duplicate=True),
                 ),
                 (
-                    Output(self.L.book_panel_row, 'style'),
-                    Output(self.R.book_panel_row, 'style'),
+                    Output(self.L.book_panel_row, 'style', allow_duplicate=True),
+                    Output(self.R.book_panel_row, 'style', allow_duplicate=True),
                 )
             ],
-            inputs=[Input(self.toptabs, 'active_tab')]
+            inputs=[Input(self.toptabs, 'active_tab')],
+            prevent_initial_call=True
         )
         def switch_toptabs(tab_id, num_tabs=2):
             invis=tuple([STYLE_INVIS for n in range(num_tabs)])
             vis=tuple([STYLE_VIS for n in range(num_tabs)])
             return (invis,vis) if tab_id=='books' else (vis,invis)
         
-        
-        # @app.callback(
-        #     Output(self.store, 'data'),
-        #     [
-        #         Input(self.L.store, 'data'), 
-        #         Input(self.R.store, 'data'),
-        #     ]
-        # )
-        # def reset_ff(filter_data_L, filter_data_R):
-        #     print('resetting ff')
-        #     self.ff = ComparisonFigureFactory(filter_data_L, filter_data_R)
-        #     return self.ff.filter_data
-            
 
 
 
         @app.callback(
-            Output(self.graphtab, 'children'),
+            Output(self.graphtab, 'children', allow_duplicate=True),
             [
                 Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
                 Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
