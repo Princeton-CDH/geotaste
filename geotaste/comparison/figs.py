@@ -33,9 +33,8 @@ class ComparisonFigureFactory(FigureFactory):
     
     @cached_property
     def df_dwellings(self): 
-        dfL = self.L.df_dwellings.assign(L_or_R='L')
-        dfR = self.R.df_dwellings.assign(L_or_R='R')
-        return pd.concat([dfL,dfR])
+        return combine_LR_df(self.L.df_dwellings, self.R.df_dwellings)
+
     
     @cached_property
     def df_members(self): 
@@ -44,8 +43,8 @@ class ComparisonFigureFactory(FigureFactory):
 
     def plot(self, height=250, **kwargs):
         def get_color(x):
-            if x.startswith('L'): return LEFT_COLOR
-            if x.startswith('R'): return RIGHT_COLOR
+            if x=='L': return LEFT_COLOR
+            if x=='R': return RIGHT_COLOR
             return BOTH_COLOR
         
         df = self.df_dwellings

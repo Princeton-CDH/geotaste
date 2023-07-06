@@ -4,16 +4,10 @@ class CombinedPanel(FilterPanel):
     
     @cached_property
     def member_panel(self): 
-        return MemberPanel(
-            name=self.name+'-Members',
-            **self._kwargs
-        )
+        return MemberPanel(**self._kwargs)
     
     @cached_property
-    def book_panel(self): return BookPanel(
-            name=self.name+'-Books',
-            **self._kwargs
-        )
+    def book_panel(self): return BookPanel(**self._kwargs)
 
     @cached_property
     def subcomponents(self):
