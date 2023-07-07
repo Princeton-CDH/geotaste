@@ -43,11 +43,9 @@ class FilterComponent(BaseComponent):
     # some will have
     figure_factory = None
     dataset_class = None
-    _ff = None
 
     @property
     def ff(self): 
-        if self._ff is not None: return self._ff
         if self.figure_factory is not None:
             return self.figure_factory(self.filter_data)
     
@@ -56,34 +54,20 @@ class FilterComponent(BaseComponent):
         if self.dataset_class is not None:
             return self.dataset_class()
 
-    def plot(self, filter_data={}, existing_fig=None): 
-        # filter
-        if filter_data:
-            fig = self.figure_factory(filter_data).plot(**self._kwargs)
-        else:
-            fig = self.ff.plot(**self._kwargs)
-
-        # retain layout
-        if existing_fig is not None:
-            old_fig = go.Figure(existing_fig) if type(existing_fig)!=go.Figure else existing_fig
-            out_fig = go.Figure(data=fig.data, layout=old_fig.layout)
-        else:
-            out_fig = fig
-
-        # return
-        return out_fig
+    def plot(self, filter_data={}, existing_fig=None):
+        ff = self.figure_factory(filter_data) if filter_data else self.ff
+        fig = ff.plot(**self._kwargs)
+        if existing_fig: fig = combine_figs(fig, existing_fig)
+        return fig
     
     
 
-    ## all components can have a memory -- only activated if nec
     @cached_property
     def store(self):
         return dcc.Store(id=self.id(self.name), data={})
-        # return dcc.Store(id=self.id(f'store-{self.__class__.__name__}'), data={})
     
     @property
     def filter_desc(self):
-        # return describe_filters(self.filter_data)
         return format_intension(self.filter_data.get(INTENSION_KEY,{}))
     
     @property

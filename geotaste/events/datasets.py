@@ -89,7 +89,7 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
     def data(self, cols=['member','book','event','event_type','start_date','end_date','dwelling','dwelling_reason']):
         ld=[]
         df=super().data
-        for i,row in df.iterrows():
+        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings'):
             matches, reason = find_dwelling_ids(row)
             for match in matches:
                 d={
