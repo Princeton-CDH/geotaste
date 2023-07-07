@@ -51,6 +51,7 @@ PATHS=dict(
     events = os.path.join(PATH_DATA,'events.csv'),
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
+    combined = os.path.join(PATH_DATA,'combined.pkl'),
 )
 
 LATLON_SCO = (48.85107555543428, 2.3385039932538567)

@@ -1,6 +1,7 @@
 from ..imports import *
 
-
+def get_book_id(uri):
+    return uri.split('/books/',1)[1][:-1] if '/books/' in uri else ''
 
 class BooksDataset(Dataset):
     url:str = URLS.get('books')

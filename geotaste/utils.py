@@ -461,3 +461,16 @@ def get_filter_data(filter_data={}):
 
 def selectrename_df(df, col2col={}):
     return df[col2col.keys()].rename(columns=col2col)
+
+
+
+
+
+def geodist(latlon1, latlon2, unit='km'):
+    from geopy.distance import distance
+    import numpy as np
+    try:
+        dist = distance(latlon1, latlon2)
+        return getattr(dist,unit)
+    except Exception:
+        return np.nan
