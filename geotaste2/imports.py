@@ -51,7 +51,7 @@ PATHS=dict(
     events = os.path.join(PATH_DATA,'events.csv'),
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
-    combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
+    combined = os.path.join(PATH_DATA,'combined.pkl'),
 )
 
 LATLON_SCO = (48.85107555543428, 2.3385039932538567)
@@ -123,10 +123,10 @@ except FileNotFoundError:
 from .utils import *
 from .statutils import *
 from .datasets import *
-from .arronds import *
-from .app import *
-from .members import *
-from .books import *
-from .events import *
-from .combined import *
-from .comparison import *
+# from .arronds import *
+# from .app import *
+# from .members import *
+# from .books import *
+# from .events import *
+# from .combined import *
+# from .comparison import *
