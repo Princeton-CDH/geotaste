@@ -91,6 +91,7 @@ from functools import cached_property, lru_cache
 cache = lru_cache(maxsize=None)
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL
+BLANKDIV = html.Div(BLANKSTR)
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
 import dash_bootstrap_components as dbc
@@ -123,6 +124,7 @@ except FileNotFoundError:
 from .utils import *
 from .statutils import *
 from .datasets import *
+from .figs import *
 # from .arronds import *
 # from .app import *
 # from .members import *

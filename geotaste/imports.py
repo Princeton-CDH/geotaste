@@ -1,6 +1,7 @@
 ## Constants
 MIN_P=.05
 BLANKSTR='‎‎‎‎'
+BLANKDIV = html.Div(BLANKSTR)
 BLANK = ''
 UNFILTERED = '(unfiltered)'
 NOFILTER = BLANK

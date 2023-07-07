@@ -52,7 +52,7 @@ class FigureFactory(DashFigureFactory, PlotlyFigureSelector, Logmaker):
     records_points_dim = 'xy'
     dataset_class = CombinedDataset
     drop_duplicates = ()
-    quant = None
+    quant = False
     opts_xaxis=dict()
     opts_yaxis=dict()
     height=600
@@ -69,15 +69,23 @@ class FigureFactory(DashFigureFactory, PlotlyFigureSelector, Logmaker):
         return (self.dataset_class() if self.dataset_class is not None else None)
 
     @cached_property
-    def data_all(self):
-        odf=(
+    def data_orig(self):
+        return (
             self.dataset.data 
             if self.dataset is not None and self.dataset.data is not None
             else pd.DataFrame()
         )
+
+    @cached_property
+    def data_all(self):
+        odf = self.data_orig
         if self.drop_duplicates and len(odf):
             odf=odf.drop_duplicates(self.drop_duplicates)
         return odf
+    
+    @cached_property
+    def total_counts(self):
+        return self.dataset.data[self.key].value_counts()
     
     @cached_property
     def data(self):
@@ -87,8 +95,38 @@ class FigureFactory(DashFigureFactory, PlotlyFigureSelector, Logmaker):
     def filter_desc(self):
         return format_intension(self.filter_data.get(INTENSION_KEY,{}))
     
+    def unique(
+            self, 
+            sort_by_count=True, 
+            series_orig=True, 
+            series_all=False,
+            **kwargs): 
+        l = list(self.get_series(**kwargs).unique())
+        if not sort_by_count:
+            l.sort(key=lambda x: x)
+        else:
+            if series_orig:
+                logger.debug('using original series')
+                series = self.series_orig
+            elif series_all:
+                logger.debug('using dedup\'d series')
+                series = self.series_all
+            else:
+                logger.debug('using dedup\'d and filtered')
+                series = self.series
+            counts = series.value_counts()
+            l.sort(key=lambda x: -counts.loc[x])
+        return pd.Series(l, name=self.key)
+
+
+
     @cached_property
     def series(self): return self.get_series(df=self.data)
+    @cached_property
+    def series_orig(self): 
+        return self.get_series(df=self.data_orig)
+
+    
     @cached_property
     def series_q(self): return self.get_series(df=self.data, quant=True)
     @cached_property
@@ -354,8 +392,19 @@ class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
     key='creator_nationalities'
     quant=False
 
-class CreatorDOBFigure(MemberFigure):
+class CreatorDOBFigure(CreatorFigure):
     key = 'creator_dob'
     quant = True
     min_series_val=1800
     max_series_val=1950
+
+
+
+class MemberNameFigure(MemberFigure):
+    key = 'member_name'
+
+class CreatorNameFigure(MemberFigure):
+    key = 'creator_name'
+
+class BookTitleFigure(BookFigure):
+    key = 'book_title'
