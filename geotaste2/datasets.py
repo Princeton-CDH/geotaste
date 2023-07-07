@@ -647,20 +647,22 @@ class CombinedDataset(Dataset):
         'event':'event',
         'book':'book',
         'dwelling':'dwelling',
+        'dwelling_arrond_id':'arrond_id',
         'event_type':'event_type',
         'start_date':'event_start',
         'end_date':'event_end',
+        'dwelling_desc':'dwelling_desc',
         'dwelling_numposs':'dwelling_numposs',
         'dwelling_reason':'dwelling_reason',
         'dwelling_start_date':'dwelling_start',
         'dwelling_end_date':'dwelling_end',
         'dwelling_street_address':'dwelling_address',
-        'dwelling_latitude':'dwelling_lat',
-        'dwelling_longitude':'dwelling_lon',
-        'dwelling_arrond_id':'dwelling_arrond',
-        'dwelling_dist_from_SCO':'dwelling_distSCO'
+        'dwelling_latitude':'lat',
+        'dwelling_longitude':'lon',
+        'dwelling_dist_from_SCO':'dwelling_distSCO',
     }
-    coltype_sort = ['member', 'event', 'book', 'dwelling', 'creator']
+    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
+    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator',]
     
     def gen(self, save=False):
         # events and members (full outer join)
@@ -677,10 +679,11 @@ class CombinedDataset(Dataset):
         odf = events_members.merge(creations_books, on='book', how='outer').fillna(self.fillna)
 
         colsort = sorted(
-            odf.columns, 
-            key=lambda c: self.coltype_sort.index(c.split('_')[0])
+            [c for c in odf.columns if c not in set(self.cols_prefix)], 
+            key=lambda c: self.coltype_sort.index(c.split('_')[0]) if c.split('_')[0] in set(self.coltype_sort) else 1000
         )
-        odf = odf[list(colsort)].set_index(self.coltype_sort).sort_index()
+        sortt=[x for x in self.coltype_sort if x in set(odf.columns)]
+        odf = odf[self.cols_prefix + list(colsort)].sort_values(sortt)
         if save: odf.to_pickle(self.path)
         return odf
 
@@ -718,3 +721,47 @@ class CombinedDataset(Dataset):
 
 
 
+
+
+
+def get_arrond_counts(df,key='arrond_id'):
+    arrond_counts = {n:0 for n in sorted(get_all_arrond_ids(), key=lambda x: int(x) if x.isdigit() else np.inf)}
+    for k,v in dict(df[key].value_counts()).items(): arrond_counts[k]=v    
+    arrond_df = pd.DataFrame([arrond_counts]).T.reset_index()
+    arrond_df.columns=[key, 'count']
+    arrond_df = arrond_df.set_index(key).loc[filter_valid_arrond]
+    arrond_df['perc']=arrond_df['count'] / sum(arrond_df['count']) * 100
+    return arrond_df
+    
+
+
+def get_geojson_arrondissement(force=False):
+    import os,json,requests
+    
+    # download if nec
+    url=URLS.get('geojson_arrond')
+    fn=os.path.join(PATH_DATA,'arrondissements.geojson')
+    if force or not os.path.exists(fn):
+        data = requests.get(url)
+        with open(fn,'wb') as of: 
+            of.write(data.content)
+
+    # load        
+    with open(fn) as f:
+        jsond=json.load(f)
+        
+    # anno
+    for d in jsond['features']:
+        d['id'] = str(d['properties']['c_ar'])
+        d['properties']['arrond_id'] = d['id']
+    
+    return jsond
+
+
+@cache
+def get_all_arrond_ids():
+    ids_in_geojson = {
+        d['id'] 
+        for d in get_geojson_arrondissement()['features']
+    }
+    return {n for n in ids_in_geojson if n and n.isdigit() and n!='99'}# | {'X','?','99'} # outside of paris + unkown
