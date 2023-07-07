@@ -281,6 +281,17 @@ def flatten_list(s):
             l+=[x]
     return l
 
+def flatten_series(s):
+    s=pd.Series(s)
+    l=[]
+    for i,x in zip(s.index, s):
+        if is_listy(x):
+            l+=[(i,xx) for xx in flatten_list(x)]
+        else:
+            l+=[(i,x)]
+    il,xl=zip(*l)
+    return pd.Series(xl,index=il)
+
 
 def make_counts_df(series):
     return pd.DataFrame(
@@ -474,3 +485,17 @@ def geodist(latlon1, latlon2, unit='km'):
         return getattr(dist,unit)
     except Exception:
         return np.nan
+    
+
+
+
+
+
+def qualquant_series(series, quant=None):
+    series=pd.Series(series) if type(series)!=pd.Series else series
+    if quant is True: 
+        series=pd.to_numeric(series, errors='coerce')
+    elif quant is False:
+        series=series.fillna('').apply(str).replace({'':UNKNOWN})
+    return series
+    
