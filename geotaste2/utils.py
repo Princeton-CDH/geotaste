@@ -491,7 +491,7 @@ def geodist(latlon1, latlon2, unit='km'):
 
 
 
-def qualquant_series(series, quant=None):
+def qualquant_series(series, quant=False):
     series=pd.Series(series) if type(series)!=pd.Series else series
     if quant is True: 
         series=pd.to_numeric(series, errors='coerce')
