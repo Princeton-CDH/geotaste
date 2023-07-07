@@ -222,14 +222,12 @@ class MemberGenderFigure(MemberFigure):
     quant=False
     
 
-class MemberNationalityFigure(MemberFigure):
-    records_name='member nationalities'
-    key='member_nationalities'
-    # records_points_dim='y'
-    
+
+class NationalityFigure(FigureFactory):
+    records_points_dim='y'
+
     def plot(self, color=None, **kwargs):
         df_counts = make_counts_df(self.series)        
-        # category_orders={self.key: * df_counts[self.key].index}
         fig=px.bar(
             df_counts,
             y=self.key,
@@ -251,10 +249,15 @@ class MemberNationalityFigure(MemberFigure):
             dragmode='select',# if quant else None, 
             selectdirection='v',# if quant else None
         )
-        fig.update_xaxes(title_text='Number of members', visible=False)
+        fig.update_xaxes(title_text=f'Number of {self.records_name}', visible=False)
         fig.update_yaxes(title_text='', tickangle=0, autorange='reversed')
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         return fig
+
+
+class MemberNationalityFigure(NationalityFigure, MemberFigure):
+    records_name='member nationalities'
+    key='member_nationalities'
 
 
 class MemberArrondMap(MemberFigure):
@@ -347,3 +350,12 @@ class CreatorGenderFigure(CreatorFigure):
     key='creator_gender'
     quant=False
 
+class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
+    key='creator_nationalities'
+    quant=False
+
+class CreatorDOBFigure(MemberFigure):
+    key = 'creator_dob'
+    quant = True
+    min_series_val=1800
+    max_series_val=1950
