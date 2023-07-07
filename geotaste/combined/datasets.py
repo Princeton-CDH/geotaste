@@ -1,6 +1,7 @@
 from ..imports import *
-
-
+from ..members.datasets import MembersDataset
+from ..events.datasets import MemberEventDwellingsDataset
+from ..books.datasets import BooksDataset
 
 
 class CombinedDataset(Dataset):
@@ -36,26 +37,29 @@ class CombinedDataset(Dataset):
         'dwelling_reason':'dwelling_reason',
     }
     
+    def gen(self, save=False):
+        # events and members (full outer join)
+        events = selectrename_df(MemberEventDwellingsDataset().data, self.cols_events)
+        members = selectrename_df(MembersDataset().data, self.cols_members)
+        events_members = events.merge(members,on='member',how='outer').fillna(self.fillna)
 
-    @cached_property
-    def data(self, force=False):
+        # creations and books (left join)
+        creations = selectrename_df(CreationsDataset().data, self.cols_creations)
+        books = selectrename_df(BooksDataset().data, self.cols_books)
+        creations_books = creations.join(books)  # big to small, same index
+
+        # all together (full outer join)
+        odf = events_members.merge(creations_books, on='book', how='outer').fillna(self.fillna)
+        if save: odf.to_pickle(self.path)
+        return odf
+
+    
+    def load(self, force=False, save=True):
+        # need to gen?
         if force or not os.path.exists(self.path):
-            # events and members (full outer join)
-            events = selectrename_df(MemberEventDwellingsDataset().data, self.cols_events)
-            # events = selectrename_df(MemberEvents().data, self.cols_events)
-            members = selectrename_df(MembersDataset().data, self.cols_members)
-            events_members = events.merge(members,on='member',how='outer').fillna(self.fillna)
-            
-
-            # creations and books (left join)
-            creations = selectrename_df(CreationsDataset().data, self.cols_creations)
-            books = selectrename_df(BooksDataset().data, self.cols_books)
-            creations_books = creations.join(books)  # big to small, same index
-
-            # all together (full outer join)
-            odf = events_members.merge(creations_books, on='book', how='outer').fillna(self.fillna)
-            odf.to_pickle(self.path)
-            return odf
-        else:
-            return pd.read_pickle(self.path)
+            return self.gen(save=save)
+        # otherwise load
+        return pd.read_pickle(self.path)
         
+    @cached_property
+    def data(self): return self.load()

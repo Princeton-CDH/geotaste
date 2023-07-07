@@ -1,10 +1,11 @@
 from ..imports import *
 from .datasets import *
 from ..app.figs import DatasetFigure
+from ..combined.datasets import CombinedDataset
 
 class BooksFigure(DatasetFigure):
     records_name='books'
-    dataset_class = BooksDataset
+    dataset_class = CombinedDataset
 
 class CreationsFigure(DatasetFigure):
     records_name='works'
@@ -12,7 +13,7 @@ class CreationsFigure(DatasetFigure):
     
 
 class BookYearFigure(BooksFigure):
-    key='year'
+    key='book_year'
     records_points_dim = 'x'
 
     def plot(self, color=None, min_year=1835, max_year=1945, **kwargs):
@@ -24,7 +25,7 @@ class BookYearFigure(BooksFigure):
 
 
 class CreatorGenderFigure(CreationsFigure):
-    key='creator_Gender'
+    key='creator_gender'
 
     def plot(self, color=None, **kwargs):
         fig = super().plot_histogram_bar(

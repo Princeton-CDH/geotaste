@@ -1,6 +1,7 @@
 from ..imports import *
+from .figs import CombinedFigureFactory
 
-class CombinedPanel(FilterPanel):
+class MetaPanel(FilterPanel):
     
     @cached_property
     def member_panel(self): 
@@ -13,27 +14,50 @@ class CombinedPanel(FilterPanel):
     def subcomponents(self):
         return [self.member_panel, self.book_panel]
 
-    # def layout(self, params=None):
-    #     return dbc.Container(
-    #         [
-    #             self.member_panel.layout(params), 
-    #             self.book_panel.layout(params),
-    #             self.store,
-    #         ], 
-    #         className='combined-panel'
-    #     )
 
-    # def component_callbacks(self, app):
-    #     super().component_callbacks(app)
+class CombinedPanel(FilterPlotPanel, FilterCard):
+    figure_factory = CombinedFigureFactory
+    desc = 'Filters'
+    records_name='members'
 
-    #     @app.callback(
-    #         Output(self.store, 'data',allow_duplicate=True),
-    #         [ 
-    #             Input(self.member_panel.store, 'data'),
-    #             Input(self.book_panel.store, 'data'),
-    #         ],
-    #         prevent_initial_call=True
-    #     )
-    #     def component_filters_updated(*filters_d):
-    #         self.filter_data = intersect_filters(*filters_d)
-    #         return self.filter_data
+    @cached_property
+    def member_name_card(self): 
+        from ..members.components import MemberNameCard
+        return MemberNameCard(**self._kwargs)
+    
+    @cached_property
+    def member_dob_card(self): 
+        from ..members.components import MemberDOBCard
+        return MemberDOBCard(**self._kwargs)
+    
+    @cached_property
+    def membership_year_card(self): 
+        from ..members.components import MembershipYearCard
+        return MembershipYearCard(**self._kwargs)
+    
+    @cached_property
+    def member_gender_card(self): 
+        from ..members.components import MemberGenderCard
+        return MemberGenderCard(**self._kwargs)
+    
+    @cached_property
+    def member_nation_card(self): 
+        from ..members.components import MemberNationalityCard
+        return MemberNationalityCard(**self._kwargs)
+    
+    @cached_property
+    def member_arrond_card(self): 
+        from ..members.components import MemberArrondCard
+        return MemberArrondCard(**self._kwargs)
+
+    @cached_property
+    def subcomponents(self):
+        return [
+            self.member_name_card,
+            self.membership_year_card,
+            self.member_dob_card,
+            self.member_gender_card,
+            self.member_nation_card,
+            self.member_arrond_card,
+        ]
+    

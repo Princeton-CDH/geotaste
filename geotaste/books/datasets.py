@@ -103,8 +103,16 @@ class CreatorsDataset(Dataset):
     
     @cached_property
     def data(self):
+        def reformat_nation(x):
+            x=x.strip()
+            if ' - ' in x:
+                x=x.split(' - ',1)[-1]
+            if x.endswith('-'): x=x[:-1]
+            return x.strip()
+
         df=super().data
         df['creator']=df['sort name']
+        df['nationalities'] = df['Nationality'].apply(reformat_nation)
         return df.set_index('creator')
 
 

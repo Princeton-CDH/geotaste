@@ -1,11 +1,11 @@
 from ..imports import *
 from ..app.figs import *
-from .datasets import *
+from ..combined.datasets import CombinedDataset
 
 class MemberFigure(DatasetFigure):
     records_name='members'
     key = ''
-    dataset_class = MembersDataset
+    dataset_class = CombinedDataset
 
 
 class MemberTableFigure(MemberFigure, TableFigure):
@@ -43,7 +43,7 @@ class MemberDOBFigure(MemberFigure):
 
 class MembershipYearFigure(MemberFigure):
     records_name='annual subscriptions'
-    key='membership_years'
+    key='member_membership_years'
 
     
 
@@ -63,7 +63,7 @@ class MembershipYearFigure(MemberFigure):
 
 
 class MemberGenderFigure(MemberFigure):
-    key='gender'
+    key='member_gender'
 
     def plot(self, color=None, **kwargs):
         fig = super().plot_histogram_bar(
@@ -83,7 +83,7 @@ class MemberGenderFigure(MemberFigure):
 
 class MemberNationalityMapFigure(MemberFigure):
     records_name='member nationalities'
-    key='nationalities'
+    key='member_nationalities'
     records_points_dim='locations'
     
     @cached_property
@@ -130,7 +130,7 @@ class MemberNationalityMapFigure(MemberFigure):
 
 class MemberNationalityFigure(MemberFigure):
     records_name='member nationalities'
-    key='nationalities'
+    key='member_nationalities'
     records_points_dim='y'
     
     def plot(self, color=None, **kwargs):

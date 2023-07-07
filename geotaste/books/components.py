@@ -5,7 +5,7 @@ from ..app.components import FilterPlotCard, FilterCard
 
 
 class BookTitleCard(FilterInputCard):
-    dataset_class = BooksDataset
+    dataset_class = CombinedDataset
     desc = 'Filter by book title'
     key='title'
     multi = True
@@ -13,7 +13,7 @@ class BookTitleCard(FilterInputCard):
 
 
 class BookCreatorCard(FilterInputCard):
-    dataset_class = CreationsDataset
+    dataset_class = CombinedDataset
     desc = 'Filter by creator'
     key='creator'
     multi = True
