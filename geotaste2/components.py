@@ -11,12 +11,15 @@ class BaseComponent(DashComponent, Logmaker):
             no_store=None,
             no_attr=None,
             no_config=None,
-            
+
             # other kwargs: color, ...
+            name_prefix=None,
             **kwargs
             ):
 
         # invoke Dash component init    
+        name=name if name else self.__class__.__name__
+        if name_prefix: name=f'{name_prefix}-{name}'
         super().__init__(
             title=title, 
             name=name,
@@ -33,6 +36,29 @@ class BaseComponent(DashComponent, Logmaker):
         for k,v in kwargs.items(): 
             setattr(self,k,v)
         self._kwargs = kwargs
+
+    @cached_property
+    def subcomponents(self):
+        return []  # subclass this
+    @cached_property
+    def graph_subcomponents(self):
+        return [
+            card for card in self.subcomponents
+            if hasattr(card,'graph')
+        ]
+    
+    @cached_property
+    def content(self,params=None):
+        cards=[
+            card.layout(params)
+            for card in self.subcomponents
+        ]
+        return dbc.Container(cards if cards else BLANK)
+    
+    def layout(self, params=None): return self.content
+    
+
+    
 
 
 
@@ -56,11 +82,20 @@ class CollapsibleCard(BaseComponent):
     
     @cached_property
     def body(self):
-        return dbc.Collapse(dbc.CardBody(self.content), is_open=True)
-    
+        logger.debug(f'creating body for {self.name}')
+        return dbc.Collapse(
+            dbc.CardBody(self.content), 
+            is_open=True, 
+            id=self.id('body')
+        )
     
     @cached_property
-    def footer(self): return dbc.Collapse(dbc.CardFooter(BLANK), is_open=False)
+    def footer(self):
+        return dbc.Collapse(
+            dbc.CardFooter(BLANK), 
+            is_open=False,
+            id=self.id('footer')
+        )
     
     
     @cached_property
@@ -69,7 +104,8 @@ class CollapsibleCard(BaseComponent):
             "[-]", 
             color="link", 
             n_clicks=0,
-            className='button_showhide'
+            className='button_showhide',
+            id=self.id('button_showhide')
         )
     
     def component_callbacks(self, app):        
@@ -123,13 +159,9 @@ class FilterComponent(FigureComponent):
     def filter_key(self): return self.filter_desc
 
     @cached_property
-    def store_desc(self): return html.Span(UNFILTERED, className='store_desc')
+    def store_desc(self): 
+        return html.Span(UNFILTERED, className='store_desc')
 
-    def layout(self, params=None): return self.content
-
-    @cached_property
-    def content(self): return ''
-    
     def intersect_filters(self, *filters_d):
         logger.debug(f'intersecting {len(filters_d)} filters')
         return intersect_filters(*filters_d)
@@ -157,7 +189,8 @@ class FilterCard(FilterComponent, CollapsibleCard):
                 ],
                 style=style_d
             ),
-            is_open=False
+            is_open=False,
+            id=self.id('footer')
         )
     
     @cached_property
@@ -215,7 +248,11 @@ class FilterPlotCard(FilterCard):
     @cached_property
     def content(self): return self.graph
     @cached_property
-    def graph(self): return dcc.Graph(figure=self.plot())
+    def graph(self): 
+        return dcc.Graph(
+            figure=go.Figure(), #self.plot(),
+            id=self.id('graph')
+        )
 
     def component_callbacks(self, app):
         # do my parent's too
@@ -275,7 +312,8 @@ class FilterInputCard(FilterCard):
             options = [dict(value=lbl, label=lbl)  for lbl in l],
             value = [] if self.multi else '',
             multi=self.multi,
-            placeholder=self.placeholder
+            placeholder=self.placeholder,
+            id=self.id('input')
         )
 
 

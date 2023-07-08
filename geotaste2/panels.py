@@ -1,7 +1,107 @@
-from ..imports import *
-from .figs import *
-from .views import *
-from ..combined import CombinedPanel
+from .imports import *
+
+
+class FilterPanel(FilterComponent):
+    @cached_property
+    def content(self,params=None):
+        return dbc.Container([self.store] + super().content.children)
+
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
+        
+        # intersect and listen
+        @app.callback(
+            Output(self.store, 'data',allow_duplicate=True),
+            [
+                Input(card.store, 'data')
+                for card in self.subcomponents
+            ],
+            prevent_initial_call=True
+        )
+        def subcomponent_filters_updated(*filters_d):
+            logger.debug('subcomponent filters updated')
+            self.filter_data = self.intersect_filters(*filters_d)
+            return self.filter_data
+        
+
+
+class FilterPlotPanel(FilterPanel):
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
+        @app.callback(
+            [
+                Output(card.graph,'figure',allow_duplicate=True)
+                for card in self.graph_subcomponents
+            ],
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def redraw_graphs_from_new_data(panel_data):
+            filtered_keys = set(panel_data.get('intension',{}).keys())
+            return [
+                (
+                    dash.no_update 
+                    if card.key in filtered_keys 
+                    else card.plot(
+                        filter_data = panel_data, 
+                    )
+                )
+                for card in self.graph_subcomponents
+            ]
+        
+
+
+
+
+
+
+class CombinedPanel(FilterPlotPanel):
+    figure_factory = CombinedFigureFactory
+    desc = 'Filters'
+    records_name='members'
+
+    @cached_property
+    def member_name_card(self): 
+        return MemberNameCard(name_prefix=self.name, **self._kwargs)
+    
+    @cached_property
+    def member_dob_card(self): 
+        return MemberDOBCard(name_prefix=self.name, **self._kwargs)
+    
+    @cached_property
+    def membership_year_card(self): 
+        return MembershipYearCard(name_prefix=self.name, **self._kwargs)
+    
+    @cached_property
+    def member_gender_card(self): 
+        return MemberGenderCard(name_prefix=self.name, **self._kwargs)
+    
+    @cached_property
+    def member_nation_card(self): 
+        return MemberNationalityCard(name_prefix=self.name, **self._kwargs)
+    
+    @cached_property
+    def member_arrond_card(self): 
+        return MemberArrondCard(name_prefix=self.name, **self._kwargs)
+
+    @cached_property
+    def subcomponents(self):
+        return [
+            # self.member_name_card,
+            # self.membership_year_card,
+            self.member_dob_card,
+            # self.member_gender_card,
+            # self.member_nation_card,
+            # self.member_arrond_card,
+        ]
+    
+
+
+
+
+
+
+
 
 
 
@@ -10,10 +110,11 @@ from ..combined import CombinedPanel
 
 class PanelComparison(FilterPanel):
     figure_factory = ComparisonFigureFactory
-    default_view = MemberMapView
+    # default_view = MemberMapView
     
 
-    def layout(self, params=None):
+    @cached_property
+    def content(self,params=None):
         return dbc.Container([
             self.store,
 
@@ -68,7 +169,7 @@ class PanelComparison(FilterPanel):
     @cached_property
     def L(self):
         return CombinedPanel(
-            name=self.id('L'), 
+            name=self.id('L-Panel'),
             L_or_R='L', 
             color=LEFT_COLOR, 
             desc='Left-hand Group Panel'
@@ -77,7 +178,7 @@ class PanelComparison(FilterPanel):
     @cached_property
     def R(self):
         return CombinedPanel(
-            name=self.id('R'),
+            name=self.id('R-Panel'),
             L_or_R='R', 
             color=RIGHT_COLOR, 
             desc='Right-hand Group Panel'
@@ -131,7 +232,8 @@ class PanelComparison(FilterPanel):
     def graphtab(self):
         return dbc.Container(
             children=[html.Pre('Loading...')],
-            className='graphtab-div'
+            className='graphtab-div',
+            id=self.id('graphtab')
         )
 
     def determine_view(self, tab_ids_1=[], tab_ids_2=[], default=None):
@@ -172,6 +274,7 @@ class PanelComparison(FilterPanel):
             ],
         )
         def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data):
+            return html.P('!?!?')
             viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
             return viewfunc(self)
 
