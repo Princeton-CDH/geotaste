@@ -31,7 +31,7 @@ import os
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.expanduser('~/geotaste_data')
-PATH_ASSETS = os.path.join(PATH_HERE, 'app', 'assets')
+PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
 
 
 # Urls
@@ -125,6 +125,8 @@ from .utils import *
 from .statutils import *
 from .datasets import *
 from .figs import *
+from .components import *
+from .panels import *
 # from .arronds import *
 # from .app import *
 # from .members import *

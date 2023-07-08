@@ -99,16 +99,6 @@ class Dataset:
 
 
 
-
-
-
-
-
-
-
-
-### datasets
-
 def get_member_id(uri):
     return uri.lower().split('/members/',1)[1][:-1] if '/members/' in uri else ''
 
@@ -156,9 +146,6 @@ class MembersDataset(Dataset):
         # other
         df = df.set_index('member')
         return df
-
-    
-
 
 
 

@@ -499,3 +499,9 @@ def qualquant_series(series, quant=False):
         series=series.fillna('').apply(str).replace({'':UNKNOWN})
     return series
     
+
+
+def uid(length=10):
+    # from dash oop
+    import shortuuid
+    return str(shortuuid.ShortUUID().random(length=length))
