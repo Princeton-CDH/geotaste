@@ -1,6 +1,6 @@
 from .imports import *
 
-def filter_query_str_series(sname,svals, op='or', maxlen=2,plural_cols=None,fname='overlaps'):
+def filter_query_str_series(sname:str, svals:list, op='or', maxlen=1,plural_cols=None,fname='overlaps',multiline=False):
     """
     Filters a query string series based on the given parameters.
 
@@ -25,21 +25,38 @@ def filter_query_str_series(sname,svals, op='or', maxlen=2,plural_cols=None,fnam
         >>> filter_query_str_series('score', [80, 90, 100], maxlen=3, plural_cols=['score'])
         '@overlaps(score,[80, 90, 100])'
     """
+    # make sure input is listlike
+    if not is_listy(svals): svals=[svals]
+
+    # stringifying
+    def repr(x): return orjson.dumps(x).decode()
     
+    # return function if this is a list-containing col
     if (plural_cols is not None and sname in set(plural_cols)):
-        return f'@{fname}({sname},{svals})'
+        return f'@{fname}({sname},{repr(svals)})'
     
+    # if a range of ints, use a less/greater than syntax
     elif is_range_of_ints(svals):
-        return f'{svals[0]} <= {sname} <= {svals[-1]}'
+        return f'({svals[0]}<={sname}<={svals[-1]})'
 
+    # if simply too many vals
     elif len(svals) > maxlen:
-        return f'@{fname}({sname},{svals})'
+        return f'@{fname}({sname},{repr(svals)})'
 
+    # otherwise, compound
     else:
-        o = f' {op} '.join(f'({sname}=={repr(x)})' for x in svals)
-        return f'({o})' if len(svals)>1 else o
+        strs=[f'({sname}=={repr(x)})' for x in svals]
+        if not multiline or len(strs)==1:
+            o = f' {op} '.join(strs)
+            return f'({o})' if len(strs)>1 else o
+        
+        else:
+            # mjultiline with mre than 1 opt
+            o = f'\n{op}\n'.join(strs)
+            o=f'(\n{o}'.replace('\n','\n  ')
+            return o+'\n)'
 
-def filter_query_str(filter_data:dict, test_func:'function'=overlaps, operator:str='and', plural_cols:list|None=None, multiline:bool=False) -> str:
+def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list|None=None, multiline:bool=False) -> str:
     """Filter a query string based on the given filter data.
 
     Args:
@@ -60,8 +77,9 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, operator:s
     if not filter_data: return ''
     fname=test_func.__name__ if type(test_func)!=str else test_func
     
-    return f' {operator} '.join([
-        format_series(sname,svals)
+    sep = f'\n{operator}\n' if multiline else f' {operator} '
+    return sep.join([
+        filter_query_str_series(sname,svals,op='or',maxlen=maxlen,plural_cols=plural_cols,multiline=multiline,fname=fname)
         for sname,svals in filter_data.items()
         if svals is not None
     ])
