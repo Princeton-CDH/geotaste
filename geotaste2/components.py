@@ -1,7 +1,42 @@
 from .imports import *
 
 
+
+class Logmaker:
+    """A class that provides logging functionality.
+
+    Attributes:
+        None
+
+    Methods:
+        log(*x, level='debug', **y): Logs the given message with the specified level.
+    """
+    def log(self, *x, level='debug', **y):
+        """Logs the given message with the specified level.
+
+        Args:
+            *x: Variable length argument list of values to be logged.
+            level (str): The log level to be used. Default is 'debug'.
+            **y: Variable length keyword argument list of additional values to be logged.
+
+        Returns:
+            None
+
+        Raises:
+            None
+        """
+        o=' '.join(str(xx) for xx in x)
+        name=self.__class__.__name__
+        if hasattr(self,'name'): name+=f' ({self.name})'
+        o = f'[{nowstr()}] {name}: {o}'
+        f=getattr(logger,level)
+        f(o)
+
+
+
 class BaseComponent(DashComponent, Logmaker):
+    name = None
+
     def __init__(
             self,
 
@@ -13,13 +48,16 @@ class BaseComponent(DashComponent, Logmaker):
             no_config=None,
 
             # other kwargs: color, ...
-            name_prefix=None,
+            name_context=None,
+            name_add_uuid=False,
             **kwargs
             ):
 
         # invoke Dash component init    
-        name=name if name else self.__class__.__name__
-        if name_prefix: name=f'{name_prefix}-{name}'
+        name=name if name else (self.name if self.name else self.__class__.__name__)
+        if name_context and name_context!=name: name=f'{name}-{name_context}'
+        if name_add_uuid: name = name.split('_',1)[0] + '_' + uid(4)
+
         super().__init__(
             title=title, 
             name=name,
@@ -46,6 +84,13 @@ class BaseComponent(DashComponent, Logmaker):
             card for card in self.subcomponents
             if hasattr(card,'graph')
         ]
+    @cached_property
+    def store_subcomponents(self):
+        return [
+            card for card in self.subcomponents
+            if hasattr(card,'store')
+        ]
+    
     
     @cached_property
     def content(self,params=None):
@@ -58,6 +103,10 @@ class BaseComponent(DashComponent, Logmaker):
     def layout(self, params=None): return self.content
     
 
+
+
+
+
     
 
 
@@ -65,6 +114,7 @@ class BaseComponent(DashComponent, Logmaker):
 
 class CollapsibleCard(BaseComponent):
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
+        logger.trace(self.name)
         children = []
         if header and self.header is not None: children.append(self.header)
         if body and self.body is not None: children.append(self.body)
@@ -73,6 +123,7 @@ class CollapsibleCard(BaseComponent):
 
     @cached_property
     def header(self):
+        logger.trace(self.name)
         return dbc.CardHeader(
             [
                 html.Div(self.button_showhide, className='button_showhide_div'),
@@ -82,7 +133,7 @@ class CollapsibleCard(BaseComponent):
     
     @cached_property
     def body(self):
-        logger.debug(f'creating body for {self.name}')
+        logger.trace(self.name)
         return dbc.Collapse(
             dbc.CardBody(self.content), 
             is_open=True, 
@@ -91,6 +142,7 @@ class CollapsibleCard(BaseComponent):
     
     @cached_property
     def footer(self):
+        logger.trace(self.name)
         return dbc.Collapse(
             dbc.CardFooter(BLANK), 
             is_open=False,
@@ -100,6 +152,7 @@ class CollapsibleCard(BaseComponent):
     
     @cached_property
     def button_showhide(self):
+        logger.trace(self.name)
         return dbc.Button(
             "[-]", 
             color="link", 
@@ -108,7 +161,8 @@ class CollapsibleCard(BaseComponent):
             id=self.id('button_showhide')
         )
     
-    def component_callbacks(self, app):        
+    def component_callbacks(self, app):       
+        logger.trace(self.name) 
         ## buttons
         @app.callback(
             Output(self.body, "is_open", allow_duplicate=True),
@@ -138,6 +192,8 @@ class FigureComponent(BaseComponent):
 
     @cached_property
     def series(self): return self.ff().series
+    @cached_property
+    def key(self): return self.ff().key
 
     def unique(self, **kwargs): return self.ff().unique(**kwargs)
 
@@ -164,7 +220,8 @@ class FilterComponent(FigureComponent):
 
     def intersect_filters(self, *filters_d):
         logger.debug(f'intersecting {len(filters_d)} filters')
-        return intersect_filters(*filters_d)
+        filters_d = [d for d in filters_d if d]
+        return {k:v for d in filters_d for k,v in d.items()}
     
 
 
@@ -179,6 +236,7 @@ class FilterComponent(FigureComponent):
 class FilterCard(FilterComponent, CollapsibleCard):
     @cached_property
     def footer(self):
+        logger.trace(self.name)
         style_d={'color':self.color if self.color else 'inherit'}
         return dbc.Collapse(
             dbc.CardFooter(
@@ -225,16 +283,19 @@ class FilterCard(FilterComponent, CollapsibleCard):
         )
         def store_data_updated(store_data):
             # filter cleared?
-            if not store_data:
-                return UNFILTERED, False
-
+            if not store_data: return UNFILTERED, False
             logger.debug('store_data_updated')
-            res=describe_filters(store_data, records_name=self.records_name)
-            o1 = dcc.Markdown(res) if res else UNFILTERED
+            res=self.describe_filters(store_data)
+            o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else UNFILTERED
             return o1, True
 
     
-
+    
+    def describe_filters(self, store_data):
+        if len(store_data) == 1:
+            return str(list(store_data.values()))
+        else:
+            return str(store_data)
 
 
 
@@ -246,11 +307,13 @@ class FilterCard(FilterComponent, CollapsibleCard):
 
 class FilterPlotCard(FilterCard):
     @cached_property
-    def content(self): return self.graph
+    def content(self): 
+        logger.trace(self.name)
+        return self.graph
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=go.Figure(), #self.plot(),
+            figure=self.plot(),
             id=self.id('graph')
         )
 
@@ -275,8 +338,9 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def graph_selection_updated(selected_data):
-            logger.debug('graph_selection_updated')
-            return self.ff().selected(selected_data)
+            o=self.ff().selected(selected_data)
+            logger.debug(f'[{self.name}) selection updated: {o}')
+            return o
         
         
 
@@ -304,7 +368,9 @@ class FilterInputCard(FilterCard):
     sort_by_count = True
     
     @cached_property
-    def content(self): return self.input
+    def content(self): 
+        logger.trace(self.name)
+        return self.input
     @cached_property
     def input(self):
         l=self.unique(sort_by_count=self.sort_by_count)
@@ -344,12 +410,8 @@ class FilterInputCard(FilterCard):
         )
         def input_value_changed(vals):
             if not vals: raise PreventUpdate
-            if self.dataset is not None:
-                return self.dataset.filter_series(
-                    self.key,
-                    vals=vals
-                )
-            return {}
+            self.filter_data = {self.key:vals}
+            return self.filter_data
     
 
 
@@ -425,4 +487,47 @@ class CreatorGenderCard(FilterPlotCard):
 
 
 
+
+
+def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=60):
+    cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
+    dff = delist_df(df[cols])
+    cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
+    return dash_table.DataTable(
+        data=dff.to_dict('records'),
+        columns=cols_l,
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
+        page_action="native",
+        # page_action="none",
+        page_size=page_size,
+        fixed_rows={'headers': True},
+        style_cell={
+            'minWidth': 95, 'maxWidth': 95, 'width': 95,
+        },
+
+        style_data={
+            'minHeight': height_cell, 'maxHeight': height_cell, 'height': height_cell,
+            'whiteSpace': 'normal',
+        },
+        style_table={
+            'height':height_cell * 12, 
+            'overflowY':'auto',
+            # 'display':'block',
+            # 'flex-didrection':'column',
+            # 'flex-grow':1,
+            # 'width':'100%',
+            # 'border':'1px solid #eeeee'
+        },
+    )
+
+
+def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
+    return dbc.Tabs(
+        children=[dbc.Tab(**d) for d in children], 
+        active_tab=active_tab if active_tab else (children[0].get('tab_id') if children else None), 
+        id=dict(type=f'tab_level_{tab_level}', index=int(time.time())),
+        **kwargs
+    )
 

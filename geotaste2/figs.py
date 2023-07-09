@@ -5,44 +5,7 @@ from .imports import *
 # Figures #
 ###########
 
-class FigureSelector:
-    def selected_points_xy(self, selectedData):
-        return [(d.get('x',np.nan), d.get('y',np.nan)) for d in selectedData.get('points',[]) if d]    
-    def selected_points_x(self, selectedData):
-        return [x for x,y in self.selected_points_xy(selectedData)]
-    def selected_points_y(self, selectedData):
-        return [y for x,y in self.selected_points_xy(selectedData)]
-    def selected_points(self, selectedData):
-        func = getattr(self, f'selected_points_{self.records_points_dim}')
-        return func(selectedData)
-    def selected_points_locations(self, selectedData, key='location'):
-        return self.selected_points_key(selectedData, key)
-    def selected_points_customdata(self, selectedData, key='customdata'):
-        return self.selected_points_key(selectedData, key)
-    def selected_points_key(self, selectedData, key):
-        return [
-            d.get(key,'') 
-            for d in selectedData.get('points',[]) 
-            if d 
-            and key in d 
-            and d[key]
-        ]
-
-    
-    def selected_points_latlon(self, selectedData, keys=('lat', 'lon')):
-        return [(d.get(keys[0],np.nan), d.get(keys[1],np.nan)) for d in selectedData.get('points',[]) if keys[0] in d and keys[1] in d]
-    
-    def selected(self, selectedData):
-        logger.debug('selectedData')
-        if not selectedData: return {}
-        xs = self.selected_points(selectedData) 
-        if not xs: return {}
-        return filter_series(self.series, xs, test_func=isin_or_hasone)
-    
-    def selected_records(self, selectedData):
-        return set(self.selected(selectedData).index)
-
-class FigureFactory(DashFigureFactory, FigureSelector, Logmaker):
+class FigureFactory(DashFigureFactory, Logmaker):
     records_name = 'records'
     key = ''
     records_points_dim = 'xy'
@@ -59,6 +22,27 @@ class FigureFactory(DashFigureFactory, FigureSelector, Logmaker):
     def __init__(self, filter_data={}, df=None, **kwargs):
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
+
+    def selected(self, selectedData):
+        if not selectedData: return {}
+        
+        points_data = selectedData.get('points',[])
+        if not points_data: return {}
+
+        def get_record_id(d, keys=['label', 'location']):
+            if not d: return None
+            for k in keys:
+                if k in d:
+                    return d[k]
+            logger.exception('What is the record id here? --> '+pformat(d))
+        
+        selected_records = qualquant_series(
+            [x for x in [ get_record_id(d) for d in points_data ] if x], 
+            quant=self.quant
+        ).sort_values().tolist()
+        logger.debug(f'selected: {selected_records}')
+        return {self.key:selected_records}
+    
 
     @cached_property
     def dataset(self): 
@@ -102,13 +86,13 @@ class FigureFactory(DashFigureFactory, FigureSelector, Logmaker):
             l.sort(key=lambda x: x)
         else:
             if series_orig:
-                logger.debug('using original series')
+                # logger.debug('using original series')
                 series = self.series_orig
             elif series_all:
-                logger.debug('using dedup\'d series')
+                # logger.debug('using dedup\'d series')
                 series = self.series_all
             else:
-                logger.debug('using dedup\'d and filtered')
+                # logger.debug('using dedup\'d and filtered')
                 series = self.series
             counts = series.value_counts()
             l.sort(key=lambda x: -counts.loc[x])
@@ -207,7 +191,7 @@ class FigureFactory(DashFigureFactory, FigureSelector, Logmaker):
             category_orders=category_orders,
             # range_x=(self.minval, self.maxval),
             template=PLOTLY_TEMPLATE,
-            **kwargs
+            # **kwargs
         )
         fig.update_layout(
             clickmode='event+select', 
@@ -332,16 +316,6 @@ class MemberArrondMap(MemberFigure):
         ofig.update_xaxes(fixedrange = True)
         ofig.update_yaxes(fixedrange = True)
         return ofig
-    
-    def selected(self, selectedData):
-        if selectedData:
-            locations = self.selected_points_locations(selectedData)
-            if locations:
-                s=self.df[['arrond_id']].reset_index().drop_duplicates().set_index(self.df.index.name)['arrond_id']
-                o=filter_series(s, locations, test_func=isin_or_hasone)
-                return o
-        
-        return {}
 
 class BookFigure(TypicalFigure):
     records_name='books'
@@ -616,3 +590,10 @@ class ComparisonFigureFactory(FigureFactory):
 
 
 
+
+def combine_figs(fig_new, fig_old):
+    fig_old = go.Figure(fig_old) if type(fig_old)!=go.Figure else fig_old
+    return go.Figure(
+        layout=fig_old.layout if fig_old is not None and hasattr(fig_old,'data') and fig_old.data else fig_new.layout,
+        data=fig_new.data
+    )

@@ -1,5 +1,24 @@
 ## Constants
+
+# server
+PORT=8111
+HOST='0.0.0.0'
+DEBUG=True
+
+LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
+
+
+# 5 to include traces; 
+# 10 for debug; 20 info, 25 success; 
+# 30 warning, 40 error, 50 critical;
+LOG_LEVEL = 10
+
+    
+
+# stats
 MIN_P=.05
+
+# blanks etc
 BLANKSTR='‎‎‎‎'
 BLANK = ''
 UNFILTERED = '(unfiltered)'
@@ -9,30 +28,16 @@ RIGHT_COLOR='#40B0A6' ##bf6927'
 BOTH_COLOR='#606060'
 PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
-
-# LEFT_COLOR='#d2afff'
-# RIGHT_COLOR='#FF007F'
-
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'flex'}
-
-# STYLE_INVIS={'visibility':'hidden'}
-# STYLE_VIS={'visibility':'visible'}
-
-# STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
-# STYLE_VIS = {'position': 'relative'}
-
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 
-EXTENSION_KEY = 'extension'
-INTENSION_KEY = 'intension'
-
+# paths
 import os
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.expanduser('~/geotaste_data')
 PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
-
 
 # Urls
 URLS=dict(
@@ -82,6 +87,10 @@ import numbers
 import json
 from collections import Counter
 
+# for typing purposes
+from typing import *
+from collections.abc import *
+
 ## Non-sys imports
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -104,14 +113,18 @@ import numpy as np
 import pandas as pd
 # import pandas_dash
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-import logging
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
 import plotly.express as px
 import plotly.graph_objects as go
+from humanfriendly import format_timespan
 
 # setup logs
 from loguru import logger
-
+logger.remove()
+logger.add(
+    sink = sys.stderr,
+    format=LOG_FORMAT, 
+    level=LOG_LEVEL
+)
 
 ## Setup plotly
 # Plotly mapbox public token
@@ -122,15 +135,11 @@ except FileNotFoundError:
     pass
 
 from .utils import *
+from .queries import *
 from .statutils import *
 from .datasets import *
 from .figs import *
 from .components import *
 from .panels import *
-# from .arronds import *
-# from .app import *
-# from .members import *
-# from .books import *
-# from .events import *
-# from .combined import *
-# from .comparison import *
+from .layouts import *
+from .app import *
