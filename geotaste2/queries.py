@@ -64,7 +64,6 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, operator:s
         if svals is not None
     ])
 
-
 def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, operator:str='and', plural_cols:list|None=None, return_query:bool=False) -> pd.DataFrame:
     """Filter a pandas DataFrame based on the provided filter data.
 
@@ -95,15 +94,9 @@ def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, op
     odf=df.query(qstr) if qstr else df
     return (qstr,df) if return_query else odf
 
-
-
-def filter_series(
-        series:pd.Series, 
-        vals:list = [], 
-        test_func:'function' = isin_or_hasone,
-        matches:list=[]):
-    """Filter a pandas Series based on specified values or a custom test
-    function.
+def filter_series(series:pd.Series, vals:list = [], test_func:'function' = isin_or_hasone, matches:list=[]) -> pd.Series:
+    """
+    Filter a pandas Series based on specified values or a custom test function.
 
     Args:
         series (pd.Series): The pandas Series to be filtered.
@@ -113,11 +106,6 @@ def filter_series(
 
     Returns:
         pd.Series: The filtered pandas Series.
-
-    Raises:
-        None.
-
-    Examples:
     """
     if matches: series_matching = series[[m for m in matches if m in set(series.index)]]
     elif not vals: series_matching = series
