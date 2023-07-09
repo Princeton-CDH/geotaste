@@ -1,39 +1,6 @@
 from .imports import *
 
 
-
-class Logmaker:
-    """A class that provides logging functionality.
-
-    Attributes:
-        None
-
-    Methods:
-        log(*x, level='debug', **y): Logs the given message with the specified level.
-    """
-    def log(self, *x, level='debug', **y):
-        """Logs the given message with the specified level.
-
-        Args:
-            *x: Variable length argument list of values to be logged.
-            level (str): The log level to be used. Default is 'debug'.
-            **y: Variable length keyword argument list of additional values to be logged.
-
-        Returns:
-            None
-
-        Raises:
-            None
-        """
-        o=' '.join(str(xx) for xx in x)
-        name=self.__class__.__name__
-        if hasattr(self,'name'): name+=f' ({self.name})'
-        o = f'[{nowstr()}] {name}: {o}'
-        f=getattr(logger,level)
-        f(o)
-
-
-
 class BaseComponent(DashComponent, Logmaker):
     name = None
 

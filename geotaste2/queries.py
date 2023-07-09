@@ -1,7 +1,45 @@
 from .imports import *
 
+def filter_query_str_series(sname,svals, op='or', maxlen=2,plural_cols=None,fname='overlaps'):
+    """
+    Filters a query string series based on the given parameters.
 
-def filter_query_str(filter_data:dict, test_func:'function'=overlaps, operator:str='and', plural_cols:list|None=None) -> str:
+    Args:
+        sname (str): The name of the query string series.
+        svals (list): The values of the query string series.
+        op (str, optional): The operator to use for combining multiple values. Defaults to 'or'.
+        maxlen (int, optional): The maximum length of svals before using the fname function. Defaults to 2.
+        plural_cols (list, optional): The list of plural column names. Defaults to None.
+        fname (str, optional): The name of the function to use when sname is in plural_cols. Defaults to 'overlaps'.
+
+    Returns:
+        str: The filtered query string series.
+
+    Examples:
+        >>> filter_query_str_series('name', ['John', 'Jane', 'Alice'], maxlen=3, op='or')
+        '(name==\'John\') or (name==\'Jane\') or (name==\'Alice\')'
+
+        >>> filter_query_str_series('age', [18, 19, 20])
+        '(age==18) and (age==19) and (age==20)'
+
+        >>> filter_query_str_series('score', [80, 90, 100], maxlen=3, plural_cols=['score'])
+        '@overlaps(score,[80, 90, 100])'
+    """
+    
+    if (plural_cols is not None and sname in set(plural_cols)):
+        return f'@{fname}({sname},{svals})'
+    
+    elif is_range_of_ints(svals):
+        return f'{svals[0]} <= {sname} <= {svals[-1]}'
+
+    elif len(svals) > maxlen:
+        return f'@{fname}({sname},{svals})'
+
+    else:
+        o = f' {op} '.join(f'({sname}=={repr(x)})' for x in svals)
+        return f'({o})' if len(svals)>1 else o
+
+def filter_query_str(filter_data:dict, test_func:'function'=overlaps, operator:str='and', plural_cols:list|None=None, multiline:bool=False) -> str:
     """Filter a query string based on the given filter data.
 
     Args:
@@ -21,42 +59,6 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, operator:s
     
     if not filter_data: return ''
     fname=test_func.__name__ if type(test_func)!=str else test_func
-    
-    def format_series(sname,svals, op='or',maxlen=2):
-        """Formats a series into a string representation based on the given
-        parameters.
-
-    Args:
-        sname (str): The name of the series.
-        svals (list): The values of the series.
-        op (str, optional): The operator to use when joining the values. Defaults to 'or'.
-        maxlen (int, optional): The maximum length of the series values before using a function call. Defaults to 2.
-    
-    Returns:
-        str: The formatted string representation of the series.
-    
-    Raises:
-        None.
-    
-    Examples:
-        >>> format_series('sname', [1, 2, 3])
-        '(sname==1 or sname==2 or sname==3)'
-        >>> format_series('sname', [1, 2, 3], op='and')
-        '(sname==1 and sname==2 and sname==3)'
-        >>> format_series('sname', [1, 2, 3], maxlen=3)
-        '(sname==1 or sname==2 or sname==3)'
-        >>> format_series('sname', [1, 2, 3], maxlen=2)
-        '(@fname(sname,[1, 2, 3]))'
-        """
-        if (plural_cols is not None and sname in set(plural_cols)) or len(svals)>maxlen:
-            return f'(@{fname}({sname},{svals}))'
-        else:
-            o = f' {op} '.join(
-                f'({sname}=={repr(x)})'
-                for x in svals
-            )
-            return f'({o})' if len(svals)>1 else o
-            
     
     return f' {operator} '.join([
         format_series(sname,svals)

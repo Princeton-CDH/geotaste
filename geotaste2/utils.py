@@ -245,6 +245,7 @@ def force_int(x, errors=0) -> int:
     except ValueError:
         return errors
     
+
 class CachedData:
     """A class for caching data using SqliteDict.
 
@@ -270,7 +271,6 @@ class CachedData:
         Returns:
             SqliteDict: The SqliteDict object representing the cache.
         """
-        from sqlitedict import SqliteDict
         return SqliteDict(
             filename=self.path_cache, 
             tablename=tablename, 
@@ -279,49 +279,78 @@ class CachedData:
             **kwargs
         )
 
-def combine_LR_df(dfL, dfR):
-    allL,allR = set(dfL.index),set(dfR.index)
-    L,R,both = allL-allR,allR-allL,allR&allL
-    return pd.concat([
-        dfL.loc[list(L)].assign(L_or_R='L'),
-        dfL.loc[list(both)].assign(L_or_R='L&R'),
-        dfR.loc[list(R)].assign(L_or_R='R'),
-    ])
-
-def serialize_d(d):
-    """Serialize a dictionary into a tuple of key-value pairs.
+def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
+    """
+    Combines two dataframes dfL and dfR by joining them on their indexes. 
+    The function creates a new column indicating whether a row belongs to the left dataframe, 
+    the right dataframe, or both. The resultant dataframe is returned.
 
     Args:
-        d (dict): The dictionary to be serialized.
-    
+        dfL (pandas.DataFrame): The left dataframe.
+        dfR (pandas.DataFrame): The right dataframe.
+        colname (str, optional): The name of the new column that indicates whether a row 
+                                 belongs to the left dataframe, the right dataframe, 
+                                 or both. Default is 'L_or_R'.
+        colval_L (str, optional): The value in the new column for rows that belong 
+                                  only to the left dataframe. Default is 'L'.
+        colval_R (str, optional): The value in the new column for rows that belong 
+                                  only to the right dataframe. Default is 'R'.
+        colval_LR (str, optional): The value in the new column for rows that belong 
+                                   to both dataframes. Default is 'LR'.
+
     Returns:
-        tuple: A tuple containing the key-value pairs of the dictionary.
-    
+        pandas.DataFrame: The combined dataframe.
+    """
+    allL, allR = set(dfL.index), set(dfR.index)
+    L, R, both = allL - allR, allR - allL, allR & allL
+    dfs = [
+        dfL.loc[list(L)].assign(**{colname:colval_L}),
+        dfL.loc[list(both)].assign(**{colname:colval_LR}),
+        dfR.loc[list(both)].assign(**{colname:colval_LR}),
+        dfR.loc[list(R)].assign(**{colname:colval_R}),
+    ]
+    allcols = list({col for dfx in dfs for col in dfx})
+    allinds = list({ind for dfx in dfs for ind in dfx.index})
+    odf = pd.DataFrame(columns=allcols, index=allinds)
+    for dfx in dfs: odf.update(dfx)
+    return odf
+
+
+
+
+def serialize_d(d:dict) -> str:
+    """Serializes a dictionary object into a JSON-encoded string.
+
+    Args:
+        d (dict): The dictionary object to be serialized.
+
+    Returns:
+        str: A JSON-encoded string that represents the serialized dictionary.
+
     Example:
-        >>> d = {'a': 1, 'b': 2, 'c': 3}
+        >>> d = {'name': 'John', 'age': 30, 'city': 'New York'}
         >>> serialize_d(d)
-        (('a', 1), ('b', 2), ('c', 3))
-    
-    Note:
-        This function converts a dictionary into a tuple of key-value pairs. The order of the key-value pairs in the tuple is not guaranteed to be the same as the original dictionary.
+        '{"age":30,"city":"New York","name":"John"}'
     """
-    return tuple(d.items())
+    return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode()
 
-def unserialize_d(d):
-    """Unserializes a dictionary object.
+def unserialize_d(dstr:str) -> dict:
+    """Deserializes a JSON-encoded string into a dictionary object.
 
     Args:
-        d (dict): The dictionary object to be unserialized.
-    
+        dstr (str): The JSON-encoded string to be deserialized.
+
     Returns:
-        dict: The unserialized dictionary object.
-    
+        dict: A dictionary object representing the deserialized JSON.
+
     Example:
-        >>> d = {'key1': 'value1', 'key2': 'value2'}
-        >>> unserialize_d(d)
-        {'key1': 'value1', 'key2': 'value2'}
+        >>> d_str = '{"age":30,"city":"New York","name":"John"}'
+        >>> unserialize_d(d_str)
+        {'name': 'John', 'age': 30, 'city': 'New York'}
     """
-    return dict(d)
+    return orjson.loads(dstr)
+
+
 
 def nowstr():
     """Returns the current date and time as a formatted string.
@@ -471,6 +500,7 @@ class Logwatch:
         """
         self.log(self.desc)
         self.started = time.time()
+        return self
 
     def __exit__(self,*x):
         """
@@ -478,3 +508,59 @@ class Logwatch:
         """ 
         self.ended = time.time()
         self.log(self.desc)
+
+class Logmaker:
+    """A class that provides logging functionality.
+
+    Attributes:
+        None
+
+    Methods:
+        log(*x, level='debug', **y): Logs the given message with the specified level.
+    """
+    def log(self, *x, level='debug', **y):
+        """Logs the given message with the specified level.
+
+        Args:
+            *x: Variable length argument list of values to be logged.
+            level (str): The log level to be used. Default is 'debug'.
+            **y: Variable length keyword argument list of additional values to be logged.
+
+        Returns:
+            None
+
+        Raises:
+            None
+        """
+        o=' '.join(str(xx) for xx in x)
+        name=self.__class__.__name__
+        if hasattr(self,'name'): name+=f' ({self.name})'
+        o = f'[{nowstr()}] {name}: {o}'
+        f=getattr(logger,level)
+        f(o)
+
+def is_range_of_ints(numbers:'Iterable') -> bool:
+    """Check if the given numbers form a range of integers.
+    
+    Args:
+        numbers (Iterable): A collection of numbers.
+    
+    Returns:
+        bool: True if the numbers form a range of integers, False otherwise.
+    
+    Examples:
+        >>> is_range_of_ints([1, 2, 3, 4, 5])
+        True
+        >>> is_range_of_ints([1, 2, 4, 5])
+        False
+        >>> is_range_of_ints([1, 2, 3, 3, 4, 5])
+        False
+    """
+    
+    l = numbers
+    try:
+        if any(float(x)!=int(x) for x in l): return False
+    except ValueError:
+        return False
+    l = list(sorted(int(x) for x in l))
+    return l == list(range(l[0], l[-1]+1))
