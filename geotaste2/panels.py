@@ -5,6 +5,10 @@ class FilterPanel(FilterComponent):
     @cached_property
     def content(self,params=None):
         return dbc.Container([self.store] + super().content.children)
+    
+    @cached_property
+    def store_desc(self): 
+        return dbc.Textarea(id=self.id('query_str'), className='store_desc query_str', placeholder=UNFILTERED, value='', size='lg')
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -12,7 +16,10 @@ class FilterPanel(FilterComponent):
         # intersect and listen
         if self.store_subcomponents:
             @app.callback(
-                Output(self.store, 'data',allow_duplicate=True),
+                [
+                    Output(self.store, 'data', allow_duplicate=True),
+                    Output(self.store_desc, 'value', allow_duplicate=True),
+                ],
                 [
                     Input(card.store, 'data')
                     for card in self.store_subcomponents
@@ -23,7 +30,8 @@ class FilterPanel(FilterComponent):
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 self.filter_data = self.intersect_filters(*filters_d)
-                return self.filter_data
+                self.filter_query = filter_query_str(self.filter_data)
+                return self.filter_data, self.filter_query
         
 
 
@@ -188,13 +196,14 @@ class ComparisonPanel(BaseComponent):
                 dbc.Col([
                     dbc.Row([
                         dbc.Col(
-                            html.H2(['Left Group: ',self.L.store_desc]), 
+                            # html.P(['Left Group: ',self.L.store_desc]), 
+                            self.L.store_desc,
                             width=6, 
                             className='storedescs-col storedescs-col-L left-color'
                         ),
                         
                         dbc.Col(
-                            html.H2(['Right Group: ',self.R.store_desc]),
+                            self.R.store_desc,
                             width=6, 
                             className='storedescs-col storedescs-col-R right-color'
                         ),
