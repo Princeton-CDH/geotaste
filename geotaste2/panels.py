@@ -10,45 +10,107 @@ class FilterPanel(FilterComponent):
         super().component_callbacks(app)
         
         # intersect and listen
-        @app.callback(
-            Output(self.store, 'data',allow_duplicate=True),
-            [
-                Input(card.store, 'data')
-                for card in self.subcomponents
-            ],
-            prevent_initial_call=True
-        )
-        def subcomponent_filters_updated(*filters_d):
-            logger.debug('subcomponent filters updated')
-            self.filter_data = self.intersect_filters(*filters_d)
-            return self.filter_data
+        if self.store_subcomponents:
+            @app.callback(
+                Output(self.store, 'data',allow_duplicate=True),
+                [
+                    Input(card.store, 'data')
+                    for card in self.store_subcomponents
+                ],
+                prevent_initial_call=True
+            )
+            @logger.catch
+            def subcomponent_filters_updated(*filters_d):
+                logger.debug('subcomponent filters updated')
+                self.filter_data = self.intersect_filters(*filters_d)
+                return self.filter_data
         
 
 
 class FilterPlotPanel(FilterPanel):
     def component_callbacks(self, app):
         super().component_callbacks(app)
-        @app.callback(
-            [
-                Output(card.graph,'figure',allow_duplicate=True)
-                for card in self.graph_subcomponents
-            ],
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        def redraw_graphs_from_new_data(panel_data):
-            filtered_keys = set(panel_data.get('intension',{}).keys())
-            return [
-                (
-                    dash.no_update 
-                    if card.key in filtered_keys 
-                    else card.plot(
-                        filter_data = panel_data, 
+
+        if self.graph_subcomponents:
+            @app.callback(
+                [
+                    Output(card.graph,'figure',allow_duplicate=True)
+                    for card in self.graph_subcomponents
+                ],
+                Input(self.store, 'data'),
+                prevent_initial_call=True
+            )
+            def redraw_graphs_from_new_data(panel_data):
+                logger.debug(f'{self.name}: {panel_data}')
+                raise PreventUpdate
+                filtered_keys = set(panel_data.get('intension',{}).keys())
+                return [
+                    (
+                        dash.no_update 
+                        if card.key in filtered_keys 
+                        else card.plot(
+                            filter_data = panel_data, 
+                        )
                     )
-                )
-                for card in self.graph_subcomponents
-            ]
-        
+                    for card in self.graph_subcomponents
+                ]
+            
+
+
+
+class MemberPanel(CollapsibleCard):
+    name='MP'
+
+    figure_factory = CombinedFigureFactory
+    desc = 'Filters'
+    records_name='members'
+
+    @cached_property
+    def name_card(self): 
+        return MemberNameCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def dob_card(self): 
+        return MemberDOBCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def membership_year_card(self): 
+        return MembershipYearCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def gender_card(self): 
+        return MemberGenderCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def nation_card(self): 
+        return MemberNationalityCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def arrond_card(self): 
+        return MemberArrondCard(name_context=self.name, **self._kwargs)
+
+    @cached_property
+    def subcomponents(self):
+        return [
+            self.name_card,
+            self.membership_year_card,
+            self.dob_card,
+            self.gender_card,
+            self.nation_card,
+            self.arrond_card,
+        ]
+
+    @cached_property
+    def store_subcomponents(self): return []
+    @cached_property
+    def graph_subcomponents(self): return []
+    
+    
+
+
+
+
+
 
 
 
@@ -56,45 +118,56 @@ class FilterPlotPanel(FilterPanel):
 
 
 class CombinedPanel(FilterPlotPanel):
-    figure_factory = CombinedFigureFactory
-    desc = 'Filters'
-    records_name='members'
-
-    @cached_property
-    def member_name_card(self): 
-        return MemberNameCard(name_prefix=self.name, **self._kwargs)
     
     @cached_property
-    def member_dob_card(self): 
-        return MemberDOBCard(name_prefix=self.name, **self._kwargs)
-    
-    @cached_property
-    def membership_year_card(self): 
-        return MembershipYearCard(name_prefix=self.name, **self._kwargs)
-    
-    @cached_property
-    def member_gender_card(self): 
-        return MemberGenderCard(name_prefix=self.name, **self._kwargs)
-    
-    @cached_property
-    def member_nation_card(self): 
-        return MemberNationalityCard(name_prefix=self.name, **self._kwargs)
-    
-    @cached_property
-    def member_arrond_card(self): 
-        return MemberArrondCard(name_prefix=self.name, **self._kwargs)
+    def member_panel(self): 
+        return MemberPanel(name_context=self.name)
 
     @cached_property
     def subcomponents(self):
         return [
-            # self.member_name_card,
-            # self.membership_year_card,
-            self.member_dob_card,
-            # self.member_gender_card,
-            # self.member_nation_card,
-            # self.member_arrond_card,
+            self.member_panel
         ]
     
+    @cached_property
+    def store_subcomponents(self):
+        return [
+            card
+            for panel in self.subcomponents
+            for card in panel.subcomponents
+            if hasattr(card,'store')
+        ]
+    
+    @cached_property
+    def graph_subcomponents(self):
+        return [
+            card
+            for panel in self.subcomponents
+            for card in panel.subcomponents
+            if hasattr(card,'graph')
+        ]
+    
+    
+    
+    
+
+
+
+
+
+
+class LeftPanel(CombinedPanel):
+    name='L'
+    L_or_R='L' 
+    color=LEFT_COLOR
+    desc='Left-hand Group Panel'
+
+
+class RightPanel(CombinedPanel):
+    name='R'
+    L_or_R='R'
+    color=RIGHT_COLOR
+    desc='Right-hand Group Panel'
 
 
 
@@ -103,23 +176,14 @@ class CombinedPanel(FilterPlotPanel):
 
 
 
-
-
-
-
-
-class PanelComparison(FilterPanel):
+class ComparisonPanel(BaseComponent):
     figure_factory = ComparisonFigureFactory
     # default_view = MemberMapView
-    
 
     @cached_property
     def content(self,params=None):
         return dbc.Container([
-            self.store,
-
             dbc.Row([
-                
                 # left col -- 6
                 dbc.Col([
                     dbc.Row([
@@ -167,28 +231,9 @@ class PanelComparison(FilterPanel):
     def subcomponents(self): return (self.L, self.R)
 
     @cached_property
-    def L(self):
-        return CombinedPanel(
-            name=self.id('L-Panel'),
-            L_or_R='L', 
-            color=LEFT_COLOR, 
-            desc='Left-hand Group Panel'
-        )
-    
+    def L(self): return LeftPanel()
     @cached_property
-    def R(self):
-        return CombinedPanel(
-            name=self.id('R-Panel'),
-            L_or_R='R', 
-            color=RIGHT_COLOR, 
-            desc='Right-hand Group Panel'
-        )
-    
-    def intersect_filters(self, *filters_d):
-        logger.debug(f'intersecting {len(filters_d)} filters')
-        assert len(filters_d) == 2
-        return (filters_d[0], filters_d[1])
-    
+    def R(self): return RightPanel()
     
     @cached_property
     def graphtabs(self):
@@ -261,20 +306,21 @@ class PanelComparison(FilterPanel):
 
 
 
-    def component_callbacks(self, app):
-        super().component_callbacks(app)
+    # def component_callbacks(self, app):
+    #     # super().component_callbacks(app)
 
 
-        @app.callback(
-            Output(self.graphtab, 'children'),
-            [
-                Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
-                Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-                Input(self.store, 'data'),   # triggered by update! which means that self.filter_data and self.ff are updated as well
-            ],
-        )
-        def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data):
-            return html.P('!?!?')
-            viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
-            return viewfunc(self)
+    #     @app.callback(
+    #         Output(self.graphtab, 'children'),
+    #         [
+    #             Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
+    #             Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
+    #             Input(self.L.store, 'data'),   # triggered by update! which means that self.filter_data and self.ff are updated as well,
+    #             Input(self.R.store, 'data'),   # triggered by update! which means that self.filter_data and self.ff are updated as well
+    #         ],
+    #     )
+    #     def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_data_R):
+    #         return html.P('!?!?')
+    #         viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
+    #         return viewfunc(self)
 
