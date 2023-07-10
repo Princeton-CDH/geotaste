@@ -55,7 +55,7 @@ def to_set(x:object) -> set:
     Returns:
         A set containing the value `x` if `x` is not a list-like object, otherwise a set containing all the elements of `x`.
     """
-    return {x} if not is_listy(x) else set(x)
+    return {x} if not is_listy(x) else set(flatten_list(x))
     
 def overlaps(series:pd.Series, vals:list) -> pd.Series:
     """Checks if any element in the given series overlaps with the values in
