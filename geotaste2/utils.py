@@ -558,8 +558,9 @@ def is_range_of_ints(numbers:'Iterable') -> bool:
     """
     
     l = numbers
+    if len(l)<2: return False
     try:
-        if any(float(x)!=int(x) for x in l): return False
+        if any(x!=int(x) for x in l): return False
     except ValueError:
         return False
     l = list(sorted(int(x) for x in l))

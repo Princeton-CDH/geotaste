@@ -271,6 +271,8 @@ class MemberNationalityFigure(NationalityFigure, MemberFigure):
     key='member_nationalities'
 
 class MemberArrondMap(MemberFigure):
+    key='arrond_id'
+    
     def plot(self, color=None, height=250, **kwargs):
         counts_by_arrond = get_arrond_counts(self.df).reset_index()
         geojson = get_geojson_arrondissement()
