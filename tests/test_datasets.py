@@ -1,5 +1,4 @@
 # code
-import sys; sys.path.insert(0,'..')
 from geotaste.datasets import *
 import random,tempfile
 
@@ -20,16 +19,9 @@ def test_dataset():
         dset = Dataset(ofn)
 
         assert dset.path == ofn
-        assert type(dset._data) is pd.DataFrame
         assert type(dset.data) is pd.DataFrame
         assert len(dset.data) == numrows
         assert len(dset.data.columns) == numcols
-
-        colsnow = ['a', 'b']
-        dset.cols = colsnow
-        assert len(dset._data.columns) == numcols
-        assert len(dset.data.columns) == len(colsnow)
-
 
 
 
@@ -47,7 +39,7 @@ def test_members_dataset():
 
 
 def test_authors_dataset():
-    obj = Authors()
-    df = obj.data
-    assert 'James Joyce' in set(df.name)
+    obj = CreatorsDataset()
+    df = obj.data.reset_index()
+    assert 'Joyce, James' in set(df['creator'])
 

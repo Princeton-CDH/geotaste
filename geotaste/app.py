@@ -1,5 +1,5 @@
-from geotaste2.imports import *
-from geotaste2 import __version__
+from geotaste.imports import *
+from geotaste import __version__
 
 
 def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
