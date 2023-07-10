@@ -162,12 +162,16 @@ class BookPanel(CollapsibleCard):
         return BookTitleCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_card(self):
-        return CreatorNameCard(name_context=self.name, **self._kwargs)
-    
-    @cached_property
     def year_card(self): 
         return BookYearCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def genre_card(self): 
+        return BookGenreCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def creator_card(self):
+        return CreatorNameCard(name_context=self.name, **self._kwargs)
     
     @cached_property
     def creator_gender_card(self):
@@ -181,8 +185,9 @@ class BookPanel(CollapsibleCard):
     def subcomponents(self):
         return [
             self.title_card,
-            self.creator_card,
             self.year_card,
+            self.genre_card,
+            self.creator_card,
             self.creator_gender_card,
             self.creator_nationality_card,
         ]

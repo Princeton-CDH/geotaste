@@ -48,7 +48,7 @@ class Dataset:
         if self.fillna is not None: 
             df=df.fillna(self.fillna)
         for c in self.cols_sep: 
-            df[c]=df[c].fillna('').apply(lambda x: str(x).split(self.sep))
+            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
         for c in self.cols_q:
             df[c]=pd.to_numeric(df[c], errors='coerce')
         if self.cols: 
@@ -240,6 +240,7 @@ class BooksDataset(Dataset):
     cols:list = [
         'uri',
         'title',
+        'genre',
         'author',
         'editor',
         'translator',
@@ -266,7 +267,8 @@ class BooksDataset(Dataset):
         'introduction',
         'illustrator',
         'photographer',
-        'circulation_years'
+        'circulation_years',
+        'genre'
     ]
 
     cols_q = ['year', 'borrow_count', 'purchase_count']
@@ -611,7 +613,9 @@ class CombinedDataset(Dataset):
     cols_books = {
         'title':'book_title',
         'year':'book_year',
-        'format':'book_format'
+        'format':'book_format',
+        'genre':'book_genre',
+
     }
     cols_members = {
         'sort_name':'member_name',
@@ -644,7 +648,7 @@ class CombinedDataset(Dataset):
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
     cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon']
-    cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership']
+    cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
     
     def gen(self, save=False):
         # events and members (full outer join)

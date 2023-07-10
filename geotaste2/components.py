@@ -442,6 +442,13 @@ class CreatorGenderCard(FilterPlotCard):
     desc = 'Filter by gender of creator'
     figure_factory = CreatorGenderFigure
 
+class BookGenreCard(FilterPlotCard):
+    desc = 'Filter by gende of book'
+    figure_factory = BookGenreFigure
+
+    @cached_property
+    def graph(self):
+        return dcc.Graph(figure=self.plot(), config={'displayModeBar':False})
 
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Filter by nationality of creator'
