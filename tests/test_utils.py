@@ -198,3 +198,55 @@ def test_is_range_of_ints():
     assert is_range_of_ints([1,2,3.0,4.000]) == True
     assert is_range_of_ints([-1,0,1,2,3.0,4.000]) == True
 
+
+def test_delist_df():
+    # create a sample dataframe for testing
+    df1 = pd.DataFrame({
+        'A': [[1, 2, 3], [4, 5, 6]],
+        'B': [2.666666, 3.777777],
+        'C': ['non-changed item', 'another non-changed item']
+    })
+
+    # expected output from delist_df function
+    expected_df1 = pd.DataFrame({
+        'A': ['1 2 3', '4 5 6'],
+        'B': [2.67, 3.78],
+        'C': ['non-changed item', 'another non-changed item']
+    })
+
+    # assert that the function works as expected
+    assert_frame_equal(delist_df(df1), expected_df1)
+
+    # test with another separator
+    df2 = pd.DataFrame({
+        'A': [[1, 2, 3], [4, 5, 6]],
+        'B': [2.666666, 3.777777],
+        'C': ['non-changed item', 'another non-changed item']
+    })
+
+    # expected output from delist_df function
+    expected_df2 = pd.DataFrame({
+        'A': ['1-2-3', '4-5-6'],
+        'B': [2.67, 3.78],
+        'C': ['non-changed item', 'another non-changed item']
+    })
+
+    # assert that the function works as expected
+    assert_frame_equal(delist_df(df2, sep='-'), expected_df2)
+
+    # test with Nan values
+    df3 = pd.DataFrame({
+        'A': [[1, np.nan, 3], [4, np.nan, 6]],
+        'B': [2.666666, np.nan],
+        'C': ['non-changed item', np.nan]
+    })
+
+    # expected output from delist_df function
+    expected_df3 = pd.DataFrame({
+        'A': ['1 nan 3', '4 nan 6'],
+        'B': [2.67, np.nan],
+        'C': ['non-changed item', np.nan]
+    })
+
+    # assert that the function works as expected
+    assert_frame_equal(delist_df(df3), expected_df3)

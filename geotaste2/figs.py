@@ -238,8 +238,14 @@ class MemberGenderFigure(MemberFigure):
 class NationalityFigure(FigureFactory):
     records_points_dim='y'
 
-    def plot(self, color=None, **kwargs):
-        df_counts = make_counts_df(self.series)        
+    def plot(self, color=None, keep_missing_types=True, **kwargs):
+        # df_counts = make_counts_df(self.series)        
+        valtypes = (self.series_all if keep_missing_types else self.series).unique()
+        vals = self.series
+        valcounts = vals.value_counts()
+        for mv in set(valtypes)-set(vals): valcounts[mv]=0
+        df_counts = pd.DataFrame(valcounts).reset_index()
+
         fig=px.bar(
             df_counts,
             y=self.key,
@@ -370,20 +376,23 @@ class CreatorNameFigure(MemberFigure):
 ### COMBINED?
 
 class CombinedFigureFactory(FigureFactory):
-    pass
-    # ## calcs
-    # @cached_property
-    # def arrond_counts(self): 
-    #     # return get_arrond_counts_series(self.valid_arronds)
-    #     return self.valid_arronds.value_counts()
-    # @cached_property
-    # def arrond_percs(self):
-    #     s=self.arrond_counts
-    #     return (s/s.sum()) * 100
-    # @cached_property
-    # def arronds(self):return self.df_dwellings.arrond_id
-    # @cached_property
-    # def valid_arronds(self): return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
+    ## calcs
+    @cached_property
+    def arrond_counts(self): return self.valid_arronds.value_counts()
+    @cached_property
+    def arrond_percs(self):
+        s=self.arrond_counts
+        return (s/s.sum()) * 100
+    
+    @cached_property
+    def df_dwellings(self): return self.data.drop_duplicates('dwelling')
+    @cached_property
+    def df_members(self): return self.data.drop_duplicates('member')
+    
+    @cached_property
+    def arronds(self):return self.df_dwellings.arrond_id
+    @cached_property
+    def valid_arronds(self): return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
 
 
 
@@ -400,7 +409,7 @@ class CombinedFigureFactory(FigureFactory):
 
 
 class ComparisonFigureFactory(FigureFactory):
-    cols_table = ['name','membership_years','birth_year','gender','nationalities','arrond_id','L_or_R']
+    cols_table = ['L_or_R','member_name','memer_membership','member_dob','member_gender','member_nationalities','arrond_id']
     indiv_ff = CombinedFigureFactory
 
     def __init__(self, ff1={}, ff2={}, **kwargs):
@@ -409,8 +418,8 @@ class ComparisonFigureFactory(FigureFactory):
         if is_listy(ff1) and not ff2 and len(ff1)==2:
             ff1,ff2 = ff1
 
-        self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1)==dict else ff1
-        self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2)==dict else ff2
+        self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1) in {dict,str} else ff1
+        self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2) in {dict,str} else ff2
 
     @cached_property
     def arrond_dists(self):
@@ -419,8 +428,8 @@ class ComparisonFigureFactory(FigureFactory):
     @cached_property
     def df_arronds(self): 
         return analyze_contingency_tables(
-            self.L.valid_arronds,
-            self.R.valid_arronds,
+            self.ff1.valid_arronds,
+            self.ff2.valid_arronds,
         )
     
     @cached_property
@@ -430,8 +439,8 @@ class ComparisonFigureFactory(FigureFactory):
     @cached_property
     def df_dwellings(self): 
         return combine_LR_df(
-            self.L.df_dwellings, 
-            self.R.df_dwellings
+            self.ff1.df_dwellings, 
+            self.ff2.df_dwellings
         )
 
     
@@ -450,11 +459,11 @@ class ComparisonFigureFactory(FigureFactory):
         color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         fig = px.scatter_mapbox(
             df, 
-            lat='latitude',
-            lon='longitude', 
+            lat='lat',
+            lon='lon', 
             center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
             zoom=12, 
-            hover_name='name',
+            hover_name='member_name',
             color='L_or_R',
             color_discrete_map=color_map,
             # height=height,
@@ -493,7 +502,7 @@ class ComparisonFigureFactory(FigureFactory):
             coloraxis=dict(
                 colorbar=dict(
                     orientation='h', 
-                    y=0,
+                    y=.1,
                     thickness=10
                 )
             ),
@@ -598,4 +607,38 @@ def combine_figs(fig_new, fig_old):
     return go.Figure(
         layout=fig_old.layout if fig_old is not None and hasattr(fig_old,'data') and fig_old.data else fig_new.layout,
         data=fig_new.data
+    )
+
+
+def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=60):
+    cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
+    dff = delist_df(df[cols])
+    cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
+    return dash_table.DataTable(
+        data=dff.to_dict('records'),
+        columns=cols_l,
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
+        page_action="native",
+        # page_action="none",
+        page_size=page_size,
+        fixed_rows={'headers': True},
+        style_cell={
+            'minWidth': 95, 'maxWidth': 95, 'width': 95,
+        },
+
+        style_data={
+            'minHeight': height_cell, 'maxHeight': height_cell, 'height': height_cell,
+            'whiteSpace': 'normal',
+        },
+        style_table={
+            'height':height_cell * 12, 
+            'overflowY':'auto',
+            # 'display':'block',
+            # 'flex-didrection':'column',
+            # 'flex-grow':1,
+            # 'width':'100%',
+            # 'border':'1px solid #eeeee'
+        },
     )
