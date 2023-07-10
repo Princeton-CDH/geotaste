@@ -41,7 +41,7 @@ PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
 
 # Urls
 URLS=dict(
-    books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/books.csv',
+    books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/newdataset/data/1.3-beta/books-with-genres.csv',
     members='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
     events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
     dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
