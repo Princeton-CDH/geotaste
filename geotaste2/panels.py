@@ -8,7 +8,23 @@ class FilterPanel(FilterComponent):
     
     @cached_property
     def store_desc(self): 
-        return dbc.Textarea(id=self.id('query_str'), className='store_desc query_str', placeholder=UNFILTERED, value='', size='lg')
+        return dbc.Textarea(
+            id=self.id('query_str'), 
+            className='store_desc query_str', 
+            placeholder=UNFILTERED, 
+            value='', 
+            style={'color':self.color}
+        )
+    
+    @cached_property
+    def button_query(self):
+        return dbc.Button(
+            "Query", 
+            # color="link", 
+            n_clicks=0,
+            className='button_query',
+            id=self.id('button_query')
+        )
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -30,8 +46,9 @@ class FilterPanel(FilterComponent):
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 self.filter_data = self.intersect_filters(*filters_d)
-                self.filter_query = filter_query_str(self.filter_data)
+                self.filter_query = filter_query_str(self.filter_data, multiline=False)
                 return self.filter_data, self.filter_query
+            
         
 
 
@@ -45,25 +62,26 @@ class FilterPlotPanel(FilterPanel):
                     Output(card.graph,'figure',allow_duplicate=True)
                     for card in self.graph_subcomponents
                 ],
-                Input(self.store, 'data'),
+                [
+                    Input(self.store, 'data'),
+                    Input(self.button_query, 'n_clicks')
+                ],
+                State(self.store_desc, 'value'),
                 prevent_initial_call=True
             )
-            def redraw_graphs_from_new_data(panel_data):
-                logger.debug(f'{self.name}: {panel_data}')
-                raise PreventUpdate
-                filtered_keys = set(panel_data.get('intension',{}).keys())
+            def redraw_graphs_from_new_data(filter_data, n_clicks, query_str):
+                fd = filter_data if ctx.triggered_id == self.store.id else query_str
+                logger.debug(fd)
+                filtered_keys = set(filter_data.keys())
                 return [
                     (
                         dash.no_update 
                         if card.key in filtered_keys 
-                        else card.plot(
-                            filter_data = panel_data, 
-                        )
+                        else card.plot(fd)
                     )
                     for card in self.graph_subcomponents
                 ]
             
-
 
 
 class MemberPanel(CollapsibleCard):
@@ -129,7 +147,7 @@ class CombinedPanel(FilterPlotPanel):
     
     @cached_property
     def member_panel(self): 
-        return MemberPanel(name_context=self.name)
+        return MemberPanel(name_context=self.name, **self._kwargs)
 
     @cached_property
     def subcomponents(self):
@@ -164,22 +182,6 @@ class CombinedPanel(FilterPlotPanel):
 
 
 
-class LeftPanel(CombinedPanel):
-    name='L'
-    L_or_R='L' 
-    color=LEFT_COLOR
-    desc='Left-hand Group Panel'
-
-
-class RightPanel(CombinedPanel):
-    name='R'
-    L_or_R='R'
-    color=RIGHT_COLOR
-    desc='Right-hand Group Panel'
-
-
-
-
 
 
 
@@ -197,13 +199,13 @@ class ComparisonPanel(BaseComponent):
                     dbc.Row([
                         dbc.Col(
                             # html.P(['Left Group: ',self.L.store_desc]), 
-                            self.L.store_desc,
+                            [self.L.store_desc, self.L.button_query],
                             width=6, 
                             className='storedescs-col storedescs-col-L left-color'
                         ),
                         
                         dbc.Col(
-                            self.R.store_desc,
+                            [self.R.store_desc, self.R.button_query],
                             width=6, 
                             className='storedescs-col storedescs-col-R right-color'
                         ),
@@ -240,9 +242,22 @@ class ComparisonPanel(BaseComponent):
     def subcomponents(self): return (self.L, self.R)
 
     @cached_property
-    def L(self): return LeftPanel()
+    def L(self): 
+        return CombinedPanel(
+            name='L',
+            L_or_R='L', 
+            color=LEFT_COLOR,
+            desc='Left-hand Group Panel'
+        )
+    
     @cached_property
-    def R(self): return RightPanel()
+    def R(self): 
+        return CombinedPanel(
+            name='R',
+            L_or_R='R',
+            color=RIGHT_COLOR,
+            desc='Right-hand Group Panel'
+        )
     
     @cached_property
     def graphtabs(self):
