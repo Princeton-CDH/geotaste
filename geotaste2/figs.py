@@ -177,6 +177,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
             vertical=False,
             log_x=False,
             log_y=False,
+            text=None,
             **kwargs):
         
         height = self.height if height is None else height
@@ -197,6 +198,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
             category_orders=category_orders,
             log_x=log_x,
             log_y=log_y,
+            text=text,
             # range_x=(self.minval, self.maxval),
             template=PLOTLY_TEMPLATE,
             # **kwargs
@@ -212,7 +214,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
             fig.update_yaxes(title_text=f'Number of {self.records_name}', visible=False)
         
         fig.update_layout(
-            uniformtext_minsize=12,
+            uniformtext_minsize=10,
             clickmode='event+select', 
             dragmode='select',# if quant else None, 
             selectdirection='h' if not vertical else 'v',
@@ -233,7 +235,6 @@ class TypicalFigure(FigureFactory):
 class MemberFigure(TypicalFigure):
     records_name='members'
     drop_duplicates=('member',)
-    pass
 
 class MemberDOBFigure(MemberFigure):
     key = 'member_dob'
@@ -247,12 +248,15 @@ class MembershipYearFigure(MemberFigure):
 class MemberGenderFigure(MemberFigure):
     key='member_gender'
     quant=False
+
+    def plot(self, **kwargs):
+        return self.plot_histogram(vertical=False, text='count', **kwargs)
     
 class NationalityFigure(FigureFactory):
     records_points_dim='y'
 
     def plot(self, **kwargs):
-        return self.plot_histogram(vertical=True, log_x=True, **kwargs)
+        return self.plot_histogram(vertical=True, log_x=True, text='count', **kwargs)
 
 
 class MemberNationalityFigure(NationalityFigure, MemberFigure):
@@ -322,7 +326,7 @@ class BookGenreFigure(BookFigure):
     key = 'book_genre'
     
     def plot(self, **kwargs):
-        return self.plot_histogram(vertical=True, **kwargs)
+        return self.plot_histogram(vertical=True, text='count', **kwargs)
 
 
 class BookYearFigure(BookFigure):
@@ -338,6 +342,9 @@ class CreatorFigure(TypicalFigure):
 class CreatorGenderFigure(CreatorFigure):
     key='creator_gender'
     quant=False
+
+    def plot(self, **kwargs):
+        return self.plot_histogram(vertical=False, text='count', **kwargs)
 
 class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
     key='creator_nationalities'

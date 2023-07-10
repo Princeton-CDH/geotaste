@@ -283,7 +283,8 @@ class FilterPlotCard(FilterCard):
     def graph(self): 
         return dcc.Graph(
             figure=self.plot(),
-            id=self.id('graph')
+            id=self.id('graph'),
+            config={'displayModeBar':False}
         )
 
     def component_callbacks(self, app):
@@ -443,7 +444,7 @@ class CreatorGenderCard(FilterPlotCard):
     figure_factory = CreatorGenderFigure
 
 class BookGenreCard(FilterPlotCard):
-    desc = 'Filter by gende of book'
+    desc = 'Filter by genre of book'
     figure_factory = BookGenreFigure
 
     @cached_property
