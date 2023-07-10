@@ -59,8 +59,8 @@ class FigureFactory(DashFigureFactory, Logmaker):
     @cached_property
     def data_all(self):
         odf = self.data_orig
-        if self.drop_duplicates and len(odf):
-            odf=odf.drop_duplicates(self.drop_duplicates)
+        # if self.drop_duplicates and len(odf):
+        #     odf=odf.drop_duplicates(self.drop_duplicates)
         return odf
     
     @cached_property
@@ -69,7 +69,10 @@ class FigureFactory(DashFigureFactory, Logmaker):
     
     @cached_property
     def data(self):
-        return filter_df(self.data_all, self.filter_data)
+        odf = filter_df(self.data_all, self.filter_data)
+        if self.drop_duplicates and len(odf):
+            odf=odf.drop_duplicates(self.drop_duplicates)
+        return odf
     
     @property
     def filter_desc(self):
@@ -321,6 +324,9 @@ class BookFigure(TypicalFigure):
     records_name='books'
     drop_duplicates=('book',)
 
+class BookTitleFigure(BookFigure):
+    key = 'book_title'
+
 class BookYearFigure(BookFigure):
     key = 'book_year'
     quant = True
@@ -350,12 +356,6 @@ class MemberNameFigure(MemberFigure):
 
 class CreatorNameFigure(MemberFigure):
     key = 'creator_name'
-
-class BookTitleFigure(BookFigure):
-    key = 'book_title'
-
-
-
 
 
 

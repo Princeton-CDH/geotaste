@@ -205,14 +205,22 @@ class FilterCard(FilterComponent, CollapsibleCard):
         logger.trace(self.name)
         style_d={'color':self.color if self.color else 'inherit'}
         return dbc.Collapse(
-            dbc.CardFooter(
+            dbc.CardFooter(dbc.Row(
                 [
-                    self.store,
-                    html.Div(self.button_clear, className='button_clear_div'),
-                    html.Div(self.store_desc, className='card-footer-desc')
+                    dbc.Col(
+                        [
+                            self.store,
+                            html.Div(self.store_desc, className='card-footer-desc')
+                        ], 
+                        width=11
+                    ),
+                    dbc.Col(
+                        html.Div(self.button_clear, className='button_clear_div'),
+                        width=1
+                    )
                 ],
                 style=style_d
-            ),
+            )),
             is_open=False,
             id=self.id('footer')
         )
@@ -221,9 +229,9 @@ class FilterCard(FilterComponent, CollapsibleCard):
     def store_desc(self): 
         return dbc.Button(
             UNFILTERED, 
-            className='store_desc', 
+            className='store_desc button_store_desc', 
             color='link',
-            id=self.id(f'store_desc')
+            id=self.id(f'store_desc'),
         )
     
     @cached_property
@@ -258,7 +266,8 @@ class FilterCard(FilterComponent, CollapsibleCard):
     
     
     def describe_filters(self, store_data):
-        return filter_query_str(store_data)
+        # return filter_query_str(store_data)
+        return ', '.join(str(x) for x in flatten_list(store_data.get(self.key,[])))
 
 
 

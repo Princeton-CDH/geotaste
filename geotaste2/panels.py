@@ -20,7 +20,7 @@ class FilterPanel(FilterComponent):
     def button_query(self):
         return dbc.Button(
             "Query", 
-            # color="link", 
+            color="link", 
             n_clicks=0,
             className='button_query',
             id=self.id('button_query')
@@ -46,7 +46,7 @@ class FilterPanel(FilterComponent):
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 self.filter_data = self.intersect_filters(*filters_d)
-                self.filter_query = filter_query_str(self.filter_data, multiline=False)
+                self.filter_query = Combined().filter_query_str(self.filter_data)
                 return self.filter_data, self.filter_query
             
         
@@ -88,7 +88,7 @@ class MemberPanel(CollapsibleCard):
     name='MP'
 
     figure_factory = CombinedFigureFactory
-    desc = 'Filters'
+    desc = 'Member Filters'
     records_name='members'
 
     @cached_property
@@ -133,6 +133,35 @@ class MemberPanel(CollapsibleCard):
     
     
 
+class BookPanel(CollapsibleCard):
+    name='BP'
+    figure_factory = CombinedFigureFactory
+    desc = 'Book Filters'
+    records_name='books'
+
+    @cached_property
+    def title_card(self): 
+        return BookTitleCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def year_card(self): 
+        return BookYearCard(name_context=self.name, **self._kwargs)
+
+    @cached_property
+    def subcomponents(self):
+        return [
+            self.title_card,
+            self.year_card,
+        ]
+
+    @cached_property
+    def store_subcomponents(self): return []
+    @cached_property
+    def graph_subcomponents(self): return []
+    
+    
+
+
 
 
 
@@ -146,13 +175,16 @@ class MemberPanel(CollapsibleCard):
 class CombinedPanel(FilterPlotPanel):
     
     @cached_property
-    def member_panel(self): 
-        return MemberPanel(name_context=self.name, **self._kwargs)
+    def member_panel(self): return MemberPanel(name_context=self.name, **self._kwargs)
+
+    @cached_property
+    def book_panel(self): return BookPanel(name_context=self.name, **self._kwargs)
 
     @cached_property
     def subcomponents(self):
         return [
-            self.member_panel
+            self.member_panel,
+            self.book_panel
         ]
     
     @cached_property
@@ -173,16 +205,6 @@ class CombinedPanel(FilterPlotPanel):
             if hasattr(card,'graph')
         ]
     
-    
-    
-    
-
-
-
-
-
-
-
 
 
 

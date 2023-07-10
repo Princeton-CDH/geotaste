@@ -356,3 +356,7 @@ p {
     /* height:100%; */
     border:0;
 }
+
+.button_store_desc { 
+    text-align:left;
+}
