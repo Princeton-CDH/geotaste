@@ -145,12 +145,11 @@ class CollapsibleCard(BaseComponent):
 
 class FigureComponent(BaseComponent):
     figure_factory = None
-    key='relevant_col'
     records_name='members'
 
     def ff(self, filter_data={}): 
         if self.figure_factory is not None:
-            return self.figure_factory({**self.filter_data, **filter_data})
+            return self.figure_factory(filter_data)
         
     def plot(self, filter_data={}, existing_fig=None, **kwargs):
         fig = self.ff(filter_data).plot(**{**self._kwargs, **kwargs})
@@ -259,13 +258,7 @@ class FilterCard(FilterComponent, CollapsibleCard):
     
     
     def describe_filters(self, store_data):
-        if len(store_data) == 1:
-            return str(list(store_data.values()))
-        else:
-            return str(store_data)
-
-
-
+        return filter_query_str(store_data)
 
 
 
@@ -329,7 +322,6 @@ class FilterPlotCard(FilterCard):
 
 class FilterInputCard(FilterCard):
     desc = 'Filter by input'
-    key=''
     placeholder = 'Select'
     multi = True
     sort_by_count = True
@@ -388,28 +380,23 @@ class FilterInputCard(FilterCard):
 
 class MemberNameCard(FilterInputCard):
     desc = 'Filter by member name'
-    key='member_name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
 
 class MemberDOBCard(FilterPlotCard):
     desc = 'Filter by date of birth'
-    key='member_birth_year'
     figure_factory = MemberDOBFigure    
     
 class MembershipYearCard(FilterPlotCard):
     desc = 'Filter by years of membership'
-    key='member_membership_years'
     figure_factory = MembershipYearFigure    
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Filter by gender of member'
-    key='member_gender'
     figure_factory = MemberGenderFigure
 
 class MemberNationalityCard(FilterPlotCard):
     desc = 'Filter by nationality of member'
-    key='member_nationalities'
     figure_factory = MemberNationalityFigure
 
     @cached_property
@@ -418,7 +405,6 @@ class MemberNationalityCard(FilterPlotCard):
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Filter by arrondissement'
-    key='arrond_id'
     figure_factory = MemberArrondMap
 
 
@@ -428,7 +414,6 @@ class MemberArrondCard(FilterPlotCard):
 
 class BookTitleCard(FilterInputCard):
     desc = 'Filter by book title'
-    key='book_title'
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
@@ -436,19 +421,16 @@ class BookTitleCard(FilterInputCard):
 
 class CreatorNameCard(FilterInputCard):
     desc = 'Filter by creator'
-    key='creator_name'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
     
 
 class BookYearCard(FilterPlotCard):
     desc = "Date of book's publication"
-    key='year'
     figure_factory = BookYearFigure
 
 class CreatorGenderCard(FilterPlotCard):
     desc = 'Filter by gender of creator'
-    key='creator_Gender'
     figure_factory = CreatorGenderFigure
 
 

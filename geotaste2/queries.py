@@ -29,23 +29,24 @@ def filter_query_str_series(sname:str, svals:list, op='or', maxlen=1,plural_cols
     if not is_listy(svals): svals=[svals]
 
     # stringifying
-    def repr(x): return orjson.dumps(x).decode()
+    def repr(x): 
+        return json.dumps(x, ensure_ascii=False)
     
     # return function if this is a list-containing col
     if (plural_cols is not None and sname in set(plural_cols)):
-        return f'@{fname}({sname},{repr(svals)})'
+        return f'@{fname}({sname}, {repr(svals)})'
     
     # if a range of ints, use a less/greater than syntax
     elif is_range_of_ints(svals):
-        return f'({svals[0]}<={sname}<={svals[-1]})'
+        return f'({svals[0]} <= {sname} <= {svals[-1]})'
 
     # if simply too many vals
     elif len(svals) > maxlen:
-        return f'@{fname}({sname},{repr(svals)})'
+        return f'@{fname}({sname}, {repr(svals)})'
 
     # otherwise, compound
     else:
-        strs=[f'({sname}=={repr(x)})' for x in svals]
+        strs=[f'({sname} == {repr(x)})' for x in svals]
         if not multiline or len(strs)==1:
             o = f' {op} '.join(strs)
             return f'({o})' if len(strs)>1 else o
@@ -108,7 +109,7 @@ def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, op
         test_func=test_func,
         operator=operator, 
         plural_cols=plural_cols
-    )
+    ) if type(filter_data)!=str else filter_data
 
     # query and return
     odf=df.query(qstr) if qstr else df

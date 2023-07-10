@@ -19,7 +19,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     min_series_val=None
     max_series_val=None
     
-    def __init__(self, filter_data={}, df=None, **kwargs):
+    def __init__(self, filter_data={}, **kwargs):
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
 

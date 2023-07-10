@@ -649,7 +649,8 @@ class CombinedDataset(Dataset):
         'dwelling_dist_from_SCO':'dwelling_distSCO',
     }
     coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
-    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator',]
+    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
+    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon']
     
     def gen(self, save=False):
         # events and members (full outer join)
@@ -685,7 +686,7 @@ class CombinedDataset(Dataset):
     @cached_property
     def data(self): 
         odf=self.load()
-
+        for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
         # final filters?
         odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
         return odf
