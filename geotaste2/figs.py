@@ -130,7 +130,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
                 quant=quant if quant is not None else self.quant
             ),
             name=self.key
-        )
+        ).replace({'':UNKNOWN})
         if self.min_series_val is not None: s=s[s>=self.min_series_val]
         if self.max_series_val is not None: s=s[s<=self.max_series_val]
         return s
@@ -174,6 +174,9 @@ class FigureFactory(DashFigureFactory, Logmaker):
             color=None, 
             height=None, 
             keep_missing_types=True,
+            vertical=False,
+            log_x=False,
+            log_y=False,
             **kwargs):
         
         height = self.height if height is None else height
@@ -187,35 +190,45 @@ class FigureFactory(DashFigureFactory, Logmaker):
         
         fig=px.bar(
             df_counts,
-            x=self.key,
-            y='count', 
-            height=height,
+            x=self.key if not vertical else 'count',
+            y='count' if not vertical else self.key, 
+            height=height if not vertical else len(df_counts)*20,
             color_discrete_sequence=[color] if color else None,
             category_orders=category_orders,
+            log_x=log_x,
+            log_y=log_y,
             # range_x=(self.minval, self.maxval),
             template=PLOTLY_TEMPLATE,
             # **kwargs
         )
+        fig.update_traces(textposition = 'auto', textfont_size=14)
+
+        cats=list(reversed(df_counts[self.key].index))        
+        if vertical:
+            fig.update_yaxes(categoryorder='array', categoryarray=cats, title_text='', tickangle=0, autorange='reversed')
+            fig.update_xaxes(title_text=f'Number of {self.records_name}', visible=False)
+        else:
+            fig.update_xaxes(categoryorder='array', categoryarray=cats, title_text='')
+            fig.update_yaxes(title_text=f'Number of {self.records_name}', visible=False)
+        
         fig.update_layout(
+            uniformtext_minsize=12,
             clickmode='event+select', 
             dragmode='select',# if quant else None, 
-            selectdirection='h',# if quant else None
-        )
-
-        fig.update_layout(
+            selectdirection='h' if not vertical else 'v',
             margin={"r":0,"t":0,"l":0,"b":0},
-            xaxis = { 'fixedrange': True },
-            yaxis = { 'fixedrange': True },
+            # xaxis = { 'fixedrange': True },
+            # yaxis = { 'fixedrange': True },
         )
-        if self.opts_xaxis: fig.update_xaxes(**self.opts_xaxis)
-        if self.opts_yaxis: fig.update_yaxes(**self.opts_yaxis)
+        # if self.opts_xaxis: fig.update_xaxes(**self.opts_xaxis)
+        # if self.opts_yaxis: fig.update_yaxes(**self.opts_yaxis)
         return fig
 
 class TypicalFigure(FigureFactory):
     height = 100
     plot = FigureFactory.plot_histogram
-    opts_xaxis=dict(title_text='')
-    opts_yaxis=dict(visible=False)
+    # opts_xaxis=dict(title_text='')
+    # opts_yaxis=dict(visible=False)
 
 class MemberFigure(TypicalFigure):
     records_name='members'
@@ -238,39 +251,9 @@ class MemberGenderFigure(MemberFigure):
 class NationalityFigure(FigureFactory):
     records_points_dim='y'
 
-    def plot(self, color=None, keep_missing_types=True, **kwargs):
-        # df_counts = make_counts_df(self.series)        
-        valtypes = (self.series_all if keep_missing_types else self.series).unique()
-        vals = self.series
-        valcounts = vals.value_counts()
-        for mv in set(valtypes)-set(vals): valcounts[mv]=0
-        df_counts = pd.DataFrame(valcounts).reset_index()
+    def plot(self, **kwargs):
+        return self.plot_histogram(vertical=True, log_x=True, **kwargs)
 
-        fig=px.bar(
-            df_counts,
-            y=self.key,
-            x='count', 
-            color_discrete_sequence=[color] if color else None,
-            # range_x=(self.minval, self.maxval),
-            height=len(df_counts)*20,
-            text='count',
-            template=PLOTLY_TEMPLATE,
-            log_x=True,
-            # **kwargs
-        )
-        cats=list(reversed(df_counts[self.key].index))
-        fig.update_yaxes(categoryorder='array', categoryarray=cats)
-        fig.update_traces(textposition = 'auto', textfont_size=14)
-        fig.update_layout(
-            uniformtext_minsize=12,
-            clickmode='event+select', 
-            dragmode='select',# if quant else None, 
-            selectdirection='v',# if quant else None
-        )
-        fig.update_xaxes(title_text=f'Number of {self.records_name}', visible=False)
-        fig.update_yaxes(title_text='', tickangle=0, autorange='reversed')
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-        return fig
 
 class MemberNationalityFigure(NationalityFigure, MemberFigure):
     records_name='member nationalities'
@@ -334,6 +317,13 @@ class BookFigure(TypicalFigure):
 
 class BookTitleFigure(BookFigure):
     key = 'book_title'
+
+class BookGenreFigure(BookFigure):
+    key = 'book_genre'
+    
+    def plot(self, **kwargs):
+        return self.plot_histogram(vertical=True, **kwargs)
+
 
 class BookYearFigure(BookFigure):
     key = 'book_year'
