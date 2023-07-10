@@ -1,11 +1,17 @@
 from .imports import *
+from .views import *
 
 
 class FilterPanel(FilterComponent):
     @cached_property
     def content(self,params=None):
-        return dbc.Container([self.store] + super().content.children)
+        return dbc.Container([self.store, self.store_str] + super().content.children)
     
+    @cached_property
+    def store_str(self):
+        return dcc.Store(id=self.id(self.name)+'_str', data='')
+
+
     @cached_property
     def store_desc(self): 
         return dbc.Textarea(
@@ -49,6 +55,17 @@ class FilterPanel(FilterComponent):
                 self.filter_query = Combined().filter_query_str(self.filter_data)
                 return self.filter_data, self.filter_query
             
+            @app.callback(
+                Output(self.store_str, 'data'),
+                Input(self.button_query, 'n_clicks'),
+                State(self.store_desc, 'value'),
+                prevent_initial_call=True
+            )
+            @logger.catch
+            def update_filter_query(n_clicks, query_str):
+                logger.debug(f'setting {query_str} to {self.name}.store_str')
+                return query_str
+            
         
 
 
@@ -64,13 +81,14 @@ class FilterPlotPanel(FilterPanel):
                 ],
                 [
                     Input(self.store, 'data'),
-                    Input(self.button_query, 'n_clicks')
+                    Input(self.store_str, 'data')
                 ],
-                State(self.store_desc, 'value'),
                 prevent_initial_call=True
             )
-            def redraw_graphs_from_new_data(filter_data, n_clicks, query_str):
-                fd = filter_data if ctx.triggered_id == self.store.id else query_str
+            @logger.catch
+            def redraw_graphs_from_new_data(filter_data, query_str):
+                logger.debug(f'redrawing, triggered by {ctx.triggered_id}')
+                fd = query_str if ctx.triggered_id == self.store_str.id else filter_data
                 logger.debug(fd)
                 filtered_keys = set(filter_data.keys())
                 return [
@@ -285,16 +303,16 @@ class ComparisonPanel(BaseComponent):
     def graphtabs(self):
         map_tabs = get_tabs([
             dict(label='Left vs. Right Groups', tab_id='map_LR'),
-            dict(label='Left Group', tab_id='map_L'),
-            dict(label='Right', tab_id='map_R'),
+            # dict(label='Left Group', tab_id='map_L'),
+            # dict(label='Right', tab_id='map_R'),
         ], tab_level=2, className='graphtabs-container')
         
         tbl_tabs = get_tabs(
             children=[
-                dict(label='By arrondissement', tab_id='tbl_arrond'),
                 dict(label='By member', tab_id='tbl_members'),                
+                dict(label='By arrondissement', tab_id='tbl_arrond'),
             ], 
-            tab_level=2, className='graphtabs-container'
+            tab_level=2, className='graphtabs-container', active_tab='tbl_members'
         )
 
         analyze_tabs = get_tabs(
@@ -350,23 +368,25 @@ class ComparisonPanel(BaseComponent):
         
         return default if default is not None else self.default_view
 
+    def component_callbacks(self, app):
+        # super().component_callbacks(app)
 
 
-    # def component_callbacks(self, app):
-    #     # super().component_callbacks(app)
-
-
-    #     @app.callback(
-    #         Output(self.graphtab, 'children'),
-    #         [
-    #             Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
-    #             Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-    #             Input(self.L.store, 'data'),   # triggered by update! which means that self.filter_data and self.ff are updated as well,
-    #             Input(self.R.store, 'data'),   # triggered by update! which means that self.filter_data and self.ff are updated as well
-    #         ],
-    #     )
-    #     def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_data_R):
-    #         return html.P('!?!?')
-    #         viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
-    #         return viewfunc(self)
+        @app.callback(
+            Output(self.graphtab, 'children'),
+            [
+                Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
+                Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
+                Input(self.L.store, 'data'),
+                Input(self.L.store_str, 'data'),
+                Input(self.R.store, 'data'),
+                Input(self.R.store_str, 'data'),
+            ],
+        )
+        def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_query_L, filter_data_R, filter_query_R):
+            fdL = filter_query_L if ctx.triggered_id == self.L.store_str.id else filter_data_L
+            fdR = filter_query_R if ctx.triggered_id == self.R.store_str.id else filter_data_R
+            ff = ComparisonFigureFactory(fdL, fdR)
+            viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
+            return viewfunc(ff)
 

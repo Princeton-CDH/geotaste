@@ -447,39 +447,6 @@ class CreatorGenderCard(FilterPlotCard):
 
 
 
-def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=60):
-    cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
-    dff = delist_df(df[cols])
-    cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
-    return dash_table.DataTable(
-        data=dff.to_dict('records'),
-        columns=cols_l,
-        sort_action="native",
-        sort_mode="multi",
-        filter_action="native",
-        page_action="native",
-        # page_action="none",
-        page_size=page_size,
-        fixed_rows={'headers': True},
-        style_cell={
-            'minWidth': 95, 'maxWidth': 95, 'width': 95,
-        },
-
-        style_data={
-            'minHeight': height_cell, 'maxHeight': height_cell, 'height': height_cell,
-            'whiteSpace': 'normal',
-        },
-        style_table={
-            'height':height_cell * 12, 
-            'overflowY':'auto',
-            # 'display':'block',
-            # 'flex-didrection':'column',
-            # 'flex-grow':1,
-            # 'width':'100%',
-            # 'border':'1px solid #eeeee'
-        },
-    )
-
 
 def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
     return dbc.Tabs(

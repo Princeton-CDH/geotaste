@@ -565,3 +565,34 @@ def is_range_of_ints(numbers:'Iterable') -> bool:
         return False
     l = list(sorted(int(x) for x in l))
     return l == list(range(l[0], l[-1]+1))
+
+
+
+def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
+    """
+    Takes a pandas DataFrame (df), iterates through each column, 
+    and applies the function fix to each value in each column. The function 
+    fix turns list-like objects into strings, rounds numeric objects to 
+    two decimal places, and leaves all other types of objects unchanged. 
+
+    If an item in a column is a list-like object, it joins the items in the list
+    into a string, separated by the provided separator (default is a space). If an 
+    item is a numeric value, it rounds the number to two decimal places.
+    The function returns a new DataFrame. The original DataFrame remains unchanged.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to process.
+        sep (str, optional): The separator to use when joining list-like objects into strings.
+                             Default is a space.
+
+    Returns:
+        pd.DataFrame: The processed DataFrame.
+    """
+    def fix(y):
+        if is_listy(y): return sep.join(str(x) for x in y)
+        if is_numeric(y): y=round(y,2)
+        return y
+    df=df.copy()
+    for col in df:
+        df[col]=df[col].apply(fix)
+    return df
