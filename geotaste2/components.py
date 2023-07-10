@@ -443,6 +443,15 @@ class CreatorGenderCard(FilterPlotCard):
     figure_factory = CreatorGenderFigure
 
 
+class CreatorNationalityCard(FilterPlotCard):
+    desc = 'Filter by nationality of creator'
+    figure_factory = CreatorNationalityFigure
+
+    @cached_property
+    def graph(self):
+        return dcc.Graph(figure=self.plot(), config={'displayModeBar':False})
+
+
 
 
 
