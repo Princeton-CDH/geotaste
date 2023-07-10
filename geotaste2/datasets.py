@@ -6,7 +6,6 @@ from .imports import *
 ##################
 
 
-
 class Dataset:
     id:str=''
     url:str = ''
@@ -199,13 +198,6 @@ class DwellingsDataset(Dataset):
         return self.data[self.data['member'] == member]
     
 
-
-@cache
-def Members(): return MembersDataset()
-@cache
-def MemberDwellings(): return MemberDwellingsDataset()
-@cache
-def Dwellings(): return DwellingsDataset()
 
 
 
@@ -650,7 +642,9 @@ class CombinedDataset(Dataset):
     }
     coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
+
     cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon']
+    cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership']
     
     def gen(self, save=False):
         # events and members (full outer join)
@@ -691,6 +685,12 @@ class CombinedDataset(Dataset):
         odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
         return odf
     
+    def filter_query_str(self, filter_data={}):
+        return filter_query_str(
+            filter_data, 
+            multiline=False,
+            plural_cols=self.cols_sep
+        )
 
 
 
@@ -753,3 +753,13 @@ def get_all_arrond_ids():
         for d in get_geojson_arrondissement()['features']
     }
     return {n for n in ids_in_geojson if n and n.isdigit() and n!='99'}# | {'X','?','99'} # outside of paris + unkown
+
+
+
+
+@cache
+def Members(): return MembersDataset()
+@cache
+def Dwellings(): return DwellingsDataset()
+@cache
+def Combined(): return CombinedDataset()
