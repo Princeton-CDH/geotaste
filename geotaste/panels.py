@@ -277,50 +277,64 @@ class ComparisonPanel(BaseComponent):
     # default_view = MemberMapView
 
     @cached_property
+    def content_left_tabs(self,params=None):
+        return dbc.Container(dbc.Row([
+            dbc.Col(
+                # html.P(['Left Group: ',self.L.store_desc]), 
+                [self.L.store_desc, self.L.button_query],
+                width=6, 
+                className='storedescs-col storedescs-col-L left-color'
+            ),
+            
+            dbc.Col(
+                [self.R.store_desc, self.R.button_query],
+                width=6, 
+                className='storedescs-col storedescs-col-R right-color'
+            ),
+        ]), className='layout-toprow')
+    
+    
+    @cached_property
+    def content_right_tabs(self,params=None):
+        return dbc.Container([
+            dbc.Row(self.graphtabs, className='content-tabs-row')
+        ])
+
+    @cached_property
+    def content_right(self,params=None):
+        return dbc.Container([
+            dbc.Row(self.graphtab, className='content-belowtabs-row')
+        ], className='layout-rightcol')
+    
+    @cached_property
+    def content_main_row(self,params=None):
+        return dbc.Row([
+            dbc.Col(
+                self.L.layout(params), 
+                width=6, 
+                className='panel_L panel'
+            ),
+            
+            dbc.Col(
+                self.R.layout(params), 
+                width=6, 
+                className='panel_R panel'
+            ),
+        ], 
+        className='layout-mainrow')
+    
+    @cached_property
+    def content_left(self,params=None):
+        return dbc.Container(self.content_main_row, className='layout-leftcol')
+
+    @cached_property
     def content(self,params=None):
         return dbc.Container([
+            self.content_left_tabs,
+
             dbc.Row([
-                # left col -- 6
-                dbc.Col([
-                    dbc.Row([
-                        dbc.Col(
-                            # html.P(['Left Group: ',self.L.store_desc]), 
-                            [self.L.store_desc, self.L.button_query],
-                            width=6, 
-                            className='storedescs-col storedescs-col-L left-color'
-                        ),
-                        
-                        dbc.Col(
-                            [self.R.store_desc, self.R.button_query],
-                            width=6, 
-                            className='storedescs-col storedescs-col-R right-color'
-                        ),
-                    ], className='layout-toprow'), 
-
-                    dbc.Row([
-                        dbc.Col(
-                            self.L.layout(params), 
-                            width=6, 
-                            className='panel_L panel'
-                        ),
-                        
-                        dbc.Col(
-                            self.R.layout(params), 
-                            width=6, 
-                            className='panel_R panel'
-                        ),
-                    ], 
-                    className='layout-mainrow'
-                    )
-                ], className='layout-leftcol', width=6),
-
-                # right col
-                dbc.Col(
-                    dbc.Container([
-                        dbc.Row(self.graphtabs, className='content-tabs-row'),
-                        dbc.Row(self.graphtab, className='content-belowtabs-row'),
-                    ]), 
-                    className='layout-rightcol', width=6)
+                dbc.Col(self.content_left, className='layout-leftcol', width=6),
+                dbc.Col(self.content_right, className='layout-rightcol', width=6)
             ])
         ], className='panel-comparison-layout layout-belownavbar')
         
