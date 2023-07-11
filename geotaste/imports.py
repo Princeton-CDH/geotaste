@@ -1,5 +1,24 @@
 ## Constants
+
+# server
+PORT=8111
+HOST='0.0.0.0'
+DEBUG=False
+
+LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
+
+
+# 5 to include traces; 
+# 10 for debug; 20 info, 25 success; 
+# 30 warning, 40 error, 50 critical;
+LOG_LEVEL = 10
+
+    
+
+# stats
 MIN_P=.05
+
+# blanks etc
 BLANKSTR='‎‎‎‎'
 BLANK = ''
 UNFILTERED = '(unfiltered)'
@@ -9,34 +28,20 @@ RIGHT_COLOR='#40B0A6' ##bf6927'
 BOTH_COLOR='#606060'
 PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
-
-# LEFT_COLOR='#d2afff'
-# RIGHT_COLOR='#FF007F'
-
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'flex'}
-
-# STYLE_INVIS={'visibility':'hidden'}
-# STYLE_VIS={'visibility':'visible'}
-
-# STYLE_INVIS = {'position': 'absolute', 'top': '-9999px', 'left': '-9999px'}
-# STYLE_VIS = {'position': 'relative'}
-
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 
-EXTENSION_KEY = 'extension'
-INTENSION_KEY = 'intension'
-
+# paths
 import os
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.expanduser('~/geotaste_data')
-PATH_ASSETS = os.path.join(PATH_HERE, 'app', 'assets')
-
+PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
 
 # Urls
 URLS=dict(
-    books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/books.csv',
+    books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/newdataset/data/1.3-beta/books-with-genres.csv',
     members='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
     events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
     dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
@@ -51,6 +56,7 @@ PATHS=dict(
     events = os.path.join(PATH_DATA,'events.csv'),
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
+    combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
 )
 
 LATLON_SCO = (48.85107555543428, 2.3385039932538567)
@@ -81,15 +87,25 @@ import numbers
 import json
 from collections import Counter
 
+# for typing purposes
+from typing import *
+from collections.abc import *
+
 ## Non-sys imports
+import orjson
+from sqlitedict import SqliteDict
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 import warnings
 warnings.filterwarnings('ignore')
-from functools import cached_property, lru_cache
-cache = lru_cache(maxsize=None)
+from functools import cached_property, cache
+# cache = lru_cache(maxsize=None)
+# from diskcache import Cache
+# cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
+# cache = cache_obj.memoize()
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL
+BLANKDIV = html.Div(BLANKSTR)
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
 import dash_bootstrap_components as dbc
@@ -102,11 +118,18 @@ import numpy as np
 import pandas as pd
 # import pandas_dash
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-import logging
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
 import plotly.express as px
 import plotly.graph_objects as go
+from humanfriendly import format_timespan
 
+# setup logs
+from loguru import logger
+logger.remove()
+logger.add(
+    sink = sys.stderr,
+    format=LOG_FORMAT, 
+    level=LOG_LEVEL
+)
 
 ## Setup plotly
 # Plotly mapbox public token
@@ -117,12 +140,11 @@ except FileNotFoundError:
     pass
 
 from .utils import *
+from .queries import *
 from .statutils import *
 from .datasets import *
-from .arronds import *
+from .figs import *
+from .components import *
+from .panels import *
+from .layouts import *
 from .app import *
-from .members import *
-from .books import *
-from .events import *
-from .combined import *
-from .comparison import *
