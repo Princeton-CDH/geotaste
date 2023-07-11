@@ -98,3 +98,41 @@ def filter_signif(df, p_col=None, min_p=MIN_P):
     if p_col is None: pcol=first([c for c in df if c=='pvalue' or c.endswith('_p')])
     if not pcol: return df
     return df[df[pcol] <= min_p]
+
+
+
+def measure_dists(
+        series1, 
+        series2, 
+        methods = [
+            'braycurtis', 
+            'canberra', 
+            'chebyshev', 
+            'cityblock', 
+            'correlation', 
+            'cosine', 
+            'euclidean', 
+            'jensenshannon', 
+            'minkowski', 
+        ],
+        series_name='dists',
+        calc = ['median']
+        ):
+    from scipy.spatial import distance
+    a=pd.Series(series1).values
+    b=pd.Series(series2).values
+    o=pd.Series({fname:getattr(distance,fname)(a,b) for fname in methods}, name=series_name)
+    for fname in calc: o[fname]=o.agg(fname)
+    return o
+
+
+
+def geodist(latlon1, latlon2, unit='km'):
+    from geopy.distance import distance
+    import numpy as np
+    try:
+        dist = distance(latlon1, latlon2)
+        return getattr(dist,unit)
+    except Exception:
+        return np.nan
+    
