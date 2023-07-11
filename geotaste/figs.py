@@ -509,7 +509,7 @@ class ComparisonFigureFactory(FigureFactory):
             coloraxis=dict(
                 colorbar=dict(
                     orientation='h', 
-                    y=.1,
+                    y=.01,
                     thickness=10
                 )
             ),
@@ -617,7 +617,7 @@ def combine_figs(fig_new, fig_old):
     )
 
 
-def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=60):
+def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=60):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -647,5 +647,6 @@ def get_dash_table(df, cols=[], page_size=25, height_table='80vh', height_cell=6
             # 'flex-grow':1,
             # 'width':'100%',
             # 'border':'1px solid #eeeee'
+            # 'padding-bottom':'100px'
         },
     )
