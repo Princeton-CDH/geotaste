@@ -9,15 +9,20 @@ class FigureFactory(DashFigureFactory, Logmaker):
     records_name = 'records'
     key = ''
     records_points_dim = 'xy'
-    dataset_class = CombinedDataset
+    dataset_class = Combined
     drop_duplicates = ()
     quant = False
     opts_xaxis=dict()
     opts_yaxis=dict()
     height=600
-    color=None
     min_series_val=None
     max_series_val=None
+    color=None 
+    keep_missing_types=True
+    vertical=False
+    log_x=False
+    log_y=False
+    text=None
     
     def __init__(self, filter_data={}, **kwargs):
         if filter_data is None: filter_data = {}
@@ -46,7 +51,11 @@ class FigureFactory(DashFigureFactory, Logmaker):
 
     @cached_property
     def dataset(self): 
-        return (self.dataset_class() if self.dataset_class is not None else None)
+        return (
+            self.dataset_class.__func__() 
+            if self.dataset_class is not None 
+            else None
+        )
 
     @cached_property
     def data_orig(self):
@@ -166,47 +175,43 @@ class FigureFactory(DashFigureFactory, Logmaker):
         ]).sort_values([self.key, iname]).set_index(iname)
     
     
-        
+    @cached_property
+    def df_counts(self):
+        valcounts = self.series.value_counts()
+        if self.keep_missing_types:
+            valtypes = self.series_all.unique()
+            for missing_val in set(valtypes)-set(valcounts.index):
+                valcounts[missing_val]=0
+        return pd.DataFrame(valcounts).reset_index()
 
+    def plot(self, **kwargs):
+        return self.plot_histogram(**kwargs)
         
-    def plot_histogram(
-            self, 
-            color=None, 
-            height=None, 
-            keep_missing_types=True,
-            vertical=False,
-            log_x=False,
-            log_y=False,
-            text=None,
-            **kwargs):
-        
-        height = self.height if height is None else height
-        color = self.color if color is None else color
-        valtypes = (self.series_all if keep_missing_types else self.series).unique()
-        vals = self.series
-        valcounts = vals.value_counts()
-        for mv in set(valtypes)-set(vals): valcounts[mv]=0
-        df_counts = pd.DataFrame(valcounts).reset_index()
-        category_orders = {self.key:df_counts.index} if self.quant is False else None
+    def plot_histogram(self, color=None, **kwargs):
+        color = color if color else self.color
+        category_orders = (
+            {self.key:self.df_counts.index} 
+            if self.quant is False 
+            else None
+        )
         
         fig=px.bar(
-            df_counts,
-            x=self.key if not vertical else 'count',
-            y='count' if not vertical else self.key, 
-            height=height if not vertical else len(df_counts)*20,
+            self.df_counts,
+            x=self.key if not self.vertical else 'count',
+            y='count' if not self.vertical else self.key, 
+            height=self.height if not self.vertical else len(self.df_counts)*20,
             color_discrete_sequence=[color] if color else None,
             category_orders=category_orders,
-            log_x=log_x,
-            log_y=log_y,
-            text=text,
-            # range_x=(self.minval, self.maxval),
+            log_x=self.log_x,
+            log_y=self.log_y,
+            text=self.text,
             template=PLOTLY_TEMPLATE,
             # **kwargs
         )
         fig.update_traces(textposition = 'auto', textfont_size=14)
 
-        cats=list(reversed(df_counts[self.key].index))        
-        if vertical:
+        cats=list(reversed(self.df_counts[self.key].index))        
+        if self.vertical:
             fig.update_yaxes(categoryorder='array', categoryarray=cats, title_text='', tickangle=0, autorange='reversed')
             fig.update_xaxes(title_text=f'Number of {self.records_name}', visible=False)
         else:
@@ -216,19 +221,16 @@ class FigureFactory(DashFigureFactory, Logmaker):
         fig.update_layout(
             uniformtext_minsize=10,
             clickmode='event+select', 
-            dragmode='select',# if quant else None, 
-            selectdirection='h' if not vertical else 'v',
+            dragmode='select',
+            selectdirection='h' if not self.vertical else 'v',
             margin={"r":0,"t":0,"l":0,"b":0},
-            # xaxis = { 'fixedrange': True },
-            # yaxis = { 'fixedrange': True },
         )
-        # if self.opts_xaxis: fig.update_xaxes(**self.opts_xaxis)
-        # if self.opts_yaxis: fig.update_yaxes(**self.opts_yaxis)
+        if self.opts_xaxis: fig.update_xaxes(**self.opts_xaxis)
+        if self.opts_yaxis: fig.update_yaxes(**self.opts_yaxis)
         return fig
 
 class TypicalFigure(FigureFactory):
     height = 100
-    plot = FigureFactory.plot_histogram
     # opts_xaxis=dict(title_text='')
     # opts_yaxis=dict(visible=False)
 
@@ -248,15 +250,14 @@ class MembershipYearFigure(MemberFigure):
 class MemberGenderFigure(MemberFigure):
     key='member_gender'
     quant=False
-
-    def plot(self, **kwargs):
-        return self.plot_histogram(vertical=False, text='count', **kwargs)
+    vertical = False
+    text = 'count'
     
 class NationalityFigure(FigureFactory):
     records_points_dim='y'
-
-    def plot(self, **kwargs):
-        return self.plot_histogram(vertical=True, log_x=True, text='count', **kwargs)
+    vertical = True
+    log_x = True
+    text = 'count'
 
 
 class MemberNationalityFigure(NationalityFigure, MemberFigure):
@@ -324,10 +325,9 @@ class BookTitleFigure(BookFigure):
 
 class BookGenreFigure(BookFigure):
     key = 'book_genre'
+    vertical = True
+    text = 'count'
     
-    def plot(self, **kwargs):
-        return self.plot_histogram(vertical=True, text='count', **kwargs)
-
 
 class BookYearFigure(BookFigure):
     key = 'book_year'
@@ -342,9 +342,9 @@ class CreatorFigure(TypicalFigure):
 class CreatorGenderFigure(CreatorFigure):
     key='creator_gender'
     quant=False
+    vertical = False
+    text='count'
 
-    def plot(self, **kwargs):
-        return self.plot_histogram(vertical=False, text='count', **kwargs)
 
 class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
     key='creator_nationalities'
@@ -364,7 +364,17 @@ class CreatorNameFigure(MemberFigure):
 
 
 
+class EventFigure(TypicalFigure):
+    drop_duplicates = ('event',)
 
+class EventYearFigure(EventFigure):
+    key = 'event_year'
+    quant = True
+
+class EventTypeFigure(EventFigure):
+    key = 'event_type'
+    quant = False
+    vertical = True
 
 
 

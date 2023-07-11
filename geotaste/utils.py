@@ -318,35 +318,25 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
 
 
 
-def serialize_d(d:dict) -> str:
-    """Serializes a dictionary object into a JSON-encoded string.
+def serialize(d:object) -> str:
+    """Serializes an object into a JSON-encoded string.
 
     Args:
-        d (dict): The dictionary object to be serialized.
+        d (dict): The object to be serialized.
 
     Returns:
-        str: A JSON-encoded string that represents the serialized dictionary.
-
-    Example:
-        >>> d = {'name': 'John', 'age': 30, 'city': 'New York'}
-        >>> serialize_d(d)
-        '{"age":30,"city":"New York","name":"John"}'
+        str: A JSON-encoded string that represents the serialized object.
     """
     return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode()
 
-def unserialize_d(dstr:str) -> dict:
-    """Deserializes a JSON-encoded string into a dictionary object.
+def unserialize(dstr:str) -> object:
+    """Deserializes a JSON-encoded string into a python object.
 
     Args:
         dstr (str): The JSON-encoded string to be deserialized.
 
     Returns:
-        dict: A dictionary object representing the deserialized JSON.
-
-    Example:
-        >>> d_str = '{"age":30,"city":"New York","name":"John"}'
-        >>> unserialize_d(d_str)
-        {'name': 'John', 'age': 30, 'city': 'New York'}
+        dict: A object representing the deserialized JSON.
     """
     return orjson.loads(dstr)
 

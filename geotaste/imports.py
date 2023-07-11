@@ -3,7 +3,8 @@
 # server
 PORT=8111
 HOST='0.0.0.0'
-DEBUG=True
+HOST='127.0.0.1'
+DEBUG=False
 
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
@@ -98,8 +99,11 @@ import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 import warnings
 warnings.filterwarnings('ignore')
-from functools import cached_property, lru_cache
-cache = lru_cache(maxsize=None)
+from functools import cached_property, cache
+# cache = lru_cache(maxsize=None)
+# from diskcache import Cache
+# cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
+# cache = cache_obj.memoize()
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL
 BLANKDIV = html.Div(BLANKSTR)
