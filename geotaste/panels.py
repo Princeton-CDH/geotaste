@@ -48,7 +48,6 @@ class FilterPanel(FilterComponent):
                 ],
                 prevent_initial_call=True
             )
-            @logger.catch
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 self.filter_data = self.intersect_filters(*filters_d)
@@ -61,7 +60,6 @@ class FilterPanel(FilterComponent):
                 State(self.store_desc, 'value'),
                 prevent_initial_call=True
             )
-            @logger.catch
             def update_filter_query(n_clicks, query_str):
                 logger.debug(f'setting {query_str} to {self.name}.store_str')
                 return query_str
@@ -85,17 +83,20 @@ class FilterPlotPanel(FilterPanel):
                 ],
                 prevent_initial_call=True
             )
-            @logger.catch
             def redraw_graphs_from_new_data(filter_data, query_str):
                 logger.debug(f'redrawing, triggered by {ctx.triggered_id}')
                 fd = query_str if ctx.triggered_id == self.store_str.id else filter_data
                 logger.debug(fd)
                 filtered_keys = set(filter_data.keys())
+
+                # filter_data, existing_fig, kwargs
+                existing_fig = None # @TODO?
+                
                 return [
                     (
                         dash.no_update 
                         if card.key in filtered_keys 
-                        else card.plot(fd)
+                        else card.plot(fd, existing_fig=existing_fig)
                     )
                     for card in self.graph_subcomponents
                 ]
@@ -201,28 +202,53 @@ class BookPanel(CollapsibleCard):
 
 
 
+class EventPanel(CollapsibleCard):
+    name='EP'
+    figure_factory = CombinedFigureFactory
+    desc = 'Event Filters'
+    records_name='events'
 
+    @cached_property
+    def year_card(self): 
+        return EventYearCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def type_card(self): 
+        return EventTypeCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def subcomponents(self):
+        return [
+            self.year_card,
+            self.type_card,
+        ]
 
-
-
-
-
-
+    @cached_property
+    def store_subcomponents(self): return []
+    @cached_property
+    def graph_subcomponents(self): return []
 
 
 class CombinedPanel(FilterPlotPanel):
     
     @cached_property
-    def member_panel(self): return MemberPanel(name_context=self.name, **self._kwargs)
+    def member_panel(self): 
+        return MemberPanel(name_context=self.name, **self._kwargs)
 
     @cached_property
-    def book_panel(self): return BookPanel(name_context=self.name, **self._kwargs)
+    def book_panel(self):
+        return BookPanel(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def event_panel(self):
+        return EventPanel(name_context=self.name, **self._kwargs)
 
     @cached_property
     def subcomponents(self):
         return [
             self.member_panel,
-            self.book_panel
+            self.book_panel,
+            self.event_panel,
         ]
     
     @cached_property
@@ -365,29 +391,6 @@ class ComparisonPanel(BaseComponent):
             id=self.id('graphtab')
         )
 
-    def determine_view(self, tab_ids_1=[], tab_ids_2=[], default=None):
-        tab_ids_1_set=set(tab_ids_1)
-        tab_ids_2_set=set(tab_ids_2)
-
-        if 'tbl' in tab_ids_1_set:
-            if 'tbl_members' in tab_ids_2_set: 
-                return MemberTableView
-                
-            elif 'tbl_arrond' in tab_ids_2_set:
-                return ArrondTableView
-                
-        elif 'analyze' in tab_ids_1_set:
-            if 'tbl_diff' in tab_ids_2_set:
-                return DifferenceDegreeView
-        
-        elif 'map' in tab_ids_1_set:
-            return MemberMapView
-            if 'map_L' in tab_ids_2_set: return 'map_members_L'
-            if 'map_R' in tab_ids_2_set: return 'map_members_R'
-            return 'map_members'
-        
-        return default if default is not None else self.default_view
-
     def component_callbacks(self, app):
         # super().component_callbacks(app)
 
@@ -406,7 +409,38 @@ class ComparisonPanel(BaseComponent):
         def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_query_L, filter_data_R, filter_query_R):
             fdL = filter_query_L if ctx.triggered_id == self.L.store_str.id else filter_data_L
             fdR = filter_query_R if ctx.triggered_id == self.R.store_str.id else filter_data_R
-            ff = ComparisonFigureFactory(fdL, fdR)
-            viewfunc = self.determine_view(tab_ids_1, tab_ids_2)
-            return viewfunc(ff)
+            serialized_data = serialize([tab_ids_1, tab_ids_2, fdL, fdR])
+            return graphtab_cache(serialized_data)
+            
 
+@cache
+def graphtab_cache(serialized_data):
+    logger.debug(f'graphtab_cache({serialized_data})')
+    tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
+    ff = ComparisonFigureFactory(fdL, fdR)
+    viewfunc = determine_view(tab_ids_1, tab_ids_2)
+    return viewfunc(ff)
+
+
+def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
+    tab_ids_1_set=set(tab_ids_1)
+    tab_ids_2_set=set(tab_ids_2)
+
+    if 'tbl' in tab_ids_1_set:
+        if 'tbl_members' in tab_ids_2_set: 
+            return MemberTableView
+            
+        elif 'tbl_arrond' in tab_ids_2_set:
+            return ArrondTableView
+            
+    elif 'analyze' in tab_ids_1_set:
+        if 'tbl_diff' in tab_ids_2_set:
+            return DifferenceDegreeView
+    
+    elif 'map' in tab_ids_1_set:
+        return MemberMapView
+        if 'map_L' in tab_ids_2_set: return 'map_members_L'
+        if 'map_R' in tab_ids_2_set: return 'map_members_R'
+        return 'map_members'
+    
+    return default
