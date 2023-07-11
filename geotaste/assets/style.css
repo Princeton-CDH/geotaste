@@ -245,13 +245,14 @@ p {
 }
 
 .comparison_map_graph {
-    display: flex;
-    flex-direction: column;
+    /* display: flex; */
+    /* flex-direction: column; */
     /* flex-grow: 1; */
-    /* height: 100vh; */
-    height:100%;
+    height: 100vh;
+    position:absolute; top:0;right:0;width:50vw;padding-top:150px; display:block;
+    /* height:100%; */
     width: 100%;
-    padding-bottom:50px;
+    
 }
 
 .comparison_map_table {
