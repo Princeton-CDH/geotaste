@@ -3,7 +3,6 @@
 # server
 PORT=8111
 HOST='0.0.0.0'
-HOST='127.0.0.1'
 DEBUG=False
 
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
