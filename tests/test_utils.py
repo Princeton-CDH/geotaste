@@ -154,19 +154,19 @@ def test_combine_LR_df():
 
 
 
-def test_serialize_d():
+def test_serialize():
     d = {'name': 'John', 'age': 30, 'city': 'New York'}
-    serialized = serialize_d(d)
+    serialized = serialize(d)
     assert serialized == '{"age":30,"city":"New York","name":"John"}'
 
-def test_unserialize_d():
+def test_unserialize():
     d_str = '{"age":30,"city":"New York","name":"John"}'
-    unserialized = unserialize_d(d_str)
+    unserialized = unserialize(d_str)
     assert unserialized == {'name': 'John', 'age': 30, 'city': 'New York'}
 
 def test_serializing():
     d = {'name': 'John', 'age': 30, 'city': 'New York'}
-    assert unserialize_d(serialize_d(d)) == d
+    assert unserialize(serialize(d)) == d
     
 
 def test_selectrename_df():

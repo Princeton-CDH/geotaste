@@ -141,7 +141,20 @@ class CollapsibleCard(BaseComponent):
             if n: return not is_open
             return is_open
 
-    
+
+@cache
+def plot_cache(figure_class, serialized_data):
+    logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
+    filter_data,existing_fig,kwargs = (
+        unserialize(serialized_data) 
+        if serialized_data 
+        else ({},None,{})
+    )
+    ff = figure_class(filter_data)
+    fig = ff.plot(**kwargs)
+    if existing_fig: 
+        fig = combine_figs(fig, existing_fig)
+    return fig
 
 class FigureComponent(BaseComponent):
     figure_factory = None
@@ -152,9 +165,14 @@ class FigureComponent(BaseComponent):
             return self.figure_factory(filter_data)
         
     def plot(self, filter_data={}, existing_fig=None, **kwargs):
-        fig = self.ff(filter_data).plot(**{**self._kwargs, **kwargs})
-        if existing_fig: fig = combine_figs(fig, existing_fig)
-        return fig
+        kwargs = {**self._kwargs, **kwargs}
+        serialized_data = serialize([filter_data, existing_fig, kwargs])
+        return plot_cache(
+            self.figure_factory, 
+            serialized_data
+        )
+
+        
 
     @cached_property
     def series(self): return self.ff().series
@@ -283,6 +301,7 @@ class FilterPlotCard(FilterCard):
     def graph(self): 
         return dcc.Graph(
             figure=self.plot(),
+            # figure=go.Figure(),
             id=self.id('graph'),
             config={'displayModeBar':False}
         )
@@ -409,10 +428,6 @@ class MemberNationalityCard(FilterPlotCard):
     desc = 'Filter by nationality of member'
     figure_factory = MemberNationalityFigure
 
-    @cached_property
-    def graph(self):
-        return dcc.Graph(figure=self.plot(), config={'displayModeBar':False})
-
 class MemberArrondCard(FilterPlotCard):
     desc = 'Filter by arrondissement'
     figure_factory = MemberArrondMap
@@ -447,29 +462,25 @@ class BookGenreCard(FilterPlotCard):
     desc = 'Filter by genre of book'
     figure_factory = BookGenreFigure
 
-    @cached_property
-    def graph(self):
-        return dcc.Graph(figure=self.plot(), config={'displayModeBar':False})
-
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Filter by nationality of creator'
     figure_factory = CreatorNationalityFigure
 
-    @cached_property
-    def graph(self):
-        return dcc.Graph(figure=self.plot(), config={'displayModeBar':False})
+    
+class EventYearCard(FilterPlotCard):
+    desc = 'Filter by year of event'
+    figure_factory = EventYearFigure
 
-
-
-
-
+class EventTypeCard(FilterPlotCard):
+    desc = 'Filter by type of event'
+    figure_factory = EventTypeFigure
 
 
 def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
     return dbc.Tabs(
         children=[dbc.Tab(**d) for d in children], 
         active_tab=active_tab if active_tab else (children[0].get('tab_id') if children else None), 
-        id=dict(type=f'tab_level_{tab_level}', index=int(time.time())),
+        id=dict(type=f'tab_level_{tab_level}', index=uid()),
         **kwargs
     )
 
