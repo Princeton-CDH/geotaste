@@ -20,8 +20,16 @@ class GeotasteLayout(BaseComponent):
     def layout(self, params=None):
         return dbc.Container(
             [
-                dbc.Row([self.logo], className='navbar-row'),
-                self.comparison_panel.layout()
+                dbc.Container([
+                    dbc.Row([self.logo], className='navbar-row'),
+                    dbc.Row([
+                        dbc.Col(self.comparison_panel.content_left_tabs, width=6),
+                        dbc.Col(self.comparison_panel.content_right_tabs, width=6),
+                    ])
+                ], className='frozen-top-row'),
+                
+                self.comparison_panel.content_left,
+                self.comparison_panel.content_right,
             ],
             className='layout-container'
         )
