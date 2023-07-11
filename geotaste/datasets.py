@@ -470,6 +470,7 @@ class EventsDataset(Dataset):
     def data(self):
         df=super().data
         df['event']=[f'E{i+1:05}' for i in range(len(df))]
+        df['start_year'] = pd.to_numeric([estr[:4] for estr in df['start_date'].apply(str)], errors='coerce')
         return df.set_index('event')
 
 
@@ -634,6 +635,7 @@ class CombinedDataset(Dataset):
         'event_type':'event_type',
         'start_date':'event_start',
         'end_date':'event_end',
+        'start_year':'event_year',
         'dwelling_desc':'dwelling_desc',
         'dwelling_numposs':'dwelling_numposs',
         'dwelling_reason':'dwelling_reason',
@@ -647,8 +649,12 @@ class CombinedDataset(Dataset):
     coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
-    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon']
+    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year']
     cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
+
+    def __init__(self, *x,**y):
+        logger.debug('CombinedDataset()')
+        super().__init__(*x,**y)
     
     def gen(self, save=False):
         # events and members (full outer join)
@@ -766,4 +772,6 @@ def Members(): return MembersDataset()
 @cache
 def Dwellings(): return DwellingsDataset()
 @cache
-def Combined(): return CombinedDataset()
+def Combined(): 
+    logger.debug('Combined()')
+    return CombinedDataset()
