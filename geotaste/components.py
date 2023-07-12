@@ -103,7 +103,7 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name)
         return dbc.Collapse(
             dbc.CardBody(self.content), 
-            is_open=True, 
+            is_open=False, 
             id=self.id('body')
         )
     
