@@ -45,19 +45,25 @@ class BaseComponent(DashComponent, Logmaker):
     @cached_property
     def subcomponents(self):
         return []  # subclass this
-    @cached_property
-    def graph_subcomponents(self):
-        return [
-            card for card in self.subcomponents
-            if hasattr(card,'graph')
-        ]
-    @cached_property
-    def store_subcomponents(self):
-        return [
-            card for card in self.subcomponents
-            if hasattr(card,'store')
-        ]
     
+    def cards_with_attr(self, attrname:str):
+        return [
+            card
+            for card in self.subcomponents
+            if hasattr(card,attrname)
+        ]
+
+    @cached_property
+    def store_subcomponents(self): 
+        return self.cards_with_attr('store')
+    
+    @cached_property
+    def store_panel_subcomponents(self): 
+        return self.cards_with_attr('store_panel')
+    
+    @cached_property
+    def graph_subcomponents(self): 
+        return self.cards_with_attr('graph')
     
     @cached_property
     def content(self,params=None):
@@ -139,6 +145,7 @@ class CollapsibleCard(BaseComponent):
             State(self.body, "is_open"),
             prevent_initial_call=True
         )
+        #@logger.catch
         def toggle_collapse(n, is_open):
             now_is_open = (not is_open if n else is_open)
             logger.debug(f'{self.name} is now open? {now_is_open}')
@@ -193,15 +200,12 @@ class FilterComponent(FigureComponent):
     
     @cached_property
     def store(self):
-        return dcc.Store(id=self.id(self.name), data={})
-
-    @property
-    def filter_desc(self):
-        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
+        return dcc.Store(id=self.id('store'), data={})
     
-    @property
-    def filter_key(self): return self.filter_desc
-
+    @cached_property
+    def store_panel(self):
+        return dcc.Store(id=self.id('store_panel'), data={})
+    
     @cached_property
     def store_desc(self): 
         return html.Span(UNFILTERED, className='store_desc')
@@ -211,8 +215,6 @@ class FilterComponent(FigureComponent):
         filters_d = [d for d in filters_d if d]
         return {k:v for d in filters_d for k,v in d.items()}
     
-
-
 
 
 
@@ -231,8 +233,12 @@ class FilterCard(FilterComponent, CollapsibleCard):
                 [
                     dbc.Col(
                         [
-                            self.store,
-                            html.Div(self.store_desc, className='card-footer-desc')
+                            self.store, 
+                            self.store_panel,
+                            html.Div(
+                                self.store_desc, 
+                                className='card-footer-desc'
+                            )
                         ], 
                         width=11
                     ),
@@ -277,6 +283,7 @@ class FilterCard(FilterComponent, CollapsibleCard):
             Input(self.store, 'data'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def store_data_updated(store_data):
             # filter cleared?
             if not store_data: return UNFILTERED, False
@@ -321,6 +328,7 @@ class FilterPlotCard(FilterCard):
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def clear_selection(n_clicks):
             return {}, self.plot()
         
@@ -334,6 +342,7 @@ class FilterPlotCard(FilterCard):
             ],
             prevent_initial_call=True
         )
+        #@logger.catch
         def toggle_collapse(is_open, filter_data):
             logger.debug(f'{self.name} is now open? {is_open}')
             if not is_open: raise PreventUpdate
@@ -346,6 +355,7 @@ class FilterPlotCard(FilterCard):
             Input(self.graph, 'selectedData'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def graph_selection_updated(selected_data):
             o=self.ff().selected(selected_data)
             logger.debug(f'[{self.name}) selection updated: {o}')
@@ -407,6 +417,7 @@ class FilterInputCard(FilterCard):
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def clear_selection(n_clicks):
             logger.debug('clear_selection')
             return {}, []
@@ -416,6 +427,7 @@ class FilterInputCard(FilterCard):
             Input(self.input, 'value'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def input_value_changed(vals):
             if not vals: raise PreventUpdate
             self.filter_data = {self.key:vals}
