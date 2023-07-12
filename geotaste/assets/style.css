@@ -112,6 +112,7 @@ h5 { font-size:1.1rem;}
 .panel { 
     padding:0 5px;
     border:none;
+    margin-bottom:1rem;
 }
 
 .card-header {
@@ -422,4 +423,8 @@ p {
 
 .button_store_desc { 
     text-align:left;
+}
+
+.collapsible-panel {
+    margin-bottom:1rem;
 }
