@@ -80,6 +80,8 @@ class BaseComponent(DashComponent, Logmaker):
 
 
 class CollapsibleCard(BaseComponent):
+    body_is_open = False
+
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         logger.trace(self.name)
         children = []
@@ -103,7 +105,7 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name)
         return dbc.Collapse(
             dbc.CardBody(self.content), 
-            is_open=False, 
+            is_open=self.body_is_open, 
             id=self.id('body')
         )
     
