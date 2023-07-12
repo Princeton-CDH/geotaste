@@ -446,6 +446,33 @@ class FilterInputCard(FilterCard):
         # do my parent's too
         super().component_callbacks(app)
 
+        # @app.callback(
+        #     Output(self.graph, "figure", allow_duplicate=True),
+        #     [
+        #         Input(self.body, "is_open"),
+        #         Input(self.store_panel, 'data')
+        #     ],
+        #     [
+        #         # State(self.graph, 'figure'),
+        #         # State(self.store_selection, 'data')
+        #         State(self.store, 'data')
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # #@logger.catch
+        # def toggle_collapse(is_open, panel_filter_data, my_filter_data):
+        #     # logger.debug(f'{self.name} is now open? {is_open}')
+        #     if not is_open: return dash.no_update
+            
+        #     filter_data={
+        #         k:v 
+        #         for k,v in panel_filter_data.items() 
+        #         if k not in my_filter_data
+        #         and k != self.key
+        #     }
+        #     ff = self.ff(filter_data, selected=my_filter_data)
+        #     return ff.fig
+
         # ## CLEAR? -- OVERWRITTEN
         @app.callback(
             [
