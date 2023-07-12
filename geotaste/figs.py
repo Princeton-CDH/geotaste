@@ -650,3 +650,12 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=6
             # 'padding-bottom':'100px'
         },
     )
+
+
+
+def get_empty_fig(height=100, **layout_kwargs):
+    fig=go.Figure(layout=dict(height=height, **layout_kwargs))
+    fig.update_layout(showlegend=False, template='simple_white')
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(visible=False)
+    return fig

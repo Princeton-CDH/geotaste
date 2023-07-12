@@ -303,8 +303,7 @@ class FilterPlotCard(FilterCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.plot(),
-            # figure=go.Figure(),
+            figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False}
         )
