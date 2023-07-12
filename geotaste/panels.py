@@ -39,8 +39,8 @@ class FilterPanel(FilterComponent):
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 filter_data = self.intersect_filters(*filters_d)
-                filter_desc = Combined().filter_query_str(filter_data)
-                return filter_data, filter_desc
+                filter_desc = Combined().filter_query_str(filter_data) 
+                return filter_data, (filter_desc if filter_desc else UNFILTERED)
             
             @app.callback(
                 [
@@ -121,6 +121,7 @@ class FilterPlotPanel(FilterPanel):
             
 class CollapsiblePanel(CollapsibleCard):
     body_is_open = True
+    className='collapsible-panel'
 
 class MemberPanel(CollapsiblePanel):
     name='MP'
@@ -173,7 +174,7 @@ class MemberPanel(CollapsiblePanel):
 class BookPanel(CollapsiblePanel):
     name='BP'
     figure_factory = CombinedFigureFactory
-    desc = 'The books they borrowed'
+    desc = 'Books they borrowed'
     records_name='books'
 
     @cached_property

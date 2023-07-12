@@ -87,6 +87,7 @@ class BaseComponent(DashComponent, Logmaker):
 
 class CollapsibleCard(BaseComponent):
     body_is_open = False
+    className=''
 
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         logger.trace(self.name)
@@ -94,7 +95,7 @@ class CollapsibleCard(BaseComponent):
         if header and self.header is not None: children.append(self.header)
         if body and self.body is not None: children.append(self.body)
         if footer and self.footer is not None: children.append(self.footer)
-        return dbc.Card(children, **kwargs)
+        return dbc.Card(children, className=f'collapsible-card {self.className}', **kwargs)
 
     @cached_property
     def header(self):
@@ -102,7 +103,7 @@ class CollapsibleCard(BaseComponent):
         return dbc.CardHeader(
             [
                 html.Div(self.button_showhide, className='button_showhide_div'),
-                html.P(self.desc),
+                html.P(self.desc[0].upper() + self.desc[1:]),
             ]
         )
     
@@ -211,7 +212,7 @@ class FigureComponent(BaseComponent):
 
         
 class FilterComponent(FigureComponent):
-    desc = 'Filter by X'
+    desc = 'X'
     
     @cached_property
     def store(self):
@@ -417,7 +418,7 @@ class FilterPlotCard(FilterCard):
 
 
 class FilterInputCard(FilterCard):
-    desc = 'Filter by input'
+    desc = 'input'
     placeholder = 'Select'
     multi = True
     sort_by_count = True
@@ -477,28 +478,28 @@ class FilterInputCard(FilterCard):
 
 
 class MemberNameCard(FilterInputCard):
-    desc = 'Filter by member name'
+    desc = 'Name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
 
 class MemberDOBCard(FilterPlotCard):
-    desc = 'Filter by date of birth'
+    desc = 'Birth year'
     figure_factory = MemberDOBFigure    
     
 class MembershipYearCard(FilterPlotCard):
-    desc = 'Filter by years of membership'
+    desc = 'Years of membership'
     figure_factory = MembershipYearFigure    
 
 class MemberGenderCard(FilterPlotCard):
-    desc = 'Filter by gender of member'
+    desc = 'Gender'
     figure_factory = MemberGenderFigure
 
 class MemberNationalityCard(FilterPlotCard):
-    desc = 'Filter by nationality of member'
+    desc = 'Nationality'
     figure_factory = MemberNationalityFigure
 
 class MemberArrondCard(FilterPlotCard):
-    desc = 'Filter by arrondissement'
+    desc = 'Arrondissement'
     figure_factory = MemberArrondMap
 
 
@@ -507,41 +508,41 @@ class MemberArrondCard(FilterPlotCard):
 
 
 class BookTitleCard(FilterInputCard):
-    desc = 'Filter by book title'
+    desc = 'Title'
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
 
 
 class CreatorNameCard(FilterInputCard):
-    desc = 'Filter by creator'
+    desc = 'Author'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
     
 
 class BookYearCard(FilterPlotCard):
-    desc = "Date of book's publication"
+    desc = "Publication date"
     figure_factory = BookYearFigure
 
 class CreatorGenderCard(FilterPlotCard):
-    desc = 'Filter by gender of creator'
+    desc = 'Author gender'
     figure_factory = CreatorGenderFigure
 
 class BookGenreCard(FilterPlotCard):
-    desc = 'Filter by genre of book'
+    desc = 'Genre'
     figure_factory = BookGenreFigure
 
 class CreatorNationalityCard(FilterPlotCard):
-    desc = 'Filter by nationality of creator'
+    desc = 'Author nationality'
     figure_factory = CreatorNationalityFigure
 
     
 class EventYearCard(FilterPlotCard):
-    desc = 'Filter by year of event'
+    desc = 'Year of borrowing'
     figure_factory = EventYearFigure
 
 class EventTypeCard(FilterPlotCard):
-    desc = 'Filter by type of event'
+    desc = 'type of event'
     figure_factory = EventTypeFigure
 
 
