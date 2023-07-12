@@ -47,7 +47,7 @@ h5 { font-size:1.1rem;}
     /* background: #F7F7F7; */
     /* border:1px solid red; */
     /* width:100%; */
-    /* border-bottom: 1px solid #dddddd; */
+    border-bottom: 1px solid #dddddd;
     z-index: 4;
 }
 
@@ -110,7 +110,7 @@ h5 { font-size:1.1rem;}
 }
 
 .panel { 
-    padding:0 5px;
+    padding:0 2px;
     border:none;
     margin-bottom:1rem;
 }
@@ -175,9 +175,11 @@ p {
     /* width:50vw; */
     /* background:white; */
     height:100px;
+    min-height:100px;
     overflow-y: scroll;
     overflow-x: hidden;
 }
+.layout-toprow .row {height:95%;}
 
 .layout-mainrow { 
     /* height:100%; */
@@ -225,6 +227,8 @@ p {
 
 .storedescs-col-L, .storedescs-col-R { 
     text-align: center;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
 }
 
 .left-color { 
@@ -297,11 +301,11 @@ p {
     background: rgba(255,255,255,1);
     top:0; left:0; position:absolute; z-index: 100;
 
-    border-bottom:1px solid gray; 
+    /* border-bottom:1px solid #dddddd;  */
     /* #F7F7F7; */
 }
 
-.layout-leftcol { left:0; border-right:1px solid gray; }
+.layout-leftcol { left:0; }
 .layout-rightcol { right:0; }
 
 .navtabs-container {
@@ -344,7 +348,7 @@ p {
 
 .graphtabs-container-container { 
     /* border-bottom: 1px solid #dddddd;  */
-    border-bottom: 1px solid gray; 
+    /* border-bottom: 1px solid #dddddd;  */
     height:100px;
 }
 
@@ -409,7 +413,8 @@ p {
 }
 
 .card-body {
-    padding:5px;
+    padding:0;
+    /* padding-right:8px; */
 }
 
 .query_str {
@@ -427,4 +432,45 @@ p {
 
 .collapsible-panel {
     margin-bottom:1rem;
+}
+
+
+.panel_L .card-header { 
+    background-color: rgba(171, 145, 85, 0.3);
+}
+.panel_L .card-header-collapsible-panel { 
+    background-color: rgba(171, 145, 85, .5);
+}
+.panel_L .card { 
+    border: 1px solid rgba(171, 145, 85, 0.15);
+}
+
+.panel_R .card-header { 
+    background-color: rgba(64, 176, 166, 0.3);
+}
+.panel_R .card-header-collapsible-panel { 
+    background-color: rgba(64, 176, 166, 0.5);
+}
+.panel_R .card { 
+    border: 1px solid rgba(64, 176, 166, 0.15);
+}
+
+.storedescs-col-L {
+    border: 1px solid rgba(171, 145, 85, .25);
+    border-top:none;
+    padding-right:4px;
+    width:100%;
+    background-color: rgba(171, 145, 85, .05);
+}
+
+.storedescs-col-R {
+    border: 1px solid rgba(64, 176, 166, 0.25);
+    border-top:none;
+    padding-left:4px;
+    width:100%;
+    background-color: rgba(64, 176, 166, 0.05);
+}
+
+.storedescs-inbetween {
+    width:4px;
 }
