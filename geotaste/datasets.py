@@ -654,12 +654,12 @@ class CombinedDataset(Dataset):
 
     def gen(self, save=False):
         # events and members (full outer join)
-        events = selectrename_df(MemberEventDwellingsDataset().data, self.cols_events)
+        events = selectrename_df(MemberEventDwellingsDataset().data.query('event_type=="Borrow"'), self.cols_events)
         members = selectrename_df(MembersDataset().data, self.cols_members)
         events_members = events.merge(members,on='member',how='outer').fillna(self.fillna)
 
         # creations and books (left join)
-        creations = selectrename_df(CreationsDataset().data, self.cols_creations)
+        creations = selectrename_df(CreationsDataset().data, self.cols_creations).query('creator_role=="author"')
         books = selectrename_df(BooksDataset().data, self.cols_books)
         creations_books = creations.join(books)  # big to small, same index
 
