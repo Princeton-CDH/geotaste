@@ -475,7 +475,7 @@ class Logwatch:
             str: A description of the task.
         """
         if self.started is not None and self.ended is not None:
-            return f'{self.task_name} completed in {self.tdesc}'
+            return f'{self.task_name} ... {self.tdesc}'
         else:
             return f'Task running ...' if not self.task_name else f'{self.task_name} ...'
         
