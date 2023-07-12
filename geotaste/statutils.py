@@ -58,12 +58,24 @@ def analyze_contingency_tables(
     return df
 
 
-def iter_contingency_tables(vals1, vals2, iter_values=[], min_count=None):
+def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterable'=[], min_count:int|None=None):
+    """
+    Iterates over contingency tables for two sets of values.
 
+    Args:
+        vals1 (Iterable): The first set of values.
+        vals2 (Iterable): The second set of values.
+        uniqvals (Iterable, optional): A list of unique values to consider. Defaults to an empty list.
+        min_count (int | None, optional): The minimum count required for a contingency table to be yielded. Defaults to None.
+
+    Yields:
+        tuple: A tuple containing the unique value and its corresponding contingency table.
+    """
+    
     assert is_listy(vals1),is_listy(vals2)
     s1,s2=pd.Series(vals1),pd.Series(vals2)
     counts1,counts2=s1.value_counts(), s2.value_counts()
-    uniqvals = set(s1)|set(s2) if not iter_values else set(iter_values)
+    uniqvals = set(s1)|set(s2) if not uniqvals else set(uniqvals)
 
     def get_contingency_table(v):
         tl=int(counts1.get(v,0))
