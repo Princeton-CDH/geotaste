@@ -589,6 +589,10 @@ class EventYearCard(FilterPlotCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
 
+class EventMonthCard(FilterPlotCard):
+    desc = 'Month of borrowing'
+    figure_factory = EventMonthFigure
+
 class EventTypeCard(FilterPlotCard):
     desc = 'type of event'
     figure_factory = EventTypeFigure

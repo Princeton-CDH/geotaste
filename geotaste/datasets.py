@@ -471,6 +471,10 @@ class EventsDataset(Dataset):
         df=super().data
         df['event']=[f'E{i+1:05}' for i in range(len(df))]
         df['start_year'] = pd.to_numeric([estr[:4] for estr in df['start_date'].apply(str)], errors='coerce')
+        df['start_month'] = pd.to_numeric([
+            x[5:7] if len(x)>=7 and x[:4].isdigit() and x[4]=='-' else None
+            for x in df['start_date'].apply(str)
+        ], errors='coerce')
         return df.set_index('event')
 
 
@@ -636,6 +640,7 @@ class CombinedDataset(Dataset):
         'start_date':'event_start',
         'end_date':'event_end',
         'start_year':'event_year',
+        'start_month':'event_month',
         'dwelling_desc':'dwelling_desc',
         'dwelling_numposs':'dwelling_numposs',
         'dwelling_reason':'dwelling_reason',
