@@ -24,9 +24,18 @@ class FigureFactory(DashFigureFactory, Logmaker):
     log_y=False
     text=None
     
-    def __init__(self, filter_data={}, **kwargs):
+    def __init__(self, filter_data={}, selected=[], **kwargs):
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
+        self.selection_data = (
+            selected 
+            if type(selected) is dict
+            else (
+                {self.key:selected}
+                if self.key
+                else {}
+            ) 
+        )
 
     def selected(self, selectedData):
         if not selectedData: return {}
@@ -166,13 +175,17 @@ class FigureFactory(DashFigureFactory, Logmaker):
     
     @cached_property
     def figdf(self) -> pd.DataFrame:
-        if not len(self.df): return pd.DataFrame()
-        iname = self.df.index.name
-        return pd.DataFrame([
-            {iname:i, self.key:v}
-            for i,vals in zip(self.df.index, self.df[self.key])
-            for v in flatten_list(vals)
-        ]).sort_values([self.key, iname]).set_index(iname)
+        return self.df_counts
+    
+    @cached_property
+    def seldf(self) -> pd.DataFrame:
+        if self.selection_data and len(self.figdf):
+            return filter_df(self.figdf, self.selection_data)
+        return pd.DataFrame()
+    
+    @cached_property
+    def sels(self) -> list:
+        return list(self.seldf.index) if len(self.seldf) else []
     
     
     @cached_property
@@ -183,6 +196,15 @@ class FigureFactory(DashFigureFactory, Logmaker):
             for missing_val in set(valtypes)-set(valcounts.index):
                 valcounts[missing_val]=0
         return pd.DataFrame(valcounts).reset_index()
+
+    @cached_property
+    def fig(self): 
+        logger.debug(f'{self.__class__.__name__}.fig')
+        fig = self.plot()
+        if self.sels:
+            fig.update_traces(selectedpoints=self.sels)
+        return fig
+        
 
     def plot(self, **kwargs):
         return self.plot_histogram(**kwargs)

@@ -49,7 +49,7 @@ class BaseComponent(DashComponent, Logmaker):
     def cards_with_attr(self, attrname:str):
         return [
             card
-            for card in self.subcomponents
+            for card in self.cards()
             if hasattr(card,attrname)
         ]
 
@@ -154,6 +154,14 @@ class CollapsibleCard(BaseComponent):
 
 # @cache
 @cache_obj.memoize()
+def ff_cache(figure_class, serialized_data):
+    logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
+    filter_data = unserialize(serialized_data)
+    return figure_class(filter_data)
+
+
+# @cache
+@cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (
@@ -173,9 +181,17 @@ class FigureComponent(BaseComponent):
 
     def ff(self, filter_data={}): 
         if self.figure_factory is not None:
-            return self.figure_factory(filter_data)
-        
-    def plot(self, filter_data={}, existing_fig=None, **kwargs):
+            return ff_cache(
+                self.figure_factory, 
+                serialize(filter_data)
+            )
+
+    def plot(self, filter_data={}, existing_fig=None, **kwargs) -> go.Figure:
+        ff = self.ff(filter_data)
+        return ff.fig
+    
+
+    def plot1(self, filter_data={}, existing_fig=None, **kwargs) -> go.Figure:
         kwargs = {**self._kwargs, **kwargs}
         serialized_data = serialize([filter_data, existing_fig, kwargs])
         return plot_cache(
@@ -207,6 +223,10 @@ class FilterComponent(FigureComponent):
         return dcc.Store(id=self.id('store_panel'), data={})
     
     @cached_property
+    def store_selection(self):
+        return dcc.Store(id=self.id('store_selection'), data={})
+    
+    @cached_property
     def store_desc(self): 
         return html.Span(UNFILTERED, className='store_desc')
 
@@ -235,6 +255,7 @@ class FilterCard(FilterComponent, CollapsibleCard):
                         [
                             self.store, 
                             self.store_panel,
+                            self.store_selection,
                             html.Div(
                                 self.store_desc, 
                                 className='card-footer-desc'
@@ -313,8 +334,9 @@ class FilterPlotCard(FilterCard):
         return dcc.Graph(
             figure=get_empty_fig(),
             id=self.id('graph'),
-            config={'displayModeBar':False}
+            config={'displayModeBar':False},
         )
+    
 
     def component_callbacks(self, app):
         # do my parent's too
@@ -335,23 +357,49 @@ class FilterPlotCard(FilterCard):
 
         @app.callback(
             Output(self.graph, "figure", allow_duplicate=True),
-            Input(self.body, "is_open"),
             [
-                State(self.store, 'data'),
-                # State(self.graph, 'figure')
+                Input(self.body, "is_open"),
+                Input(self.store_panel, 'data')
+            ],
+            [
+                State(self.graph, 'figure'),
+                State(self.store_selection, 'data')
             ],
             prevent_initial_call=True
         )
         #@logger.catch
-        def toggle_collapse(is_open, filter_data):
-            logger.debug(f'{self.name} is now open? {is_open}')
-            if not is_open: raise PreventUpdate
-            return self.plot(filter_data) #, existing_fig=existing_fig)
-            return now_is_open
+        def toggle_collapse(is_open, panel_filter_data, existing_fig, stored_selection):
+            # logger.debug(f'{self.name} is now open? {is_open}')
+            if not is_open: return dash.no_update
+            
+            fd={k:v for k,v in panel_filter_data.items() if k!=self.key}
+            
+            fig = self.plot(fd)
+            selections = existing_fig.get('layout',{}).get('selections')
+            try:
+                selectedpoints = existing_fig['data'][0]['selectedpoints']
+            except (KeyError,IndexError):
+                selectedpoints = []
+            
+            logger.debug(['selections',selections])
+            logger.debug(['selectedpoints',selectedpoints])
+            logger.debug(['stored_selection',stored_selection])
+
+            return fig
+
+            # logger.debug(['existing_fig',existing_fig])
+            existing_fig_exists = len(existing_fig.get('data',[]))>0
+            if not existing_fig_exists or fd:
+                return self.plot(fd, existing_fig=existing_fig)
+            else:
+                return dash.no_update
 
 
         @app.callback(
-            Output(self.store, "data", allow_duplicate=True),
+            [
+                Output(self.store, "data", allow_duplicate=True),
+                Output(self.store_selection, 'data', allow_duplicate=True)
+            ],
             Input(self.graph, 'selectedData'),
             prevent_initial_call=True
         )
@@ -359,7 +407,7 @@ class FilterPlotCard(FilterCard):
         def graph_selection_updated(selected_data):
             o=self.ff().selected(selected_data)
             logger.debug(f'[{self.name}) selection updated: {o}')
-            return o
+            return (o, selected_data)
         
         
 
