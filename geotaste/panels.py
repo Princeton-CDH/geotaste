@@ -123,6 +123,7 @@ class CollapsiblePanel(CollapsibleCard):
     body_is_open = True
     className='collapsible-panel'
 
+
 class MemberPanel(CollapsiblePanel):
     name='MP'
     figure_factory = CombinedFigureFactory
@@ -269,13 +270,13 @@ class ComparisonPanel(BaseComponent):
             dbc.Col(
                 html.P(['Left Group: ',self.L.store_desc]), 
                 # [self.L.store_desc],
-                width=6, 
+                # width=6, 
                 className='storedescs-col storedescs-col-L left-color'
             ),
-            
+            dbc.Col(html.Nobr(), className='storedescs-inbetween',width=1),
             dbc.Col(
                 html.P(['Right Group: ',self.R.store_desc]), 
-                width=6, 
+                # width=6, 
                 className='storedescs-col storedescs-col-R right-color'
             ),
         ]), className='layout-toprow')

@@ -87,7 +87,7 @@ class BaseComponent(DashComponent, Logmaker):
 
 class CollapsibleCard(BaseComponent):
     body_is_open = False
-    className=''
+    className='collapsible-card'
 
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         logger.trace(self.name)
@@ -104,7 +104,8 @@ class CollapsibleCard(BaseComponent):
             [
                 html.Div(self.button_showhide, className='button_showhide_div'),
                 html.P(self.desc[0].upper() + self.desc[1:]),
-            ]
+            ],
+            className=f'card-header-{self.className}'
         )
     
     @cached_property
