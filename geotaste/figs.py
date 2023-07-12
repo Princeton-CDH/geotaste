@@ -397,6 +397,11 @@ class EventYearFigure(EventFigure):
     key = 'event_year'
     quant = True
 
+class EventMonthFigure(EventFigure):
+    key = 'event_month'
+    quant = True
+
+
 class EventTypeFigure(EventFigure):
     key = 'event_type'
     quant = False

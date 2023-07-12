@@ -204,6 +204,10 @@ class BookPanel(CollapsiblePanel):
     @cached_property
     def event_year_card(self): 
         return EventYearCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def event_month_card(self): 
+        return EventMonthCard(name_context=self.name, **self._kwargs)
         
     @cached_property
     def subcomponents(self):
@@ -215,6 +219,7 @@ class BookPanel(CollapsiblePanel):
             self.creator_gender_card,
             self.creator_nationality_card,
             self.event_year_card,
+            self.event_month_card,
         ]
 
     @cached_property
