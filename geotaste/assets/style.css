@@ -106,11 +106,12 @@ h5 { font-size:1.1rem;}
 }
 
 .card { 
-    margin-bottom:2rem; 
+    margin:4px 0; 
 }
 
 .panel { 
     padding:0 5px;
+    border:none;
 }
 
 .card-header {
@@ -178,7 +179,6 @@ p {
 }
 
 .layout-mainrow { 
-    border-top:1px solid #dddddd;
     /* height:100%; */
     /* overflow-y: scroll; */
     /* overflow-x: hidden; */

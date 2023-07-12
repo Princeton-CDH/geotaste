@@ -92,7 +92,7 @@ class CollapsiblePanel(CollapsibleCard):
 class MemberPanel(CollapsiblePanel):
     name='MP'
     figure_factory = CombinedFigureFactory
-    desc = 'Member Filters'
+    desc = 'Members of the library'
     records_name='members'
 
     @cached_property
@@ -140,7 +140,7 @@ class MemberPanel(CollapsiblePanel):
 class BookPanel(CollapsiblePanel):
     name='BP'
     figure_factory = CombinedFigureFactory
-    desc = 'Book Filters'
+    desc = 'The books they borrowed'
     records_name='books'
 
     @cached_property
@@ -168,6 +168,10 @@ class BookPanel(CollapsiblePanel):
         return CreatorNationalityCard(name_context=self.name, **self._kwargs)
     
     @cached_property
+    def event_year_card(self): 
+        return EventYearCard(name_context=self.name, **self._kwargs)
+        
+    @cached_property
     def subcomponents(self):
         return [
             self.title_card,
@@ -176,6 +180,7 @@ class BookPanel(CollapsiblePanel):
             self.creator_card,
             self.creator_gender_card,
             self.creator_nationality_card,
+            self.event_year_card,
         ]
 
     @cached_property
@@ -185,33 +190,6 @@ class BookPanel(CollapsiblePanel):
     
     
 
-
-
-class EventPanel(CollapsiblePanel):
-    name='EP'
-    figure_factory = CombinedFigureFactory
-    desc = 'Event Filters'
-    records_name='events'
-
-    @cached_property
-    def year_card(self): 
-        return EventYearCard(name_context=self.name, **self._kwargs)
-    
-    @cached_property
-    def type_card(self): 
-        return EventTypeCard(name_context=self.name, **self._kwargs)
-    
-    @cached_property
-    def subcomponents(self):
-        return [
-            self.year_card,
-            self.type_card,
-        ]
-
-    @cached_property
-    def store_subcomponents(self): return []
-    @cached_property
-    def graph_subcomponents(self): return []
 
 
 class CombinedPanel(FilterPlotPanel):
@@ -224,16 +202,12 @@ class CombinedPanel(FilterPlotPanel):
     def book_panel(self):
         return BookPanel(name_context=self.name, **self._kwargs)
     
-    @cached_property
-    def event_panel(self):
-        return EventPanel(name_context=self.name, **self._kwargs)
 
     @cached_property
     def subcomponents(self):
         return [
             self.member_panel,
             self.book_panel,
-            self.event_panel,
         ]
     
     @cached_property
