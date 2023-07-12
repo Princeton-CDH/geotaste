@@ -206,8 +206,6 @@ class FigureComponent(BaseComponent):
     @cached_property
     def key(self): return self.ff().key
 
-    def unique(self, **kwargs): return self.ff().unique(**kwargs)
-
 
 
         
@@ -429,7 +427,7 @@ class FilterInputCard(FilterCard):
         return self.input
     @cached_property
     def input(self):
-        l=self.unique(sort_by_count=self.sort_by_count)
+        l=self.ff().unique(sort_by_count=self.sort_by_count)
         return dcc.Dropdown(
             options = [dict(value=lbl, label=lbl)  for lbl in l],
             value = [] if self.multi else '',
@@ -498,6 +496,29 @@ class FilterInputCard(FilterCard):
             filter_data = {self.key:vals}
             return filter_data
     
+
+        @app.callback(
+            Output(self.input, "options", allow_duplicate=True),
+            [
+                Input(self.body, "is_open"),
+                Input(self.store_panel, 'data')
+            ],
+            [
+                State(self.store, 'data')
+            ],
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def update_input_vals(is_open, panel_filter_data, my_filter_data):
+            if not is_open: return dash.no_update            
+            filter_data={
+                k:v 
+                for k,v in panel_filter_data.items() 
+                if k not in my_filter_data
+                and k != self.key
+            }
+            ff = self.ff(filter_data)
+            return ff.unique(sort_by_count=self.sort_by_count)
 
 
 
