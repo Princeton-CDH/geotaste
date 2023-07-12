@@ -101,11 +101,11 @@ class FilterPlotPanel(FilterPanel):
                     for card in self.graph_subcomponents
                 ]
             
+class CollapsiblePanel(CollapsibleCard):
+    body_is_open = True
 
-
-class MemberPanel(CollapsibleCard):
+class MemberPanel(CollapsiblePanel):
     name='MP'
-
     figure_factory = CombinedFigureFactory
     desc = 'Member Filters'
     records_name='members'
@@ -152,7 +152,7 @@ class MemberPanel(CollapsibleCard):
     
     
 
-class BookPanel(CollapsibleCard):
+class BookPanel(CollapsiblePanel):
     name='BP'
     figure_factory = CombinedFigureFactory
     desc = 'Book Filters'
@@ -202,7 +202,7 @@ class BookPanel(CollapsibleCard):
 
 
 
-class EventPanel(CollapsibleCard):
+class EventPanel(CollapsiblePanel):
     name='EP'
     figure_factory = CombinedFigureFactory
     desc = 'Event Filters'
