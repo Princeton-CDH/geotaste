@@ -35,12 +35,32 @@ class FilterPanel(FilterComponent):
                 ],
                 prevent_initial_call=True
             )
-            @logger.catch
+            #@logger.catch
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
-                self.filter_data = self.intersect_filters(*filters_d)
-                self.filter_query = Combined().filter_query_str(self.filter_data)
-                return self.filter_data, self.filter_query
+                filter_data = self.intersect_filters(*filters_d)
+                filter_desc = Combined().filter_query_str(self.filter_data)
+                return filter_data, filter_desc
+            
+            @app.callback(
+                [
+                    Output(card.store_panel, 'data', allow_duplicate=True)
+                    for card in self.store_panel_subcomponents
+                ],
+                Input(self.store, 'data'),
+                prevent_initial_call=True
+            )
+            #@logger.catch
+            def panel_filter_data_changed(panel_filter_data):
+                if panel_filter_data is None: panel_filter_data={}
+                logger.debug(f'panel_filter_data_changed({panel_filter_data})')
+                # raise PreventUpdate
+                return [
+                    panel_filter_data
+                    for card in self.store_panel_subcomponents
+                ]
+            
+
             
 
         
@@ -50,41 +70,41 @@ class FilterPlotPanel(FilterPanel):
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-        if self.graph_subcomponents:
-            @app.callback(
-                [
-                    Output(card.graph,'figure',allow_duplicate=True)
-                    for card in self.graph_subcomponents
-                ],
-                [
-                    Input(self.store, 'data'),
-                ],
-                [
-                    State(card.body,'is_open')
-                    for card in self.graph_subcomponents
-                ],
-                prevent_initial_call=True
-            )
-            def redraw_graphs_from_new_data(filter_data, *cards_open):
-                logger.debug(f'redraw_graphs_from_new_data({filter_data})')
-                filtered_keys = set(filter_data.keys())
-                existing_fig = None # @TODO?
+        # if self.graph_subcomponents:
+        #     @app.callback(
+        #         [
+        #             Output(card.graph,'figure',allow_duplicate=True)
+        #             for card in self.graph_subcomponents
+        #         ],
+        #         [
+        #             Input(self.store, 'data'),
+        #         ],
+        #         [
+        #             State(card.body,'is_open')
+        #             for card in self.graph_subcomponents
+        #         ],
+        #         prevent_initial_call=True
+        #     )
+        #     def redraw_graphs_from_new_data(filter_data, *cards_open):
+        #         logger.debug(f'redraw_graphs_from_new_data({filter_data})')
+        #         filtered_keys = set(filter_data.keys())
+        #         existing_fig = None # @TODO?
                 
-                return [
-                    (
-                        dash.no_update 
-                        if (
-                            card.key in filtered_keys 
-                            or 
-                            not cards_open[i]
-                        )
-                        else card.plot(
-                            filter_data, 
-                            existing_fig=existing_fig
-                        )
-                    )
-                    for i,card in enumerate(self.graph_subcomponents)
-                ]
+        #         return [
+        #             (
+        #                 dash.no_update 
+        #                 if (
+        #                     card.key in filtered_keys 
+        #                     or 
+        #                     not cards_open[i]
+        #                 )
+        #                 else card.plot(
+        #                     filter_data, 
+        #                     existing_fig=existing_fig
+        #                 )
+        #             )
+        #             for i,card in enumerate(self.graph_subcomponents)
+        #         ]
             
 class CollapsiblePanel(CollapsibleCard):
     body_is_open = True
@@ -210,24 +230,13 @@ class CombinedPanel(FilterPlotPanel):
             self.book_panel,
         ]
     
-    @cached_property
-    def store_subcomponents(self):
+    def cards_with_attr(self, attrname:str):
         return [
             card
             for panel in self.subcomponents
             for card in panel.subcomponents
-            if hasattr(card,'store')
+            if hasattr(card,attrname)
         ]
-    
-    @cached_property
-    def graph_subcomponents(self):
-        return [
-            card
-            for panel in self.subcomponents
-            for card in panel.subcomponents
-            if hasattr(card,'graph')
-        ]
-    
 
 
 
@@ -377,6 +386,7 @@ class ComparisonPanel(BaseComponent):
                 Input(self.R.store, 'data'),
             ],
         )
+        #@logger.catch
         def repopulate_graphtab(*args):
             serialized_data = serialize(args)
             return graphtab_cache(serialized_data)
