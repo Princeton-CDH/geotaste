@@ -81,9 +81,13 @@ class FilterPlotPanel(FilterPanel):
                     Input(self.store, 'data'),
                     Input(self.store_str, 'data')
                 ],
+                [
+                    State(card.body,'is_open')
+                    for card in self.graph_subcomponents
+                ],
                 prevent_initial_call=True
             )
-            def redraw_graphs_from_new_data(filter_data, query_str):
+            def redraw_graphs_from_new_data(filter_data, query_str, *cards_open):
                 logger.debug(f'redrawing, triggered by {ctx.triggered_id}')
                 fd = query_str if ctx.triggered_id == self.store_str.id else filter_data
                 logger.debug(fd)
@@ -95,10 +99,10 @@ class FilterPlotPanel(FilterPanel):
                 return [
                     (
                         dash.no_update 
-                        if card.key in filtered_keys 
+                        if card.key in filtered_keys or not cards_open[i]
                         else card.plot(fd, existing_fig=existing_fig)
                     )
-                    for card in self.graph_subcomponents
+                    for i,card in enumerate(self.graph_subcomponents)
                 ]
             
 class CollapsiblePanel(CollapsibleCard):
