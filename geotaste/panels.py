@@ -39,7 +39,7 @@ class FilterPanel(FilterComponent):
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 filter_data = self.intersect_filters(*filters_d)
-                filter_desc = Combined().filter_query_str(self.filter_data)
+                filter_desc = Combined().filter_query_str(filter_data)
                 return filter_data, filter_desc
             
             @app.callback(
@@ -48,17 +48,30 @@ class FilterPanel(FilterComponent):
                     for card in self.store_panel_subcomponents
                 ],
                 Input(self.store, 'data'),
+                [
+                    State(card.store_panel, 'data')
+                    for card in self.store_panel_subcomponents
+                ],
                 prevent_initial_call=True
             )
             #@logger.catch
-            def panel_filter_data_changed(panel_filter_data):
+            def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
                 if panel_filter_data is None: panel_filter_data={}
                 logger.debug(f'panel_filter_data_changed({panel_filter_data})')
-                # raise PreventUpdate
-                return [
-                    panel_filter_data
-                    for card in self.store_panel_subcomponents
+
+
+                logger.debug([card.key for card in self.store_panel_subcomponents])
+
+                new_filter_data_l = [
+                    {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    for card in self.store_panel_subcomponents    
                 ]
+                out = [
+                    (dash.no_update if old==new else new)
+                    for old,new in zip(old_filter_data_l, new_filter_data_l)
+                ]
+                logger.debug(f'out from panel {pformat(out)}')
+                return out
             
 
             
@@ -392,7 +405,9 @@ class ComparisonPanel(BaseComponent):
             return graphtab_cache(serialized_data)
             
 
-@cache
+# @cache
+
+@cache_obj.memoize()
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
