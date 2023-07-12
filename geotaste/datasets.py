@@ -652,10 +652,6 @@ class CombinedDataset(Dataset):
     cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year']
     cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
 
-    def __init__(self, *x,**y):
-        logger.debug('CombinedDataset()')
-        super().__init__(*x,**y)
-    
     def gen(self, save=False):
         # events and members (full outer join)
         events = selectrename_df(MemberEventDwellingsDataset().data, self.cols_events)
@@ -685,15 +681,17 @@ class CombinedDataset(Dataset):
         if force or not os.path.exists(self.path):
             return self.gen(save=save)
         # otherwise load
-        return pd.read_pickle(self.path)
+        with Logwatch('reading pickled dataset'):
+            return pd.read_pickle(self.path)
         
     @cached_property
     def data(self): 
         odf=self.load()
-        for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
-        # final filters?
-        odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
-        return odf
+        with Logwatch('postprocessing CombinedDataset.data'):
+            for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
+            # final filters?
+            odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
+            return odf
     
     def filter_query_str(self, filter_data={}):
         return filter_query_str(

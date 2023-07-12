@@ -44,7 +44,7 @@ h5 { font-size:1.1rem;}
     padding:0;
     text-align: center;
     vertical-align: middle;
-    background: #F7F7F7;
+    /* background: #F7F7F7; */
     /* border:1px solid red; */
     /* width:100%; */
     /* border-bottom: 1px solid #dddddd; */
@@ -70,8 +70,8 @@ h5 { font-size:1.1rem;}
     height:50px;
     line-height:50px;
     margin:0 auto;
-    margin-top:1px;
-    margin-bottom:-5px;
+    /* margin-top:1px; */
+    /* margin-bottom:-5px; */
 }
 
 .logo { 
@@ -82,7 +82,7 @@ h5 { font-size:1.1rem;}
     margin: 0 auto;
     width:fit-content;
     z-index:5;
-    background-color: #F7F7F7;
+    /* background-color: #F7F7F7; */
     /* position:absolute;
     top:0;
     right:0; */
@@ -167,12 +167,14 @@ p {
     overflow-y: hidden;
     z-index: 10;
     vertical-align: top; */
-    position:absolute;
-    top:50px;
-    left:0;
-    width:50vw;
-    background:white;
-    /* border:1px solid red; */
+    /* position:absolute; */
+    /* top:50px; */
+    /* left:0; */
+    /* width:50vw; */
+    /* background:white; */
+    height:100px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .layout-mainrow { 
@@ -194,13 +196,13 @@ p {
     /* width:50vw; */
 }
 
-.layout-leftcol::-webkit-scrollbar, .layout-rightcol::-webkit-scrollbar {
+.layout-leftcol::-webkit-scrollbar, .layout-rightcol::-webkit-scrollbar, .layout-toprow::-webkit-scrollbar {
     width: 8px;
     z-index:0;
     display: none;
 }
   
-.layout-leftcol::-webkit-scrollbar-thumb, .layout-rightcol::-webkit-scrollbar-thumb {
+.layout-leftcol::-webkit-scrollbar-thumb, .layout-rightcol::-webkit-scrollbar-thumb, .layout-toprow::-webkit-scrollbar-thumb {
     background-color: silver;
     z-index:0;
     display:none;
@@ -293,9 +295,12 @@ p {
     /* border:1px solid green; */
     background: rgba(255,255,255,1);
     top:0; left:0; position:absolute; z-index: 2000;
+
+    border-bottom:1px solid gray; 
+    /* #F7F7F7; */
 }
 
-.layout-leftcol { left:0; }
+.layout-leftcol { left:0; border-right:1px solid gray; }
 .layout-rightcol { right:0; }
 
 .navtabs-container {
@@ -326,7 +331,7 @@ p {
 .graphtabs-container{
     height:auto;
     margin:0;
-    padding-bottom:1px;
+    
 }
 
 .graphtabs-container .nav-link { 
@@ -337,7 +342,8 @@ p {
 
 
 .graphtabs-container-container { 
-    border-bottom: 1px solid #dddddd; 
+    /* border-bottom: 1px solid #dddddd;  */
+    border-bottom: 1px solid gray; 
     height:100px;
 }
 
