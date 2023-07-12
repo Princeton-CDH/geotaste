@@ -36,6 +36,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
                 else {}
             ) 
         )
+        self.kwargs=kwargs
 
     def selected(self, selectedData):
         if not selectedData: return {}
@@ -54,8 +55,9 @@ class FigureFactory(DashFigureFactory, Logmaker):
             [x for x in [ get_record_id(d) for d in points_data ] if x], 
             quant=self.quant
         ).sort_values().tolist()
-        logger.debug(f'selected: {selected_records}')
-        return {self.key:selected_records}
+        o={self.key:selected_records}
+        logger.debug(f'selected: {o}')
+        return o
     
 
     @cached_property
@@ -207,6 +209,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
         
 
     def plot(self, **kwargs):
+        kwargs={**self.kwargs, **kwargs}
         return self.plot_histogram(**kwargs)
         
     def plot_histogram(self, color=None, **kwargs):
@@ -290,6 +293,7 @@ class MemberArrondMap(MemberFigure):
     key='arrond_id'
     
     def plot(self, color=None, height=250, **kwargs):
+        kwargs={**self.kwargs, **kwargs}
         counts_by_arrond = get_arrond_counts(self.df).reset_index()
         geojson = get_geojson_arrondissement()
         fig_choro = px.choropleth_mapbox(
@@ -485,6 +489,7 @@ class ComparisonFigureFactory(FigureFactory):
             return BOTH_COLOR
         
         df = self.df_dwellings
+        kwargs={**self.kwargs, **kwargs}
         color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         fig = px.scatter_mapbox(
             df, 

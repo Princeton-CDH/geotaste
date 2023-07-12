@@ -35,7 +35,7 @@ class BaseComponent(DashComponent, Logmaker):
 
         # ensure some exist
         self.color = None
-        self.filter_data = {}
+        # self.filter_data = {}
         
         # overwritten here
         for k,v in kwargs.items(): 
@@ -156,8 +156,8 @@ class CollapsibleCard(BaseComponent):
 @cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
-    filter_data = unserialize(serialized_data)
-    return figure_class(filter_data)
+    filter_data,selected,kwargs = unserialize(serialized_data)
+    return figure_class(filter_data, selected, **kwargs)
 
 
 # @cache
@@ -179,12 +179,11 @@ class FigureComponent(BaseComponent):
     figure_factory = None
     records_name='members'
 
-    def ff(self, filter_data={}): 
+    def ff(self, filter_data={}, selected:dict|list={}, **kwargs):
         if self.figure_factory is not None:
-            return ff_cache(
-                self.figure_factory, 
-                serialize(filter_data)
-            )
+            kwargs = {**self._kwargs, **kwargs}
+            serialized_data = serialize([filter_data, selected, kwargs])
+            return ff_cache(self.figure_factory, serialized_data)
 
     def plot(self, filter_data={}, existing_fig=None, **kwargs) -> go.Figure:
         ff = self.ff(filter_data)
@@ -362,52 +361,42 @@ class FilterPlotCard(FilterCard):
                 Input(self.store_panel, 'data')
             ],
             [
-                State(self.graph, 'figure'),
-                State(self.store_selection, 'data')
+                # State(self.graph, 'figure'),
+                # State(self.store_selection, 'data')
+                State(self.store, 'data')
             ],
             prevent_initial_call=True
         )
         #@logger.catch
-        def toggle_collapse(is_open, panel_filter_data, existing_fig, stored_selection):
+        def toggle_collapse(is_open, panel_filter_data, my_filter_data):
             # logger.debug(f'{self.name} is now open? {is_open}')
             if not is_open: return dash.no_update
             
-            fd={k:v for k,v in panel_filter_data.items() if k!=self.key}
-            
-            fig = self.plot(fd)
-            selections = existing_fig.get('layout',{}).get('selections')
-            try:
-                selectedpoints = existing_fig['data'][0]['selectedpoints']
-            except (KeyError,IndexError):
-                selectedpoints = []
-            
-            logger.debug(['selections',selections])
-            logger.debug(['selectedpoints',selectedpoints])
-            logger.debug(['stored_selection',stored_selection])
+            filter_data={
+                k:v 
+                for k,v in panel_filter_data.items() 
+                if k not in my_filter_data
+                and k != self.key
+            }
+            ff = self.ff(filter_data, selected=my_filter_data)
+            return ff.fig
 
-            return fig
-
-            # logger.debug(['existing_fig',existing_fig])
-            existing_fig_exists = len(existing_fig.get('data',[]))>0
-            if not existing_fig_exists or fd:
-                return self.plot(fd, existing_fig=existing_fig)
-            else:
-                return dash.no_update
 
 
         @app.callback(
-            [
-                Output(self.store, "data", allow_duplicate=True),
-                Output(self.store_selection, 'data', allow_duplicate=True)
-            ],
+            Output(self.store, "data", allow_duplicate=True),
             Input(self.graph, 'selectedData'),
+            State(self.store, 'data'),
             prevent_initial_call=True
         )
         #@logger.catch
-        def graph_selection_updated(selected_data):
+        def graph_selection_updated(selected_data, old_data={}):
             o=self.ff().selected(selected_data)
-            logger.debug(f'[{self.name}) selection updated: {o}')
-            return (o, selected_data)
+            if not o: raise PreventUpdate
+            logger.debug(f'[{self.name}) selection updated: {selected_data}')
+            out=(o if o!=old_data else dash.no_update)
+            logger.debug(out)
+            return out
         
         
 
@@ -478,8 +467,8 @@ class FilterInputCard(FilterCard):
         #@logger.catch
         def input_value_changed(vals):
             if not vals: raise PreventUpdate
-            self.filter_data = {self.key:vals}
-            return self.filter_data
+            filter_data = {self.key:vals}
+            return filter_data
     
 
 
