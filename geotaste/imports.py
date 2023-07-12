@@ -100,8 +100,8 @@ import warnings
 warnings.filterwarnings('ignore')
 from functools import cached_property, cache
 # cache = lru_cache(maxsize=None)
-# from diskcache import Cache
-# cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
+from diskcache import Cache
+cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 # cache = cache_obj.memoize()
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL

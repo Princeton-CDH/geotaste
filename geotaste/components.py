@@ -142,7 +142,8 @@ class CollapsibleCard(BaseComponent):
             return is_open
 
 
-@cache
+# @cache
+@cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (
