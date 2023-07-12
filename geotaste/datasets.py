@@ -654,7 +654,7 @@ class CombinedDataset(Dataset):
     coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
-    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year']
+    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month']
     cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
 
     def gen(self, save=False):
