@@ -140,8 +140,9 @@ class CollapsibleCard(BaseComponent):
             prevent_initial_call=True
         )
         def toggle_collapse(n, is_open):
-            if n: return not is_open
-            return is_open
+            now_is_open = (not is_open if n else is_open)
+            logger.debug(f'{self.name} is now open? {now_is_open}')
+            return now_is_open
 
 
 # @cache
@@ -322,6 +323,23 @@ class FilterPlotCard(FilterCard):
         )
         def clear_selection(n_clicks):
             return {}, self.plot()
+        
+
+        @app.callback(
+            Output(self.graph, "figure", allow_duplicate=True),
+            Input(self.body, "is_open"),
+            [
+                State(self.store, 'data'),
+                # State(self.graph, 'figure')
+            ],
+            prevent_initial_call=True
+        )
+        def toggle_collapse(is_open, filter_data):
+            logger.debug(f'{self.name} is now open? {is_open}')
+            if not is_open: raise PreventUpdate
+            return self.plot(filter_data) #, existing_fig=existing_fig)
+            return now_is_open
+
 
         @app.callback(
             Output(self.store, "data", allow_duplicate=True),
