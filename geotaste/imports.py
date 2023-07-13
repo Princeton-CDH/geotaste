@@ -3,7 +3,7 @@
 # server
 PORT=8111
 HOST='0.0.0.0'
-DEBUG=False
+DEBUG=True
 
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
@@ -31,6 +31,7 @@ UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'flex'}
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
+LOGO_SRC2="/assets/rulerlab-small.png"
 
 # paths
 import os
@@ -100,8 +101,8 @@ import warnings
 warnings.filterwarnings('ignore')
 from functools import cached_property, cache
 # cache = lru_cache(maxsize=None)
-# from diskcache import Cache
-# cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
+from diskcache import Cache
+cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 # cache = cache_obj.memoize()
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL

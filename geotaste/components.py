@@ -35,7 +35,7 @@ class BaseComponent(DashComponent, Logmaker):
 
         # ensure some exist
         self.color = None
-        self.filter_data = {}
+        # self.filter_data = {}
         
         # overwritten here
         for k,v in kwargs.items(): 
@@ -45,19 +45,25 @@ class BaseComponent(DashComponent, Logmaker):
     @cached_property
     def subcomponents(self):
         return []  # subclass this
-    @cached_property
-    def graph_subcomponents(self):
-        return [
-            card for card in self.subcomponents
-            if hasattr(card,'graph')
-        ]
-    @cached_property
-    def store_subcomponents(self):
-        return [
-            card for card in self.subcomponents
-            if hasattr(card,'store')
-        ]
     
+    def cards_with_attr(self, attrname:str):
+        return [
+            card
+            for card in self.cards()
+            if hasattr(card,attrname)
+        ]
+
+    @cached_property
+    def store_subcomponents(self): 
+        return self.cards_with_attr('store')
+    
+    @cached_property
+    def store_panel_subcomponents(self): 
+        return self.cards_with_attr('store_panel')
+    
+    @cached_property
+    def graph_subcomponents(self): 
+        return self.cards_with_attr('graph')
     
     @cached_property
     def content(self,params=None):
@@ -80,13 +86,16 @@ class BaseComponent(DashComponent, Logmaker):
 
 
 class CollapsibleCard(BaseComponent):
+    body_is_open = False
+    className='collapsible-card'
+
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         logger.trace(self.name)
         children = []
         if header and self.header is not None: children.append(self.header)
         if body and self.body is not None: children.append(self.body)
         if footer and self.footer is not None: children.append(self.footer)
-        return dbc.Card(children, **kwargs)
+        return dbc.Card(children, className=f'collapsible-card {self.className}', **kwargs)
 
     @cached_property
     def header(self):
@@ -94,8 +103,9 @@ class CollapsibleCard(BaseComponent):
         return dbc.CardHeader(
             [
                 html.Div(self.button_showhide, className='button_showhide_div'),
-                html.P(self.desc),
-            ]
+                html.P(self.desc[0].upper() + self.desc[1:]),
+            ],
+            className=f'card-header-{self.className}'
         )
     
     @cached_property
@@ -103,7 +113,7 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name)
         return dbc.Collapse(
             dbc.CardBody(self.content), 
-            is_open=True, 
+            is_open=self.body_is_open, 
             id=self.id('body')
         )
     
@@ -137,12 +147,23 @@ class CollapsibleCard(BaseComponent):
             State(self.body, "is_open"),
             prevent_initial_call=True
         )
+        #@logger.catch
         def toggle_collapse(n, is_open):
-            if n: return not is_open
-            return is_open
+            now_is_open = (not is_open if n else is_open)
+            logger.debug(f'{self.name} is now open? {now_is_open}')
+            return now_is_open
 
 
-@cache
+# @cache
+@cache_obj.memoize()
+def ff_cache(figure_class, serialized_data):
+    logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
+    filter_data,selected,kwargs = unserialize(serialized_data)
+    return figure_class(filter_data, selected, **kwargs)
+
+
+# @cache
+@cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (
@@ -160,11 +181,18 @@ class FigureComponent(BaseComponent):
     figure_factory = None
     records_name='members'
 
-    def ff(self, filter_data={}): 
+    def ff(self, filter_data={}, selected:dict|list={}, **kwargs):
         if self.figure_factory is not None:
-            return self.figure_factory(filter_data)
-        
-    def plot(self, filter_data={}, existing_fig=None, **kwargs):
+            kwargs = {**self._kwargs, **kwargs}
+            serialized_data = serialize([filter_data, selected, kwargs])
+            return ff_cache(self.figure_factory, serialized_data)
+
+    def plot(self, filter_data={}, existing_fig=None, **kwargs) -> go.Figure:
+        ff = self.ff(filter_data)
+        return ff.fig
+    
+
+    def plot1(self, filter_data={}, existing_fig=None, **kwargs) -> go.Figure:
         kwargs = {**self._kwargs, **kwargs}
         serialized_data = serialize([filter_data, existing_fig, kwargs])
         return plot_cache(
@@ -179,25 +207,24 @@ class FigureComponent(BaseComponent):
     @cached_property
     def key(self): return self.ff().key
 
-    def unique(self, **kwargs): return self.ff().unique(**kwargs)
-
 
 
         
 class FilterComponent(FigureComponent):
-    desc = 'Filter by X'
+    desc = 'X'
     
     @cached_property
     def store(self):
-        return dcc.Store(id=self.id(self.name), data={})
-
-    @property
-    def filter_desc(self):
-        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
+        return dcc.Store(id=self.id('store'), data={})
     
-    @property
-    def filter_key(self): return self.filter_desc
-
+    @cached_property
+    def store_panel(self):
+        return dcc.Store(id=self.id('store_panel'), data={})
+    
+    @cached_property
+    def store_selection(self):
+        return dcc.Store(id=self.id('store_selection'), data={})
+    
     @cached_property
     def store_desc(self): 
         return html.Span(UNFILTERED, className='store_desc')
@@ -207,8 +234,6 @@ class FilterComponent(FigureComponent):
         filters_d = [d for d in filters_d if d]
         return {k:v for d in filters_d for k,v in d.items()}
     
-
-
 
 
 
@@ -227,8 +252,13 @@ class FilterCard(FilterComponent, CollapsibleCard):
                 [
                     dbc.Col(
                         [
-                            self.store,
-                            html.Div(self.store_desc, className='card-footer-desc')
+                            self.store, 
+                            self.store_panel,
+                            self.store_selection,
+                            html.Div(
+                                self.store_desc, 
+                                className='card-footer-desc'
+                            )
                         ], 
                         width=11
                     ),
@@ -273,6 +303,7 @@ class FilterCard(FilterComponent, CollapsibleCard):
             Input(self.store, 'data'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def store_data_updated(store_data):
             # filter cleared?
             if not store_data: return UNFILTERED, False
@@ -300,11 +331,11 @@ class FilterPlotCard(FilterCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.plot(),
-            # figure=go.Figure(),
+            figure=get_empty_fig(),
             id=self.id('graph'),
-            config={'displayModeBar':False}
+            config={'displayModeBar':False},
         )
+    
 
     def component_callbacks(self, app):
         # do my parent's too
@@ -318,18 +349,54 @@ class FilterPlotCard(FilterCard):
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def clear_selection(n_clicks):
             return {}, self.plot()
+        
+
+        @app.callback(
+            Output(self.graph, "figure", allow_duplicate=True),
+            [
+                Input(self.body, "is_open"),
+                Input(self.store_panel, 'data')
+            ],
+            [
+                # State(self.graph, 'figure'),
+                # State(self.store_selection, 'data')
+                State(self.store, 'data')
+            ],
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def toggle_collapse(is_open, panel_filter_data, my_filter_data):
+            # logger.debug(f'{self.name} is now open? {is_open}')
+            if not is_open: return dash.no_update
+            
+            filter_data={
+                k:v 
+                for k,v in panel_filter_data.items() 
+                if k not in my_filter_data
+                and k != self.key
+            }
+            ff = self.ff(filter_data, selected=my_filter_data)
+            return ff.fig
+
+
 
         @app.callback(
             Output(self.store, "data", allow_duplicate=True),
             Input(self.graph, 'selectedData'),
+            State(self.store, 'data'),
             prevent_initial_call=True
         )
-        def graph_selection_updated(selected_data):
+        #@logger.catch
+        def graph_selection_updated(selected_data, old_data={}):
             o=self.ff().selected(selected_data)
-            logger.debug(f'[{self.name}) selection updated: {o}')
-            return o
+            if not o: raise PreventUpdate
+            logger.debug(f'[{self.name}) selection updated: {selected_data}')
+            out=(o if o!=old_data else dash.no_update)
+            logger.debug(out)
+            return out
         
         
 
@@ -350,7 +417,7 @@ class FilterPlotCard(FilterCard):
 
 
 class FilterInputCard(FilterCard):
-    desc = 'Filter by input'
+    desc = 'input'
     placeholder = 'Select'
     multi = True
     sort_by_count = True
@@ -361,7 +428,7 @@ class FilterInputCard(FilterCard):
         return self.input
     @cached_property
     def input(self):
-        l=self.unique(sort_by_count=self.sort_by_count)
+        l=self.ff().unique(sort_by_count=self.sort_by_count)
         return dcc.Dropdown(
             options = [dict(value=lbl, label=lbl)  for lbl in l],
             value = [] if self.multi else '',
@@ -378,6 +445,33 @@ class FilterInputCard(FilterCard):
         # do my parent's too
         super().component_callbacks(app)
 
+        # @app.callback(
+        #     Output(self.graph, "figure", allow_duplicate=True),
+        #     [
+        #         Input(self.body, "is_open"),
+        #         Input(self.store_panel, 'data')
+        #     ],
+        #     [
+        #         # State(self.graph, 'figure'),
+        #         # State(self.store_selection, 'data')
+        #         State(self.store, 'data')
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # #@logger.catch
+        # def toggle_collapse(is_open, panel_filter_data, my_filter_data):
+        #     # logger.debug(f'{self.name} is now open? {is_open}')
+        #     if not is_open: return dash.no_update
+            
+        #     filter_data={
+        #         k:v 
+        #         for k,v in panel_filter_data.items() 
+        #         if k not in my_filter_data
+        #         and k != self.key
+        #     }
+        #     ff = self.ff(filter_data, selected=my_filter_data)
+        #     return ff.fig
+
         # ## CLEAR? -- OVERWRITTEN
         @app.callback(
             [
@@ -387,6 +481,7 @@ class FilterInputCard(FilterCard):
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def clear_selection(n_clicks):
             logger.debug('clear_selection')
             return {}, []
@@ -396,11 +491,35 @@ class FilterInputCard(FilterCard):
             Input(self.input, 'value'),
             prevent_initial_call=True
         )
+        #@logger.catch
         def input_value_changed(vals):
             if not vals: raise PreventUpdate
-            self.filter_data = {self.key:vals}
-            return self.filter_data
+            filter_data = {self.key:vals}
+            return filter_data
     
+
+        @app.callback(
+            Output(self.input, "options", allow_duplicate=True),
+            [
+                Input(self.body, "is_open"),
+                Input(self.store_panel, 'data')
+            ],
+            [
+                State(self.store, 'data')
+            ],
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def update_input_vals(is_open, panel_filter_data, my_filter_data):
+            if not is_open: return dash.no_update            
+            filter_data={
+                k:v 
+                for k,v in panel_filter_data.items() 
+                if k not in my_filter_data
+                and k != self.key
+            }
+            ff = self.ff(filter_data)
+            return ff.unique(sort_by_count=self.sort_by_count)
 
 
 
@@ -408,28 +527,28 @@ class FilterInputCard(FilterCard):
 
 
 class MemberNameCard(FilterInputCard):
-    desc = 'Filter by member name'
+    desc = 'Name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
 
 class MemberDOBCard(FilterPlotCard):
-    desc = 'Filter by date of birth'
+    desc = 'Birth year'
     figure_factory = MemberDOBFigure    
     
 class MembershipYearCard(FilterPlotCard):
-    desc = 'Filter by years of membership'
+    desc = 'Years of membership'
     figure_factory = MembershipYearFigure    
 
 class MemberGenderCard(FilterPlotCard):
-    desc = 'Filter by gender of member'
+    desc = 'Gender'
     figure_factory = MemberGenderFigure
 
 class MemberNationalityCard(FilterPlotCard):
-    desc = 'Filter by nationality of member'
+    desc = 'Nationality'
     figure_factory = MemberNationalityFigure
 
 class MemberArrondCard(FilterPlotCard):
-    desc = 'Filter by arrondissement'
+    desc = 'Arrondissement'
     figure_factory = MemberArrondMap
 
 
@@ -438,41 +557,45 @@ class MemberArrondCard(FilterPlotCard):
 
 
 class BookTitleCard(FilterInputCard):
-    desc = 'Filter by book title'
+    desc = 'Title'
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
 
 
 class CreatorNameCard(FilterInputCard):
-    desc = 'Filter by creator'
+    desc = 'Author'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
     
 
 class BookYearCard(FilterPlotCard):
-    desc = "Date of book's publication"
+    desc = "Publication date"
     figure_factory = BookYearFigure
 
 class CreatorGenderCard(FilterPlotCard):
-    desc = 'Filter by gender of creator'
+    desc = 'Author gender'
     figure_factory = CreatorGenderFigure
 
 class BookGenreCard(FilterPlotCard):
-    desc = 'Filter by genre of book'
+    desc = 'Genre'
     figure_factory = BookGenreFigure
 
 class CreatorNationalityCard(FilterPlotCard):
-    desc = 'Filter by nationality of creator'
+    desc = 'Author nationality'
     figure_factory = CreatorNationalityFigure
 
     
 class EventYearCard(FilterPlotCard):
-    desc = 'Filter by year of event'
+    desc = 'Year of borrowing'
     figure_factory = EventYearFigure
 
+class EventMonthCard(FilterPlotCard):
+    desc = 'Month of borrowing'
+    figure_factory = EventMonthFigure
+
 class EventTypeCard(FilterPlotCard):
-    desc = 'Filter by type of event'
+    desc = 'type of event'
     figure_factory = EventTypeFigure
 
 

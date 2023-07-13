@@ -65,7 +65,7 @@ class Dataset:
         ])
     
     def filter_df(self, filter_data={}):
-        if not filter_data: filter_data=self.filter_data
+        # if not filter_data: filter_data=self.filter_data
         return filter_df(self.data, filter_data)
 
     def series(self, key) -> pd.Series:
@@ -471,6 +471,10 @@ class EventsDataset(Dataset):
         df=super().data
         df['event']=[f'E{i+1:05}' for i in range(len(df))]
         df['start_year'] = pd.to_numeric([estr[:4] for estr in df['start_date'].apply(str)], errors='coerce')
+        df['start_month'] = pd.to_numeric([
+            x[5:7] if len(x)>=7 and x[:4].isdigit() and x[4]=='-' else None
+            for x in df['start_date'].apply(str)
+        ], errors='coerce')
         return df.set_index('event')
 
 
@@ -636,6 +640,7 @@ class CombinedDataset(Dataset):
         'start_date':'event_start',
         'end_date':'event_end',
         'start_year':'event_year',
+        'start_month':'event_month',
         'dwelling_desc':'dwelling_desc',
         'dwelling_numposs':'dwelling_numposs',
         'dwelling_reason':'dwelling_reason',
@@ -649,21 +654,17 @@ class CombinedDataset(Dataset):
     coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
-    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year']
+    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month']
     cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
 
-    def __init__(self, *x,**y):
-        logger.debug('CombinedDataset()')
-        super().__init__(*x,**y)
-    
     def gen(self, save=False):
         # events and members (full outer join)
-        events = selectrename_df(MemberEventDwellingsDataset().data, self.cols_events)
+        events = selectrename_df(MemberEventDwellingsDataset().data.query('event_type=="Borrow"'), self.cols_events)
         members = selectrename_df(MembersDataset().data, self.cols_members)
         events_members = events.merge(members,on='member',how='outer').fillna(self.fillna)
 
         # creations and books (left join)
-        creations = selectrename_df(CreationsDataset().data, self.cols_creations)
+        creations = selectrename_df(CreationsDataset().data, self.cols_creations).query('creator_role=="author"')
         books = selectrename_df(BooksDataset().data, self.cols_books)
         creations_books = creations.join(books)  # big to small, same index
 
@@ -685,15 +686,17 @@ class CombinedDataset(Dataset):
         if force or not os.path.exists(self.path):
             return self.gen(save=save)
         # otherwise load
-        return pd.read_pickle(self.path)
+        with Logwatch('reading pickled dataset'):
+            return pd.read_pickle(self.path)
         
     @cached_property
     def data(self): 
         odf=self.load()
-        for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
-        # final filters?
-        odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
-        return odf
+        with Logwatch('postprocessing CombinedDataset.data'):
+            for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
+            # final filters?
+            odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
+            return odf
     
     def filter_query_str(self, filter_data={}):
         return filter_query_str(
