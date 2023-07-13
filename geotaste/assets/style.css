@@ -176,7 +176,7 @@ p {
     /* background:white; */
     height:100px;
     min-height:100px;
-    overflow-y: scroll;
+    overflow-y: hidden;
     overflow-x: hidden;
 }
 .layout-toprow .row {height:100%;}
@@ -199,21 +199,27 @@ p {
     /* width:50vw; */
 }
 
-.layout-leftcol::-webkit-scrollbar, .layout-rightcol::-webkit-scrollbar, .layout-toprow::-webkit-scrollbar {
+.layout-leftcol::-webkit-scrollbar, .layout-rightcol::-webkit-scrollbar, .layout-toprow::-webkit-scrollbar, .storedescs-col::-webkit-scrollbar {
     width: 8px;
     z-index:0;
     display: none;
 }
   
-.layout-leftcol::-webkit-scrollbar-thumb, .layout-rightcol::-webkit-scrollbar-thumb, .layout-toprow::-webkit-scrollbar-thumb {
+.layout-leftcol::-webkit-scrollbar-thumb, .layout-rightcol::-webkit-scrollbar-thumb, .layout-toprow::-webkit-scrollbar-thumb, .storedescs-col::-webkit-scrollbar-thumb {
     background-color: silver;
     z-index:0;
     display:none;
 }
 
 .storedescs-col {
-    float: none;
+    float:none;
     clear:both;
+    text-align: center;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    overflow-y:scroll;
+    overflow-x:hidden;
+    height:100px;
 }
 
 .storedescs-row {
@@ -225,11 +231,6 @@ p {
     font-weight:normal;
 }
 
-.storedescs-col-L, .storedescs-col-R { 
-    text-align: center;
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
-}
 
 .left-color { 
     color:#AB9155; 
