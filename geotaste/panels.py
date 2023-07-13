@@ -333,7 +333,7 @@ class ComparisonPanel(BaseComponent):
         return dbc.Collapse(
             self.content_main_row, 
             className='layout-leftcol',
-            is_open=True
+            is_open=False
         )
     
     @cached_property
@@ -414,6 +414,20 @@ class ComparisonPanel(BaseComponent):
             active_tab='map'
         )
         return dbc.Container(graphtabs, className='graphtabs-container-container')
+
+    # @cached_property
+    # def graphtabs(self):
+    #     return get_tabs(
+    #         children=[
+    #             dict(label='Map', tab_id='map'),
+    #             dict(label='Table', tab_id='tbl'),
+    #             dict(label='Comparison', tab_id='tbl_arrond'),
+    #         ],
+    #         tab_level=1,
+    #         className='graphtabs-container',
+    #         active_tab='map'
+    #     )
+    
     
     @cached_property
     def graphtab(self):
@@ -432,10 +446,12 @@ class ComparisonPanel(BaseComponent):
                 Output(self.content_right, 'style'),
             ],
             Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
-            State(self.content_left, 'is_open')
+            State(self.content_left, 'is_open'),
+            prevent_initial_callback=True
         )
         #@logger.catch
         def dropdown_the_filters(n_clicks_l, is_open):
+            if not any(n_clicks_l): raise PreventUpdate
             if is_open:
                 # then shut
                 return False, {'width':'100vw'}
@@ -465,9 +481,23 @@ class ComparisonPanel(BaseComponent):
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
+    tab_ids_1, fdL, fdR = unserialize(serialized_data)
     ff = ComparisonFigureFactory(fdL, fdR)
     viewfunc = determine_view(tab_ids_1, tab_ids_2)
+    # viewfunc = determine_view(tab_ids_1)
     return viewfunc(ff)
+
+# def determine_view(tab_ids=[], default=MemberMapView):
+#     if not tab_ids: return default
+#     tab = tab_ids[0]
+#     key2view=dict(
+#         tbl=MemberTableView,
+#         tbl_arrond=ArrondTableView,
+#         map=MemberMapView
+#     )
+#     return key2view.get(tab,default)
+    
+
 
 
 def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
@@ -478,8 +508,10 @@ def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
         if 'tbl_members' in tab_ids_2_set: 
             return MemberTableView
             
-        elif 'tbl_arrond' in tab_ids_2_set:
+        if 'tbl_arrond' in tab_ids_2_set:
             return ArrondTableView
+        
+        return MemberTableView
             
     elif 'analyze' in tab_ids_1_set:
         if 'tbl_diff' in tab_ids_2_set:
