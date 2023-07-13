@@ -39,8 +39,8 @@ class FilterPanel(FilterComponent):
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 filter_data = self.intersect_filters(*filters_d)
-                filter_desc = Combined().filter_query_str(filter_data) 
-                return filter_data, (filter_desc if filter_desc else UNFILTERED)
+                filter_desc = filter_query_str(filter_data, human=True) if filter_data else UNFILTERED
+                return filter_data, filter_desc
             
             @app.callback(
                 [

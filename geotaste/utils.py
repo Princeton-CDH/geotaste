@@ -586,3 +586,11 @@ def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
     for col in df:
         df[col]=df[col].apply(fix)
     return df
+
+
+
+def oxfordcomma(l, repr=repr, op='and'):
+    if len(l)<3:
+        return f' {op} '.join(repr(x) for x in l)
+    else:
+        return f"{', '.join(repr(x) for x in l[:-1])}, {op} {l[-1]}"
