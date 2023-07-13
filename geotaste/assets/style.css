@@ -94,7 +94,10 @@ h5 { font-size:1.1rem;}
     display:inline; 
     margin-top:-10px;
     z-index:0;
-    width:34px;
+}
+.logo-img2 {
+    height:44px;
+    width:31px;
 }
 
 
@@ -361,14 +364,15 @@ p {
     line-height:50px;
     padding:0 1rem;
     margin:0;
-    border: 1px solid rgba(0,0,0,.1);
+    /* border: 1px solid rgba(0,0,0,.1); */
     /* border:1px solid red; */
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
+    /* border-bottom-left-radius: 3px; */
+    /* border-bottom-right-radius: 3px; */
 }
 
 .graphtabs-container .nav-link.active {
     border: 1px solid rgba(0,0,0,.3);
+    border-bottom:none;
 }
 
 
