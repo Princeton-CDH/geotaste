@@ -10,3 +10,4 @@ cache
 *.pyc
 .env
 .vscode
+dev_*.txt

@@ -5,32 +5,19 @@ from .views import *
 class FilterPanel(FilterComponent):
     @cached_property
     def content(self,params=None):
-        return dbc.Container([self.store, self.store_str] + super().content.children)
+        return dbc.Container([self.store] + super().content.children)
     
-    @cached_property
-    def store_str(self):
-        return dcc.Store(id=self.id(self.name)+'_str', data='')
-
-
     @cached_property
     def store_desc(self): 
-        return dbc.Textarea(
+        return dbc.Container(
+            UNFILTERED,
             id=self.id('query_str'), 
             className='store_desc query_str', 
-            placeholder=UNFILTERED, 
-            value='', 
+            # placeholder=UNFILTERED, 
+            # value='', 
             style={'color':self.color}
         )
-    
-    @cached_property
-    def button_query(self):
-        return dbc.Button(
-            "Query", 
-            color="link", 
-            n_clicks=0,
-            className='button_query',
-            id=self.id('button_query')
-        )
+
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -40,7 +27,7 @@ class FilterPanel(FilterComponent):
             @app.callback(
                 [
                     Output(self.store, 'data', allow_duplicate=True),
-                    Output(self.store_desc, 'value', allow_duplicate=True),
+                    Output(self.store_desc, 'children', allow_duplicate=True),
                 ],
                 [
                     Input(card.store, 'data')
@@ -48,22 +35,47 @@ class FilterPanel(FilterComponent):
                 ],
                 prevent_initial_call=True
             )
+            #@logger.catch
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
-                self.filter_data = self.intersect_filters(*filters_d)
-                self.filter_query = Combined().filter_query_str(self.filter_data)
-                return self.filter_data, self.filter_query
+                filter_data = self.intersect_filters(*filters_d)
+                filter_desc = filter_query_str(filter_data, human=True) if filter_data else UNFILTERED
+                return filter_data, filter_desc
             
             @app.callback(
-                Output(self.store_str, 'data'),
-                Input(self.button_query, 'n_clicks'),
-                State(self.store_desc, 'value'),
+                [
+                    Output(card.store_panel, 'data', allow_duplicate=True)
+                    for card in self.store_panel_subcomponents
+                ],
+                Input(self.store, 'data'),
+                [
+                    State(card.store_panel, 'data')
+                    for card in self.store_panel_subcomponents
+                ],
                 prevent_initial_call=True
             )
-            def update_filter_query(n_clicks, query_str):
-                logger.debug(f'setting {query_str} to {self.name}.store_str')
-                return query_str
+            #@logger.catch
+            def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
+                if panel_filter_data is None: panel_filter_data={}
+                logger.debug(f'panel_filter_data_changed({panel_filter_data})')
+
+
+                logger.debug([card.key for card in self.store_panel_subcomponents])
+
+                new_filter_data_l = [
+                    {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    for card in self.store_panel_subcomponents    
+                ]
+                out = [
+                    (dash.no_update if old==new else new)
+                    for old,new in zip(old_filter_data_l, new_filter_data_l)
+                ]
+                logger.debug(f'out from panel {pformat(out)}')
+                return out
             
+
+            
+
         
 
 
@@ -71,43 +83,51 @@ class FilterPlotPanel(FilterPanel):
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-        if self.graph_subcomponents:
-            @app.callback(
-                [
-                    Output(card.graph,'figure',allow_duplicate=True)
-                    for card in self.graph_subcomponents
-                ],
-                [
-                    Input(self.store, 'data'),
-                    Input(self.store_str, 'data')
-                ],
-                prevent_initial_call=True
-            )
-            def redraw_graphs_from_new_data(filter_data, query_str):
-                logger.debug(f'redrawing, triggered by {ctx.triggered_id}')
-                fd = query_str if ctx.triggered_id == self.store_str.id else filter_data
-                logger.debug(fd)
-                filtered_keys = set(filter_data.keys())
-
-                # filter_data, existing_fig, kwargs
-                existing_fig = None # @TODO?
+        # if self.graph_subcomponents:
+        #     @app.callback(
+        #         [
+        #             Output(card.graph,'figure',allow_duplicate=True)
+        #             for card in self.graph_subcomponents
+        #         ],
+        #         [
+        #             Input(self.store, 'data'),
+        #         ],
+        #         [
+        #             State(card.body,'is_open')
+        #             for card in self.graph_subcomponents
+        #         ],
+        #         prevent_initial_call=True
+        #     )
+        #     def redraw_graphs_from_new_data(filter_data, *cards_open):
+        #         logger.debug(f'redraw_graphs_from_new_data({filter_data})')
+        #         filtered_keys = set(filter_data.keys())
+        #         existing_fig = None # @TODO?
                 
-                return [
-                    (
-                        dash.no_update 
-                        if card.key in filtered_keys 
-                        else card.plot(fd, existing_fig=existing_fig)
-                    )
-                    for card in self.graph_subcomponents
-                ]
+        #         return [
+        #             (
+        #                 dash.no_update 
+        #                 if (
+        #                     card.key in filtered_keys 
+        #                     or 
+        #                     not cards_open[i]
+        #                 )
+        #                 else card.plot(
+        #                     filter_data, 
+        #                     existing_fig=existing_fig
+        #                 )
+        #             )
+        #             for i,card in enumerate(self.graph_subcomponents)
+        #         ]
             
+class CollapsiblePanel(CollapsibleCard):
+    body_is_open = True
+    className='collapsible-panel'
 
 
-class MemberPanel(CollapsibleCard):
+class MemberPanel(CollapsiblePanel):
     name='MP'
-
     figure_factory = CombinedFigureFactory
-    desc = 'Member Filters'
+    desc = 'Members of the library'
     records_name='members'
 
     @cached_property
@@ -152,10 +172,10 @@ class MemberPanel(CollapsibleCard):
     
     
 
-class BookPanel(CollapsibleCard):
+class BookPanel(CollapsiblePanel):
     name='BP'
     figure_factory = CombinedFigureFactory
-    desc = 'Book Filters'
+    desc = 'Books they borrowed'
     records_name='books'
 
     @cached_property
@@ -183,6 +203,14 @@ class BookPanel(CollapsibleCard):
         return CreatorNationalityCard(name_context=self.name, **self._kwargs)
     
     @cached_property
+    def event_year_card(self): 
+        return EventYearCard(name_context=self.name, **self._kwargs)
+    
+    @cached_property
+    def event_month_card(self): 
+        return EventMonthCard(name_context=self.name, **self._kwargs)
+        
+    @cached_property
     def subcomponents(self):
         return [
             self.title_card,
@@ -191,6 +219,8 @@ class BookPanel(CollapsibleCard):
             self.creator_card,
             self.creator_gender_card,
             self.creator_nationality_card,
+            self.event_year_card,
+            self.event_month_card,
         ]
 
     @cached_property
@@ -200,33 +230,6 @@ class BookPanel(CollapsibleCard):
     
     
 
-
-
-class EventPanel(CollapsibleCard):
-    name='EP'
-    figure_factory = CombinedFigureFactory
-    desc = 'Event Filters'
-    records_name='events'
-
-    @cached_property
-    def year_card(self): 
-        return EventYearCard(name_context=self.name, **self._kwargs)
-    
-    @cached_property
-    def type_card(self): 
-        return EventTypeCard(name_context=self.name, **self._kwargs)
-    
-    @cached_property
-    def subcomponents(self):
-        return [
-            self.year_card,
-            self.type_card,
-        ]
-
-    @cached_property
-    def store_subcomponents(self): return []
-    @cached_property
-    def graph_subcomponents(self): return []
 
 
 class CombinedPanel(FilterPlotPanel):
@@ -239,36 +242,21 @@ class CombinedPanel(FilterPlotPanel):
     def book_panel(self):
         return BookPanel(name_context=self.name, **self._kwargs)
     
-    @cached_property
-    def event_panel(self):
-        return EventPanel(name_context=self.name, **self._kwargs)
 
     @cached_property
     def subcomponents(self):
         return [
             self.member_panel,
             self.book_panel,
-            self.event_panel,
         ]
     
-    @cached_property
-    def store_subcomponents(self):
+    def cards_with_attr(self, attrname:str):
         return [
             card
             for panel in self.subcomponents
             for card in panel.subcomponents
-            if hasattr(card,'store')
+            if hasattr(card,attrname)
         ]
-    
-    @cached_property
-    def graph_subcomponents(self):
-        return [
-            card
-            for panel in self.subcomponents
-            for card in panel.subcomponents
-            if hasattr(card,'graph')
-        ]
-    
 
 
 
@@ -280,15 +268,15 @@ class ComparisonPanel(BaseComponent):
     def content_left_tabs(self,params=None):
         return dbc.Container(dbc.Row([
             dbc.Col(
-                # html.P(['Left Group: ',self.L.store_desc]), 
-                [self.L.store_desc, self.L.button_query],
-                width=6, 
+                html.P([html.B('Left Group: '), self.L.store_desc]),
+                # [self.L.store_desc],
+                # width=6, 
                 className='storedescs-col storedescs-col-L left-color'
             ),
-            
+            dbc.Col(html.Nobr(), className='storedescs-inbetween',width=1),
             dbc.Col(
-                [self.R.store_desc, self.R.button_query],
-                width=6, 
+                html.P([html.B('Right Group: '), self.R.store_desc]),
+                # width=6, 
                 className='storedescs-col storedescs-col-R right-color'
             ),
         ]), className='layout-toprow')
@@ -415,19 +403,18 @@ class ComparisonPanel(BaseComponent):
                 Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
                 Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
                 Input(self.L.store, 'data'),
-                Input(self.L.store_str, 'data'),
                 Input(self.R.store, 'data'),
-                Input(self.R.store_str, 'data'),
             ],
         )
-        def repopulate_graphtab(tab_ids_1, tab_ids_2, filter_data_L, filter_query_L, filter_data_R, filter_query_R):
-            fdL = filter_query_L if ctx.triggered_id == self.L.store_str.id else filter_data_L
-            fdR = filter_query_R if ctx.triggered_id == self.R.store_str.id else filter_data_R
-            serialized_data = serialize([tab_ids_1, tab_ids_2, fdL, fdR])
+        #@logger.catch
+        def repopulate_graphtab(*args):
+            serialized_data = serialize(args)
             return graphtab_cache(serialized_data)
             
 
-@cache
+# @cache
+
+@cache_obj.memoize()
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)

@@ -1,63 +1,86 @@
 from .imports import *
 
-def filter_query_str_series(sname:str, svals:list, op='or', maxlen=1,plural_cols=None,fname='overlaps',multiline=False):
+def humancol(col):
+    if not '_' in col: return col
+    a,b = col.split('_',1)
+    b = b.title() if b!='dob' else 'DOB'
+    if b == 'Membership': return b
+    return a.title() + ' ' + b
+
+
+def filter_query_str_series(
+        sname:str, 
+        svals:'Iterable', 
+        op:str='or', 
+        maxlen=1,
+        plural_cols=None,
+        fname='overlaps',
+        human:bool=False
+        ):
     """
-    Filters a query string series based on the given parameters.
+    Generates a query string for filtering a series based on a given column name and values.
 
     Args:
-        sname (str): The name of the query string series.
-        svals (list): The values of the query string series.
+        sname (str): The name of the column to filter on.
+        svals (Iterable): The values to filter on.
         op (str, optional): The operator to use for combining multiple values. Defaults to 'or'.
-        maxlen (int, optional): The maximum length of svals before using the fname function. Defaults to 2.
-        plural_cols (list, optional): The list of plural column names. Defaults to None.
-        fname (str, optional): The name of the function to use when sname is in plural_cols. Defaults to 'overlaps'.
+        maxlen (int, optional): The maximum number of values allowed before using a plural representation. Defaults to 1.
+        plural_cols (list, optional): A list of column names that should use a plural representation. Defaults to None.
+        fname (str, optional): The function name to use in the plural representation. Defaults to 'overlaps'.
+        human (bool, optional): Whether to generate a human-readable representation. Defaults to False.
 
     Returns:
-        str: The filtered query string series.
-
-    Examples:
-        >>> filter_query_str_series('name', ['John', 'Jane', 'Alice'], maxlen=3, op='or')
-        '(name==\'John\') or (name==\'Jane\') or (name==\'Alice\')'
-
-        >>> filter_query_str_series('age', [18, 19, 20])
-        '(age==18) and (age==19) and (age==20)'
-
-        >>> filter_query_str_series('score', [80, 90, 100], maxlen=3, plural_cols=['score'])
-        '@overlaps(score,[80, 90, 100])'
+        str: The generated query string.
     """
+    
     # make sure input is listlike
     if not is_listy(svals): svals=[svals]
 
     # stringifying
-    def repr(x): 
-        return json.dumps(x, ensure_ascii=False)
+    def repr(x): return json.dumps(x, ensure_ascii=False)
+
+    def getplural():
+        if not human:
+            return f'@{fname}({sname}, {repr(svals)})'
+        else:
+            return f'{humancol(sname)} is either {oxfordcomma(svals, repr=repr, op="or")}'
+        
+    def getrange():
+        if not human:
+            return f'({svals[0]} <= {sname} <= {svals[-1]})'
+        else:
+            return f'{humancol(sname)} ranges from {svals[0]} through {svals[-1]}'
     
+    def getsinglequerygroup():
+        strs=[
+            (
+                f'({sname} == {repr(x)})' 
+                if not human
+                else f'{humancol(sname)} is {repr(x)}'
+            )
+            for x in svals
+        ]
+        o = f' {op} '.join(strs)
+        return f'({o})' if len(strs)>1 else o
+
     # return function if this is a list-containing col
     if (plural_cols is not None and sname in set(plural_cols)):
-        return f'@{fname}({sname}, {repr(svals)})'
+        return getplural()
     
     # if a range of ints, use a less/greater than syntax
     elif is_range_of_ints(svals):
-        return f'({svals[0]} <= {sname} <= {svals[-1]})'
+        return getrange()
 
     # if simply too many vals
     elif len(svals) > maxlen:
-        return f'@{fname}({sname}, {repr(svals)})'
+        return getplural()
 
     # otherwise, compound
     else:
-        strs=[f'({sname} == {repr(x)})' for x in svals]
-        if not multiline or len(strs)==1:
-            o = f' {op} '.join(strs)
-            return f'({o})' if len(strs)>1 else o
+        return getsinglequerygroup()
         
-        else:
-            # mjultiline with mre than 1 opt
-            o = f'\n{op}\n'.join(strs)
-            o=f'(\n{o}'.replace('\n','\n  ')
-            return o+'\n)'
 
-def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list|None=None, multiline:bool=False) -> str:
+def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list|None=None, human:bool=False) -> str:
     """Filter a query string based on the given filter data.
 
     Args:
@@ -78,9 +101,9 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, 
     if not filter_data: return ''
     fname=test_func.__name__ if type(test_func)!=str else test_func
     
-    sep = f'\n{operator}\n' if multiline else f' {operator} '
+    sep = f' {operator} '
     return sep.join([
-        filter_query_str_series(sname,svals,op='or',maxlen=maxlen,plural_cols=plural_cols,multiline=multiline,fname=fname)
+        filter_query_str_series(sname,svals,op='or',maxlen=maxlen,plural_cols=plural_cols,fname=fname,human=human)
         for sname,svals in filter_data.items()
         if svals is not None
     ])

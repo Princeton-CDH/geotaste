@@ -475,7 +475,7 @@ class Logwatch:
             str: A description of the task.
         """
         if self.started is not None and self.ended is not None:
-            return f'{self.task_name} completed in {self.tdesc}'
+            return f'{self.task_name} ... {self.tdesc}'
         else:
             return f'Task running ...' if not self.task_name else f'{self.task_name} ...'
         
@@ -586,3 +586,11 @@ def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
     for col in df:
         df[col]=df[col].apply(fix)
     return df
+
+
+
+def oxfordcomma(l, repr=repr, op='and'):
+    if len(l)<3:
+        return f' {op} '.join(repr(x) for x in l)
+    else:
+        return f"{', '.join(repr(x) for x in l[:-1])}, {op} {repr(l[-1])}"
