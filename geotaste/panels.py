@@ -268,14 +268,14 @@ class ComparisonPanel(BaseComponent):
     def content_left_tabs(self,params=None):
         return dbc.Container(dbc.Row([
             dbc.Col(
-                html.P(['Left Group: ',self.L.store_desc]), 
+                html.P([html.B('Left Group: '), self.L.store_desc]),
                 # [self.L.store_desc],
                 # width=6, 
                 className='storedescs-col storedescs-col-L left-color'
             ),
             dbc.Col(html.Nobr(), className='storedescs-inbetween',width=1),
             dbc.Col(
-                html.P(['Right Group: ',self.R.store_desc]), 
+                html.P([html.B('Right Group: '), self.R.store_desc]),
                 # width=6, 
                 className='storedescs-col storedescs-col-R right-color'
             ),

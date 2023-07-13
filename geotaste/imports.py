@@ -31,6 +31,7 @@ UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'flex'}
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
+LOGO_SRC2="/assets/rulerlab-small.png"
 
 # paths
 import os
