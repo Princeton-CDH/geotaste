@@ -57,6 +57,17 @@ h5 { font-size:1.1rem;}
     margin: 0 auto;
 }
 
+.frozen-top-row {
+    height:150px;
+    /* border:1px solid green; */
+    background: rgba(255,255,255,1);
+    top:0; left:0; position:absolute; z-index: 100;
+    /* border-bottom: 1px solid rgba(0,0,0,.5); */
+    /* border-bottom:1px solid #dddddd;  */
+    /* #F7F7F7; */
+}
+
+
 .tab {
     height:50px;
     line-height:50px;
@@ -270,11 +281,12 @@ p {
     /* flex-direction: column; */
     /* flex-grow: 1; */
     height: 100vh;
+    width:100%;
     margin:0;padding:0;
-    position:absolute; top:0;right:0;width:50vw;padding-top:150px; display:block;
+    position:absolute;top:0;right:0;padding-top:150px;display:block;
+
     /* height:100%; */
     /* width: 100%; */
-    width:50vw;
     
 }
 
@@ -311,18 +323,10 @@ p {
     overflow-y:scroll;
 }
 
-.frozen-top-row {
-    height:150px;
-    /* border:1px solid green; */
-    background: rgba(255,255,255,1);
-    top:0; left:0; position:absolute; z-index: 100;
-    /* border-bottom: 1px solid rgba(0,0,0,.5); */
-    /* border-bottom:1px solid #dddddd;  */
-    /* #F7F7F7; */
-}
 
-.layout-leftcol { left:0; }
-.layout-rightcol { right:0; }
+
+.layout-leftcol { left:0; display:none; }
+.layout-rightcol { left:0; width:100vw;}
 
 .navtabs-container {
     float:left;
