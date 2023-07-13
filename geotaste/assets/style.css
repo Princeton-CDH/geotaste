@@ -42,6 +42,7 @@ h5 { font-size:1.1rem;}
     /* position:absolute; top:0; left:0; width:100vw; */
     line-height:50px;  
     padding:0;
+    height:50px;
     text-align: center;
     vertical-align: middle;
     /* background: #F7F7F7; */
@@ -88,11 +89,15 @@ h5 { font-size:1.1rem;}
     right:0; */
 }
 
-.logo-img {  
+.logo-img, .logo-img2 {  
     height:50px; 
     display:inline; 
     margin-top:-10px;
+    z-index:0;
+    width:34px;
 }
+
+
 
 .logo-title { 
     margin:0 10px; 
@@ -220,6 +225,11 @@ p {
     overflow-y:scroll;
     overflow-x:hidden;
     height:100px;
+    align-items: center;
+    justify-content:center;
+    display:flex;
+    padding:8px;
+    z-index: 5000;
 }
 
 .storedescs-row {

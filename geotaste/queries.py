@@ -1,5 +1,13 @@
 from .imports import *
 
+def humancol(col):
+    if not '_' in col: return col
+    a,b = col.split('_',1)
+    b = b.title() if b!='dob' else 'DOB'
+    if b == 'Membership': return b
+    return a.title() + ' ' + b
+
+
 def filter_query_str_series(
         sname:str, 
         svals:'Iterable', 
@@ -35,14 +43,20 @@ def filter_query_str_series(
         if not human:
             return f'@{fname}({sname}, {repr(svals)})'
         else:
-            return f'{sname} is either {oxfordcomma(svals, repr=repr, op="or")}'
+            return f'{humancol(sname)} is either {oxfordcomma(svals, repr=repr, op="or")}'
+        
+    def getrange():
+        if not human:
+            return f'({svals[0]} <= {sname} <= {svals[-1]})'
+        else:
+            return f'{humancol(sname)} ranges from {svals[0]} through {svals[-1]}'
     
     def getsinglequerygroup():
         strs=[
             (
                 f'({sname} == {repr(x)})' 
                 if not human
-                else f'{sname} is {repr(x)}'
+                else f'{humancol(sname)} is {repr(x)}'
             )
             for x in svals
         ]
@@ -55,7 +69,7 @@ def filter_query_str_series(
     
     # if a range of ints, use a less/greater than syntax
     elif is_range_of_ints(svals):
-        return f'({svals[0]} <= {sname} <= {svals[-1]})'
+        return getrange()
 
     # if simply too many vals
     elif len(svals) > maxlen:
@@ -65,9 +79,6 @@ def filter_query_str_series(
     else:
         return getsinglequerygroup()
         
-
-
-
 
 def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list|None=None, human:bool=False) -> str:
     """Filter a query string based on the given filter data.

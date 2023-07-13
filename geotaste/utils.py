@@ -593,4 +593,4 @@ def oxfordcomma(l, repr=repr, op='and'):
     if len(l)<3:
         return f' {op} '.join(repr(x) for x in l)
     else:
-        return f"{', '.join(repr(x) for x in l[:-1])}, {op} {l[-1]}"
+        return f"{', '.join(repr(x) for x in l[:-1])}, {op} {repr(l[-1])}"
