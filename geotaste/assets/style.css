@@ -371,7 +371,7 @@ p {
 }
 
 .graphtabs-container .nav-link.active {
-    border: 1px solid rgba(0,0,0,.3);
+    border: 1px solid rgba(0,0,0,.2);
     border-bottom:none;
 }
 
@@ -486,7 +486,7 @@ p {
 }
 
 .storedescs-col-L {
-    border: 1px solid rgba(171, 145, 85, .25);
+    border: 1px solid rgba(171, 145, 85, .3);
     border-top:none;
     padding-right:4px;
     width:100%;
@@ -494,7 +494,7 @@ p {
 }
 
 .storedescs-col-R {
-    border: 1px solid rgba(64, 176, 166, 0.25);
+    border: 1px solid rgba(64, 176, 166, 0.3);
     border-top:none;
     padding-left:4px;
     width:100%;
