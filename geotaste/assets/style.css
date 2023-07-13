@@ -325,8 +325,8 @@ p {
 
 
 
-.layout-leftcol { left:0; display:none; }
-.layout-rightcol { left:0; width:100vw;}
+.layout-leftcol { left:0; }
+.layout-rightcol { right:0; width:100%;}
 
 .navtabs-container {
     float:left;
