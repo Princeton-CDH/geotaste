@@ -9,7 +9,7 @@ class FilterPanel(FilterComponent):
     
     @cached_property
     def store_desc(self): 
-        return dbc.Container(
+        return html.Span(
             UNFILTERED,
             id=self.id('query_str'), 
             className='store_desc query_str', 
@@ -266,20 +266,42 @@ class ComparisonPanel(BaseComponent):
 
     @cached_property
     def content_left_tabs(self,params=None):
-        return dbc.Container(dbc.Row([
-            dbc.Col(
-                html.P([html.B('Left Group: '), self.L.store_desc]),
-                # [self.L.store_desc],
-                # width=6, 
-                className='storedescs-col storedescs-col-L left-color'
-            ),
-            dbc.Col(html.Nobr(), className='storedescs-inbetween',width=1),
-            dbc.Col(
-                html.P([html.B('Right Group: '), self.R.store_desc]),
-                # width=6, 
-                className='storedescs-col storedescs-col-R right-color'
-            ),
-        ]), className='layout-toprow')
+        p_L=html.Span([html.B('Left Group: '), self.L.store_desc])
+        p_R=html.Span([html.B('Right Group: '), self.R.store_desc])
+        
+        def getbtn(x, cls=''):
+            className='button_store_desc store_desc query_str'
+            if cls: className+=(' '+cls)
+            return dbc.Button(
+                x, 
+                color="link", 
+                n_clicks=0,
+                className=className,
+                id=dict(type='store_desc_btn', index=uid()),
+                style={'text-align':'center'}
+            )
+        
+        btn_L = getbtn(p_L)
+        btn_R = getbtn(p_R)
+
+        return dbc.Container(
+            dbc.Row([
+                dbc.Col(
+                    btn_L,
+                    className='storedescs-col storedescs-col-L left-color'
+                ),
+                dbc.Col(
+                    html.Nobr(), 
+                    className='storedescs-inbetween',
+                    width=1
+                ),
+                dbc.Col(
+                    btn_R,
+                    className='storedescs-col storedescs-col-R right-color'
+                ),
+            ]), 
+            className='layout-toprow'
+        )
     
     
     @cached_property
@@ -288,11 +310,6 @@ class ComparisonPanel(BaseComponent):
             dbc.Row(self.graphtabs, className='content-tabs-row')
         ])
 
-    @cached_property
-    def content_right(self,params=None):
-        return dbc.Container([
-            dbc.Row(self.graphtab, className='content-belowtabs-row')
-        ], className='layout-rightcol')
     
     @cached_property
     def content_main_row(self,params=None):
@@ -313,18 +330,31 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def content_left(self,params=None):
-        return dbc.Container(self.content_main_row, className='layout-leftcol')
+        return dbc.Collapse(
+            self.content_main_row, 
+            className='layout-leftcol',
+            is_open=True
+        )
+    
+    @cached_property
+    def content_right(self,params=None):
+        return dbc.Collapse(
+            dbc.Container(self.graphtab, className='content-belowtabs-row'),
+            className='layout-rightcol',
+            is_open=True
+        )
 
     @cached_property
     def content(self,params=None):
-        return dbc.Container([
-            self.content_left_tabs,
-
-            dbc.Row([
-                dbc.Col(self.content_left, className='layout-leftcol', width=6),
-                dbc.Col(self.content_right, className='layout-rightcol', width=6)
-            ])
-        ], className='panel-comparison-layout layout-belownavbar')
+        return dbc.Container(
+            dbc.Row(
+                [
+                    dbc.Col(self.content_left),
+                    dbc.Col(self.content_right)
+                ]
+            ), 
+            className='panel-comparison-layout layout-belownavbar'
+        )
         
     @cached_property
     def subcomponents(self): return (self.L, self.R)
@@ -395,6 +425,23 @@ class ComparisonPanel(BaseComponent):
 
     def component_callbacks(self, app):
         # super().component_callbacks(app)
+
+        @app.callback(
+            [
+                Output(self.content_left, 'is_open'),
+                Output(self.content_right, 'style'),
+            ],
+            Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
+            State(self.content_left, 'is_open')
+        )
+        #@logger.catch
+        def dropdown_the_filters(n_clicks_l, is_open):
+            if is_open:
+                # then shut
+                return False, {'width':'100vw'}
+            else:
+                # then open
+                return True, {'width':'50vw'}
 
 
         @app.callback(

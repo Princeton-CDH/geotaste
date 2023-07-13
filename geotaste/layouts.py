@@ -16,23 +16,24 @@ class GeotasteLayout(BaseComponent):
             html.H1(self.title, className='logo-title'),
             html.Img(src=LOGO_SRC2, className='logo-img2'),
         ], className='logo')
+    
+    @cached_property
+    def frozen_top_row(self):
+        return dbc.Container([
+            dbc.Row(dbc.Container([
+                dbc.Row([self.logo], className='navbar-row'),
+                dbc.Row([
+                    dbc.Col(self.comparison_panel.content_left_tabs, width=6),
+                    dbc.Col(self.comparison_panel.content_right_tabs, width=6),
+                ]),
+            ]))
+        ], className='frozen-top-row')
 
     def layout(self, params=None):
         return dbc.Container(
             [
-                dbc.Container([
-                    dbc.Row(dbc.Container([
-                        dbc.Row([self.logo], className='navbar-row'),
-                        dbc.Row([
-                            dbc.Col(self.comparison_panel.content_left_tabs, width=6),
-                            dbc.Col(self.comparison_panel.content_right_tabs, width=6),
-                        ]),
-                    ]))
-                ], className='frozen-top-row'),
-                
-                self.comparison_panel.content_left,
-                self.comparison_panel.content_right,
+                self.frozen_top_row,
+                self.comparison_panel.content,
             ],
             className='layout-container'
         )
-
