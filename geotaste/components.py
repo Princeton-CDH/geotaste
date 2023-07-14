@@ -88,6 +88,7 @@ class BaseComponent(DashComponent, Logmaker):
 class CollapsibleCard(BaseComponent):
     body_is_open = False
     className='collapsible-card'
+    tooltip = ''
 
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         logger.trace(self.name)
@@ -102,32 +103,25 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name)
         desc=self.desc[0].upper() + self.desc[1:]
         idx=self.id('card_header')
+        children = [
+            html.Div(
+                [
+                    self.button_showhide
+                ], 
+                className='button_showhide_div'
+            ),
+            dbc.Button(
+                desc, 
+                color="link", 
+                n_clicks=0,
+                id=idx,
+                className='card-title'
+            )
+        ]
+        if self.tooltip:
+            children+=[dbc.Tooltip(self.tooltip, target=idx)]
         return dbc.CardHeader(
-            [
-                html.Div(
-                    [
-                        self.button_showhide
-                    ], 
-                    className='button_showhide_div'
-                ),
-                dbc.Button(
-                    desc, 
-                    color="link", 
-                    n_clicks=0,
-                    id=idx,
-                    className='card-title'
-                ),
-                dbc.Popover(
-                    [
-                        dbc.PopoverHeader(f'Filter on {self.name}'),
-                        dbc.PopoverBody(f'Filter...'),
-                    ],
-                    target=idx,
-                    trigger='hover',
-                    style={'z-index':1000},
-                    placement='auto'
-                )
-            ],
+            children,
             className=f'card-header-{self.className}'
         )
     
@@ -559,7 +553,7 @@ class MemberDOBCard(FilterPlotCard):
     figure_factory = MemberDOBFigure    
     
 class MembershipYearCard(FilterPlotCard):
-    desc = 'Years of membership'
+    desc = 'Years active'
     figure_factory = MembershipYearFigure    
 
 class MemberGenderCard(FilterPlotCard):
@@ -612,6 +606,7 @@ class CreatorNationalityCard(FilterPlotCard):
 class EventYearCard(FilterPlotCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
+    tooltip = 'Select only members who borrowed books in a given year range'
 
 class EventMonthCard(FilterPlotCard):
     desc = 'Month of borrowing'

@@ -30,8 +30,8 @@ PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'flex'}
-LOGO_SRC="/assets/SCo_logo_graphic-small-inv.png"
-LOGO_SRC2="/assets/rulerlab-small-inv.png"
+LOGO_SRC="/assets/SCo_logo_graphic-small.png"
+LOGO_SRC2="/assets/rulerlab-small.png"
 
 # paths
 import os
@@ -60,8 +60,20 @@ PATHS=dict(
     combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
 )
 
-LATLON_SCO = (48.85107555543428, 2.3385039932538567)
-MAP_CENTER = dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1])
+LATLON_SCO = (
+    48.85107555543428, 
+    2.3385039932538567
+)
+
+CENTER = (
+    48.855522428555176, 
+    2.2809462243735004
+)
+
+MAP_CENTER = dict(
+    lat=CENTER[0],
+    lon=CENTER[1]
+)
 DISPREFERRED_ADDRESSES = {
     '11 rue Scribe': 'American Express',
     'Berkeley Street': 'Thomas Cook', # @CHECK
