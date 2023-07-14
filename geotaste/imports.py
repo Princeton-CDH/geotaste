@@ -30,8 +30,8 @@ PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
 STYLE_VIS={'display':'flex'}
-LOGO_SRC="/assets/SCo_logo_graphic-small.png"
-LOGO_SRC2="/assets/rulerlab-small.png"
+LOGO_SRC="/assets/SCo_logo_graphic-small-inv.png"
+LOGO_SRC2="/assets/rulerlab-small-inv.png"
 
 # paths
 import os
