@@ -415,17 +415,20 @@ p {
     padding:0 1rem;
     margin:0;
     /* background: rgba(192, 153, 255, .6); */
-    border: 1px solid rgba(135, 119, 159, 1);
+    /* border: 1px solid rgba(135, 119, 159, 1); */
+    /* border: 1px solid rgba(10,10,10,1); */
     /* border: 1px solid rgba(0,0,0,.1); */
     /* border:1px solid red; */
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 0px;
+    border:none;
     display:inline-block;
     width:fit-content;
-    background: rgba(135, 119, 159, 0.9);
+    /* background: rgba(135, 119, 159, 0.9); */
     color:black;
+    background:rgba(225, 225, 225, 0.9);
 }
 
 .graphtabs-container .nav-link.link, .graphtabs-container .nav-link.visited {
@@ -438,25 +441,34 @@ p {
     /* background: rgba(192, 153, 255, .9); */
     /* background: rgba(102, 92, 119, 0.8); */
     background: rgba(116, 102, 139, 1);
-    color:whitesmoke;
+    padding:0 1rem;
+    color:black;
     backdrop-filter: blur(10px);
     border-top:none;
-    border: 1px solid rgba(55, 43, 74, 1);
+    background:rgba(175, 175, 175, 1);
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 0px;
     margin:0;
     display:inline-block;
     width:fit-content;
+    background:rgba(200, 200, 200, 0.9);
+    font-weight:600;
 }
 
 .graphtabs-container .nav-link:hover {
     /* border-bottom: 1px solid rgb(224, 205, 255); */
-    color:white;
-    border-top:none;
-    border: 1px solid rgba(55, 43, 74, 1);
+    /* color:white; */
+    /* border-top:none; */
+    /* border: 1px solid rgba(55, 43, 74, 1); */
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 0px;
-    font-weight:bold;
+    /* font-weight:bold; */
+    /* text-decoration: underline; */
+    /* font-style: italic; */
+    border:none;
+    font-weight:700;
+    border-left:1px solid silver;
+    border-bottom:1px solid silver;
 }
 
 
