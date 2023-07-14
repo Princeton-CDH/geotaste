@@ -10,10 +10,28 @@ class GeotasteLayout(BaseComponent):
         return ComparisonPanel()
 
     @cached_property
+    def logo_popup(self):
+        return html.Span([
+            dbc.Button(
+                self.title,
+                id='logo_popup',
+                color='link',
+                className='logo-title'
+            ),
+            dbc.Popover(
+                dbc.PopoverBody('Explanation!'),
+                target='logo_popup',
+                trigger='hover',
+                style={'z-index':1000}
+            )
+        ], className='logo-title')
+
+    @cached_property
     def logo(self):
         return html.Div([
             html.Img(src=LOGO_SRC, className='logo-img'),
-            html.H1(self.title, className='logo-title'),
+            # html.H1(self.title, className='logo-title'),
+            self.logo_popup,
             html.Img(src=LOGO_SRC2, className='logo-img2'),
         ], className='logo')
     
