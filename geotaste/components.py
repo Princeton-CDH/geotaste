@@ -160,13 +160,16 @@ class CollapsibleCard(BaseComponent):
         ## buttons
         @app.callback(
             Output(self.body, "is_open", allow_duplicate=True),
-            Input(self.button_showhide, "n_clicks"),
+            [
+                Input(self.button_showhide, "n_clicks"),
+                Input(self.id('card_header'), 'n_clicks')
+            ],
             State(self.body, "is_open"),
             prevent_initial_call=True
         )
         #@logger.catch
-        def toggle_collapse(n, is_open):
-            now_is_open = (not is_open if n else is_open)
+        def toggle_collapse(n1, n2, is_open):
+            now_is_open = (not is_open if (n1 or n2) else is_open)
             logger.debug(f'{self.name} is now open? {now_is_open}')
             return now_is_open
 
