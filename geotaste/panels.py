@@ -15,7 +15,7 @@ class FilterPanel(FilterComponent):
             className='store_desc query_str', 
             # placeholder=UNFILTERED, 
             # value='', 
-            style={'color':self.color}
+            # style={'color':self.color}
         )
 
 
@@ -34,8 +34,8 @@ class FilterPanel(FilterComponent):
                     for card in self.store_subcomponents
                 ],
                 prevent_initial_call=True
-            )
             #@logger.catch
+            )
             def subcomponent_filters_updated(*filters_d):
                 logger.debug('subcomponent filters updated')
                 filter_data = self.intersect_filters(*filters_d)
@@ -288,7 +288,7 @@ class ComparisonPanel(BaseComponent):
             dbc.Row([
                 dbc.Col(
                     btn_L,
-                    className='storedescs-col storedescs-col-L left-color'
+                    className='storedescs-col storedescs-col-L'
                 ),
                 dbc.Col(
                     html.Nobr(), 
@@ -297,7 +297,7 @@ class ComparisonPanel(BaseComponent):
                 ),
                 dbc.Col(
                     btn_R,
-                    className='storedescs-col storedescs-col-R right-color'
+                    className='storedescs-col storedescs-col-R'
                 ),
             ]), 
             className='layout-toprow'
@@ -346,6 +346,7 @@ class ComparisonPanel(BaseComponent):
 
     @cached_property
     def content(self,params=None):
+        return dbc.Container([self.content_left, self.content_right])
         return dbc.Container(
             dbc.Row(
                 [
@@ -415,19 +416,6 @@ class ComparisonPanel(BaseComponent):
         )
         return dbc.Container(graphtabs, className='graphtabs-container-container')
 
-    # @cached_property
-    # def graphtabs(self):
-    #     return get_tabs(
-    #         children=[
-    #             dict(label='Map', tab_id='map'),
-    #             dict(label='Table', tab_id='tbl'),
-    #             dict(label='Comparison', tab_id='tbl_arrond'),
-    #         ],
-    #         tab_level=1,
-    #         className='graphtabs-container',
-    #         active_tab='map'
-    #     )
-    
     
     @cached_property
     def graphtab(self):
@@ -481,23 +469,9 @@ class ComparisonPanel(BaseComponent):
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
-    tab_ids_1, fdL, fdR = unserialize(serialized_data)
     ff = ComparisonFigureFactory(fdL, fdR)
     viewfunc = determine_view(tab_ids_1, tab_ids_2)
-    # viewfunc = determine_view(tab_ids_1)
     return viewfunc(ff)
-
-# def determine_view(tab_ids=[], default=MemberMapView):
-#     if not tab_ids: return default
-#     tab = tab_ids[0]
-#     key2view=dict(
-#         tbl=MemberTableView,
-#         tbl_arrond=ArrondTableView,
-#         map=MemberMapView
-#     )
-#     return key2view.get(tab,default)
-    
-
 
 
 def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
