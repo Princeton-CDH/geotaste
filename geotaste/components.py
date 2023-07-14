@@ -100,10 +100,33 @@ class CollapsibleCard(BaseComponent):
     @cached_property
     def header(self):
         logger.trace(self.name)
+        desc=self.desc[0].upper() + self.desc[1:]
+        idx=self.id('card_header')
         return dbc.CardHeader(
             [
-                html.Div(self.button_showhide, className='button_showhide_div'),
-                html.P(self.desc[0].upper() + self.desc[1:]),
+                html.Div(
+                    [
+                        self.button_showhide
+                    ], 
+                    className='button_showhide_div'
+                ),
+                dbc.Button(
+                    desc, 
+                    color="link", 
+                    n_clicks=0,
+                    id=idx,
+                    className='card-title'
+                ),
+                dbc.Popover(
+                    [
+                        dbc.PopoverHeader(f'Filter on {self.name}'),
+                        dbc.PopoverBody(f'Filter...'),
+                    ],
+                    target=idx,
+                    trigger='hover',
+                    style={'z-index':1000},
+                    placement='auto'
+                )
             ],
             className=f'card-header-{self.className}'
         )

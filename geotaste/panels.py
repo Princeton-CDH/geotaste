@@ -289,7 +289,7 @@ class ComparisonPanel(BaseComponent):
                     target=idx,
                     trigger='hover',
                     style={'z-index':1000},
-                    placement='bottom'
+                    placement='auto'
                 )
             ])
 
@@ -347,7 +347,7 @@ class ComparisonPanel(BaseComponent):
         return dbc.Collapse(
             self.content_main_row, 
             className='layout-leftcol',
-            is_open=False
+            is_open=True
         )
     
     @cached_property
