@@ -271,18 +271,32 @@ class ComparisonPanel(BaseComponent):
         
         def getbtn(x, cls=''):
             className='button_store_desc store_desc query_str'
-            if cls: className+=(' '+cls)
-            return dbc.Button(
-                x, 
-                color="link", 
-                n_clicks=0,
-                className=className,
-                id=dict(type='store_desc_btn', index=uid()),
-                style={'text-align':'center'}
-            )
+            idx=dict(type='store_desc_btn', index=uid())
+            return dbc.Container([
+                dbc.Button(
+                    x, 
+                    color="link", 
+                    n_clicks=0,
+                    className=className,
+                    id=idx,
+                    style={'text-align':'center'}
+                ),
+                dbc.Popover(
+                    [
+                        dbc.PopoverHeader(f'Configure the {cls}-hand group'),
+                        dbc.PopoverBody(f'Filter the {cls}-hand group of library members and the books they borrowed. Then, see how they compare with the {"left" if cls=="right" else "right"}-hand group, on the map and in the data.'),
+                    ],
+                    target=idx,
+                    trigger='hover',
+                    style={'z-index':1000},
+                    placement='bottom'
+                )
+            ])
+
+
         
-        btn_L = getbtn(p_L)
-        btn_R = getbtn(p_R)
+        btn_L = getbtn(p_L, cls='left')
+        btn_R = getbtn(p_R, cls='right')
 
         return dbc.Container(
             dbc.Row([
