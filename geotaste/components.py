@@ -601,16 +601,18 @@ class BookGenreCard(FilterPlotCard):
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Author nationality'
     figure_factory = CreatorNationalityFigure
+    tooltip = 'Filter by the nationality of the author'
 
     
 class EventYearCard(FilterPlotCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
-    tooltip = 'Select only members who borrowed books in a given year range'
+    tooltip = 'Filter for the books borrowed in a given year range'
 
 class EventMonthCard(FilterPlotCard):
     desc = 'Month of borrowing'
     figure_factory = EventMonthFigure
+    tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
 
 class EventTypeCard(FilterPlotCard):
     desc = 'type of event'
