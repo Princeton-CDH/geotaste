@@ -164,7 +164,7 @@ h5 { font-size:1.1rem;}
     padding:0.2em;
     font-size:0.8em;
     text-align: right;
-    background-color: rgba(255,255,255,0.95);
+    background-color: rgba(255,255,255,0);
     border-top: none;
 }
 
@@ -413,9 +413,10 @@ p {
     height:100px;
     margin-left:4px;
     margin-right:4px;
-    border-bottom:1px solid rgba(10,10,10,0.2);
+    border:1px solid white;
+    /* border-bottom:1px solid rgba(10,10,10,0.2);
     border-top:none;
-    border-right:none;
+    border-right:none; */
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
     background: rgba(255,255,255,0.9);
@@ -473,6 +474,8 @@ p {
 }
 
 .graphtabs-container .nav-link:hover {
+    border: 1px solid rgba(100, 100, 100, 1);
+    border-top:none;
     /* border-bottom: 1px solid rgb(224, 205, 255); */
     /* color:white; */
     /* border-top:none; */
@@ -545,6 +548,8 @@ p {
     float:right;
 }
 
+.button_clear { font-size:.8rem}
+
 .button_clear_div {
     float:right;
 }
@@ -552,6 +557,11 @@ p {
 .card-footer-desc {
     text-align: left;
     width:100%;
+}
+
+.card-footer-desc .store_desc {
+    font-size:.8rem;
+    padding-left:.3rem;
 }
 
 .card-body {

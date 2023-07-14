@@ -103,6 +103,13 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name)
         desc=self.desc[0].upper() + self.desc[1:]
         idx=self.id('card_header')
+        btn_title = dbc.Button(
+            desc, 
+            color="link", 
+            n_clicks=0,
+            id=idx,
+            className='card-title'
+        )
         children = [
             html.Div(
                 [
@@ -110,16 +117,10 @@ class CollapsibleCard(BaseComponent):
                 ], 
                 className='button_showhide_div'
             ),
-            dbc.Button(
-                desc, 
-                color="link", 
-                n_clicks=0,
-                id=idx,
-                className='card-title'
-            )
+            btn_title
         ]
         if self.tooltip:
-            children+=[dbc.Tooltip(self.tooltip, target=idx)]
+            children.append(tooltip(btn_title, self.tooltip))
         return dbc.CardHeader(
             children,
             className=f'card-header-{self.className}'
@@ -623,10 +624,42 @@ class EventTypeCard(FilterPlotCard):
 
 
 def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
-    return dbc.Tabs(
-        children=[dbc.Tab(**d) for d in children], 
-        active_tab=active_tab if active_tab else (children[0].get('tab_id') if children else None), 
-        id=dict(type=f'tab_level_{tab_level}', index=uid()),
+    tabs = [
+        dbc.Tab(
+            children=d.get('children'),
+            label=d.get('label'),
+            tab_id=d.get('tab_id'),
+            id=uid()
+        )
+        for d in children
+    ]
+    tooltips = [
+        tooltip(tab, d.get('tooltip'))
+        for tab,d in zip(tabs,children)
+        if d.get('tooltip')
+    ]
+    active_tab=(
+        active_tab 
+        if active_tab 
+        else (
+            children[0].get('tab_id') 
+            if children 
+            else None
+        )
+    )
+    
+    tabs_obj = dbc.Tabs(
+        children=tabs, 
+        active_tab=active_tab, 
+        id=dict(
+            type=f'tab_level_{tab_level}', 
+            index=uid()
+        ),
         **kwargs
     )
+    return dbc.Container([tabs_obj] + tooltips)
 
+
+
+def tooltip(component, tooltip=''):
+    return dbc.Tooltip(tooltip, target=component.id)
