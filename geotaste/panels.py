@@ -403,16 +403,22 @@ class ComparisonPanel(BaseComponent):
         tbl_tabs = get_tabs(
             children=[
                 dict(label='By member', tab_id='tbl_members'),                
-                dict(label='By arrondissement', tab_id='tbl_arrond'),
+                # dict(label='By arrondissement', tab_id='tbl_arrond'),
             ], 
             tab_level=2, className='graphtabs-container', active_tab='tbl_members'
         )
 
         analyze_tabs = get_tabs(
             children=[
+                # dict(
+                #     label='Magnitude of difference',
+                #     tab_id='tbl_diff'
+                # ),                
+
                 dict(
-                    label='Magnitude of difference',
-                    tab_id='tbl_diff'),                
+                    label='By arrondissement', 
+                    tab_id='tbl_arrond'
+                ),
             ], 
             tab_level=2, 
             className='graphtabs-container'
@@ -420,9 +426,14 @@ class ComparisonPanel(BaseComponent):
 
         graphtabs = get_tabs(
             children=[
-                dict(children=map_tabs, label='Map data', tab_id='map'),
+                dict(
+                    children=map_tabs, 
+                    label='Map data', 
+                    tab_id='map',
+                    tooltip='Map where members lived'
+                ),
                 dict(children=tbl_tabs, label='View data', tab_id='tbl'),
-                # dict(children=analyze_tabs, label='Analyze data', tab_id='analyze')
+                dict(children=analyze_tabs, label='Analyze data', tab_id='analyze')
             ], 
             tab_level=1, 
             className='graphtabs-container',
@@ -491,19 +502,16 @@ def graphtab_cache(serialized_data):
 def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
     tab_ids_1_set=set(tab_ids_1)
     tab_ids_2_set=set(tab_ids_2)
+    logger.debug([tab_ids_1_set, tab_ids_2_set])
 
-    if 'tbl' in tab_ids_1_set:
-        if 'tbl_members' in tab_ids_2_set: 
-            return MemberTableView
-            
-        if 'tbl_arrond' in tab_ids_2_set:
-            return ArrondTableView
-        
+    if 'tbl' in tab_ids_1_set and 'tbl_members' in tab_ids_2_set: 
         return MemberTableView
-            
-    elif 'analyze' in tab_ids_1_set:
-        if 'tbl_diff' in tab_ids_2_set:
-            return DifferenceDegreeView
+
+    elif 'analyze' in tab_ids_1_set and 'tbl_arrond' in tab_ids_2_set:
+        return ArrondTableView
+
+    elif 'tbl' in tab_ids_1_set:
+        return MemberTableView
     
     elif 'map' in tab_ids_1_set:
         return MemberMapView
