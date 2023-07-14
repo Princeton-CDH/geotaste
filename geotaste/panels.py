@@ -283,13 +283,13 @@ class ComparisonPanel(BaseComponent):
                 ),
                 dbc.Popover(
                     [
-                        dbc.PopoverHeader(f'Configure the {cls}-hand group'),
+                        dbc.PopoverHeader(f'ℹ️ Choose books/members for {cls}-hand group'),
                         dbc.PopoverBody(f'Filter the {cls}-hand group of library members and the books they borrowed. Then, see how they compare with the {"left" if cls=="right" else "right"}-hand group, on the map and in the data.'),
                     ],
                     target=idx,
                     trigger='hover',
                     style={'z-index':1000},
-                    placement='auto'
+                    placement='right'
                 )
             ])
 

@@ -20,13 +20,13 @@ class GeotasteLayout(BaseComponent):
             ),
             dbc.Popover(
                 [
-                    dbc.PopoverHeader('How to use'),
+                    dbc.PopoverHeader('ℹ️ How to use'),
                     dbc.PopoverBody('Filter the left and right hand groups and then compare how their distribute on the map.'),
                 ],
                 target='logo_popup',
                 trigger='hover',
                 style={'z-index':1000},
-                placement='bottom'
+                placement='auto'
             )
         ], className='logo-title')
 

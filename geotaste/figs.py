@@ -500,7 +500,7 @@ class ComparisonFigureFactory(FigureFactory):
             df, 
             lat='lat',
             lon='lon', 
-            center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
+            center=MAP_CENTER,
             zoom=12, 
             hover_name='member_name',
             color='L_or_R',
