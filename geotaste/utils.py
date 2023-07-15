@@ -83,6 +83,9 @@ def is_numeric(x:object) -> bool:
     """
     return isinstance(x, numbers.Number)
 
+def is_numberish(x:object) -> bool:
+    return is_numeric(x) or (type(x)==str and x.isdigit())
+
 def is_listy(x:object) -> bool:
     """Checks if the input object is a list-like object.
 
@@ -93,6 +96,12 @@ def is_listy(x:object) -> bool:
         bool: True if the object is a tuple, list, or pandas Series; False otherwise.
     """
     return type(x) in {tuple,list,pd.Series}
+
+def ensure_int(x:Number, return_orig=True, default=None) -> int:
+    try:
+        return int(x)
+    except ValueError:
+        return (x if return_orig else default)
 
 def ensure_dict(x:object) -> dict:
     """Ensures that the input is a dictionary.
@@ -278,6 +287,13 @@ class CachedData:
             autocommit=autocommit,
             **kwargs
         )
+    
+def concat_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
+    return pd.concat([
+        dfL.assign(**{colname:colval_L}),
+        dfR.assign(**{colname:colval_R})
+    ])
+
 
 def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
     """
@@ -594,3 +610,27 @@ def oxfordcomma(l, repr=repr, op='and'):
         return f' {op} '.join(repr(x) for x in l)
     else:
         return f"{', '.join(repr(x) for x in l[:-1])}, {op} {repr(l[-1])}"
+    
+
+
+def wraptxt(s, n, newline_char='\n'):
+    """
+    Args:
+    s (str): String to be wrapped.
+    n (int): Number of characters after which the string should be wrapped.
+    newline_char (str): The character to be inserted at the end of each wrapped line. Default is '\n'.
+
+    Returns:
+    str: The wrapped string.
+    """
+    words = s.split()
+    lines = []
+    current_line = ''
+    for word in words:
+        if len(current_line) + len(word) > n:
+            lines.append(current_line.strip())
+            current_line = word
+        else:
+            current_line += ' ' + word
+    lines.append(current_line.strip())
+    return newline_char.join(lines)

@@ -624,11 +624,13 @@ class CombinedDataset(Dataset):
     }
     cols_members = {
         'sort_name':'member_name',
+        'name':'member_nicename',
         'membership_years':'member_membership',
         'birth_year':'member_dob',
         'death_year':'member_dod',
         'gender':'member_gender',
-        'nationalities':'member_nationalities'
+        'nationalities':'member_nationalities',
+        'title':'member_title'
     }
     cols_events = {
         'member':'member',
@@ -647,6 +649,7 @@ class CombinedDataset(Dataset):
         'dwelling_start_date':'dwelling_start',
         'dwelling_end_date':'dwelling_end',
         'dwelling_street_address':'dwelling_address',
+        'dwelling_city':'dwelling_city',
         'dwelling_latitude':'lat',
         'dwelling_longitude':'lon',
         'dwelling_dist_from_SCO':'dwelling_distSCO',

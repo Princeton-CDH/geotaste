@@ -84,6 +84,7 @@ def MemberMapView(ff):
     ofig.update_layout(autosize=True)
     ograph = dcc.Graph(
         figure=ofig, 
-        className='comparison_map_graph'
+        className='comparison_map_graph',
+        config={'displayModeBar':False},
     )
     return dbc.Container(ograph, className='graphtab')

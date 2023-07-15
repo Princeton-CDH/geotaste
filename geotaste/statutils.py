@@ -162,10 +162,10 @@ def measure_dists(
 
 
 def geodist(latlon1, latlon2, unit='km'):
-    from geopy.distance import distance
+    from geopy.distance import geodesic as distfunc
     import numpy as np
     try:
-        dist = distance(latlon1, latlon2)
+        dist = distfunc(latlon1, latlon2)
         return getattr(dist,unit)
     except Exception:
         return np.nan

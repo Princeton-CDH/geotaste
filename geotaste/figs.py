@@ -466,8 +466,8 @@ class ComparisonFigureFactory(FigureFactory):
     @cached_property
     def df_arronds(self): 
         return analyze_contingency_tables(
-            self.ff1.valid_arronds,
-            self.ff2.valid_arronds,
+            self.L.valid_arronds,
+            self.R.valid_arronds,
         )
     
     @cached_property
@@ -476,15 +476,17 @@ class ComparisonFigureFactory(FigureFactory):
     
     @cached_property
     def df_dwellings(self): 
-        return combine_LR_df(
-            self.ff1.df_dwellings, 
-            self.ff2.df_dwellings
-        )
+        # return combine_LR_df(
+        #     self.ff1.df_dwellings, 
+        #     self.ff2.df_dwellings
+        # )
+        return concat_LR_df(self.L.df_dwellings,self.R.df_dwellings)
 
     
     @cached_property
     def df_members(self): 
-        return combine_LR_df(self.L.df_members, self.R.df_members)
+        return concat_LR_df(self.L.df_members, self.R.df_members)
+        # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
     def plot(self, height=250, **kwargs):
@@ -496,63 +498,155 @@ class ComparisonFigureFactory(FigureFactory):
         df = self.df_dwellings
         kwargs={**self.kwargs, **kwargs}
         color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
-        fig = px.scatter_mapbox(
-            df, 
-            lat='lat',
-            lon='lon', 
-            center=MAP_CENTER,
-            zoom=12, 
-            hover_name='member_name',
-            color='L_or_R',
-            color_discrete_map=color_map,
-            # height=height,
-            size_max=40,
-            template=PLOTLY_TEMPLATE
-            # **kwargs
-        )
-        fig.update_traces(marker=dict(size=10))
-        fig.update_mapboxes(style='stamen-toner')
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         
-        fig_choro = px.choropleth_mapbox(
-            self.df_arronds.reset_index(),
-            geojson=get_geojson_arrondissement(),
-            locations='arrond_id', 
-            color='perc_L->R',
-            center=MAP_CENTER,
-            zoom=12,
-            # color_continuous_scale='puor',
-            color_continuous_scale=[LEFT_COLOR, 'rgba(0,0,0,0)', RIGHT_COLOR],
-            opacity=.5,
-            # height=height,
-            template=PLOTLY_TEMPLATE
-        )
-        fig_choro.update_mapboxes(style="stamen-toner")
-        fig_choro.update_layout(
-            margin={"r":0,"t":0,"l":0,"b":0},
-            legend=dict(
-                yanchor="top",
-                y=0.99,
-                xanchor="left",
-                x=0.01
-            )
-        )
-        fig_choro.update_layout(
-            coloraxis=dict(
-                colorbar=dict(
-                    orientation='h', 
-                    y=.01,
-                    thickness=10
-                )
-            ),
 
-        )
+        # figure 1: scatter
+        def get_scatter():
+
+            # @logger.catch
+            def hover(row):
+                UNKNOWN = '????'
+                def v(x): return x if x else UNKNOWN
+                
+                if not row.member_membership:
+                    y1,y2 = UNKNOWN,UNKNOWN
+                else:
+                    yl = sorted(list(row.member_membership))
+                    y1,y2 = yl[0],yl[-1]
+                
+                numborrow_member_total = len(figdf[(figdf.member==row.member)].drop_duplicates(['dwelling','book']))
+                numborrow_here = len(figdf[(figdf.member==row.member) & (figdf.dwelling==row.dwelling)].drop_duplicates(['dwelling','book']))
+                pronouns = ('they','their') if row.member_gender == 'Nonbinary' else (
+                    ('she','her') if row.member_gender=='Female' else (
+                        ('he','his') if row.member_gender == 'Male' else ('they','their')
+                    )
+                )
+                xn=50
+                def wrap(x,xn=xn): return wraptxt(x, ensure_int(xn), '<br>') if x else x
+                
+                def bookdesc(r):
+                    o=f'* {r.creator}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
+                    if r.book_genre: o+=f' of {"and ".join(x.lower() for x in r.book_genre)}'
+                    o+=f' borrowed '
+                    if r.event_year and r.member_dob and is_numberish(r.member_dob) and is_numberish(r.event_year): 
+                        o+=f' when {int(float(r.event_year) - float(r.member_dob))}yo'
+                    if r.event_start:
+                        o+=f' {r.event_start}'
+                    if r.event_end:
+                        o+=f' and returned {r.event_end}'
+                    return wrap(o)
+                
+                borrowbooks = '<br><br>'.join(figdf[(figdf.dwelling==row.dwelling) & (figdf.book_title!='')].fillna(UNKNOWN).apply(bookdesc,axis=1))
+
+                from geopy.distance import geodesic
+                gdist = geodesic((float(row.lon),float(row.lat)), (LATLON_SCO[1], LATLON_SCO[0])).km
+                nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
+                nats=f', from {oxfordcomma(nats, repr=lambda x: x)}' if nats else ''
+                
+                otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}')
+                obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {round(gdist,1):,}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership. {"These books were:" if numborrow_here>1 else "This book was:"}')
+                o = '<br><br>'.join([otitle, obody,borrowbooks])
+                return o
+
+            figdf = df.reset_index().fillna('').query('(lat!="") & (lon!="")')
+            with Logwatch('assigning hovertext to plot'):
+                figdf=figdf.assign(hover=figdf.apply(hover,axis=1))
+            customdata=np.stack((figdf['hover'], figdf['member_name']), axis=-1)
+            fig = px.scatter_mapbox(
+                figdf, 
+                lat='lat',
+                lon='lon', 
+                center=MAP_CENTER,
+                zoom=12, 
+                hover_name='member_name',
+                hover_data = 'hover',
+                color='L_or_R',
+                color_discrete_map=color_map,
+                # height=height,
+                size_max=40,
+                template=PLOTLY_TEMPLATE,
+                # **kwargs
+            )
+            fig.update_traces(
+                marker=dict(size=10), 
+                customdata=customdata,
+                hovertemplate="%{customdata[0]}"
+            )
+            fig.update_mapboxes(style='stamen-toner')
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+            return fig
         
-        # fig_choro.update_coloraxes(reversescale=True)
-        ofig=go.Figure(
-            data=fig_choro.data + fig.data, 
-            layout=fig_choro.layout
-        )
+
+        def get_choro():
+            from colour import Color
+
+            Lcolor = Color(LEFT_COLOR)
+            Rcolor = Color(RIGHT_COLOR)
+            midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+            midpoint.set_luminance(.95)
+
+            figdf = self.df_arronds.reset_index()
+            fig_choro = px.choropleth_mapbox(
+                figdf,
+                geojson=get_geojson_arrondissement(),
+                locations='arrond_id', 
+                color='perc_L->R',
+                center=MAP_CENTER,
+                zoom=12,
+                # color_continuous_scale='puor',
+                hover_data = list(figdf.columns),
+                color_continuous_scale=[
+                    LEFT_COLOR, 
+                    # 'rgba(255,255,255,1)', 
+                    # BOTH_COLOR,
+                    midpoint.hex,
+                    RIGHT_COLOR
+                ],
+                opacity=.5,
+                # height=height,
+                template=PLOTLY_TEMPLATE
+            )
+            
+            fig_choro.update_mapboxes(style="stamen-toner")
+            fig_choro.update_layout(
+                margin={"r":0,"t":0,"l":0,"b":0},
+                legend=dict(
+                    yanchor="bottom",
+                    y=0.1,
+                    xanchor="right",
+                    x=0.99
+                )
+            )
+            fig_choro.update_layout(
+                coloraxis=dict(
+                    colorbar=dict(
+                        orientation='h', 
+                        y=.01,
+                        lenmode='fraction',
+                        len=.5,
+                        thickness=10,
+                        xanchor='right',
+                        x=.99
+                    )
+                ),
+
+            )
+            return fig_choro
+
+        # generate figs
+        with Logwatch('generating scatter plot'):
+            fig_scatter = get_scatter()
+
+        with Logwatch('generating choropleth'):
+            fig_choro = get_choro()
+
+        with Logwatch('combining figs'):
+            ofig=go.Figure(
+                data=fig_choro.data + fig_scatter.data, 
+                layout=fig_choro.layout
+            )
+
+        # final responsive layout patch
         ofig.update_layout(autosize=True)
         ofig.layout._config = {'responsive':True}
         return ofig
