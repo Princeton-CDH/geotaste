@@ -97,6 +97,7 @@ import copy,time,sys,os
 import random
 import pandas as pd
 import numbers
+from numbers import Number
 import json
 from collections import Counter
 
