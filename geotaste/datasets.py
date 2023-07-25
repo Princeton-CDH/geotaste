@@ -178,7 +178,8 @@ class DwellingsDataset(Dataset):
         'latitude',
         'longitude',
     ]
-    cols_id=['member','street_address','city','postal_code','start_date','end_date']
+    # cols_id=['member','street_address','city','postal_code','start_date','end_date']
+    cols_id = ['member', 'latitude', 'longitude','start_date','end_date']
 
     @cached_property
     def data(self):
@@ -186,13 +187,16 @@ class DwellingsDataset(Dataset):
         df['member'] = df['member_uri'].apply(get_member_id)
         df['arrond_id']=df['arrrondissement'].apply(lambda x: 'X' if not x else str(int(x)))
         df['dist_from_SCO'] = [
-            round(geodist(latlon, LATLON_SCO, unit='km'), 3) 
+            geodist(latlon, LATLON_SCO, unit='km')
             for latlon in zip(df.latitude, df.longitude)
         ]
         df['desc'] = df.apply(get_dwelling_desc, axis=1)
-        df['dwelling'] = [self.sep.join(l) for l in df[self.cols_id].values]
-        df=df.drop_duplicates('dwelling')
-        return df.fillna('').set_index('dwelling')
+        df['dwelling'] = [self.sep.join(str(x) for x in l) for l in df[self.cols_id].values]
+        # logger.debug(df.dwelling)
+        # logger.debug([len(df),'len df1'])
+        # logger.debug(df.dwelling.value_counts())
+        # df=df.drop_duplicates('dwelling')
+        return df.set_index('dwelling')
 
     def get_member(self, member):
         return self.data[self.data['member'] == member]
@@ -495,12 +499,16 @@ class MemberEventsDataset(EventsDataset):
                     'member':get_member_id(member_uri),
                     'book':get_book_id(row['item_uri']),
                     'event':event,
-                    'member_name':row['member_names'][i],
-                    'member_sort_name':row['member_sort_names'][i],
                     **dict(row)
                 }
                 l.append(d)
-        return pd.DataFrame(l)
+        df_events = pd.DataFrame(l)
+        return df_events.merge(
+            Members().data, 
+            on='member', 
+            how='outer',
+            suffixes=('','_member')
+        ).fillna('')
 
 @cache
 def MemberEvents(): return MemberEventsDataset()
@@ -622,7 +630,9 @@ class CombinedDataset(Dataset):
         'genre':'book_genre',
 
     }
-    cols_members = {
+    cols_members_events = {
+        'member':'member',
+        'title':'member_title',
         'sort_name':'member_name',
         'name':'member_nicename',
         'membership_years':'member_membership',
@@ -630,10 +640,6 @@ class CombinedDataset(Dataset):
         'death_year':'member_dod',
         'gender':'member_gender',
         'nationalities':'member_nationalities',
-        'title':'member_title'
-    }
-    cols_events = {
-        'member':'member',
         'event':'event',
         'book':'book',
         'dwelling':'dwelling',
@@ -662,24 +668,30 @@ class CombinedDataset(Dataset):
 
     def gen(self, save=False):
         # events and members (full outer join)
-        events = selectrename_df(MemberEventDwellingsDataset().data.query('event_type=="Borrow"'), self.cols_events)
-        members = selectrename_df(MembersDataset().data, self.cols_members)
-        events_members = events.merge(members,on='member',how='outer').fillna(self.fillna)
+        events_members = selectrename_df(
+            MemberEventDwellings().data,
+            self.cols_members_events
+        )
 
         # creations and books (left join)
-        creations = selectrename_df(CreationsDataset().data, self.cols_creations).query('creator_role=="author"')
+        creations = selectrename_df(CreationsDataset().data, self.cols_creations) #.query('@overlaps(creator_role, ["", "author"])')
         books = selectrename_df(BooksDataset().data, self.cols_books)
-        creations_books = creations.join(books)  # big to small, same index
+        creations_books = creations.join(books, how='outer')  # big to small, same index
 
         # all together (full outer join)
-        odf = events_members.merge(creations_books, on='book', how='outer').fillna(self.fillna)
-
-        colsort = sorted(
-            [c for c in odf.columns if c not in set(self.cols_prefix)], 
-            key=lambda c: self.coltype_sort.index(c.split('_')[0]) if c.split('_')[0] in set(self.coltype_sort) else 1000
+        odf = events_members.merge(
+            creations_books, 
+            on='book', 
+            how='left'
         )
-        sortt=[x for x in self.coltype_sort if x in set(odf.columns)]
-        odf = odf[self.cols_prefix + list(colsort)].sort_values(sortt)
+        print(len(odf))
+
+        # colsort = sorted(
+        #     [c for c in odf.columns if c not in set(self.cols_prefix)], 
+        #     key=lambda c: self.coltype_sort.index(c.split('_')[0]) if c.split('_')[0] in set(self.coltype_sort) else 1000
+        # )
+        # sortt=[x for x in self.coltype_sort if x in set(odf.columns)]
+        # odf = odf[self.cols_prefix + list(colsort)].sort_values(sortt)
         if save: odf.to_pickle(self.path)
         return odf
 
@@ -777,6 +789,8 @@ def get_all_arrond_ids():
 def Members(): return MembersDataset()
 @cache
 def Dwellings(): return DwellingsDataset()
+@cache
+def MemberEventDwellings(): return MemberEventDwellingsDataset()
 @cache
 def Combined(): 
     logger.debug('Combined()')

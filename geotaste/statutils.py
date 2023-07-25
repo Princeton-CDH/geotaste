@@ -129,6 +129,7 @@ def zfy(series):
 
 
 def filter_signif(df, p_col=None, min_p=MIN_P):
+    if min_p is None: return df
     if p_col is None: pcol=first([c for c in df if c=='pvalue' or c.endswith('_p')])
     if not pcol: return df
     return df[df[pcol] <= min_p]
@@ -165,8 +166,53 @@ def geodist(latlon1, latlon2, unit='km'):
     from geopy.distance import geodesic as distfunc
     import numpy as np
     try:
-        dist = distfunc(latlon1, latlon2)
+        dist = distfunc((latlon1[1],latlon[0]), (latlon2[1],latlon[0])) # doh!
         return getattr(dist,unit)
     except Exception:
         return np.nan
     
+
+
+
+
+
+
+
+####
+
+def describe_arronds(df_arronds, min_p=None, p_col=None):
+    signif_df = filter_signif(df_arronds)
+
+    if len(signif_df): 
+        signif_df['odds_ratio'] = signif_df['odds_ratio'].replace(np.inf, np.nan)
+        signif_df = signif_df[signif_df.odds_ratio.apply(is_numeric) & (~signif_df.odds_ratio.isna()) & (signif_df.odds_ratio!=0)]
+
+    desc_top = f'''Comparing where library members in the left- and right-hand groups lived produces **{len(signif_df)}** statistically significant arrondissement.'''
+    
+    signif_more_L=signif_df[signif_df.odds_ratio>1]
+    signif_more_R=signif_df[signif_df.odds_ratio<1]
+
+    desc_L=describe_arronds_LR(signif_more_L,side='left') if len(signif_more_L) else ''
+    desc_R=describe_arronds_LR(signif_more_R,side='right') if len(signif_more_R) else ''
+
+    return (desc_L,desc_R)
+
+def describe_arronds_row(row,side='left'):
+    ratio = row.odds_ratio
+    cL,cR,pL,pR=row.count_L,row.count_R,row.perc_L,row.perc_R
+    if side=='right':
+        if ratio == 0: ratio=np.nan
+        ratio=1/ratio
+        cL,cR=cR,cL
+        pL,pR=pR,pL
+    cL2 = cL*pR
+    cR2 = cR*pR
+    astr=ordinal_str(int(row.arrond_id))
+    return f'* ***{ratio:.1f}x*** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
+
+def describe_arronds_LR(signif_df, side='left'):
+    descs=['',f'The {side.title()} Group is...']
+    for arrond_id,row in signif_df.reset_index().sort_values('odds_ratio', ascending=side!='left').iterrows():
+        descs.append(describe_arronds_row,side=side)
+    return '\n'.join(descs)
+

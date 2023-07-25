@@ -129,6 +129,7 @@ class MemberPanel(CollapsiblePanel):
     figure_factory = CombinedFigureFactory
     desc = 'Members of the library'
     records_name='members'
+    tooltip = 'Filter members of the library by name, date of birth, when active, gender, nationality, and arrondissement'
 
     @cached_property
     def name_card(self): 
@@ -177,6 +178,7 @@ class BookPanel(CollapsiblePanel):
     figure_factory = CombinedFigureFactory
     desc = 'Books they borrowed'
     records_name='books'
+    tooltip = 'Filter books borrowed by title, date of publication, genre, author, author gender, author nationality, and the date borrowed'
 
     @cached_property
     def title_card(self): 
@@ -272,6 +274,7 @@ class ComparisonPanel(BaseComponent):
         def getbtn(x, cls=''):
             className='button_store_desc store_desc query_str'
             idx=dict(type='store_desc_btn', index=uid())
+            msg=f'(Click here to show/hide the filters). Here, {cls}-hand side in {"blue" if cls=="right" else "brown"}, filter for a group of library members and/or the books they borrowed. Then, see how it compare with the {"left" if cls=="right" else "right"}-hand group, on the map and in the data.'
             return dbc.Container([
                 dbc.Button(
                     x, 
@@ -281,16 +284,17 @@ class ComparisonPanel(BaseComponent):
                     id=idx,
                     style={'text-align':'center'}
                 ),
-                dbc.Popover(
-                    [
-                        dbc.PopoverHeader(f'ℹ️ Choose books/members for {cls}-hand group'),
-                        dbc.PopoverBody(f'Filter the {cls}-hand group of library members and the books they borrowed. Then, see how they compare with the {"left" if cls=="right" else "right"}-hand group, on the map and in the data.'),
-                    ],
-                    target=idx,
-                    trigger='hover',
-                    style={'z-index':1000},
-                    placement='right'
-                )
+                # dbc.Popover(
+                #     [
+                #         dbc.PopoverHeader(f'ℹ️ Choose books/members for {cls}-hand group'),
+                #         dbc.PopoverBody(),
+                #     ],
+                #     target=idx,
+                #     trigger='hover',
+                #     style={'z-index':1000},
+                #     placement='right'
+                # )
+                dbc.Tooltip(msg, target=idx)
             ])
 
 
@@ -490,7 +494,7 @@ class ComparisonPanel(BaseComponent):
 
 # @cache
 
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)

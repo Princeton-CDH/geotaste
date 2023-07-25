@@ -423,9 +423,15 @@ class CombinedFigureFactory(FigureFactory):
         return (s/s.sum()) * 100
     
     @cached_property
-    def df_dwellings(self): return self.data.drop_duplicates('dwelling')
+    def df_dwellings(self): 
+        assert 'dwelling' in set(self.data.columns)
+        o=self.data.drop_duplicates('dwelling').set_index('dwelling')
+        return o
+    
     @cached_property
-    def df_members(self): return self.data.drop_duplicates('member')
+    def df_members(self): 
+        
+        return self.data.drop_duplicates('member').set_index('member')
     
     @cached_property
     def arronds(self):return self.df_dwellings.arrond_id
@@ -480,32 +486,40 @@ class ComparisonFigureFactory(FigureFactory):
         #     self.ff1.df_dwellings, 
         #     self.ff2.df_dwellings
         # )
-        return concat_LR_df(self.L.df_dwellings,self.R.df_dwellings)
+        return combine_LR_df(
+            self.L.df_dwellings,
+            self.R.df_dwellings, 
+            colval_L='Left Group',
+            colval_R='Right Group',
+            colval_LR='Both Groups'
+        )
 
     
     @cached_property
     def df_members(self): 
-        return concat_LR_df(self.L.df_members, self.R.df_members)
+        return combine_LR_df(self.L.df_members, self.R.df_members)
         # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
     def plot(self, height=250, **kwargs):
         def get_color(x):
-            if x=='L': return LEFT_COLOR
-            if x=='R': return RIGHT_COLOR
+            if x=='L' or 'Left' in x: return LEFT_COLOR
+            if x=='R' or 'Right' in x: return RIGHT_COLOR
             return BOTH_COLOR
         
-        df = self.df_dwellings
+        df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        bdf=df[df.book_title!='']
         kwargs={**self.kwargs, **kwargs}
         color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         
 
+
         # figure 1: scatter
         def get_scatter():
-
+            figdf=df.sample(frac=1)
             # @logger.catch
             def hover(row):
-                UNKNOWN = '????'
+                UNKNOWN = '?'
                 def v(x): return x if x else UNKNOWN
                 
                 if not row.member_membership:
@@ -513,9 +527,12 @@ class ComparisonFigureFactory(FigureFactory):
                 else:
                     yl = sorted(list(row.member_membership))
                     y1,y2 = yl[0],yl[-1]
+
+                borrowdf_here = bdf[bdf.dwelling==row.dwelling].drop_duplicates('event')
+                borrowdf_member = bdf[bdf.member==row.member].drop_duplicates('event')
                 
-                numborrow_member_total = len(figdf[(figdf.member==row.member)].drop_duplicates(['dwelling','book']))
-                numborrow_here = len(figdf[(figdf.member==row.member) & (figdf.dwelling==row.dwelling)].drop_duplicates(['dwelling','book']))
+                numborrow_member_total = len(borrowdf_member)
+                numborrow_here = len(borrowdf_here)
                 pronouns = ('they','their') if row.member_gender == 'Nonbinary' else (
                     ('she','her') if row.member_gender=='Female' else (
                         ('he','his') if row.member_gender == 'Male' else ('they','their')
@@ -536,21 +553,21 @@ class ComparisonFigureFactory(FigureFactory):
                         o+=f' and returned {r.event_end}'
                     return wrap(o)
                 
-                borrowbooks = '<br><br>'.join(figdf[(figdf.dwelling==row.dwelling) & (figdf.book_title!='')].fillna(UNKNOWN).apply(bookdesc,axis=1))
+                borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
 
-                from geopy.distance import geodesic
-                gdist = geodesic((float(row.lon),float(row.lat)), (LATLON_SCO[1], LATLON_SCO[0])).km
+                gdist = f'{round(float(row.dwelling_distSCO),1):,1}' if row.dwelling_distSCO else UNKNOWN
                 nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
                 nats=f', from {oxfordcomma(nats, repr=lambda x: x)}' if nats else ''
+                gstr=f', {row.member_gender.lower()}'
                 
-                otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}')
-                obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {round(gdist,1):,}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership. {"These books were:" if numborrow_here>1 else "This book was:"}')
+                otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}{gstr}')
+                obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership. {"These books were:" if numborrow_here>1 else "This book was:"}')
                 o = '<br><br>'.join([otitle, obody,borrowbooks])
                 return o
 
-            figdf = df.reset_index().fillna('').query('(lat!="") & (lon!="")')
+            
             with Logwatch('assigning hovertext to plot'):
-                figdf=figdf.assign(hover=figdf.apply(hover,axis=1))
+                figdf['hover'] = [hover(row) for i,row in tqdm(figdf.iterrows(), total=len(figdf))]
             customdata=np.stack((figdf['hover'], figdf['member_name']), axis=-1)
             fig = px.scatter_mapbox(
                 figdf, 
@@ -585,7 +602,14 @@ class ComparisonFigureFactory(FigureFactory):
             midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
             midpoint.set_luminance(.95)
 
+            def hover(row):
+                if row.arrond_id and row.arrond_id.isdigit():
+                    return describe_arronds_row(row)
+                else:
+                    return ''
+
             figdf = self.df_arronds.reset_index()
+            figdf['hover']=figdf.apply(hover,axis=1)
             fig_choro = px.choropleth_mapbox(
                 figdf,
                 geojson=get_geojson_arrondissement(),
@@ -594,7 +618,8 @@ class ComparisonFigureFactory(FigureFactory):
                 center=MAP_CENTER,
                 zoom=12,
                 # color_continuous_scale='puor',
-                hover_data = list(figdf.columns),
+                # hover_data = list(figdf.columns),
+                hover_data=[],
                 color_continuous_scale=[
                     LEFT_COLOR, 
                     # 'rgba(255,255,255,1)', 
@@ -606,13 +631,18 @@ class ComparisonFigureFactory(FigureFactory):
                 # height=height,
                 template=PLOTLY_TEMPLATE
             )
+            customdata=np.stack((figdf['hover'],), axis=-1)
+            fig_choro.update_traces(
+                customdata=customdata,
+                hovertemplate="%{customdata[0]}"
+            )
             
             fig_choro.update_mapboxes(style="stamen-toner")
             fig_choro.update_layout(
                 margin={"r":0,"t":0,"l":0,"b":0},
                 legend=dict(
                     yanchor="bottom",
-                    y=0.1,
+                    y=0.06,
                     xanchor="right",
                     x=0.99
                 )
