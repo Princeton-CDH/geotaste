@@ -176,7 +176,7 @@ class CollapsibleCard(BaseComponent):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
     filter_data,selected,kwargs = unserialize(serialized_data)
@@ -184,7 +184,7 @@ def ff_cache(figure_class, serialized_data):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (
@@ -551,26 +551,32 @@ class MemberNameCard(FilterInputCard):
     desc = 'Name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
+    tooltip = 'Filter for particular members by name'
 
 class MemberDOBCard(FilterPlotCard):
     desc = 'Birth year'
-    figure_factory = MemberDOBFigure    
+    figure_factory = MemberDOBFigure 
+    tooltip = 'Filter members by date of birth'   
     
 class MembershipYearCard(FilterPlotCard):
     desc = 'Years active'
     figure_factory = MembershipYearFigure    
+    tooltip = 'Filter for membership by years of active members'
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Gender'
     figure_factory = MemberGenderFigure
+    tooltip = 'Filter for members by genre'
 
 class MemberNationalityCard(FilterPlotCard):
     desc = 'Nationality'
     figure_factory = MemberNationalityFigure
+    tooltip = 'Filter for members of particular nationalities'
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Arrondissement'
     figure_factory = MemberArrondMap
+    tooltip = 'Filter for members who ever lived in a given arrondissement'
 
 
 
@@ -582,25 +588,28 @@ class BookTitleCard(FilterInputCard):
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
-
+    tooltip = 'Filter for particular books'
 
 class CreatorNameCard(FilterInputCard):
     desc = 'Author'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
-    
+    tooltip = 'Filter for particular authors'
 
 class BookYearCard(FilterPlotCard):
     desc = "Publication date"
     figure_factory = BookYearFigure
+    tooltip = 'Filter by when the borrowed book was published'
 
 class CreatorGenderCard(FilterPlotCard):
     desc = 'Author gender'
     figure_factory = CreatorGenderFigure
+    tooltip = 'Filter by the gender of the author'
 
 class BookGenreCard(FilterPlotCard):
     desc = 'Genre'
     figure_factory = BookGenreFigure
+    tooltip = 'Filter by genre of book'
 
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Author nationality'
