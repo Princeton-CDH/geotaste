@@ -186,10 +186,13 @@ class DwellingsDataset(Dataset):
         df=super().data
         df['member'] = df['member_uri'].apply(get_member_id)
         df['arrond_id']=df['arrrondissement'].apply(lambda x: 'X' if not x else str(int(x)))
+        print(df['latitude'])
+        print(df['longitude'])
         df['dist_from_SCO'] = [
             geodist(latlon, LATLON_SCO, unit='km')
             for latlon in zip(df.latitude, df.longitude)
         ]
+        print(df.dist_from_SCO)
         df['desc'] = df.apply(get_dwelling_desc, axis=1)
         df['dwelling'] = [self.sep.join(str(x) for x in l) for l in df[self.cols_id].values]
         # logger.debug(df.dwelling)
