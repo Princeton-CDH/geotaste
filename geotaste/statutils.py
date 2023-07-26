@@ -195,7 +195,7 @@ def describe_arronds(df_arronds, min_p=None, p_col=None):
     desc_L=describe_arronds_LR(signif_more_L,side='left') if len(signif_more_L) else ''
     desc_R=describe_arronds_LR(signif_more_R,side='right') if len(signif_more_R) else ''
 
-    return (desc_L,desc_R)
+    return (desc_L,desc_R,desc_top)
 
 def describe_arronds_row(row,side='left'):
     ratio = row.odds_ratio
@@ -212,7 +212,8 @@ def describe_arronds_row(row,side='left'):
 
 def describe_arronds_LR(signif_df, side='left'):
     descs=['',f'The {side.title()} Group is...']
-    for arrond_id,row in signif_df.reset_index().sort_values('odds_ratio', ascending=side!='left').iterrows():
-        descs.append(describe_arronds_row,side=side)
+    dfx=signif_df.reset_index().sort_values('odds_ratio', ascending=side!='left')
+    for _,row in dfx.iterrows():
+        descs.append(describe_arronds_row(row,side=side))
     return '\n'.join(descs)
 

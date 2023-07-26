@@ -663,7 +663,7 @@ class CombinedDataset(Dataset):
     coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
-    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month']
+    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
     cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
 
     def gen(self, save=False):
@@ -684,14 +684,27 @@ class CombinedDataset(Dataset):
             on='book', 
             how='left'
         )
-        print(len(odf))
+        for c in odf: 
+            if c in set(self.cols_q):
+                quant = True
+            elif c not in set(self.cols_sep):
+                quant = False
+            else:
+                quant = None
+            odf[c] = qualquant_series(odf[c], quant=quant)
 
-        # colsort = sorted(
-        #     [c for c in odf.columns if c not in set(self.cols_prefix)], 
-        #     key=lambda c: self.coltype_sort.index(c.split('_')[0]) if c.split('_')[0] in set(self.coltype_sort) else 1000
-        # )
-        # sortt=[x for x in self.coltype_sort if x in set(odf.columns)]
-        # odf = odf[self.cols_prefix + list(colsort)].sort_values(sortt)
+        odfx=odf.drop_duplicates('dwelling')
+        bdf=odf[odf.book_title!='']
+        tooltip_d = {
+            row.dwelling:hover_tooltip(row, bdf) 
+            for _,row in tqdm(
+                odfx.iterrows(), 
+                total=len(odfx), 
+                desc='Pre-calculating tooltips'
+            )
+            if row.dwelling
+        }
+        odf['hover_tooltip'] = [tooltip_d.get(dw,'') for dw in odf.dwelling]
         if save: odf.to_pickle(self.path)
         return odf
 
@@ -795,3 +808,59 @@ def MemberEventDwellings(): return MemberEventDwellingsDataset()
 def Combined(): 
     logger.debug('Combined()')
     return CombinedDataset()
+
+
+
+
+
+
+
+
+#### other funcs
+
+def hover_tooltip(row, bdf):
+    UNKNOWN = '?'
+    def v(x): return x if x else UNKNOWN
+    
+    if not row.member_membership:
+        y1,y2 = UNKNOWN,UNKNOWN
+    else:
+        yl = sorted(list(row.member_membership))
+        y1,y2 = yl[0],yl[-1]
+
+    borrowdf_here = bdf[bdf.dwelling==row.dwelling].drop_duplicates('event')
+    borrowdf_member = bdf[bdf.member==row.member].drop_duplicates('event')
+    
+    numborrow_member_total = len(borrowdf_member)
+    numborrow_here = len(borrowdf_here)
+    pronouns = ('they','their') if row.member_gender == 'Nonbinary' else (
+        ('she','her') if row.member_gender=='Female' else (
+            ('he','his') if row.member_gender == 'Male' else ('they','their')
+        )
+    )
+    xn=50
+    def wrap(x,xn=xn): return wraptxt(x, ensure_int(xn), '<br>') if x else x
+    
+    def bookdesc(r):
+        o=f'* {r.creator}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
+        if r.book_genre: o+=f' of {"and ".join(x.lower() for x in r.book_genre)}'
+        o+=f' borrowed '
+        if r.event_year and r.member_dob and is_numberish(r.member_dob) and is_numberish(r.event_year): 
+            o+=f' when {int(float(r.event_year) - float(r.member_dob))}yo'
+        if r.event_start:
+            o+=f' {r.event_start}'
+        if r.event_end:
+            o+=f' and returned {r.event_end}'
+        return wrap(o)
+    
+    borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
+
+    gdist = f'{round(float(row.dwelling_distSCO),1)}' if row.dwelling_distSCO else UNKNOWN
+    nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
+    nats=f', from {oxfordcomma(nats, repr=lambda x: x)}' if nats else ''
+    gstr=f', {row.member_gender.lower()}'
+    
+    otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}{gstr}')
+    obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership. {"These books were:" if numborrow_here>1 else "This book was:"}')
+    o = '<br><br>'.join([otitle, obody,borrowbooks])
+    return o

@@ -434,9 +434,10 @@ class CombinedFigureFactory(FigureFactory):
         return self.data.drop_duplicates('member').set_index('member')
     
     @cached_property
-    def arronds(self):return self.df_dwellings.arrond_id
+    def arronds(self):return qualquant_series(self.df_dwellings.arrond_id, quant=False)
     @cached_property
-    def valid_arronds(self): return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
+    def valid_arronds(self): 
+        return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
 
 
 
@@ -516,59 +517,8 @@ class ComparisonFigureFactory(FigureFactory):
 
         # figure 1: scatter
         def get_scatter():
-            figdf=df.sample(frac=1)
-            # @logger.catch
-            def hover(row):
-                UNKNOWN = '?'
-                def v(x): return x if x else UNKNOWN
-                
-                if not row.member_membership:
-                    y1,y2 = UNKNOWN,UNKNOWN
-                else:
-                    yl = sorted(list(row.member_membership))
-                    y1,y2 = yl[0],yl[-1]
-
-                borrowdf_here = bdf[bdf.dwelling==row.dwelling].drop_duplicates('event')
-                borrowdf_member = bdf[bdf.member==row.member].drop_duplicates('event')
-                
-                numborrow_member_total = len(borrowdf_member)
-                numborrow_here = len(borrowdf_here)
-                pronouns = ('they','their') if row.member_gender == 'Nonbinary' else (
-                    ('she','her') if row.member_gender=='Female' else (
-                        ('he','his') if row.member_gender == 'Male' else ('they','their')
-                    )
-                )
-                xn=50
-                def wrap(x,xn=xn): return wraptxt(x, ensure_int(xn), '<br>') if x else x
-                
-                def bookdesc(r):
-                    o=f'* {r.creator}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
-                    if r.book_genre: o+=f' of {"and ".join(x.lower() for x in r.book_genre)}'
-                    o+=f' borrowed '
-                    if r.event_year and r.member_dob and is_numberish(r.member_dob) and is_numberish(r.event_year): 
-                        o+=f' when {int(float(r.event_year) - float(r.member_dob))}yo'
-                    if r.event_start:
-                        o+=f' {r.event_start}'
-                    if r.event_end:
-                        o+=f' and returned {r.event_end}'
-                    return wrap(o)
-                
-                borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
-
-                gdist = f'{round(float(row.dwelling_distSCO),1):,1}' if row.dwelling_distSCO else UNKNOWN
-                nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
-                nats=f', from {oxfordcomma(nats, repr=lambda x: x)}' if nats else ''
-                gstr=f', {row.member_gender.lower()}'
-                
-                otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}{gstr}')
-                obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership. {"These books were:" if numborrow_here>1 else "This book was:"}')
-                o = '<br><br>'.join([otitle, obody,borrowbooks])
-                return o
-
-            
-            with Logwatch('assigning hovertext to plot'):
-                figdf['hover'] = [hover(row) for i,row in tqdm(figdf.iterrows(), total=len(figdf))]
-            customdata=np.stack((figdf['hover'], figdf['member_name']), axis=-1)
+            figdf=df.sample(frac=1)            
+            customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
             fig = px.scatter_mapbox(
                 figdf, 
                 lat='lat',
@@ -576,7 +526,7 @@ class ComparisonFigureFactory(FigureFactory):
                 center=MAP_CENTER,
                 zoom=12, 
                 hover_name='member_name',
-                hover_data = 'hover',
+                hover_data = 'hover_tooltip',
                 color='L_or_R',
                 color_discrete_map=color_map,
                 # height=height,
