@@ -351,7 +351,7 @@ class ComparisonPanel(BaseComponent):
         return dbc.Collapse(
             self.content_main_row, 
             className='layout-leftcol',
-            is_open=True
+            is_open=False
         )
     
     @cached_property
