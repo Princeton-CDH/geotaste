@@ -435,7 +435,8 @@ def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
         - If a column in col2col is not present in the DataFrame, it will be ignored.
         - If a column in col2col is present in the DataFrame but not specified in col2col, it will be dropped from the resulting DataFrame.
     """
-    return df[col2col.keys()].rename(columns=col2col)
+    c2c = {k:v for k,v in col2col.items() if k in set(df.columns)}
+    return df[c2c.keys()].rename(columns=c2c)
 
 def qualquant_series(series, quant=False):
     """This function takes a series as input and converts it into a pandas

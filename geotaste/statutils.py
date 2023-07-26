@@ -166,9 +166,12 @@ def geodist(latlon1, latlon2, unit='km'):
     from geopy.distance import geodesic as distfunc
     import numpy as np
     try:
-        dist = distfunc((latlon1[1],latlon[0]), (latlon2[1],latlon[0])) # doh!
+        dist = distfunc(
+            (latlon1[1],latlon1[0]), 
+            (latlon2[1],latlon2[0])
+        )
         return getattr(dist,unit)
-    except Exception:
+    except ValueError as e:
         return np.nan
     
 
