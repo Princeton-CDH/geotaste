@@ -539,7 +539,19 @@ class ComparisonFigureFactory(FigureFactory):
                 customdata=customdata,
                 hovertemplate="%{customdata[0]}"
             )
-            fig.update_mapboxes(style='stamen-toner')
+            fig.update_mapboxes(
+                style='white-bg',
+                layers=[
+                    {
+                        "below": 'traces',
+                        "sourcetype": "raster",
+                        "sourceattribution": "United States Geological Survey",
+                        "source": [
+                            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+                        ]
+                    }
+                ]
+            )
             fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
             return fig
         
@@ -587,7 +599,19 @@ class ComparisonFigureFactory(FigureFactory):
                 hovertemplate="%{customdata[0]}"
             )
             
-            fig_choro.update_mapboxes(style="stamen-toner")
+            fig_choro.update_mapboxes(
+                style='white-bg',
+                layers=[
+                    {
+                        "below": 'traces',
+                        "sourcetype": "raster",
+                        "sourceattribution": "United States Geological Survey",
+                        "source": [
+                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                        ]
+                    }
+                ]
+            )
             fig_choro.update_layout(
                 margin={"r":0,"t":0,"l":0,"b":0},
                 legend=dict(
