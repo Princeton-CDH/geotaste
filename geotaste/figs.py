@@ -411,6 +411,70 @@ class EventTypeFigure(EventFigure):
 
 
 
+### LANDMARKS
+
+class LandmarksFigureFactory(FigureFactory):
+    dataset_class = Landmarks
+
+    def plot_map(self, color='gray', **kwargs):
+        figdf = self.data
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scattermapbox(
+                mode='markers+text',
+                lat=figdf['lat'],
+                lon=figdf['lon'],
+                marker=go.scattermapbox.Marker(
+                    color='blue',
+                    symbol='marker',
+                    size=10,
+                    # opacity=0.4
+                ),
+                text=figdf['landmark'],
+                textfont=dict(
+                    size=12,
+                    color='blue'
+                ),
+                textposition='bottom center',
+            )
+        )
+
+        fig.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below": 'traces',
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ]
+                }
+            ],
+            accesstoken=mapbox_access_token,
+            bearing=0,
+            center=MAP_CENTER_SCO,
+            pitch=0,
+
+            zoom=13,
+        )
+        fig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
+            autosize=True
+        )
+        fig.layout._config = {'responsive':True}
+        return fig
+
+
+
+
+
 ### COMBINED?
 
 class CombinedFigureFactory(FigureFactory):
@@ -468,21 +532,7 @@ class CombinedFigureFactory(FigureFactory):
                 hovertemplate="%{customdata[0]}"
             )
             fig.update_mapboxes(
-                style='white-bg',
-                layers=[
-                    {
-                        "below": 'traces',
-                        "sourcetype": "raster",
-                        "sourceattribution": "United States Geological Survey",
-                        "source": [
-                            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
-                        ]
-                    }
-                ]
-            )
-            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-            fig.update_mapboxes(
-                style='stamen-toner',
+                style='light',
                 layers=[
                     {
                         "below": 'traces',
@@ -649,16 +699,10 @@ class ComparisonFigureFactory(FigureFactory):
                 ],
                 opacity=.5,
                 # height=height,
-                template=PLOTLY_TEMPLATE
+                # template=PLOTLY_TEMPLATE
             )
-            customdata=np.stack((figdf['hover'],), axis=-1)
-            fig_choro.update_traces(
-                customdata=customdata,
-                hovertemplate="%{customdata[0]}"
-            )
-            
             fig_choro.update_mapboxes(
-                style='stamen-toner',
+                style='light',
                 layers=[
                     {
                         "below": 'traces',
@@ -670,6 +714,12 @@ class ComparisonFigureFactory(FigureFactory):
                     }
                 ]
             )
+            customdata=np.stack((figdf['hover'],), axis=-1)
+            fig_choro.update_traces(
+                customdata=customdata,
+                hovertemplate="%{customdata[0]}"
+            )
+            
             fig_choro.update_layout(
                 margin={"r":0,"t":0,"l":0,"b":0},
                 legend=dict(

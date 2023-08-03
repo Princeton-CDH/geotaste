@@ -176,7 +176,7 @@ class CollapsibleCard(BaseComponent):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
     filter_data,selected,kwargs = unserialize(serialized_data)
@@ -184,7 +184,7 @@ def ff_cache(figure_class, serialized_data):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (

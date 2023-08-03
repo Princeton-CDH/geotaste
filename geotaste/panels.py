@@ -493,8 +493,7 @@ class ComparisonPanel(BaseComponent):
             
 
 # @cache
-
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
@@ -502,7 +501,7 @@ def graphtab_cache(serialized_data):
     # get figure factory
     if not fdL and not fdR:
         # ... @todo change?
-        ff = CombinedFigureFactory()
+        ff = LandmarksFigureFactory()
     elif fdL and not fdR:
         ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
     elif fdR and not fdL:

@@ -47,6 +47,7 @@ URLS=dict(
     books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/newdataset/data/1.3-beta/books-with-genres.csv',
     members='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
     events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
+    landmarks='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/landmarks.csv',
     dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
     creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.2/creators.csv',
     geojson_arrond='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
@@ -60,6 +61,7 @@ PATHS=dict(
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
     combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
+    landmarks = os.path.join(PATH_DATA,'landmarks.csv'),
 )
 
 LATLON_SCO = (
@@ -75,6 +77,10 @@ CENTER = (
 MAP_CENTER = dict(
     lat=CENTER[0],
     lon=CENTER[1]
+)
+MAP_CENTER_SCO = dict(
+    lat=LATLON_SCO[0],
+    lon=LATLON_SCO[1]
 )
 DISPREFERRED_ADDRESSES = {
     '11 rue Scribe': 'American Express',
@@ -153,7 +159,7 @@ try:
     mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
     px.set_mapbox_access_token(mapbox_access_token)
 except FileNotFoundError:
-    pass
+    mapbox_access_token = None
 
 from .utils import *
 from .queries import *

@@ -96,6 +96,9 @@ class Dataset:
     
     
 
+class LandmarksDataset(Dataset):
+    path = PATHS.get('landmarks')
+    cols_q = ['lat', 'lon']
 
 
 def get_member_id(uri):
@@ -813,7 +816,8 @@ def Combined():
     return CombinedDataset()
 
 
-
+@cache
+def Landmarks(): return LandmarksDataset()
 
 
 
