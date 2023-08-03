@@ -51,7 +51,7 @@ def DifferenceDegreeView(ff):
     )
 
 def MemberMapView(ff):
-    ofig = ff.plot()
+    ofig = ff.plot_map()
     ofig.update_layout(autosize=True)
     ograph = dcc.Graph(
         figure=ofig, 

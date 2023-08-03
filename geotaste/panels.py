@@ -498,8 +498,23 @@ class ComparisonPanel(BaseComponent):
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
-    ff = ComparisonFigureFactory(fdL, fdR)
+    
+    # get figure factory
+    if not fdL and not fdR:
+        # ... @todo change?
+        ff = CombinedFigureFactory()
+    elif fdL and not fdR:
+        ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+    elif fdR and not fdL:
+        ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+    else:
+        # both
+        ff = ComparisonFigureFactory(fdL, fdR)
+
+    # get view
     viewfunc = determine_view(tab_ids_1, tab_ids_2)
+
+    # return view
     return viewfunc(ff)
 
 
@@ -519,8 +534,5 @@ def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
     
     elif 'map' in tab_ids_1_set:
         return MemberMapView
-        if 'map_L' in tab_ids_2_set: return 'map_members_L'
-        if 'map_R' in tab_ids_2_set: return 'map_members_R'
-        return 'map_members'
     
     return default

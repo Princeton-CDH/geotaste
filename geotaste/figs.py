@@ -440,13 +440,77 @@ class CombinedFigureFactory(FigureFactory):
         return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
 
 
+    def plot_map(self, color=None, **kwargs):
+        df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        kwargs={**self.kwargs, **kwargs}
+        if not color and self.color: color=self.color
+        if not color: color=DEFAULT_COLOR
+        
+        # figure 1: scatter
+        def get_scatter():
+            figdf=df.sample(frac=1)            
+            customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
+            fig = px.scatter_mapbox(
+                figdf, 
+                lat='lat',
+                lon='lon', 
+                center=MAP_CENTER,
+                zoom=12, 
+                hover_name='member_name',
+                hover_data = 'hover_tooltip',
+                size_max=40,
+                template=PLOTLY_TEMPLATE,
+                # **kwargs
+            )
+            fig.update_traces(
+                marker=dict(size=10, color=color), 
+                customdata=customdata,
+                hovertemplate="%{customdata[0]}"
+            )
+            fig.update_mapboxes(
+                style='white-bg',
+                layers=[
+                    {
+                        "below": 'traces',
+                        "sourcetype": "raster",
+                        "sourceattribution": "United States Geological Survey",
+                        "source": [
+                            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+                        ]
+                    }
+                ]
+            )
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+            fig.update_mapboxes(
+                style='stamen-toner',
+                layers=[
+                    {
+                        "below": 'traces',
+                        "sourcetype": "raster",
+                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                        "source": [
+                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                        ]
+                    }
+                ]
+            )
+            fig.update_layout(
+                margin={"r":0,"t":0,"l":0,"b":0},
+                legend=dict(
+                    yanchor="bottom",
+                    y=0.06,
+                    xanchor="right",
+                    x=0.99
+                ),
+                autosize=True
+            )
+            fig.layout._config = {'responsive':True}
+            return fig
 
+        with Logwatch('getting combined scatter plot map'):
+            ofig=get_scatter()
 
-
-
-
-
-
+        return ofig
 
 
 
@@ -502,14 +566,8 @@ class ComparisonFigureFactory(FigureFactory):
         # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
-    def plot(self, height=250, **kwargs):
-        def get_color(x):
-            if x=='L' or 'Left' in x: return LEFT_COLOR
-            if x=='R' or 'Right' in x: return RIGHT_COLOR
-            return BOTH_COLOR
-        
+    def plot_map(self, **kwargs):
         df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
-        bdf=df[df.book_title!='']
         kwargs={**self.kwargs, **kwargs}
         color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         
@@ -600,12 +658,12 @@ class ComparisonFigureFactory(FigureFactory):
             )
             
             fig_choro.update_mapboxes(
-                style='white-bg',
+                style='stamen-toner',
                 layers=[
                     {
                         "below": 'traces',
                         "sourcetype": "raster",
-                        "sourceattribution": "United States Geological Survey",
+                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
                         "source": [
                             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
                         ]
@@ -789,3 +847,9 @@ def get_empty_fig(height=100, **layout_kwargs):
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
     return fig
+
+
+def get_color(x):
+    if x=='L' or 'Left' in x: return LEFT_COLOR
+    if x=='R' or 'Right' in x: return RIGHT_COLOR
+    return BOTH_COLOR
