@@ -734,7 +734,7 @@ class ComparisonFigureFactory(FigureFactory):
             locations='arrond_id', 
             color='perc_L->R',
             center=MAP_CENTER,
-            zoom=12,
+            zoom=13,
             hover_data=[],
             color_continuous_scale=[
                 Lcolor.hex,
