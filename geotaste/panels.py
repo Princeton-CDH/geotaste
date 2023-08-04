@@ -530,7 +530,7 @@ class ComparisonPanel(BaseComponent):
             
 
 # @cache
-# @cache_obj.memoize()
+@cache_obj.memoize()
 def graphtab_cache(serialized_data):
     logger.debug(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
