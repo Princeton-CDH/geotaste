@@ -711,7 +711,67 @@ class ComparisonFigureFactory(FigureFactory):
 
         fig1=self.L.plot_map(color=LEFT_COLOR)
         fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
-        return fig2
+
+        figdf = self.df_arronds.reset_index()
+        
+        from colour import Color
+        Lcolor = Color(LEFT_COLOR)
+        Rcolor = Color(RIGHT_COLOR)
+        midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+        midpoint.set_luminance(.95)
+
+        fig_choro = px.choropleth_mapbox(
+            figdf,
+            geojson=get_geojson_arrondissement(),
+            locations='arrond_id', 
+            color='perc_L->R',
+            center=MAP_CENTER,
+            zoom=12,
+            hover_data=[],
+            color_continuous_scale=[
+                Lcolor.hex,
+                midpoint.hex,
+                Rcolor.hex,
+            ],
+            opacity=.5,
+        )
+        fig_choro.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below":"traces",
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ],
+                    "opacity":0.25
+                }
+            ]
+        )
+        ofig = go.Figure(data=fig_choro.data + fig2.data, layout=fig_choro.layout)
+
+        ofig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
+            coloraxis=dict(
+                colorbar=dict(
+                    orientation='h', 
+                    y=.01,
+                    lenmode='fraction',
+                    len=.5,
+                    thickness=10,
+                    xanchor='right',
+                    x=.99
+                )
+            )
+        )
+        return ofig
 
         
 
