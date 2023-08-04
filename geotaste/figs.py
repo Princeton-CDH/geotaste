@@ -24,7 +24,8 @@ class FigureFactory(DashFigureFactory, Logmaker):
     log_y=False
     text=None
     
-    def __init__(self, filter_data={}, selected=[], **kwargs):
+    def __init__(self, filter_data={}, selected=[], name='FigureFactory', **kwargs):
+        self.name=name
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
         self.selection_data = (
@@ -572,7 +573,7 @@ class CombinedFigureFactory(FigureFactory):
 
     #     return ofig
 
-    def plot_map(self, color=None, color_text='black', **kwargs):
+    def plot_map(self, color=None, color_text='black', basefig=None, **kwargs):
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
         figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
@@ -580,7 +581,7 @@ class CombinedFigureFactory(FigureFactory):
         fig = go.Figure()
         fig.add_trace(
             go.Scattermapbox(
-                name='Member dwelling',
+                name=f'Member dwelling ({self.name})',
                 mode='markers+text',
                 lat=figdf['lat'],
                 lon=figdf['lon'],
@@ -606,7 +607,7 @@ class CombinedFigureFactory(FigureFactory):
             )
         )
 
-        basefig = LandmarksFigureFactory().plot_map()
+        basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
         return go.Figure(data=fig.data + basefig.data, layout=basefig.layout)
 
 
@@ -622,8 +623,8 @@ class ComparisonFigureFactory(FigureFactory):
         if is_listy(ff1) and not ff2 and len(ff1)==2:
             ff1,ff2 = ff1
 
-        self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1) in {dict,str} else ff1
-        self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2) in {dict,str} else ff2
+        self.ff1 = self.L = self.indiv_ff(ff1,name='Group 1') if type(ff1) in {dict,str} else ff1
+        self.ff2 = self.R = self.indiv_ff(ff2,name='Group 2') if type(ff2) in {dict,str} else ff2
 
     @cached_property
     def arrond_dists(self):
@@ -662,51 +663,56 @@ class ComparisonFigureFactory(FigureFactory):
     
 
     def plot_map(self, **kwargs):
-        df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
-        kwargs={**self.kwargs, **kwargs}
-        color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
+        # df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        # kwargs={**self.kwargs, **kwargs}
+        # color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         
 
 
-        # figure 1: scatter
-        def get_scatter():
-            figdf=df.sample(frac=1)            
-            customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
-            fig = px.scatter_mapbox(
-                figdf, 
-                lat='lat',
-                lon='lon', 
-                center=MAP_CENTER,
-                zoom=12, 
-                hover_name='member_name',
-                hover_data = 'hover_tooltip',
-                color='L_or_R',
-                color_discrete_map=color_map,
-                # height=height,
-                size_max=40,
-                template=PLOTLY_TEMPLATE,
-                # **kwargs
-            )
-            fig.update_traces(
-                marker=dict(size=10), 
-                customdata=customdata,
-                hovertemplate="%{customdata[0]}"
-            )
-            fig.update_mapboxes(
-                style='white-bg',
-                layers=[
-                    {
-                        "below": 'traces',
-                        "sourcetype": "raster",
-                        "sourceattribution": "United States Geological Survey",
-                        "source": [
-                            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
-                        ]
-                    }
-                ]
-            )
-            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-            return fig
+        # # figure 1: scatter
+        # def get_scatter():
+        #     figdf=df.sample(frac=1)            
+        #     customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
+        #     fig = px.scatter_mapbox(
+        #         figdf, 
+        #         lat='lat',
+        #         lon='lon', 
+        #         center=MAP_CENTER,
+        #         zoom=12, 
+        #         hover_name='member_name',
+        #         hover_data = 'hover_tooltip',
+        #         color='L_or_R',
+        #         color_discrete_map=color_map,
+        #         # height=height,
+        #         size_max=40,
+        #         template=PLOTLY_TEMPLATE,
+        #         # **kwargs
+        #     )
+        #     fig.update_traces(
+        #         marker=dict(size=10), 
+        #         customdata=customdata,
+        #         hovertemplate="%{customdata[0]}"
+        #     )
+        #     fig.update_mapboxes(
+        #         style='white-bg',
+        #         layers=[
+        #             {
+        #                 "below": 'traces',
+        #                 "sourcetype": "raster",
+        #                 "sourceattribution": "United States Geological Survey",
+        #                 "source": [
+        #                     "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+        #                 ]
+        #             }
+        #         ]
+        #     )
+        #     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        #     return fig
+
+        fig1=self.L.plot_map(color=LEFT_COLOR)
+        fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
+        return fig2
+
         
 
         def get_choro():
