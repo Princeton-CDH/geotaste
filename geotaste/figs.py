@@ -497,15 +497,19 @@ class CombinedFigureFactory(FigureFactory):
             member_dwelling:len(set(member_dwelling_df.book))
             for member_dwelling,member_dwelling_df in self.data.groupby('dwelling')
         }
+        def reversename(x):
+            if not ',' in x: return x
+            a,b=x.split(', ',1)
+            return f'{b} {a}'
         return self.data.assign(
             num_borrows=[
                 bookcount.get(x,0) for x in self.data.dwelling
-            ]
+            ],
+            sort_name_reversed=self.data.member_name.apply(reversename)
         )
     
     @cached_property
     def df_members(self): 
-        
         return self.data.drop_duplicates('member').set_index('member')
     
     @cached_property
@@ -590,11 +594,11 @@ class CombinedFigureFactory(FigureFactory):
                 marker=go.scattermapbox.Marker(
                     color=color,
                     symbol='circle',
-                    # size=10,
-                    size=(figdf['num_borrows'] / 20)+5,
+                    size=10,
+                    # size=(figdf['num_borrows'] / 20)+5,
                     opacity=0.4
                 ),
-                text=figdf['member_name'],
+                text=figdf['sort_name_reversed'],
                 textfont=dict(
                     size=16,
                     color=color_text,

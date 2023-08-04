@@ -466,7 +466,7 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def graphtab_desc(self):
         ## @TODO
-        return html.P('The map below shows landmarks and some stuff', className='graphtab_desc')
+        return html.P(BLANK, className='graphtab_desc')
     
     @cached_property
     def graphtab(self):
