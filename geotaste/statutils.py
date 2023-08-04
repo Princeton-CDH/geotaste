@@ -211,7 +211,7 @@ def describe_arronds_row(row,side='left'):
     cL2 = cL*pR
     cR2 = cR*pR
     astr=ordinal_str(int(row.arrond_id))
-    return f'* ***{ratio:.1f}x*** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
+    return f'Group {"1" if side=="left" else "2"} is <b>{ratio:.1f}x</b> more likely to live in the <b>{astr}</b> than Group {"2" if side=="left" else "1"} ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
 
 def describe_arronds_LR(signif_df, side='left'):
     descs=['',f'The {side.title()} Group is...']

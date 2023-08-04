@@ -713,6 +713,14 @@ class ComparisonFigureFactory(FigureFactory):
         fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
 
         figdf = self.df_arronds.reset_index()
+        def hover(row):
+            if row.arrond_id and row.arrond_id.isdigit():
+                return describe_arronds_row(row)
+            else:
+                return ''
+
+        figdf = self.df_arronds.reset_index()
+        figdf['hover']=figdf.apply(hover,axis=1)
         
         from colour import Color
         Lcolor = Color(LEFT_COLOR)
@@ -735,6 +743,11 @@ class ComparisonFigureFactory(FigureFactory):
             ],
             opacity=.5,
         )
+        customdata=np.stack((figdf['hover'],), axis=-1)
+        fig_choro.update_traces(
+            customdata=customdata,
+            hovertemplate="%{customdata[0]}"
+        )
         fig_choro.update_mapboxes(
             style='light',
             layers=[
@@ -749,6 +762,7 @@ class ComparisonFigureFactory(FigureFactory):
                 }
             ]
         )
+        
         ofig = go.Figure(data=fig_choro.data + fig2.data, layout=fig_choro.layout)
 
         ofig.update_layout(
