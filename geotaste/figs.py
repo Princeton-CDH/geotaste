@@ -427,13 +427,14 @@ class LandmarksFigureFactory(FigureFactory):
                 marker=go.scattermapbox.Marker(
                     color='blue',
                     symbol='marker',
-                    size=10,
+                    size=25,
+                    opacity=1
                     # opacity=0.4
                 ),
                 text=figdf['landmark'],
                 textfont=dict(
-                    size=12,
-                    color='blue'
+                    size=20,
+                    color='black'
                 ),
                 textposition='bottom center',
             )
@@ -453,7 +454,7 @@ class LandmarksFigureFactory(FigureFactory):
             ],
             accesstoken=mapbox_access_token,
             bearing=0,
-            center=MAP_CENTER_SCO,
+            center=MAP_CENTER,
             pitch=0,
 
             zoom=13,
@@ -489,8 +490,9 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def df_dwellings(self): 
         assert 'dwelling' in set(self.data.columns)
-        o=self.data.drop_duplicates('dwelling').set_index('dwelling')
-        return o
+        #o=self.data.drop_duplicates('dwelling').set_index('dwelling')
+        bookcount=dict(self.data.groupby('dwelling').book.nunique())
+        return self.data.assign(num_borrows=[bookcount.get(x,0) for x in self.data.dwelling])
     
     @cached_property
     def df_members(self): 
@@ -504,65 +506,123 @@ class CombinedFigureFactory(FigureFactory):
         return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
 
 
-    def plot_map(self, color=None, **kwargs):
-        df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
-        kwargs={**self.kwargs, **kwargs}
+    # def plot_map(self, color=None, **kwargs):
+    #     df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+    #     kwargs={**self.kwargs, **kwargs}
+    #     if not color and self.color: color=self.color
+    #     if not color: color=DEFAULT_COLOR
+        
+    #     # figure 1: scatter
+    #     def get_scatter():
+    #         figdf=df.sample(frac=1)            
+    #         customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
+    #         fig = px.scatter_mapbox(
+    #             figdf, 
+    #             lat='lat',
+    #             lon='lon', 
+    #             center=MAP_CENTER,
+    #             zoom=12, 
+    #             hover_name='member_name',
+    #             hover_data = 'hover_tooltip',
+    #             size_max=40,
+    #             template=PLOTLY_TEMPLATE,
+    #             # **kwargs
+    #         )
+    #         fig.update_traces(
+    #             marker=dict(size=10, color=color), 
+    #             customdata=customdata,
+    #             hovertemplate="%{customdata[0]}"
+    #         )
+    #         fig.update_mapboxes(
+    #             style='light',
+    #             layers=[
+    #                 {
+    #                     "below": 'traces',
+    #                     "sourcetype": "raster",
+    #                     "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+    #                     "source": [
+    #                         "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+    #                     ]
+    #                 }
+    #             ]
+    #         )
+    #         fig.update_layout(
+    #             margin={"r":0,"t":0,"l":0,"b":0},
+    #             legend=dict(
+    #                 yanchor="bottom",
+    #                 y=0.06,
+    #                 xanchor="right",
+    #                 x=0.99
+    #             ),
+    #             autosize=True
+    #         )
+    #         fig.layout._config = {'responsive':True}
+    #         return fig
+
+    #     with Logwatch('getting combined scatter plot map'):
+    #         ofig=get_scatter()
+
+    #     return ofig
+
+    def plot_map(self, color=None, color_text='black', **kwargs):
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
-        
-        # figure 1: scatter
-        def get_scatter():
-            figdf=df.sample(frac=1)            
-            customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
-            fig = px.scatter_mapbox(
-                figdf, 
-                lat='lat',
-                lon='lon', 
-                center=MAP_CENTER,
-                zoom=12, 
-                hover_name='member_name',
-                hover_data = 'hover_tooltip',
-                size_max=40,
-                template=PLOTLY_TEMPLATE,
-                # **kwargs
-            )
-            fig.update_traces(
-                marker=dict(size=10, color=color), 
-                customdata=customdata,
-                hovertemplate="%{customdata[0]}"
-            )
-            fig.update_mapboxes(
-                style='light',
-                layers=[
-                    {
-                        "below": 'traces',
-                        "sourcetype": "raster",
-                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                        "source": [
-                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        ]
-                    }
-                ]
-            )
-            fig.update_layout(
-                margin={"r":0,"t":0,"l":0,"b":0},
-                legend=dict(
-                    yanchor="bottom",
-                    y=0.06,
-                    xanchor="right",
-                    x=0.99
+
+        figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scattermapbox(
+                mode='markers+text',
+                lat=figdf['lat'],
+                lon=figdf['lon'],
+                marker=go.scattermapbox.Marker(
+                    color=color,
+                    symbol='circle',
+                    # size=10,
+                    size=(figdf['num_borrows'] / 20)+5,
+                    opacity=0.4
                 ),
-                autosize=True
+                text=figdf['member_name'],
+                textfont=dict(
+                    size=16,
+                    color=color_text,
+                    family='Recursive, Tahoma, Verdana, Times New Roman'
+                ),
+                textposition='bottom center',
             )
-            fig.layout._config = {'responsive':True}
-            return fig
+        )
 
-        with Logwatch('getting combined scatter plot map'):
-            ofig=get_scatter()
+        fig.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below": 'traces',
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ]
+                }
+            ],
+            accesstoken=mapbox_access_token,
+            bearing=0,
+            center=MAP_CENTER,
+            pitch=0,
 
-        return ofig
-
-
+            zoom=13,
+        )
+        fig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
+            autosize=True
+        )
+        fig.layout._config = {'responsive':True}
+        return fig
 
 
 
