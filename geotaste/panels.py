@@ -120,7 +120,7 @@ class FilterPlotPanel(FilterPanel):
         #         ]
             
 class CollapsiblePanel(CollapsibleCard):
-    body_is_open = True
+    body_is_open = False
     className='collapsible-panel'
 
 

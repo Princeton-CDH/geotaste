@@ -459,7 +459,7 @@ class LandmarksFigureFactory(FigureFactory):
             center=MAP_CENTER,
             pitch=0,
 
-            zoom=13,
+            zoom=14,
         )
         fig.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
@@ -734,7 +734,7 @@ class ComparisonFigureFactory(FigureFactory):
             locations='arrond_id', 
             color='perc_L->R',
             center=MAP_CENTER,
-            zoom=13,
+            zoom=14,
             hover_data=[],
             color_continuous_scale=[
                 Lcolor.hex,

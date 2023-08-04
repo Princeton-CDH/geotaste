@@ -71,7 +71,7 @@ LATLON_SCO = (
 
 CENTER = (
     LATLON_SCO[0] + .005,
-    LATLON_SCO[1] - .02
+    LATLON_SCO[1] - .015
 )
 
 MAP_CENTER = dict(

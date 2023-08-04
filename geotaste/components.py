@@ -149,7 +149,7 @@ class CollapsibleCard(BaseComponent):
     def button_showhide(self):
         logger.trace(self.name)
         return dbc.Button(
-            "[-]", 
+            "[+]", 
             color="link", 
             n_clicks=0,
             className='button_showhide',
@@ -160,7 +160,10 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name) 
         ## buttons
         @app.callback(
-            Output(self.body, "is_open", allow_duplicate=True),
+            [
+                Output(self.body, "is_open", allow_duplicate=True),
+                Output(self.button_showhide, "children", allow_duplicate=True),
+            ],
             [
                 Input(self.button_showhide, "n_clicks"),
                 Input(self.id('card_header'), 'n_clicks')
@@ -172,7 +175,7 @@ class CollapsibleCard(BaseComponent):
         def toggle_collapse(n1, n2, is_open):
             now_is_open = (not is_open if (n1 or n2) else is_open)
             logger.debug(f'{self.name} is now open? {now_is_open}')
-            return now_is_open
+            return now_is_open, '[-]' if now_is_open else '[+]'
 
 
 # @cache
