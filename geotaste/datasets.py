@@ -213,13 +213,16 @@ class DwellingsDataset(Dataset):
 
 
 def get_dwelling_desc(row):
-    member_name = Members().data.loc[row.member]['name']
-    o=f'{member_name} dwelt in {row.city}'
-    if row.arrond_id and is_valid_arrond(row.arrond_id): 
-        o+=f' in the {ordinal_str(int(row.arrond_id))}'
-    if row.street_address: o+=f' at {row.street_address}'
-    if row.start_date: o+=f' from {row.start_date}'
-    if row.end_date and row.end_date!=row.start_date: o+=f' until {row.end_date}'
+    try:
+        member_name = Members().data.loc[row.member]['name']
+        o=f'{member_name} dwelt in {row.city}'
+        if row.arrond_id and is_valid_arrond(row.arrond_id): 
+            o+=f' in the {ordinal_str(int(row.arrond_id))}'
+        if row.street_address: o+=f' at {row.street_address}'
+        if row.start_date: o+=f' from {row.start_date}'
+        if row.end_date and row.end_date!=row.start_date: o+=f' until {row.end_date}'
+    except KeyError:
+        o='???'
     return o
 
 
