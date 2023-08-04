@@ -396,55 +396,75 @@ class ComparisonPanel(BaseComponent):
             desc='Right-hand Group Panel'
         )
     
+    # @cached_property
+    # def graphtabs(self):
+    #     map_tabs = get_tabs([
+    #         dict(label='Left vs. Group 2s', tab_id='map_LR'),
+    #         # dict(label='Group 1', tab_id='map_L'),
+    #         # dict(label='Right', tab_id='map_R'),
+    #     ], tab_level=2, className='graphtabs-container')
+        
+    #     tbl_tabs = get_tabs(
+    #         children=[
+    #             dict(label='By member', tab_id='tbl_members'),                
+    #             # dict(label='By arrondissement', tab_id='tbl_arrond'),
+    #         ], 
+    #         tab_level=2, className='graphtabs-container', active_tab='tbl_members'
+    #     )
+
+    #     analyze_tabs = get_tabs(
+    #         children=[
+    #             # dict(
+    #             #     label='Magnitude of difference',
+    #             #     tab_id='tbl_diff'
+    #             # ),                
+
+    #             dict(
+    #                 label='By arrondissement', 
+    #                 tab_id='tbl_arrond'
+    #             ),
+    #         ], 
+    #         tab_level=2, 
+    #         className='graphtabs-container'
+    #     )
+
+    #     graphtabs = get_tabs(
+    #         children=[
+    #             dict(
+    #                 children=map_tabs, 
+    #                 label='Map data', 
+    #                 tab_id='map',
+    #                 tooltip='Map where members lived'
+    #             ),
+    #             dict(children=tbl_tabs, label='View data', tab_id='tbl'),
+    #             dict(children=analyze_tabs, label='Analyze data', tab_id='analyze')
+    #         ], 
+    #         tab_level=1, 
+    #         className='graphtabs-container',
+    #         active_tab='map'
+    #     )
+    #     return dbc.Container(graphtabs, className='graphtabs-container-container')
+
     @cached_property
     def graphtabs(self):
-        map_tabs = get_tabs([
-            dict(label='Left vs. Group 2s', tab_id='map_LR'),
-            # dict(label='Group 1', tab_id='map_L'),
-            # dict(label='Right', tab_id='map_R'),
-        ], tab_level=2, className='graphtabs-container')
-        
-        tbl_tabs = get_tabs(
+        tabs = get_tabs(
             children=[
-                dict(label='By member', tab_id='tbl_members'),                
-                # dict(label='By arrondissement', tab_id='tbl_arrond'),
-            ], 
-            tab_level=2, className='graphtabs-container', active_tab='tbl_members'
-        )
-
-        analyze_tabs = get_tabs(
-            children=[
-                # dict(
-                #     label='Magnitude of difference',
-                #     tab_id='tbl_diff'
-                # ),                
-
-                dict(
-                    label='By arrondissement', 
-                    tab_id='tbl_arrond'
-                ),
-            ], 
-            tab_level=2, 
-            className='graphtabs-container'
-        )
-
-        graphtabs = get_tabs(
-            children=[
-                dict(
-                    children=map_tabs, 
-                    label='Map data', 
-                    tab_id='map',
-                    tooltip='Map where members lived'
-                ),
-                dict(children=tbl_tabs, label='View data', tab_id='tbl'),
-                dict(children=analyze_tabs, label='Analyze data', tab_id='analyze')
+                dict(label='Map', tab_id='map'),
+                dict(label='Data', tab_id='data'),
             ], 
             tab_level=1, 
-            className='graphtabs-container',
+            className='graphtabs-container', 
             active_tab='map'
         )
-        return dbc.Container(graphtabs, className='graphtabs-container-container')
+        return dbc.Container([
+            tabs,
+            self.graphtab_desc
+        ], className='graphtabs-container-container')
 
+    @cached_property
+    def graphtab_desc(self):
+        ## @TODO
+        return html.P('The map below shows landmarks and some stuff', className='graphtab_desc')
     
     @cached_property
     def graphtab(self):
