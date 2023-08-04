@@ -120,7 +120,7 @@ class FilterPlotPanel(FilterPanel):
         #         ]
             
 class CollapsiblePanel(CollapsibleCard):
-    body_is_open = True
+    body_is_open = False
     className='collapsible-panel'
 
 
@@ -315,7 +315,8 @@ class ComparisonPanel(BaseComponent):
                 ),
                 dbc.Col(
                     btn_R,
-                    className='storedescs-col storedescs-col-R'
+                    className='storedescs-col storedescs-col-R',
+                    id='storedescs-col-R'
                 ),
             ]), 
             className='layout-toprow'
@@ -342,6 +343,7 @@ class ComparisonPanel(BaseComponent):
                 self.R.layout(params), 
                 width=6, 
                 className='panel_R panel',
+                id='panel_R'
             ),
         ], 
         className='layout-mainrow')
@@ -510,6 +512,20 @@ class ComparisonPanel(BaseComponent):
         def repopulate_graphtab(*args):
             serialized_data = serialize(args)
             return graphtab_cache(serialized_data)
+        
+        @app.callback(
+            [
+                Output('storedescs-col-R', 'style'),
+                Output('panel_R', 'style'),
+            ],
+            Input(self.L.store, 'data'),
+            prevent_initial_callback=True
+        )
+        def allow_second_group(left_filter_data):
+            if not left_filter_data:
+                return {'opacity':.35}, {'display':'none'}
+            else:
+                return {'opacity':1}, {'display':'block'}
             
 
 # @cache
