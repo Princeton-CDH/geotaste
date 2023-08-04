@@ -29,8 +29,8 @@ def ArrondTableView(ff, Lstr='', Rstr=''):
 def MemberTableView(ff):
     return dbc.Container(
             [
-                html.H4('Data by members'), 
-                ff.table_members()
+                html.H4('Data'), 
+                ff.table() if hasattr(ff,'table') else html.P('??')
             ], 
             className='graphtab padded', 
         )

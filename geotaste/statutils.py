@@ -190,7 +190,7 @@ def describe_arronds(df_arronds, min_p=None, p_col=None):
         signif_df['odds_ratio'] = signif_df['odds_ratio'].replace(np.inf, np.nan)
         signif_df = signif_df[signif_df.odds_ratio.apply(is_numeric) & (~signif_df.odds_ratio.isna()) & (signif_df.odds_ratio!=0)]
 
-    desc_top = f'''Comparing where library members in the left- and right-hand groups lived produces **{len(signif_df)}** statistically significant arrondissement.'''
+    desc_top = f'''Comparing where members from Group 1 and Group 2 lived produces **{len(signif_df)}** statistically significant arrondissement.'''
     
     signif_more_L=signif_df[signif_df.odds_ratio>1]
     signif_more_R=signif_df[signif_df.odds_ratio<1]
@@ -211,7 +211,7 @@ def describe_arronds_row(row,side='left'):
     cL2 = cL*pR
     cR2 = cR*pR
     astr=ordinal_str(int(row.arrond_id))
-    return f'Group {"1" if side=="left" else "2"} is <b>{ratio:.1f}x</b> more likely to live in the <b>{astr}</b> than Group {"2" if side=="left" else "1"} ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
+    return f'* **{ratio:.1f}x** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
 
 def describe_arronds_LR(signif_df, side='left'):
     descs=['',f'The {side.title()} Group is...']

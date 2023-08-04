@@ -453,6 +453,7 @@ class ComparisonPanel(BaseComponent):
             children=[
                 dict(label='Map', tab_id='map'),
                 dict(label='Data', tab_id='data'),
+                dict(label='Analysis', tab_id='analysis'),
             ], 
             tab_level=1, 
             className='graphtabs-container', 
@@ -538,36 +539,49 @@ def graphtab_cache(serialized_data):
     if not fdL and not fdR:
         # ... @todo change?
         ff = LandmarksFigureFactory()
+        num_filters = 0
+        # ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+        # num_filters = 1
     elif fdL and not fdR:
         ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+        num_filters = 1
     elif fdR and not fdL:
         ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+        num_filters = 1
     else:
         # both
         ff = ComparisonFigureFactory(fdL, fdR)
+        num_filters = 2
 
     # get view
-    viewfunc = determine_view(tab_ids_1, tab_ids_2)
+    viewfunc = determine_view(tab_ids_1, tab_ids_2, num_filters=num_filters)
 
     # return view
     return viewfunc(ff)
 
 
-def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView):
+def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filters=1):
     tab_ids_1_set=set(tab_ids_1)
     tab_ids_2_set=set(tab_ids_2)
-    logger.debug([tab_ids_1_set, tab_ids_2_set])
+    # logger.debug([tab_ids_1_set, tab_ids_2_set])
 
-    if 'tbl' in tab_ids_1_set and 'tbl_members' in tab_ids_2_set: 
-        return MemberTableView
+    # if 'tbl' in tab_ids_1_set and 'tbl_members' in tab_ids_2_set: 
+    #     return MemberTableView
 
-    elif 'analyze' in tab_ids_1_set and 'tbl_arrond' in tab_ids_2_set:
-        return ArrondTableView
+    # elif 'analyze' in tab_ids_1_set and 'tbl_arrond' in tab_ids_2_set:
+    #     return ArrondTableView
 
-    elif 'tbl' in tab_ids_1_set:
-        return MemberTableView
+    # elif 'tbl' in tab_ids_1_set:
+    #     return MemberTableView
     
+    # elif 'map' in tab_ids_1_set:
+    #     return MemberMapView
+
+    if 'data' in tab_ids_1_set:
+        return MemberTableView
     elif 'map' in tab_ids_1_set:
         return MemberMapView
+    elif 'analysis' in tab_ids_1_set:
+        return ArrondTableView if num_filters>1 else MemberTableView
     
     return default

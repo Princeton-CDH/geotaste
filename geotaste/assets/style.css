@@ -57,6 +57,7 @@ h5 { font-size:1.1rem;}
 }
 
 .frozen-top-row {
+    pointer-events: none;
     height:150px;
     background: rgba(255,255,255,0);
     top:0; left:0; position:absolute; z-index: 600;
@@ -339,15 +340,17 @@ p {
     flex-wrap:nowrap;
     width:fit-content;
     float:right;
+    pointer-events: all;
 }
 
 .content-tabs-row {
-    height:100px;
+    height:50px;
     margin-left:4px;
     margin-right:4px;
+    pointer-events: none;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    background: rgba(255,255,255,0.5);
+    /* background: rgba(255,255,255,0.5); */
     width:100%;
 }
 
@@ -524,3 +527,7 @@ p {
 
 .panel_R { display: none; }
 .storedescs-col-R { opacity: .35; }
+
+button {
+    pointer-events: all;
+}
