@@ -835,11 +835,11 @@ def hover_tooltip(row, bdf):
         yl = sorted(list(row.member_membership))
         y1,y2 = yl[0],yl[-1]
 
-    borrowdf_here = bdf[bdf.dwelling==row.dwelling].drop_duplicates('event')
-    borrowdf_member = bdf[bdf.member==row.member].drop_duplicates('event')
+    borrowdf_here = bdf[bdf.dwelling==row.dwelling].drop_duplicates('book')
+    borrowdf_member = bdf[bdf.member==row.member].drop_duplicates('book')
     
-    numborrow_member_total = len(borrowdf_member)
-    numborrow_here = len(borrowdf_here)
+    numborrow_member_total = borrowdf_member.book.nunique()
+    numborrow_here = borrowdf_here.book.nunique()
     pronouns = ('they','their') if row.member_gender == 'Nonbinary' else (
         ('she','her') if row.member_gender=='Female' else (
             ('he','his') if row.member_gender == 'Male' else ('they','their')
@@ -868,6 +868,7 @@ def hover_tooltip(row, bdf):
     gstr=f', {row.member_gender.lower()}'
     
     otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}{gstr}')
-    obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership. {"These books were:" if numborrow_here>1 else "This book was:"}')
-    o = '<br><br>'.join([otitle, obody,borrowbooks])
+    obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')# {"These books were:" if numborrow_here>1 else "This book was:"}')
+    # o = '<br><br>'.join([otitle, obody,borrowbooks])
+    o = '<br><br>'.join([otitle, obody])
     return o

@@ -421,6 +421,7 @@ class LandmarksFigureFactory(FigureFactory):
         fig = go.Figure()
         fig.add_trace(
             go.Scattermapbox(
+                name='Landmarks',
                 mode='markers+text',
                 lat=figdf['lat'],
                 lon=figdf['lon'],
@@ -491,8 +492,15 @@ class CombinedFigureFactory(FigureFactory):
     def df_dwellings(self): 
         assert 'dwelling' in set(self.data.columns)
         #o=self.data.drop_duplicates('dwelling').set_index('dwelling')
-        bookcount=dict(self.data.groupby('dwelling').book.nunique())
-        return self.data.assign(num_borrows=[bookcount.get(x,0) for x in self.data.dwelling])
+        bookcount={
+            member_dwelling:len(set(member_dwelling_df.book))
+            for member_dwelling,member_dwelling_df in self.data.groupby('dwelling')
+        }
+        return self.data.assign(
+            num_borrows=[
+                bookcount.get(x,0) for x in self.data.dwelling
+            ]
+        )
     
     @cached_property
     def df_members(self): 
@@ -567,14 +575,17 @@ class CombinedFigureFactory(FigureFactory):
     def plot_map(self, color=None, color_text='black', **kwargs):
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
-
         figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
         fig = go.Figure()
         fig.add_trace(
             go.Scattermapbox(
+                name='Member dwelling',
                 mode='markers+text',
                 lat=figdf['lat'],
                 lon=figdf['lon'],
+                customdata=figdf['hover_tooltip'],
+                hovertemplate='%{customdata}<extra></extra>',
                 marker=go.scattermapbox.Marker(
                     color=color,
                     symbol='circle',
@@ -588,41 +599,15 @@ class CombinedFigureFactory(FigureFactory):
                     color=color_text,
                     family='Recursive, Tahoma, Verdana, Times New Roman'
                 ),
+                hoverlabel=dict(
+                    font_size=16,
+                ),
                 textposition='bottom center',
             )
         )
 
-        fig.update_mapboxes(
-            style='light',
-            layers=[
-                {
-                    "below": 'traces',
-                    "sourcetype": "raster",
-                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                    "source": [
-                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                    ]
-                }
-            ],
-            accesstoken=mapbox_access_token,
-            bearing=0,
-            center=MAP_CENTER,
-            pitch=0,
-
-            zoom=13,
-        )
-        fig.update_layout(
-            margin={"r":0,"t":0,"l":0,"b":0},
-            legend=dict(
-                yanchor="bottom",
-                y=0.06,
-                xanchor="right",
-                x=0.99
-            ),
-            autosize=True
-        )
-        fig.layout._config = {'responsive':True}
-        return fig
+        basefig = LandmarksFigureFactory().plot_map()
+        return go.Figure(data=fig.data + basefig.data, layout=basefig.layout)
 
 
 
