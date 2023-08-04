@@ -664,8 +664,8 @@ class ComparisonFigureFactory(FigureFactory):
         return combine_LR_df(
             self.L.df_dwellings,
             self.R.df_dwellings, 
-            colval_L='Left Group',
-            colval_R='Right Group',
+            colval_L='Group 1',
+            colval_R='Group 2',
             colval_LR='Both Groups'
         )
 

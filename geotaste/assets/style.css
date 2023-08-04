@@ -42,7 +42,7 @@ h5 { font-size:1.1rem;}
     /* background: rgba(255,255,255,0.8); */
     /* background: rgba(150,150,150,0.7); */
     /* background: rgba(240,245,245,.95); */
-    background: rgba(255,255,255,0.9);
+    /* background: rgba(255,255,255,0.9); */
     color:black;
     line-height:50px;  
     width:100vw;
@@ -55,6 +55,7 @@ h5 { font-size:1.1rem;}
     overflow-y: hidden;
     overflow-x: scroll;
     display:block;
+    backdrop-filter: blur(5px);
 }
 
 .tabs-container { 
@@ -66,7 +67,7 @@ h5 { font-size:1.1rem;}
     height:150px;
     /* border:1px solid green; */
     background: rgba(255,255,255,0);
-    backdrop-filter: blur(4px);
+    /* backdrop-filter: blur(4px); */
     top:0; left:0; position:absolute; z-index: 600;
     /* border-bottom: 1px solid rgba(0,0,0,.5); */
     /* border-bottom:1px solid #dddddd;  */
@@ -149,6 +150,7 @@ h5 { font-size:1.1rem;}
 .panel { 
     padding:0 2px;
     border:none;
+    width:25vw;
     /* margin-bottom:1rem; */
 }
 
@@ -217,7 +219,7 @@ p {
     /* left:0; */
     /* width:50vw; */
     /* background:white; */
-    background: rgba(255,255,255,.5);
+    /* background: rgba(255,255,255,.5); */
     /* backdrop-filter: blur(10px); */
     height:100px;
     min-height:100px;
@@ -347,7 +349,9 @@ p {
 .layout-leftcol, .layout-rightcol {
     height:fit-content;
     max-height:100vh;
-    width:50vw;
+    max-width:50vw;
+    min-width:25vw;
+    width:fit-content;
     position:absolute;
     top:0;
     z-index:0;
@@ -413,13 +417,13 @@ p {
     height:100px;
     margin-left:4px;
     margin-right:4px;
-    border:1px solid white;
+    /* border:1px solid white; */
     /* border-bottom:1px solid rgba(10,10,10,0.2);
     border-top:none;
     border-right:none; */
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    background: rgba(255,255,255,0.9);
+    /* background: rgba(255,255,255,0.9); */
     width:100%;
     /* backdrop-filter: blur(3px); */
 }
@@ -455,7 +459,7 @@ p {
 
 
 .graphtabs-container .nav-link.active {
-    border: 1px solid rgba(100, 100, 100, 1);
+    /* border: 1px solid rgba(100, 100, 100, 1); */
     /* background: rgba(192, 153, 255, .9); */
     /* background: rgba(102, 92, 119, 0.8); */
     background: rgba(116, 102, 139, 1);
@@ -471,10 +475,11 @@ p {
     width:fit-content;
     background:rgba(205, 205, 205, 1);
     font-weight:600;
+    border: 1px solid rgba(150, 150, 150, 1);
 }
 
 .graphtabs-container .nav-link:hover {
-    border: 1px solid rgba(100, 100, 100, 1);
+    /* border: 1px solid rgba(100, 100, 100, 1); */
     border-top:none;
     /* border-bottom: 1px solid rgb(224, 205, 255); */
     /* color:white; */
@@ -583,43 +588,41 @@ p {
 }
 
 
-.panel_L .card-header { 
-    background-color: rgba(171, 145, 85, 0.4);
-}
-.panel_L .card-header-collapsible-panel { 
-    background-color: rgba(171, 145, 85, .7);
-    backdrop-filter: blur(5px);
-}
-.panel_L .card { 
-    border: 1px solid rgba(171, 145, 85, 0.15);
-}
-
 .panel_R .card-header { 
-    background-color: rgba(64, 176, 166, 0.4);
+    background-color: rgba(125, 106, 182, 0.4);
 }
 .panel_R .card-header-collapsible-panel { 
-    background-color: rgba(64, 176, 166, .7);
+    background-color: rgba(125, 106, 182, .7);
     backdrop-filter: blur(5px);
 }
 .panel_R .card { 
+    border: 1px solid rgba(125, 106, 182, 0.15);
+}
+
+.panel_L .card-header { 
+    background-color: rgba(64, 176, 166, 0.4);
+}
+.panel_L .card-header-collapsible-panel { 
+    background-color: rgba(64, 176, 166, .7);
+    backdrop-filter: blur(5px);
+}
+.panel_L .card { 
     border: 1px solid rgba(64, 176, 166, 0.15);
 }
 
-.storedescs-col-L {
-    border: 1px solid rgba(255,255,255,1);
+.storedescs-col-L, .storedescs-col-R {
+    /* border: 1px solid rgba(255,255,255,1); */
     border-top:none;
     padding-right:4px;
     width:100%;
-    background-color: rgba(171, 145, 85, .8);
+}
+
+.storedescs-col-L {
+    background-color: rgba(64, 176, 166, .8);
 }
 
 .storedescs-col-R {
-    border: 1px solid rgba(255,255,255,1);
-    border-top:none;
-    padding-left:4px;
-    width:100%;
-    background-color: rgba(64, 176, 166, 0.8);
-    /* backdrop-filter: blur(10px); */
+    background-color: rgba(125, 106, 182, .8);
 }
 
 .storedescs-inbetween {
@@ -631,3 +634,6 @@ p {
 .dash-debug-menu__outer, .dash-debug-menu {
     display: none !important;
 }
+
+.panel_R { display: none; }
+.storedescs-col-R { opacity: .35; }

@@ -268,8 +268,8 @@ class ComparisonPanel(BaseComponent):
 
     @cached_property
     def content_left_tabs(self,params=None):
-        p_L=html.Span([html.B('Left Group: '), self.L.store_desc])
-        p_R=html.Span([html.B('Right Group: '), self.R.store_desc])
+        p_L=html.Span([html.B('Group 1: '), self.L.store_desc])
+        p_R=html.Span([html.B('Group 2: '), self.R.store_desc])
         
         def getbtn(x, cls=''):
             className='button_store_desc store_desc query_str'
@@ -341,7 +341,7 @@ class ComparisonPanel(BaseComponent):
             dbc.Col(
                 self.R.layout(params), 
                 width=6, 
-                className='panel_R panel'
+                className='panel_R panel',
             ),
         ], 
         className='layout-mainrow')
@@ -399,8 +399,8 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def graphtabs(self):
         map_tabs = get_tabs([
-            dict(label='Left vs. Right Groups', tab_id='map_LR'),
-            # dict(label='Left Group', tab_id='map_L'),
+            dict(label='Left vs. Group 2s', tab_id='map_LR'),
+            # dict(label='Group 1', tab_id='map_L'),
             # dict(label='Right', tab_id='map_R'),
         ], tab_level=2, className='graphtabs-container')
         
