@@ -88,6 +88,7 @@ class BaseComponent(DashComponent, Logmaker):
 class CollapsibleCard(BaseComponent):
     body_is_open = False
     className='collapsible-card'
+    tooltip = ''
 
     def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
         logger.trace(self.name)
@@ -100,11 +101,28 @@ class CollapsibleCard(BaseComponent):
     @cached_property
     def header(self):
         logger.trace(self.name)
+        desc=self.desc[0].upper() + self.desc[1:]
+        idx=self.id('card_header')
+        btn_title = dbc.Button(
+            desc, 
+            color="link", 
+            n_clicks=0,
+            id=idx,
+            className='card-title'
+        )
+        children = [
+            html.Div(
+                [
+                    self.button_showhide
+                ], 
+                className='button_showhide_div'
+            ),
+            btn_title
+        ]
+        if self.tooltip:
+            children.append(tooltip(btn_title, self.tooltip))
         return dbc.CardHeader(
-            [
-                html.Div(self.button_showhide, className='button_showhide_div'),
-                html.P(self.desc[0].upper() + self.desc[1:]),
-            ],
+            children,
             className=f'card-header-{self.className}'
         )
     
@@ -131,7 +149,7 @@ class CollapsibleCard(BaseComponent):
     def button_showhide(self):
         logger.trace(self.name)
         return dbc.Button(
-            "[-]", 
+            "[+]", 
             color="link", 
             n_clicks=0,
             className='button_showhide',
@@ -142,16 +160,22 @@ class CollapsibleCard(BaseComponent):
         logger.trace(self.name) 
         ## buttons
         @app.callback(
-            Output(self.body, "is_open", allow_duplicate=True),
-            Input(self.button_showhide, "n_clicks"),
+            [
+                Output(self.body, "is_open", allow_duplicate=True),
+                Output(self.button_showhide, "children", allow_duplicate=True),
+            ],
+            [
+                Input(self.button_showhide, "n_clicks"),
+                Input(self.id('card_header'), 'n_clicks')
+            ],
             State(self.body, "is_open"),
             prevent_initial_call=True
         )
         #@logger.catch
-        def toggle_collapse(n, is_open):
-            now_is_open = (not is_open if n else is_open)
+        def toggle_collapse(n1, n2, is_open):
+            now_is_open = (not is_open if (n1 or n2) else is_open)
             logger.debug(f'{self.name} is now open? {now_is_open}')
-            return now_is_open
+            return now_is_open, '[-]' if now_is_open else '[+]'
 
 
 # @cache
@@ -530,26 +554,32 @@ class MemberNameCard(FilterInputCard):
     desc = 'Name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
+    tooltip = 'Filter for particular members by name'
 
 class MemberDOBCard(FilterPlotCard):
     desc = 'Birth year'
-    figure_factory = MemberDOBFigure    
+    figure_factory = MemberDOBFigure 
+    tooltip = 'Filter members by date of birth'   
     
 class MembershipYearCard(FilterPlotCard):
-    desc = 'Years of membership'
+    desc = 'Years active'
     figure_factory = MembershipYearFigure    
+    tooltip = 'Filter for membership by years of active members'
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Gender'
     figure_factory = MemberGenderFigure
+    tooltip = 'Filter for members by genre'
 
 class MemberNationalityCard(FilterPlotCard):
     desc = 'Nationality'
     figure_factory = MemberNationalityFigure
+    tooltip = 'Filter for members of particular nationalities'
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Arrondissement'
     figure_factory = MemberArrondMap
+    tooltip = 'Filter for members who ever lived in a given arrondissement'
 
 
 
@@ -561,38 +591,44 @@ class BookTitleCard(FilterInputCard):
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
-
+    tooltip = 'Filter for particular books'
 
 class CreatorNameCard(FilterInputCard):
     desc = 'Author'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
-    
+    tooltip = 'Filter for particular authors'
 
 class BookYearCard(FilterPlotCard):
     desc = "Publication date"
     figure_factory = BookYearFigure
+    tooltip = 'Filter by when the borrowed book was published'
 
 class CreatorGenderCard(FilterPlotCard):
     desc = 'Author gender'
     figure_factory = CreatorGenderFigure
+    tooltip = 'Filter by the gender of the author'
 
 class BookGenreCard(FilterPlotCard):
     desc = 'Genre'
     figure_factory = BookGenreFigure
+    tooltip = 'Filter by genre of book'
 
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Author nationality'
     figure_factory = CreatorNationalityFigure
+    tooltip = 'Filter by the nationality of the author'
 
     
 class EventYearCard(FilterPlotCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
+    tooltip = 'Filter for the books borrowed in a given year range'
 
 class EventMonthCard(FilterPlotCard):
     desc = 'Month of borrowing'
     figure_factory = EventMonthFigure
+    tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
 
 class EventTypeCard(FilterPlotCard):
     desc = 'type of event'
@@ -600,10 +636,42 @@ class EventTypeCard(FilterPlotCard):
 
 
 def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
-    return dbc.Tabs(
-        children=[dbc.Tab(**d) for d in children], 
-        active_tab=active_tab if active_tab else (children[0].get('tab_id') if children else None), 
-        id=dict(type=f'tab_level_{tab_level}', index=uid()),
+    tabs = [
+        dbc.Tab(
+            children=d.get('children'),
+            label=d.get('label'),
+            tab_id=d.get('tab_id'),
+            id=uid()
+        )
+        for d in children
+    ]
+    tooltips = [
+        tooltip(tab, d.get('tooltip'))
+        for tab,d in zip(tabs,children)
+        if d.get('tooltip')
+    ]
+    active_tab=(
+        active_tab 
+        if active_tab 
+        else (
+            children[0].get('tab_id') 
+            if children 
+            else None
+        )
+    )
+    
+    tabs_obj = dbc.Tabs(
+        children=tabs, 
+        active_tab=active_tab, 
+        id=dict(
+            type=f'tab_level_{tab_level}', 
+            index=uid()
+        ),
         **kwargs
     )
+    return dbc.Container([tabs_obj] + tooltips)
 
+
+
+def tooltip(component, tooltip=''):
+    return dbc.Tooltip(tooltip, target=component.id)

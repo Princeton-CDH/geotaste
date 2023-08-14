@@ -1,5 +1,24 @@
 from .imports import *
 
+cols_members=[
+    'member_name_nice',
+    'member_dob',
+    'member_dod',
+    'member_nationalities',
+    'member_gender',
+    'num_borrows',
+    'dwelling_address',
+    'member_url'
+]
+
+cols_books = [
+    'creator_name',
+    'book_title',
+    'book_year',
+    # 'num_borrows_overall',
+    # 'book_url'
+]
+
 
 ###########
 # Figures #
@@ -24,7 +43,8 @@ class FigureFactory(DashFigureFactory, Logmaker):
     log_y=False
     text=None
     
-    def __init__(self, filter_data={}, selected=[], **kwargs):
+    def __init__(self, filter_data={}, selected=[], name='FigureFactory', **kwargs):
+        self.name=name
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
         self.selection_data = (
@@ -411,9 +431,80 @@ class EventTypeFigure(EventFigure):
 
 
 
+### LANDMARKS
+
+class LandmarksFigureFactory(FigureFactory):
+    dataset_class = Landmarks
+
+    def plot_map(self, color='gray', **kwargs):
+        figdf = self.data
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scattermapbox(
+                name='Landmarks',
+                mode='markers+text',
+                lat=figdf['lat'],
+                lon=figdf['lon'],
+                marker=go.scattermapbox.Marker(
+                    color='blue',
+                    symbol='marker',
+                    size=25,
+                    opacity=1
+                    # opacity=0.4
+                ),
+                text=figdf['landmark'],
+                textfont=dict(
+                    size=20,
+                    color='black'
+                ),
+                textposition='bottom center',
+            )
+        )
+
+        fig.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below": 'traces',
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ]
+                }
+            ],
+            accesstoken=mapbox_access_token,
+            bearing=0,
+            center=MAP_CENTER,
+            pitch=0,
+
+            zoom=14,
+        )
+        fig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
+            autosize=True
+        )
+        fig.layout._config = {'responsive':True}
+        return fig
+    
+    def table(self, cols=[], sep=' ', **kwargs):
+        return get_dash_table(self.data)
+
+
+
+
+
 ### COMBINED?
 
 class CombinedFigureFactory(FigureFactory):
+    cols_table = ['member_name','memer_membership','member_dob','member_gender','member_nationalities','arrond_id']
+
     ## calcs
     @cached_property
     def arrond_counts(self): return self.valid_arronds.value_counts()
@@ -423,30 +514,103 @@ class CombinedFigureFactory(FigureFactory):
         return (s/s.sum()) * 100
     
     @cached_property
-    def df_dwellings(self): return self.data.drop_duplicates('dwelling')
-    @cached_property
-    def df_members(self): return self.data.drop_duplicates('member')
+    def df_dwellings(self): 
+        assert 'dwelling' in set(self.data.columns)
+        #o=self.data.drop_duplicates('dwelling').set_index('dwelling')
+        bookcount={
+            member_dwelling:len(set(member_dwelling_df.book))
+            for member_dwelling,member_dwelling_df in self.data.groupby('dwelling')
+        }
+        def reversename(x):
+            if not ',' in x: return x
+            a,b=x.split(', ',1)
+            return f'{b} {a}'
+        return self.data.assign(
+            num_borrows=[
+                bookcount.get(x,0) for x in self.data.dwelling
+            ],
+            member_name_nice=self.data.member_name.apply(reversename),
+            member_url=self.data.member.apply(lambda x: f'https://shakespeareandco.princeton.edu/members/{x}/')
+        )
     
     @cached_property
-    def arronds(self):return self.df_dwellings.arrond_id
+    def df_members(self): 
+        return self.data.drop_duplicates('member').set_index('member')
+    
+    def table_members(self, cols=[], sep=' ', **kwargs):
+        return get_dash_table(self.df_members.reset_index(), cols=self.cols_table)
+    
     @cached_property
-    def valid_arronds(self): return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
+    def book_filters_exist(self):
+        return any(
+            fn.startswith('book_') or fn.startswith('author_') or fn.startswith('event_')
+            for fn in self.filter_data
+        )
+
+    def table(self, cols=[], sep=' ', **kwargs):
+        df = self.df_dwellings.reset_index()
+        df = (
+            df.drop_duplicates('dwelling') 
+            if not self.book_filters_exist 
+            else df.drop_duplicates(['dwelling','book'])
+        )
+        return get_dash_table(
+            df,
+            cols=(
+                cols_members 
+                if not self.book_filters_exist 
+                else cols_members+cols_books
+            )
+        )
+
+    
+    @cached_property
+    def arronds(self):return qualquant_series(self.df_dwellings.arrond_id, quant=False)
+    @cached_property
+    def valid_arronds(self): 
+        return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
+
+    def plot_map(self, color=None, color_text='black', basefig=None, **kwargs):
+        if not color and self.color: color=self.color
+        if not color: color=DEFAULT_COLOR
+        figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scattermapbox(
+                name=f'Member dwelling ({self.name})',
+                mode='markers+text',
+                lat=figdf['lat'],
+                lon=figdf['lon'],
+                customdata=figdf['hover_tooltip'],
+                hovertemplate='%{customdata}<extra></extra>',
+                marker=go.scattermapbox.Marker(
+                    color=color,
+                    symbol='circle',
+                    size=10,
+                    # size=(figdf['num_borrows'] / 20)+5,
+                    opacity=0.4
+                ),
+                text=figdf['member_name_nice'],
+                textfont=dict(
+                    size=16,
+                    color=color_text,
+                    family='Recursive, Tahoma, Verdana, Times New Roman'
+                ),
+                hoverlabel=dict(
+                    font_size=16,
+                ),
+                textposition='bottom center',
+            )
+        )
+
+        basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
+        return go.Figure(data=fig.data + basefig.data, layout=basefig.layout)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-class ComparisonFigureFactory(FigureFactory):
+class ComparisonFigureFactory(CombinedFigureFactory):
     cols_table = ['L_or_R','member_name','memer_membership','member_dob','member_gender','member_nationalities','arrond_id']
     indiv_ff = CombinedFigureFactory
 
@@ -456,8 +620,8 @@ class ComparisonFigureFactory(FigureFactory):
         if is_listy(ff1) and not ff2 and len(ff1)==2:
             ff1,ff2 = ff1
 
-        self.ff1 = self.L = self.indiv_ff(ff1) if type(ff1) in {dict,str} else ff1
-        self.ff2 = self.R = self.indiv_ff(ff2) if type(ff2) in {dict,str} else ff2
+        self.ff1 = self.L = self.indiv_ff(ff1,name='Group 1') if type(ff1) in {dict,str} else ff1
+        self.ff2 = self.R = self.indiv_ff(ff2,name='Group 2') if type(ff2) in {dict,str} else ff2
 
     @cached_property
     def arrond_dists(self):
@@ -466,8 +630,8 @@ class ComparisonFigureFactory(FigureFactory):
     @cached_property
     def df_arronds(self): 
         return analyze_contingency_tables(
-            self.ff1.valid_arronds,
-            self.ff2.valid_arronds,
+            self.L.valid_arronds,
+            self.R.valid_arronds,
         )
     
     @cached_property
@@ -476,83 +640,247 @@ class ComparisonFigureFactory(FigureFactory):
     
     @cached_property
     def df_dwellings(self): 
+        # return combine_LR_df(
+        #     self.ff1.df_dwellings, 
+        #     self.ff2.df_dwellings
+        # )
         return combine_LR_df(
-            self.ff1.df_dwellings, 
-            self.ff2.df_dwellings
+            self.L.df_dwellings,
+            self.R.df_dwellings, 
+            colval_L='Group 1',
+            colval_R='Group 2',
+            colval_LR='Both Groups'
         )
 
     
     @cached_property
     def df_members(self): 
         return combine_LR_df(self.L.df_members, self.R.df_members)
+        # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
-    def plot(self, height=250, **kwargs):
-        def get_color(x):
-            if x=='L': return LEFT_COLOR
-            if x=='R': return RIGHT_COLOR
-            return BOTH_COLOR
+    def plot_map(self, **kwargs):
+        # df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        # kwargs={**self.kwargs, **kwargs}
+        # color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
         
-        df = self.df_dwellings
-        kwargs={**self.kwargs, **kwargs}
-        color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
-        fig = px.scatter_mapbox(
-            df, 
-            lat='lat',
-            lon='lon', 
-            center=dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1]),
-            zoom=12, 
-            hover_name='member_name',
-            color='L_or_R',
-            color_discrete_map=color_map,
-            # height=height,
-            size_max=40,
-            template=PLOTLY_TEMPLATE
-            # **kwargs
-        )
-        fig.update_traces(marker=dict(size=10))
-        fig.update_mapboxes(style='stamen-toner')
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+
+        # # figure 1: scatter
+        # def get_scatter():
+        #     figdf=df.sample(frac=1)            
+        #     customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
+        #     fig = px.scatter_mapbox(
+        #         figdf, 
+        #         lat='lat',
+        #         lon='lon', 
+        #         center=MAP_CENTER,
+        #         zoom=12, 
+        #         hover_name='member_name',
+        #         hover_data = 'hover_tooltip',
+        #         color='L_or_R',
+        #         color_discrete_map=color_map,
+        #         # height=height,
+        #         size_max=40,
+        #         template=PLOTLY_TEMPLATE,
+        #         # **kwargs
+        #     )
+        #     fig.update_traces(
+        #         marker=dict(size=10), 
+        #         customdata=customdata,
+        #         hovertemplate="%{customdata[0]}"
+        #     )
+        #     fig.update_mapboxes(
+        #         style='white-bg',
+        #         layers=[
+        #             {
+        #                 "below": 'traces',
+        #                 "sourcetype": "raster",
+        #                 "sourceattribution": "United States Geological Survey",
+        #                 "source": [
+        #                     "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+        #                 ]
+        #             }
+        #         ]
+        #     )
+        #     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        #     return fig
+
+        fig1=self.L.plot_map(color=LEFT_COLOR)
+        fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
+
+        figdf = self.df_arronds.reset_index()
+        def hover(row):
+            if row.arrond_id and row.arrond_id.isdigit():
+                return describe_arronds_row(row)
+            else:
+                return ''
+
+        figdf = self.df_arronds.reset_index()
+        figdf['hover']=figdf.apply(hover,axis=1)
         
+        from colour import Color
+        Lcolor = Color(LEFT_COLOR)
+        Rcolor = Color(RIGHT_COLOR)
+        midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+        midpoint.set_luminance(.95)
+
         fig_choro = px.choropleth_mapbox(
-            self.df_arronds.reset_index(),
+            figdf,
             geojson=get_geojson_arrondissement(),
             locations='arrond_id', 
             color='perc_L->R',
             center=MAP_CENTER,
-            zoom=12,
-            # color_continuous_scale='puor',
-            color_continuous_scale=[LEFT_COLOR, 'rgba(0,0,0,0)', RIGHT_COLOR],
+            zoom=14,
+            hover_data=[],
+            color_continuous_scale=[
+                Lcolor.hex,
+                midpoint.hex,
+                Rcolor.hex,
+            ],
             opacity=.5,
-            # height=height,
-            template=PLOTLY_TEMPLATE
         )
-        fig_choro.update_mapboxes(style="stamen-toner")
-        fig_choro.update_layout(
+        customdata=np.stack((figdf['hover'],), axis=-1)
+        fig_choro.update_traces(
+            customdata=customdata,
+            hovertemplate="%{customdata[0]}"
+        )
+        fig_choro.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below":"traces",
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ],
+                    "opacity":0.25
+                }
+            ]
+        )
+        
+        ofig = go.Figure(data=fig_choro.data + fig2.data, layout=fig_choro.layout)
+
+        ofig.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
             legend=dict(
-                yanchor="top",
-                y=0.99,
-                xanchor="left",
-                x=0.01
-            )
-        )
-        fig_choro.update_layout(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
             coloraxis=dict(
                 colorbar=dict(
                     orientation='h', 
                     y=.01,
-                    thickness=10
+                    lenmode='fraction',
+                    len=.5,
+                    thickness=10,
+                    xanchor='right',
+                    x=.99
                 )
-            ),
+            )
+        )
+        return ofig
 
-        )
         
-        # fig_choro.update_coloraxes(reversescale=True)
-        ofig=go.Figure(
-            data=fig_choro.data + fig.data, 
-            layout=fig_choro.layout
-        )
+
+        def get_choro():
+            from colour import Color
+
+            Lcolor = Color(LEFT_COLOR)
+            Rcolor = Color(RIGHT_COLOR)
+            midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+            midpoint.set_luminance(.95)
+
+            def hover(row):
+                if row.arrond_id and row.arrond_id.isdigit():
+                    return describe_arronds_row(row)
+                else:
+                    return ''
+
+            figdf = self.df_arronds.reset_index()
+            figdf['hover']=figdf.apply(hover,axis=1)
+            fig_choro = px.choropleth_mapbox(
+                figdf,
+                geojson=get_geojson_arrondissement(),
+                locations='arrond_id', 
+                color='perc_L->R',
+                center=MAP_CENTER,
+                zoom=12,
+                # color_continuous_scale='puor',
+                # hover_data = list(figdf.columns),
+                hover_data=[],
+                color_continuous_scale=[
+                    LEFT_COLOR, 
+                    # 'rgba(255,255,255,1)', 
+                    # BOTH_COLOR,
+                    midpoint.hex,
+                    RIGHT_COLOR
+                ],
+                opacity=.5,
+                # height=height,
+                # template=PLOTLY_TEMPLATE
+            )
+            fig_choro.update_mapboxes(
+                style='light',
+                layers=[
+                    {
+                        "below": 'traces',
+                        "sourcetype": "raster",
+                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                        "source": [
+                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                        ]
+                    }
+                ]
+            )
+            customdata=np.stack((figdf['hover'],), axis=-1)
+            fig_choro.update_traces(
+                customdata=customdata,
+                hovertemplate="%{customdata[0]}"
+            )
+            
+            fig_choro.update_layout(
+                margin={"r":0,"t":0,"l":0,"b":0},
+                legend=dict(
+                    yanchor="bottom",
+                    y=0.06,
+                    xanchor="right",
+                    x=0.99
+                )
+            )
+            fig_choro.update_layout(
+                coloraxis=dict(
+                    colorbar=dict(
+                        orientation='h', 
+                        y=.01,
+                        lenmode='fraction',
+                        len=.5,
+                        thickness=10,
+                        xanchor='right',
+                        x=.99
+                    )
+                ),
+
+            )
+            return fig_choro
+
+        # generate figs
+        with Logwatch('generating scatter plot'):
+            fig_scatter = get_scatter()
+
+        with Logwatch('generating choropleth'):
+            fig_choro = get_choro()
+
+        with Logwatch('combining figs'):
+            ofig=go.Figure(
+                data=fig_choro.data + fig_scatter.data, 
+                layout=fig_choro.layout
+            )
+
+        # final responsive layout patch
         ofig.update_layout(autosize=True)
         ofig.layout._config = {'responsive':True}
         return ofig
@@ -691,3 +1019,9 @@ def get_empty_fig(height=100, **layout_kwargs):
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
     return fig
+
+
+def get_color(x):
+    if x=='L' or 'Left' in x: return LEFT_COLOR
+    if x=='R' or 'Right' in x: return RIGHT_COLOR
+    return BOTH_COLOR

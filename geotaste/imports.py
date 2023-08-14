@@ -23,9 +23,11 @@ BLANKSTR='‎‎‎‎'
 BLANK = ''
 UNFILTERED = '(unfiltered)'
 NOFILTER = BLANK
-LEFT_COLOR='#AB9155' #'#7d6ab6'
-RIGHT_COLOR='#40B0A6' ##bf6927'
+# LEFT_COLOR='#AB9155' #'#7d6ab6'
+RIGHT_COLOR='#7d6ab6' #rgb(125, 106, 182)
+LEFT_COLOR='#40b0a6' #rgb(64, 176, 166)'
 BOTH_COLOR='#606060'
+DEFAULT_COLOR=LEFT_COLOR
 PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
@@ -45,6 +47,7 @@ URLS=dict(
     books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/newdataset/data/1.3-beta/books-with-genres.csv',
     members='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
     events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
+    landmarks='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/landmarks.csv',
     dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
     creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.2/creators.csv',
     geojson_arrond='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
@@ -58,10 +61,27 @@ PATHS=dict(
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
     combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
+    landmarks = os.path.join(PATH_DATA,'landmarks.csv'),
 )
 
-LATLON_SCO = (48.85107555543428, 2.3385039932538567)
-MAP_CENTER = dict(lat=LATLON_SCO[0], lon=LATLON_SCO[1])
+LATLON_SCO = (
+    48.85107555543428, 
+    2.3385039932538567
+)
+
+CENTER = (
+    LATLON_SCO[0] + .005,
+    LATLON_SCO[1] - .015
+)
+
+MAP_CENTER = dict(
+    lat=CENTER[0],
+    lon=CENTER[1]
+)
+MAP_CENTER_SCO = dict(
+    lat=LATLON_SCO[0],
+    lon=LATLON_SCO[1]
+)
 DISPREFERRED_ADDRESSES = {
     '11 rue Scribe': 'American Express',
     'Berkeley Street': 'Thomas Cook', # @CHECK
@@ -79,12 +99,22 @@ DWELLING_ID_SEP='; '
 
 
 
+
+
+
+
+
+
+
+
+
 ## Sys imports
 from datetime import datetime as dt
 import copy,time,sys,os
 import random
 import pandas as pd
 import numbers
+from numbers import Number
 import json
 from collections import Counter
 
@@ -138,12 +168,19 @@ try:
     mapbox_access_token = open(os.path.expanduser('~/.mapbox_token')).read()
     px.set_mapbox_access_token(mapbox_access_token)
 except FileNotFoundError:
-    pass
+    mapbox_access_token = None
 
 from .utils import *
 from .queries import *
 from .statutils import *
+from .queries import *
+from .statutils import *
 from .datasets import *
+from .figs import *
+from .components import *
+from .panels import *
+from .layouts import *
+from .app import *
 from .figs import *
 from .components import *
 from .panels import *

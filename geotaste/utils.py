@@ -83,6 +83,9 @@ def is_numeric(x:object) -> bool:
     """
     return isinstance(x, numbers.Number)
 
+def is_numberish(x:object) -> bool:
+    return is_numeric(x) or (type(x)==str and x.isdigit())
+
 def is_listy(x:object) -> bool:
     """Checks if the input object is a list-like object.
 
@@ -93,6 +96,12 @@ def is_listy(x:object) -> bool:
         bool: True if the object is a tuple, list, or pandas Series; False otherwise.
     """
     return type(x) in {tuple,list,pd.Series}
+
+def ensure_int(x:Number, return_orig=True, default=None) -> int:
+    try:
+        return int(x)
+    except ValueError:
+        return (x if return_orig else default)
 
 def ensure_dict(x:object) -> dict:
     """Ensures that the input is a dictionary.
@@ -278,6 +287,13 @@ class CachedData:
             autocommit=autocommit,
             **kwargs
         )
+    
+def concat_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
+    return pd.concat([
+        dfL.assign(**{colname:colval_L}),
+        dfR.assign(**{colname:colval_R})
+    ]).sample(frac=1)
+
 
 def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
     """
@@ -301,18 +317,57 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
     Returns:
         pandas.DataFrame: The combined dataframe.
     """
+    # logger.debug([dfL.columns, 'dfL cols'])
+    # logger.debug([dfR.columns, 'dfR cols'])
+    print(dfL.index.name, dfR.index.name)
+    assert dfL.index.name == dfR.index.name
     allL, allR = set(dfL.index), set(dfR.index)
-    L, R, both = allL - allR, allR - allL, allR & allL
-    dfs = [
-        dfL.loc[list(L)].assign(**{colname:colval_L}),
-        dfL.loc[list(both)].assign(**{colname:colval_LR}),
-        dfR.loc[list(both)].assign(**{colname:colval_LR}),
-        dfR.loc[list(R)].assign(**{colname:colval_R}),
-    ]
-    allcols = list({col for dfx in dfs for col in dfx})
-    allinds = list({ind for dfx in dfs for ind in dfx.index})
-    odf = pd.DataFrame(columns=allcols, index=allinds)
-    for dfx in dfs: odf.update(dfx)
+    print(allR)
+    (
+        onlyL, 
+        onlyR, 
+        both,
+        either
+     ) = (
+        allL - allR, 
+        allR - allL, 
+        allR & allL,
+        allR | allL
+     )
+    
+    
+    logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
+
+    def assign(idx, underdog=True):
+        if not onlyL and not onlyR: # nothing distinct
+            o=colval_LR
+
+        else:
+            # L is underdog, prefer that
+            if len(allL) <= len(allR):
+                if idx in allL:
+                    o=colval_L
+                else:
+                    o=colval_R
+            else:
+                # R is dog
+                if idx in allR:
+                    o=colval_R
+                else:
+                    o=colval_L
+        
+            if 'hemingway' in str(idx):
+                logger.debug([idx,idx in allL, idx in allR, idx in both, idx in either, '->',o])
+        
+        return o
+
+    logger.debug(dfL.member_gender.value_counts())
+    logger.debug(dfR.member_gender.value_counts())
+    odf = pd.concat([dfL, dfR])
+    odf[colname] = [assign(i) for i in odf.index]
+    # odf = odf#.reset_index().drop_duplicates([odf.index.name,colname]).set_index(odf.index.name)
+    logger.debug([odf.columns, 'combo cols'])
+    logger.debug([odf.index.name, 'combo index name'])
     return odf
 
 
@@ -380,7 +435,8 @@ def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
         - If a column in col2col is not present in the DataFrame, it will be ignored.
         - If a column in col2col is present in the DataFrame but not specified in col2col, it will be dropped from the resulting DataFrame.
     """
-    return df[col2col.keys()].rename(columns=col2col)
+    c2c = {k:v for k,v in col2col.items() if k in set(df.columns)}
+    return df[c2c.keys()].rename(columns=c2c)
 
 def qualquant_series(series, quant=False):
     """This function takes a series as input and converts it into a pandas
@@ -594,3 +650,27 @@ def oxfordcomma(l, repr=repr, op='and'):
         return f' {op} '.join(repr(x) for x in l)
     else:
         return f"{', '.join(repr(x) for x in l[:-1])}, {op} {repr(l[-1])}"
+    
+
+
+def wraptxt(s, n, newline_char='\n'):
+    """
+    Args:
+    s (str): String to be wrapped.
+    n (int): Number of characters after which the string should be wrapped.
+    newline_char (str): The character to be inserted at the end of each wrapped line. Default is '\n'.
+
+    Returns:
+    str: The wrapped string.
+    """
+    words = s.split()
+    lines = []
+    current_line = ''
+    for word in words:
+        if len(current_line) + len(word) > n:
+            lines.append(current_line.strip())
+            current_line = word
+        else:
+            current_line += ' ' + word
+    lines.append(current_line.strip())
+    return newline_char.join(lines)
