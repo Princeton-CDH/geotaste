@@ -3,11 +3,13 @@ from .imports import *
 
 ##################
 ##### Dataset #####
+##### Dataset #####
 ##################
 
 
 class Dataset:
     id:str=''
+    url:str = ''
     url:str = ''
     path:str = ''
     cols:list = []
@@ -16,6 +18,7 @@ class Dataset:
     sep:str = ';'
     fillna:object = ''
     cols_q:list = []
+    filter_data:dict = {}
     filter_data:dict = {}
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
@@ -40,6 +43,23 @@ class Dataset:
                 raise Exception('Neither URL nor path')
         # read from saved file
         df = pd.read_csv(self.path, on_bad_lines='warn')
+    def read_df(self):
+        assert self.path # assert path string exists
+        if not os.path.exists(self.path):
+            if self.url:
+                # download and save
+                df=pd.read_csv(self.url)
+                # make dir if not exists
+                if not os.path.exists(os.path.dirname(self.path)):
+                    os.makedirs(os.path.dirname(self.path))
+                # save csv
+                df.to_csv(self.path, index=False)
+                # return loaded df
+                return df
+            else:
+                raise Exception('Neither URL nor path')
+        # read from saved file
+        df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
         
     @cached_property
@@ -47,7 +67,11 @@ class Dataset:
         df=self.read_df()
         if self.fillna is not None: 
             df=df.fillna(self.fillna)
+        df=self.read_df()
+        if self.fillna is not None: 
+            df=df.fillna(self.fillna)
         for c in self.cols_sep: 
+            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
             df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
         for c in self.cols_q:
             df[c]=pd.to_numeric(df[c], errors='coerce')
@@ -58,6 +82,43 @@ class Dataset:
             df = df.rename(self.cols_rename, axis=1)
         return df
 
+    def filter(self, filter_data={}, **other_filter_data):
+        return intersect_filters(*[
+            self.filter_series(key,vals)
+            for key,vals in list(filter_data.items()) + list(other_filter_data.items())
+        ])
+    
+    def filter_df(self, filter_data={}):
+        # if not filter_data: filter_data=self.filter_data
+        return filter_df(self.data, filter_data)
+
+    def series(self, key) -> pd.Series:
+        try:
+            return self.data[key]
+        except KeyError:
+            try:
+                return self.data_orig[key]
+            except KeyError:
+                pass
+        return pd.Series()
+
+    def filter_series(
+            self, 
+            key, 
+            vals = [], 
+            test_func = isin_or_hasone,
+            matches = []
+            ):
+        
+        return filter_series(
+            series=self.series(key),
+            vals=vals,
+            test_func=test_func,
+            series_name=key,
+            matches = matches
+        )
+    
+    
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
             self.filter_series(key,vals)
@@ -106,6 +167,7 @@ def get_member_id(uri):
 
 class MembersDataset(Dataset):
     url:str = URLS.get('members')
+    url:str = URLS.get('members')
     path:str = PATHS.get('members')
     sep:str = ';'
     cols:list = [
@@ -143,6 +205,7 @@ class MembersDataset(Dataset):
     def data(self):
         df=super().data
         df['member'] = df['uri'].apply(get_member_id)
+        df['member'] = df['uri'].apply(get_member_id)
         df['membership_years'] = [[int(y) for y in x if y] for x in df['membership_years']]
         
         # other
@@ -152,6 +215,7 @@ class MembersDataset(Dataset):
 
 
 class DwellingsDataset(Dataset):
+    url:str = URLS.get('dwellings')
     url:str = URLS.get('dwellings')
     path:str = PATHS.get('dwellings')
     cols:list = [
@@ -173,6 +237,10 @@ class DwellingsDataset(Dataset):
         # 'country_id',
         'arrrondissement'
     ]
+    # cols_rename:dict = {
+    #     'start_date':'dwelling_start_date',
+    #     'end_date':'dwelling_end_date',
+    # }
     # cols_rename:dict = {
     #     'start_date':'dwelling_start_date',
     #     'end_date':'dwelling_end_date',
@@ -249,10 +317,12 @@ def get_book_id(uri):
 
 class BooksDataset(Dataset):
     url:str = URLS.get('books')
+    url:str = URLS.get('books')
     path:str = PATHS.get('books')
     cols:list = [
         'uri',
         'title',
+        'genre',
         'genre',
         'author',
         'editor',
@@ -282,7 +352,11 @@ class BooksDataset(Dataset):
         'photographer',
         'circulation_years',
         'genre'
+        'circulation_years',
+        'genre'
     ]
+
+    cols_q = ['year', 'borrow_count', 'purchase_count']
 
     cols_q = ['year', 'borrow_count', 'purchase_count']
 
@@ -298,6 +372,7 @@ class BooksDataset(Dataset):
 
 
 class CreatorsDataset(Dataset):
+    url:str = URLS.get('creators')
     url:str = URLS.get('creators')
     path:str = PATHS.get('creators')
     cols:list = [
@@ -356,13 +431,26 @@ class CreatorsDataset(Dataset):
             if x.endswith('-'): x=x[:-1]
             return [x.strip()]
 
+        def reformat_nation(x):
+            x=x.strip()
+            if ' - ' in x:
+                x=x.split(' - ',1)[-1]
+            if x.endswith('-'): x=x[:-1]
+            return [x.strip()]
+
         df=super().data
+        df.columns = [c.lower().replace(' ','_') for c in df]
+        df['creator']=df['sort_name']  # needs to be name for now  .apply(to_name_id)
+        df['nationalities'] = df['nationality'].apply(reformat_nation)
         df.columns = [c.lower().replace(' ','_') for c in df]
         df['creator']=df['sort_name']  # needs to be name for now  .apply(to_name_id)
         df['nationalities'] = df['nationality'].apply(reformat_nation)
         return df.set_index('creator')
 
 
+def to_name_id(x):
+    x=''.join(y for y in x if y.isalpha() or y==' ')
+    return x.strip().replace(' ','-').lower()
 def to_name_id(x):
     x=''.join(y for y in x if y.isalpha() or y==' ')
     return x.strip().replace(' ','-').lower()
@@ -383,6 +471,7 @@ class CreationsDataset(Dataset):
     def data(self):
         books_df = Books().data
         creators_df = CreatorsDataset().data
+        creators_df = CreatorsDataset().data
         creators = set(creators_df.index)
 
         o=[]
@@ -398,6 +487,7 @@ class CreationsDataset(Dataset):
                             'creator':creator,
                             'creator_role':col_creator,
                             **{f'creator_{k.lower()}':v for k,v in (creators_df.loc[creator] if creator in creators else {}).items()},
+                            **{f'creator_{k.lower()}':v for k,v in (creators_df.loc[creator] if creator in creators else {}).items()},
                             **{f'book_{k}':v for k,v in rowd_nocr.items()},
                         }
                         o.append(odx)
@@ -411,6 +501,15 @@ class CreationsDataset(Dataset):
                 }
                 o.append(odx)
 
+        return pd.DataFrame(o).fillna(self.fillna).set_index('book')
+
+
+
+
+
+
+@cache
+def Books(): return BooksDataset()
         return pd.DataFrame(o).fillna(self.fillna).set_index('book')
 
 
@@ -439,7 +538,17 @@ def Books(): return BooksDataset()
 
 
 
+##########
+# EVENTS
+
+
+
+
+
+
+
 class EventsDataset(Dataset):
+    url:str = URLS.get('events')
     url:str = URLS.get('events')
     path:str = PATHS.get('events')
     cols:list = [
@@ -478,6 +587,17 @@ class EventsDataset(Dataset):
         'member_names', 
         'member_sort_names'
     ]
+
+    @cached_property
+    def data(self):
+        df=super().data
+        df['event']=[f'E{i+1:05}' for i in range(len(df))]
+        df['start_year'] = pd.to_numeric([estr[:4] for estr in df['start_date'].apply(str)], errors='coerce')
+        df['start_month'] = pd.to_numeric([
+            x[5:7] if len(x)>=7 and x[:4].isdigit() and x[4]=='-' else None
+            for x in df['start_date'].apply(str)
+        ], errors='coerce')
+        return df.set_index('event')
 
     @cached_property
     def data(self):
@@ -546,7 +666,22 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
                     'dwelling_numposs':len(matches),
                     **{f'dwelling_{k}':v for k,v in match_d.items()},
                     **dict(row),
+        ld=[]
+        df=super().data
+        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings'):
+            matches, reason = find_dwelling_ids(row)
+            for match in matches:
+                match_d=Dwellings().data.loc[match] if match else {}
+                d={
+                    'dwelling':match,
+                    'dwelling_reason':reason,
+                    'dwelling_numposs':len(matches),
+                    **{f'dwelling_{k}':v for k,v in match_d.items()},
+                    **dict(row),
                 }
+                ld.append(d)
+        return pd.DataFrame(ld)
+    
                 ld.append(d)
         return pd.DataFrame(ld)
     
@@ -778,6 +913,8 @@ def get_geojson_arrondissement(force=False):
     
     # download if nec
     url=URLS.get('geojson_arrond')
+    # download if nec
+    url=URLS.get('geojson_arrond')
     fn=os.path.join(PATH_DATA,'arrondissements.geojson')
     if force or not os.path.exists(fn):
         data = requests.get(url)
@@ -796,6 +933,13 @@ def get_geojson_arrondissement(force=False):
     return jsond
 
 
+@cache
+def get_all_arrond_ids():
+    ids_in_geojson = {
+        d['id'] 
+        for d in get_geojson_arrondissement()['features']
+    }
+    return {n for n in ids_in_geojson if n and n.isdigit() and n!='99'}# | {'X','?','99'} # outside of paris + unkown
 @cache
 def get_all_arrond_ids():
     ids_in_geojson = {
