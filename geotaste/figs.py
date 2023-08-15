@@ -446,18 +446,28 @@ class LandmarksFigureFactory(FigureFactory):
                 lat=figdf['lat'],
                 lon=figdf['lon'],
                 marker=go.scattermapbox.Marker(
-                    color='blue',
+                    color='#d5d5d5',
                     symbol='marker',
                     size=25,
                     opacity=1
                     # opacity=0.4
                 ),
                 text=figdf['landmark'],
+                customdata=figdf['tooltip'],
+                hovertemplate='%{customdata}<extra></extra>',
                 textfont=dict(
                     size=20,
+                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
                     color='black'
                 ),
                 textposition='bottom center',
+                hoverlabel=dict(
+                    font=dict(
+                        size=16,
+                        family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                        # color='black'
+                    )
+                ),
             )
         )
 
@@ -490,11 +500,13 @@ class LandmarksFigureFactory(FigureFactory):
             ),
             autosize=True
         )
-        fig.layout._config = {'responsive':True}
+        fig.layout._config = {'responsive':True, 'scrollZoom':True}
         return fig
     
     def table(self, cols=[], sep=' ', **kwargs):
         return get_dash_table(self.data)
+
+
 
 
 
@@ -587,7 +599,7 @@ class CombinedFigureFactory(FigureFactory):
                 marker=go.scattermapbox.Marker(
                     color=color,
                     symbol='circle',
-                    size=10,
+                    size=20,
                     # size=(figdf['num_borrows'] / 20)+5,
                     opacity=0.4
                 ),
@@ -595,10 +607,14 @@ class CombinedFigureFactory(FigureFactory):
                 textfont=dict(
                     size=16,
                     color=color_text,
-                    family='Recursive, Tahoma, Verdana, Times New Roman'
+                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman'
                 ),
                 hoverlabel=dict(
-                    font_size=16,
+                    font=dict(
+                        size=16,
+                        family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                        # color='black'
+                    )
                 ),
                 textposition='bottom center',
             )

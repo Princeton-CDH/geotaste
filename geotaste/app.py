@@ -1,9 +1,8 @@
 from geotaste.imports import *
-from geotaste import __version__
 
 
 def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
-    with Logwatch(f'booting geotaste v{__version__}'):
+    with Logwatch(f'booting geotaste'):
         layout = GeotasteLayout()        
         app = DashApp(
             layout, 

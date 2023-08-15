@@ -674,3 +674,8 @@ def wraptxt(s, n, newline_char='\n'):
             current_line += ' ' + word
     lines.append(current_line.strip())
     return newline_char.join(lines)
+
+def wraphtml(x,xn=50): return wraptxt(x, ensure_int(xn), '<br>') if x else x
+
+def ifnanintstr(x,y='?'):
+    return ensure_int(x) if not np.isnan(x) else y

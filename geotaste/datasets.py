@@ -10,7 +10,6 @@ from .imports import *
 class Dataset:
     id:str=''
     url:str = ''
-    url:str = ''
     path:str = ''
     cols:list = []
     cols_sep:list = []
@@ -43,38 +42,22 @@ class Dataset:
                 raise Exception('Neither URL nor path')
         # read from saved file
         df = pd.read_csv(self.path, on_bad_lines='warn')
-    def read_df(self):
-        assert self.path # assert path string exists
-        if not os.path.exists(self.path):
-            if self.url:
-                # download and save
-                df=pd.read_csv(self.url)
-                # make dir if not exists
-                if not os.path.exists(os.path.dirname(self.path)):
-                    os.makedirs(os.path.dirname(self.path))
-                # save csv
-                df.to_csv(self.path, index=False)
-                # return loaded df
-                return df
-            else:
-                raise Exception('Neither URL nor path')
-        # read from saved file
-        df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
-        
+
     @cached_property
     def data(self):  
         df=self.read_df()
-        if self.fillna is not None: 
-            df=df.fillna(self.fillna)
-        df=self.read_df()
-        if self.fillna is not None: 
-            df=df.fillna(self.fillna)
+        if df is not None and self.fillna is not None: df=df.fillna(self.fillna)
+
+        cols = list(df.columns)
+        logger.debug(f'columns in {self.path} are {cols}')
+
+
         for c in self.cols_sep: 
-            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
-            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
-        for c in self.cols_q:
-            df[c]=pd.to_numeric(df[c], errors='coerce')
+            try:
+                df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
+            except KeyError: 
+                pass
         if self.cols: 
             badcols = list(set(df.columns) - set(self.cols))
             df=df.drop(badcols, axis=1)
@@ -82,42 +65,7 @@ class Dataset:
             df = df.rename(self.cols_rename, axis=1)
         return df
 
-    def filter(self, filter_data={}, **other_filter_data):
-        return intersect_filters(*[
-            self.filter_series(key,vals)
-            for key,vals in list(filter_data.items()) + list(other_filter_data.items())
-        ])
-    
-    def filter_df(self, filter_data={}):
-        # if not filter_data: filter_data=self.filter_data
-        return filter_df(self.data, filter_data)
 
-    def series(self, key) -> pd.Series:
-        try:
-            return self.data[key]
-        except KeyError:
-            try:
-                return self.data_orig[key]
-            except KeyError:
-                pass
-        return pd.Series()
-
-    def filter_series(
-            self, 
-            key, 
-            vals = [], 
-            test_func = isin_or_hasone,
-            matches = []
-            ):
-        
-        return filter_series(
-            series=self.series(key),
-            vals=vals,
-            test_func=test_func,
-            series_name=key,
-            matches = matches
-        )
-    
     
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
@@ -159,14 +107,31 @@ class Dataset:
 
 class LandmarksDataset(Dataset):
     path = PATHS.get('landmarks')
+    url = URLS.get('landmarks')
     cols_q = ['lat', 'lon']
+    
+    
+    @cached_property
+    def data(self):
+        df=super().data
+        df['dwelling_distSCO_km'] = [
+            geodist(latlon, LATLON_SCO, unit='km')
+            for latlon in zip(df.lat, df.lon)
+        ]
+
+        def tooltip(row):
+            gdist = f'{round(float(row.dwelling_distSCO_km),1)}' if row.dwelling_distSCO_km else UNKNOWN
+            return wraphtml(f'''<b>{row.landmark}</b>, located at {row.address}, about {gdist}km from Shakespeare and Company.''')
+        
+        df['tooltip'] = df.apply(tooltip,axis=1)
+        return df
+    
 
 
 def get_member_id(uri):
     return uri.lower().split('/members/',1)[1][:-1] if '/members/' in uri else ''
 
 class MembersDataset(Dataset):
-    url:str = URLS.get('members')
     url:str = URLS.get('members')
     path:str = PATHS.get('members')
     sep:str = ';'
@@ -981,7 +946,7 @@ def hover_tooltip(row, bdf):
         )
     )
     xn=50
-    def wrap(x,xn=xn): return wraptxt(x, ensure_int(xn), '<br>') if x else x
+    def wrap(x,xn=xn): return wraphtml(x, xn)
     
     def bookdesc(r):
         o=f'* {r.creator}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
@@ -995,15 +960,10 @@ def hover_tooltip(row, bdf):
             o+=f' and returned {r.event_end}'
         return wrap(o)
     
-    borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
-
+    # borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
     gdist = f'{round(float(row.dwelling_distSCO),1)}' if row.dwelling_distSCO else UNKNOWN
     nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
-    nats=f', from {oxfordcomma(nats, repr=lambda x: x)}' if nats else ''
-    gstr=f', {row.member_gender.lower()}'
+    nats=f', from {oxfordcomma(nats, repr=lambda x: x)}, ' if nats else ''
+    # gstr=f', {row.member_gender.lower()}'
     
-    otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}{gstr}')
-    obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')# {"These books were:" if numborrow_here>1 else "This book was:"}')
-    # o = '<br><br>'.join([otitle, obody,borrowbooks])
-    o = '<br><br>'.join([otitle, obody])
-    return o
+    return wrap(f'''<b>{row.member_nicename}</b> ({ifnanintstr(row.member_dob)}-{v(ifnanintstr(row.member_dod))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')

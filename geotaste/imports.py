@@ -3,7 +3,7 @@
 # server
 PORT=8111
 HOST='0.0.0.0'
-DEBUG=True
+DEBUG=False
 
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
@@ -70,8 +70,11 @@ LATLON_SCO = (
 )
 
 CENTER = (
-    LATLON_SCO[0] + .005,
-    LATLON_SCO[1] - .015
+    # LATLON_SCO[0] + .005,
+    # LATLON_SCO[1] - .015
+
+    LATLON_SCO[0],
+    LATLON_SCO[1]
 )
 
 MAP_CENTER = dict(
