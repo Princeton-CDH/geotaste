@@ -175,7 +175,7 @@ class CollapsibleCard(BaseComponent):
         def toggle_collapse(n1, n2, is_open):
             now_is_open = (not is_open if (n1 or n2) else is_open)
             logger.debug(f'{self.name} is now open? {now_is_open}')
-            return now_is_open, '[-]' if now_is_open else '[+]'
+            return now_is_open, '[–]' if now_is_open else '[+]'
 
 
 # @cache
