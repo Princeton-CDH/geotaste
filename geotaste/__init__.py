@@ -1,3 +1,6 @@
 __version__='0.3.5'
 
-from .geotaste import *
+try:
+    from .geotaste import *
+except (ImportError,ModuleNotFoundError) as e:
+    pass
