@@ -3,7 +3,7 @@ from .imports import *
 
 class GeotasteLayout(BaseComponent):
     def __init__(self):
-        super().__init__(title="Shakespeare & Co. Labs")
+        super().__init__(title="Shakespeare and Company Project Lab")
         
     @cached_property
     def comparison_panel(self): 
@@ -34,9 +34,7 @@ class GeotasteLayout(BaseComponent):
     def logo(self):
         return html.Div([
             html.Img(src=LOGO_SRC, className='logo-img'),
-            # html.H1(self.title, className='logo-title'),
             self.logo_popup,
-            html.Img(src=LOGO_SRC2, className='logo-img2'),
         ], className='logo')
     
     @cached_property

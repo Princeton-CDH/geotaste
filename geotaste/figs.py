@@ -620,8 +620,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         if is_listy(ff1) and not ff2 and len(ff1)==2:
             ff1,ff2 = ff1
 
-        self.ff1 = self.L = self.indiv_ff(ff1,name='Group 1') if type(ff1) in {dict,str} else ff1
-        self.ff2 = self.R = self.indiv_ff(ff2,name='Group 2') if type(ff2) in {dict,str} else ff2
+        self.ff1 = self.L = self.indiv_ff(ff1,name='Filter 1') if type(ff1) in {dict,str} else ff1
+        self.ff2 = self.R = self.indiv_ff(ff2,name='Filter 2') if type(ff2) in {dict,str} else ff2
 
     @cached_property
     def arrond_dists(self):
@@ -647,8 +647,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         return combine_LR_df(
             self.L.df_dwellings,
             self.R.df_dwellings, 
-            colval_L='Group 1',
-            colval_R='Group 2',
+            colval_L='Filter 1',
+            colval_R='Filter 2',
             colval_LR='Both Groups'
         )
 
