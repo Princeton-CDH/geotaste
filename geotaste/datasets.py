@@ -507,16 +507,6 @@ class CreationsDataset(Dataset):
 
 
 
-
-@cache
-def Books(): return BooksDataset()
-        return pd.DataFrame(o).fillna(self.fillna).set_index('book')
-
-
-
-
-
-
 @cache
 def Books(): return BooksDataset()
 
@@ -666,6 +656,7 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
                     'dwelling_numposs':len(matches),
                     **{f'dwelling_{k}':v for k,v in match_d.items()},
                     **dict(row),
+                }
         ld=[]
         df=super().data
         for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings'):
@@ -679,9 +670,6 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
                     **{f'dwelling_{k}':v for k,v in match_d.items()},
                     **dict(row),
                 }
-                ld.append(d)
-        return pd.DataFrame(ld)
-    
                 ld.append(d)
         return pd.DataFrame(ld)
     
