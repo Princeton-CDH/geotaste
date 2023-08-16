@@ -458,7 +458,7 @@ class LandmarksFigureFactory(FigureFactory):
                 textfont=dict(
                     size=20,
                     family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
-                    color='black'
+                    color='blue'
                 ),
                 textposition='bottom center',
                 hoverlabel=dict(

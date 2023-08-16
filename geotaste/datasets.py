@@ -47,22 +47,17 @@ class Dataset:
     @cached_property
     def data(self):  
         df=self.read_df()
-        if df is not None and self.fillna is not None: df=df.fillna(self.fillna)
+        if self.fillna is not None: df=df.fillna(self.fillna)
 
-        cols = list(df.columns)
+        cols = [c for c in df.columns if not self.cols or c in set(self.cols)]
+        cols_sep = [c for c in self.cols_sep if c in set(cols)]
         logger.debug(f'columns in {self.path} are {cols}')
 
 
-        for c in self.cols_sep: 
-            try:
-                df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
-            except KeyError: 
-                pass
-        if self.cols: 
-            badcols = list(set(df.columns) - set(self.cols))
-            df=df.drop(badcols, axis=1)
-        if self.cols_rename: 
-            df = df.rename(self.cols_rename, axis=1)
+        for c in cols_sep: 
+            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
+        if cols: df=df[cols]
+        if self.cols_rename: df = df.rename(self.cols_rename, axis=1)
         return df
 
 
@@ -966,4 +961,4 @@ def hover_tooltip(row, bdf):
     nats=f', from {oxfordcomma(nats, repr=lambda x: x)}, ' if nats else ''
     # gstr=f', {row.member_gender.lower()}'
     
-    return wrap(f'''<b>{row.member_nicename}</b> ({ifnanintstr(row.member_dob)}-{v(ifnanintstr(row.member_dod))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
+    return wrap(f'''<b>{row.member_nicename}</b> ({ifnanintstr(row.member_dob,'')} – {v(ifnanintstr(row.member_dod,'?'))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
