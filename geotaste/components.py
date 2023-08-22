@@ -639,9 +639,7 @@ def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
     tabs = [
         dbc.Tab(
             children=d.get('children'),
-            label=d.get('label'),
-            tab_id=d.get('tab_id'),
-            id=uid()
+            **d
         )
         for d in children
     ]

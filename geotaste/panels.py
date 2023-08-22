@@ -325,8 +325,14 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def content_right_tabs(self,params=None):
+        return self.get_content_right_tabs(compare=False)
+    
+    def get_content_right_tabs(self, compare=False):
         return dbc.Container([
-            dbc.Row(self.graphtabs, className='content-tabs-row')
+            dbc.Row(
+                self.graphtabs_nocompare if not compare else self.graphtabs, 
+                className='content-tabs-row'
+            )
         ])
 
     
@@ -448,12 +454,28 @@ class ComparisonPanel(BaseComponent):
     #     return dbc.Container(graphtabs, className='graphtabs-container-container')
 
     @cached_property
+    def graphtabs_nocompare(self):
+        tabs = get_tabs(
+            children=[
+                dict(label='Map', tab_id='map'),
+                dict(label='Data', tab_id='data'),
+            ], 
+            tab_level=1, 
+            className='graphtabs-container', 
+            active_tab='map'
+        )
+        return dbc.Container([
+            tabs,
+            self.graphtab_desc
+        ], className='graphtabs-container-container')
+    
+    @cached_property
     def graphtabs(self):
         tabs = get_tabs(
             children=[
                 dict(label='Map', tab_id='map'),
                 dict(label='Data', tab_id='data'),
-                dict(label='Analysis', tab_id='analysis'),
+                dict(label='Compare filters', tab_id='analysis', id='compare-filter-tab')
             ], 
             tab_level=1, 
             className='graphtabs-container', 
@@ -518,15 +540,22 @@ class ComparisonPanel(BaseComponent):
             [
                 Output('storedescs-col-R', 'style'),
                 Output('panel_R', 'style'),
+                Output(self.content_right_tabs, 'children')
             ],
-            Input(self.L.store, 'data'),
+            [
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+            ],
             prevent_initial_callback=True
         )
-        def allow_second_group(left_filter_data):
-            if not left_filter_data:
-                return {'opacity':.35}, {'display':'none'}
+        def allow_second_group(fdL, fdR):
+            if not fdL:
+                return {'opacity':.35}, {'display':'none'}, self.get_content_right_tabs(compare=False)
+            elif fdR:
+                return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=True)
             else:
-                return {'opacity':1}, {'display':'block'}
+                return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=False)
+            
             
 
 # @cache
@@ -562,21 +591,6 @@ def graphtab_cache(serialized_data):
 
 def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filters=1):
     tab_ids_1_set=set(tab_ids_1)
-    tab_ids_2_set=set(tab_ids_2)
-    # logger.debug([tab_ids_1_set, tab_ids_2_set])
-
-    # if 'tbl' in tab_ids_1_set and 'tbl_members' in tab_ids_2_set: 
-    #     return MemberTableView
-
-    # elif 'analyze' in tab_ids_1_set and 'tbl_arrond' in tab_ids_2_set:
-    #     return ArrondTableView
-
-    # elif 'tbl' in tab_ids_1_set:
-    #     return MemberTableView
-    
-    # elif 'map' in tab_ids_1_set:
-    #     return MemberMapView
-
     if 'data' in tab_ids_1_set:
         return MemberTableView
     elif 'map' in tab_ids_1_set:
