@@ -554,32 +554,32 @@ class MemberNameCard(FilterInputCard):
     desc = 'Name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
-    tooltip = 'Filter for particular members by name'
+    # tooltip = 'Filter for particular members by name'
 
 class MemberDOBCard(FilterPlotCard):
     desc = 'Birth year'
     figure_factory = MemberDOBFigure 
-    tooltip = 'Filter members by date of birth'   
+    # tooltip = 'Filter members by date of birth'   
     
 class MembershipYearCard(FilterPlotCard):
     desc = 'Years active'
     figure_factory = MembershipYearFigure    
-    tooltip = 'Filter for membership by years of active members'
+    # tooltip = 'Filter for membership by years of active members'
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Gender'
     figure_factory = MemberGenderFigure
-    tooltip = 'Filter for members by genre'
+    # tooltip = 'Filter for members by genre'
 
 class MemberNationalityCard(FilterPlotCard):
     desc = 'Nationality'
     figure_factory = MemberNationalityFigure
-    tooltip = 'Filter for members of particular nationalities'
+    # tooltip = 'Filter for members of particular nationalities'
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Arrondissement'
     figure_factory = MemberArrondMap
-    tooltip = 'Filter for members who ever lived in a given arrondissement'
+    # tooltip = 'Filter for members who ever lived in a given arrondissement'
 
 
 
@@ -591,44 +591,44 @@ class BookTitleCard(FilterInputCard):
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
-    tooltip = 'Filter for particular books'
+    # tooltip = 'Filter for particular books'
 
 class CreatorNameCard(FilterInputCard):
     desc = 'Author'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
-    tooltip = 'Filter for particular authors'
+    # tooltip = 'Filter for particular authors'
 
 class BookYearCard(FilterPlotCard):
     desc = "Publication date"
     figure_factory = BookYearFigure
-    tooltip = 'Filter by when the borrowed book was published'
+    # tooltip = 'Filter by when the borrowed book was published'
 
 class CreatorGenderCard(FilterPlotCard):
     desc = 'Author gender'
     figure_factory = CreatorGenderFigure
-    tooltip = 'Filter by the gender of the author'
+    # tooltip = 'Filter by the gender of the author'
 
 class BookGenreCard(FilterPlotCard):
     desc = 'Genre'
     figure_factory = BookGenreFigure
-    tooltip = 'Filter by genre of book'
+    # tooltip = 'Filter by genre of book'
 
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Author nationality'
     figure_factory = CreatorNationalityFigure
-    tooltip = 'Filter by the nationality of the author'
+    # tooltip = 'Filter by the nationality of the author'
 
     
 class EventYearCard(FilterPlotCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
-    tooltip = 'Filter for the books borrowed in a given year range'
+    # tooltip = 'Filter for the books borrowed in a given year range'
 
 class EventMonthCard(FilterPlotCard):
     desc = 'Month of borrowing'
     figure_factory = EventMonthFigure
-    tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
+    # tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
 
 class EventTypeCard(FilterPlotCard):
     desc = 'type of event'
@@ -639,7 +639,9 @@ def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
     tabs = [
         dbc.Tab(
             children=d.get('children'),
-            **d
+            label=d.get('label'),
+            tab_id=d.get('tab_id'),
+            id=d.get('id', uid())
         )
         for d in children
     ]

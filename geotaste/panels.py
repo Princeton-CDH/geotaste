@@ -294,7 +294,7 @@ class ComparisonPanel(BaseComponent):
                 #     style={'z-index':1000},
                 #     placement='right'
                 # )
-                dbc.Tooltip(msg, target=idx)
+                # dbc.Tooltip(msg, target=idx)
             ])
 
 
