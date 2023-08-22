@@ -129,7 +129,7 @@ class MemberPanel(CollapsiblePanel):
     figure_factory = CombinedFigureFactory
     desc = 'Members of the library'
     records_name='members'
-    tooltip = 'Filter members of the library by name, date of birth, when active, gender, nationality, and arrondissement'
+    # tooltip = 'Filter members of the library by name, date of birth, when active, gender, nationality, and arrondissement'
 
     @cached_property
     def name_card(self): 
@@ -178,7 +178,7 @@ class BookPanel(CollapsiblePanel):
     figure_factory = CombinedFigureFactory
     desc = 'Books they borrowed'
     records_name='books'
-    tooltip = 'Filter books borrowed by title, date of publication, genre, author, author gender, author nationality, and the date borrowed'
+    # tooltip = 'Filter books borrowed by title, date of publication, genre, author, author gender, author nationality, and the date borrowed'
 
     @cached_property
     def title_card(self): 
@@ -268,8 +268,10 @@ class ComparisonPanel(BaseComponent):
 
     @cached_property
     def content_left_tabs(self,params=None):
-        p_L=html.Span([html.B('Filter 1: '), self.L.store_desc])
-        p_R=html.Span([html.B('Filter 2: '), self.R.store_desc])
+        # p_L=html.Span([html.B('Filter 1 '), self.L.store_desc])
+        # p_R=html.Span([html.B('Filter 2 '), self.R.store_desc])
+        p_L=html.Span(self.L.store_desc)
+        p_R=html.Span(self.R.store_desc)
         
         def getbtn(x, cls=''):
             className='button_store_desc store_desc query_str'

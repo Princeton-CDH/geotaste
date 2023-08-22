@@ -21,7 +21,7 @@ MIN_P=.05
 # blanks etc
 BLANKSTR='‎‎‎‎'
 BLANK = ''
-UNFILTERED = '(unfiltered)'
+UNFILTERED = '+'
 NOFILTER = BLANK
 # LEFT_COLOR='#AB9155' #'#7d6ab6'
 RIGHT_COLOR='#7d6ab6' #rgb(125, 106, 182)
