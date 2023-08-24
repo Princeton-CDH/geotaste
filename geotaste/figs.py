@@ -441,16 +441,17 @@ class LandmarksFigureFactory(FigureFactory):
         fig = go.Figure()
         fig.add_trace(
             go.Scattermapbox(
+                below='',
                 name='Landmarks',
                 mode='markers+text',
                 lat=figdf['lat'],
                 lon=figdf['lon'],
                 marker=go.scattermapbox.Marker(
-                    color='#d5d5d5',
-                    symbol='marker',
-                    size=25,
-                    opacity=1
-                    # opacity=0.4
+                    color='black',
+                    # symbol='square',
+                    size=20,
+                    # opacity=1
+                    opacity=0.4
                 ),
                 text=figdf['landmark'],
                 customdata=figdf['tooltip'],
@@ -458,7 +459,7 @@ class LandmarksFigureFactory(FigureFactory):
                 textfont=dict(
                     size=20,
                     family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
-                    color='blue'
+                    color='black'
                 ),
                 textposition='bottom center',
                 hoverlabel=dict(
@@ -472,7 +473,7 @@ class LandmarksFigureFactory(FigureFactory):
         )
 
         fig.update_mapboxes(
-            style='light',
+            style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
             layers=[
                 {
                     "below": 'traces',
