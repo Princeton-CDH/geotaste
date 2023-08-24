@@ -3,6 +3,8 @@ from .views import *
 
 
 class FilterPanel(FilterComponent):
+    unfiltered = UNFILTERED
+
     @cached_property
     def content(self,params=None):
         return dbc.Container([self.store] + super().content.children)
@@ -10,7 +12,7 @@ class FilterPanel(FilterComponent):
     @cached_property
     def store_desc(self): 
         return html.Span(
-            UNFILTERED,
+            self.unfiltered,
             id=self.id('query_str'), 
             className='store_desc query_str', 
             # placeholder=UNFILTERED, 
@@ -284,7 +286,7 @@ class ComparisonPanel(BaseComponent):
                     n_clicks=0,
                     className=className,
                     id=idx,
-                    style={'text-align':'center'}
+                    style={'text-align':'center', 'height':'100px'}
                 ),
                 # dbc.Popover(
                 #     [
@@ -394,7 +396,8 @@ class ComparisonPanel(BaseComponent):
             name='L',
             L_or_R='L', 
             color=LEFT_COLOR,
-            desc='Left-hand Group Panel'
+            desc='Left-hand Group Panel',
+            unfiltered=UNFILTERED_L
         )
     
     @cached_property
@@ -403,7 +406,8 @@ class ComparisonPanel(BaseComponent):
             name='R',
             L_or_R='R',
             color=RIGHT_COLOR,
-            desc='Right-hand Group Panel'
+            desc='Right-hand Group Panel',
+            unfiltered=UNFILTERED_R
         )
     
     # @cached_property
@@ -516,7 +520,7 @@ class ComparisonPanel(BaseComponent):
         #@logger.catch
         def dropdown_the_filters(n_clicks_l, is_open):
             if not any(n_clicks_l): raise PreventUpdate
-            if is_open:
+            if is_open and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
                 # then shut
                 return False, {'width':'100vw'}
             else:
@@ -547,16 +551,32 @@ class ComparisonPanel(BaseComponent):
             [
                 Input(self.L.store, 'data'),
                 Input(self.R.store, 'data'),
+                Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
             ],
             prevent_initial_callback=True
         )
-        def allow_second_group(fdL, fdR):
-            if not fdL:
-                return {'opacity':.35}, {'display':'none'}, self.get_content_right_tabs(compare=False)
-            elif fdR:
+        def allow_second_group(fdL, fdR, n_clicks):
+            clicked_L,clicked_R=n_clicks
+            logger.debug(['n_clicks',n_clicks])
+            
+            # both filtered
+            if fdL and fdR:
                 return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=True)
-            else:
-                return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=False)
+
+            # neither filtered            
+            if not fdL and not fdR:
+                return {'opacity':.35}, {'display':'none'}, self.get_content_right_tabs(compare=False)
+            
+
+            # just left
+            if fdL:
+                if not clicked_R%2:
+                    return {'opacity':.35}, {'display':'none'}, self.get_content_right_tabs(compare=False)
+                else:
+                    return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=False)
+            
+            # just right -- shouldnt be possible
+            return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=False)
             
             
 
