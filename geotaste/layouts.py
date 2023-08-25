@@ -48,10 +48,15 @@ class GeotasteLayout(BaseComponent):
                 ]),
             ]))
         ], className='frozen-top-row')
+    
+    @cached_property
+    def welcome_modal(self):
+        return get_welcome_modal()
 
     def layout(self, params=None):
         return dbc.Container(
             [
+                self.welcome_modal,
                 self.frozen_top_row,
                 self.comparison_panel.content,
             ],

@@ -796,6 +796,14 @@ class CombinedDataset(Dataset):
             )
             if row.dwelling
         }
+        def newnicename(x): 
+            if not ',' in x: return x
+            a,b=x.split(',', 1)
+            ln=a.strip()
+            fn=b.split()[0].strip()
+            return f'{fn} {ln}'
+
+        odf['member_nicename'] = odf['member_name'].apply(newnicename)
         odf['hover_tooltip'] = [tooltip_d.get(dw,'') for dw in odf.dwelling]
         if save: odf.to_pickle(self.path)
         return odf
@@ -921,7 +929,7 @@ def Landmarks(): return LandmarksDataset()
 #### other funcs
 
 def hover_tooltip(row, bdf):
-    UNKNOWN = '?'
+    UNKNOWN = ''
     def v(x): return x if x else UNKNOWN
     
     if not row.member_membership:
@@ -960,5 +968,18 @@ def hover_tooltip(row, bdf):
     nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
     nats=f', from {oxfordcomma(nats, repr=lambda x: x)}, ' if nats else ''
     # gstr=f', {row.member_gender.lower()}'
+    dob=ifnanintstr(row.member_dob,'')
+    dod=ifnanintstr(row.member_dod,'')
+    birthdeath=f'{dob} – {dod}'
+    arrond=f'{row.arrond_id}e' if row.arrond_id else ''
     
-    return wrap(f'''<b>{row.member_nicename}</b> ({ifnanintstr(row.member_dob,'')} – {v(ifnanintstr(row.member_dod,'?'))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
+    # return wrap(f'''<b>{row.member_nicename}</b>  – {v(ifnanintstr(row.member_dod,'?'))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
+
+    ostr = f"""
+<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_nicename} ({birthdeath})
+{row.dwelling_address}
+{row.dwelling_city} {arrond}
+
+Member: {y1} – {y2}
+""".strip().replace('\n','<br>')
+    return ostr

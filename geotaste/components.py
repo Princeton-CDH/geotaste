@@ -675,3 +675,25 @@ def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
 
 def tooltip(component, tooltip=''):
     return dbc.Tooltip(tooltip, target=component.id)
+
+
+
+
+
+def get_welcome_modal():
+    return dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle("Welcome to Geotaste App")),
+            dbc.ModalBody("We welcome you, here are our opening words"),
+            # dbc.ModalFooter(
+            #     dbc.Button(
+            #         "OK", id="close", className="ms-auto", n_clicks=0
+            #     )
+            # ),
+        ],
+        id="welcome-modal",
+        centered=True,
+        is_open=True,
+    )
+
+

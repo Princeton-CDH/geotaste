@@ -11,3 +11,4 @@ cache
 .env
 .vscode
 dev_*.txt
+*tiles*/*

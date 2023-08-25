@@ -435,6 +435,23 @@ class EventTypeFigure(EventFigure):
 
 class LandmarksFigureFactory(FigureFactory):
     dataset_class = Landmarks
+    # map_style = {
+    #     "version": 8,
+    #     "sources": {
+    #         "raster-tiles": {
+    #             "type": "raster",
+    #             "tiles": ["http://localhost:5000/{z}/{x}/{y}.png"],
+    #             "tileSize": 256
+    #         }
+    #     },
+    #     "layers": [{
+    #         "id": "simple-tiles",
+    #         "type": "raster",
+    #         "source": "raster-tiles",
+    #         "minzoom": 0,
+    #         "maxzoom": 18
+    #     }]
+    # }
 
     def plot_map(self, color='gray', **kwargs):
         figdf = self.data
@@ -467,10 +484,13 @@ class LandmarksFigureFactory(FigureFactory):
                         size=16,
                         family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
                         # color='black'
-                    )
+                    ),
+                    bgcolor='white',
                 ),
             )
         )
+
+        # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
 
         fig.update_mapboxes(
             style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
@@ -481,6 +501,8 @@ class LandmarksFigureFactory(FigureFactory):
                     "sourceattribution": "https://warper.wmflabs.org/maps/6050",
                     "source": [
                         "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                        # "/tiles/{z}/{x}/{y}.png"
+                        # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
                     ]
                 }
             ],
@@ -615,7 +637,8 @@ class CombinedFigureFactory(FigureFactory):
                         size=16,
                         family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
                         # color='black'
-                    )
+                    ),
+                    bgcolor='white',
                 ),
                 textposition='bottom center',
             )
