@@ -506,6 +506,7 @@ class LandmarksFigureFactory(FigureFactory):
                     ]
                 }
             ],
+            # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
             accesstoken=mapbox_access_token,
             bearing=0,
             center=MAP_CENTER,
