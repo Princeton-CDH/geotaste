@@ -971,7 +971,7 @@ def hover_tooltip(row, bdf):
     dob=ifnanintstr(row.member_dob,'')
     dod=ifnanintstr(row.member_dod,'')
     birthdeath=f'{dob} – {dod}'
-    arrond=f'{row.arrond_id}e' if row.arrond_id else ''
+    arrond=f'{row.arrond_id}ᵉ' if row.arrond_id else ''
     
     # return wrap(f'''<b>{row.member_nicename}</b>  – {v(ifnanintstr(row.member_dod,'?'))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
 

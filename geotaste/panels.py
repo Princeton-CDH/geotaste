@@ -122,7 +122,7 @@ class FilterPlotPanel(FilterPanel):
         #         ]
             
 class CollapsiblePanel(CollapsibleCard):
-    body_is_open = True
+    body_is_open = False
     className='collapsible-panel'
 
 
@@ -363,7 +363,7 @@ class ComparisonPanel(BaseComponent):
         return dbc.Collapse(
             self.content_main_row, 
             className='layout-leftcol',
-            is_open=True
+            is_open=False
         )
     
     @cached_property

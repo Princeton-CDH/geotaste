@@ -517,7 +517,7 @@ p {
 
 .storedescs-col-L, .storedescs-col-R {
     border-top:none;
-    padding-right:4px;
+    /* padding-right:4px; */
 }
 
 .storedescs-col-L {

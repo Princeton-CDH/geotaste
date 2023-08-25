@@ -179,9 +179,9 @@ class CollapsibleCard(BaseComponent):
 
 
 # @cache
-# @cache_obj.memoize()
+@cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
-    logger.trace(f'ff_cache({figure_class.__name__}, {serialized_data})')
+    logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
     filter_data,selected,kwargs = unserialize(serialized_data)
     return figure_class(filter_data, selected, **kwargs)
 
@@ -448,7 +448,7 @@ class FilterPlotCard(FilterCard):
 class FilterSliderCard(FilterCard):
     value=None
     unfiltered=''
-    body_is_open = True
+    body_is_open = False
 
 
     @cached_property
