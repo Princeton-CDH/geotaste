@@ -212,7 +212,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     
     @cached_property
     def seldata(self) -> dict:
-        return {self.key:self.sels}
+        return {self.key:self.series.unique()}
     
     
     @cached_property
