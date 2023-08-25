@@ -525,7 +525,7 @@ class FilterSliderCard(FilterCard):
                 Output(self.input_start, 'value', allow_duplicate=True),
                 Output(self.input_end, 'value', allow_duplicate=True),
                 Output(self.store, "data", allow_duplicate=True),
-                Output(self.store_desc, 'children')
+                Output(self.store_desc, 'children', allow_duplicate=True)
             ],
             [
                 Input(self.graph, 'selectedData'),
@@ -551,24 +551,38 @@ class FilterSliderCard(FilterCard):
 
             logger.debug(['sel updated on slider!', ctx.triggered_id])
 
-            if ctx.triggered_id == self.button_clear.id:
+            if ctx.triggered_id == self.button_clear.id and clear_clicked:
+                logger.debug(f'CLEAR TRIGGERED')
                 ff=self.ff()
-                o=[ff.plot(), ff.minval, ff.maxval, {}, f'']
+                o=[ff.plot(), ff.minval, ff.maxval, {}, self.unfiltered]
             
             elif ctx.triggered_id == self.graph.id:
-                logger.debug(f'[{self.name}) selection updated 1: {selected_data}')
+                logger.debug(f'GRAPH TRIGGERED')
                 new_data=self.ff().selected(selected_data)
                 if not new_data or new_data==old_data: raise PreventUpdate
 
                 vals=list(new_data.values())
                 minval=min(vals[0]) if vals else None
                 maxval=max(vals[0]) if vals else None
-                o=[old_fig, minval, maxval, new_data, f'{vstr(minval)} – {vstr(maxval)}']
+                o=[
+                    old_fig, 
+                    minval, 
+                    maxval, 
+                    new_data, 
+                    f'{vstr(minval)} – {vstr(maxval)}'
+                ]
             
             elif ctx.triggered_id in {self.input_start.id, self.input_end.id}:
+                logger.debug(f'INPUT TRIGGERED TRIGGERED')
                 ff = self.ff(min_series_val=start_value, max_series_val=end_value)
                 newfig = ff.plot()
-                o=[newfig, start_value, end_value, ff.seldata, f'{vstr(start_value)} – {vstr(end_value)}']
+                o=[
+                    newfig, 
+                    start_value, 
+                    end_value, 
+                    ff.seldata, 
+                    f'{vstr(start_value)} – {vstr(end_value)}'
+                ]
             else:
                 raise PreventUpdate
             
@@ -711,7 +725,7 @@ class MemberNameCard(FilterInputCard):
     figure_factory = MemberNameFigure
     # tooltip = 'Filter for particular members by name'
 
-class MemberDOBCard(FilterPlotCard):
+class MemberDOBCard(FilterSliderCard):
     desc = 'Birth year'
     figure_factory = MemberDOBFigure 
     # tooltip = 'Filter members by date of birth'   
@@ -754,7 +768,7 @@ class CreatorNameCard(FilterInputCard):
     figure_factory = CreatorNameFigure
     # tooltip = 'Filter for particular authors'
 
-class BookYearCard(FilterPlotCard):
+class BookYearCard(FilterSliderCard):
     desc = "Publication date"
     figure_factory = BookYearFigure
     # tooltip = 'Filter by when the borrowed book was published'
@@ -775,12 +789,12 @@ class CreatorNationalityCard(FilterPlotCard):
     # tooltip = 'Filter by the nationality of the author'
 
     
-class EventYearCard(FilterPlotCard):
+class EventYearCard(FilterSliderCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
     # tooltip = 'Filter for the books borrowed in a given year range'
 
-class EventMonthCard(FilterPlotCard):
+class EventMonthCard(FilterSliderCard):
     desc = 'Month of borrowing'
     figure_factory = EventMonthFigure
     # tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
@@ -838,17 +852,17 @@ def tooltip(component, tooltip=''):
 def get_welcome_modal():
     return dbc.Modal(
         [
-            dbc.ModalHeader(dbc.ModalTitle("Welcome to Geotaste App")),
-            dbc.ModalBody("We welcome you, here are our opening words"),
-            # dbc.ModalFooter(
-            #     dbc.Button(
-            #         "OK", id="close", className="ms-auto", n_clicks=0
-            #     )
-            # ),
+            dbc.ModalHeader(dbc.ModalTitle(WELCOME_HEADER)),
+            dbc.ModalBody([
+                html.H3(WELCOME_HEADER2),
+                html.Br(),
+                html.P(WELCOME_BODY),
+            ])
         ],
         id="welcome-modal",
         centered=True,
         is_open=WELOME_MSG_ON,
+        size='lg'
     )
 
 
