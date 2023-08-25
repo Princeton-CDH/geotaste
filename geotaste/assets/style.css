@@ -545,3 +545,15 @@ p {
 button {
     pointer-events: all;
 }
+
+.slider-input-num {
+    width:4em;
+    /* border:1px solid red; */
+    border:none;
+    font-style: italic;
+    font-size:.8em;
+    text-align: left;
+    padding: 0;
+    margin:0;
+    font-family: Recursive, Tahoma, Verdana;
+}

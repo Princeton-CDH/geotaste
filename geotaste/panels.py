@@ -72,7 +72,7 @@ class FilterPanel(FilterComponent):
                     (dash.no_update if old==new else new)
                     for old,new in zip(old_filter_data_l, new_filter_data_l)
                 ]
-                logger.debug(f'out from panel {pformat(out)}')
+                logger.trace(f'out from panel {pformat(out)}')
                 return out
             
 
@@ -122,7 +122,7 @@ class FilterPlotPanel(FilterPanel):
         #         ]
             
 class CollapsiblePanel(CollapsibleCard):
-    body_is_open = False
+    body_is_open = True
     className='collapsible-panel'
 
 
@@ -363,7 +363,7 @@ class ComparisonPanel(BaseComponent):
         return dbc.Collapse(
             self.content_main_row, 
             className='layout-leftcol',
-            is_open=False
+            is_open=True
         )
     
     @cached_property
@@ -583,7 +583,7 @@ class ComparisonPanel(BaseComponent):
 # @cache
 # @cache_obj.memoize()
 def graphtab_cache(serialized_data):
-    logger.debug(f'graphtab_cache({serialized_data})')
+    logger.trace(f'graphtab_cache({serialized_data})')
     tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
     
     # get figure factory

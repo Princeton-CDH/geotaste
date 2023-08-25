@@ -57,6 +57,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
             ) 
         )
         self.kwargs=kwargs
+        for k,v in kwargs.items(): setattr(self,k,v)
 
     def selected(self, selectedData):
         if not selectedData: return {}
@@ -208,6 +209,10 @@ class FigureFactory(DashFigureFactory, Logmaker):
     @cached_property
     def sels(self) -> list:
         return list(self.seldf.index) if len(self.seldf) else []
+    
+    @cached_property
+    def seldata(self) -> dict:
+        return {self.key:self.sels}
     
     
     @cached_property

@@ -12,7 +12,7 @@ LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</
 # 10 for debug; 20 info, 25 success; 
 # 30 warning, 40 error, 50 critical;
 LOG_LEVEL = 10
-
+WELOME_MSG_ON = False
     
 
 # stats
