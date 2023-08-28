@@ -103,6 +103,8 @@ def table_info(ctbl):
     perc2=count2/support2*100 if support2 else np.nan
     perc_diff=perc2-perc1
     return {
+        'count_sum':count1+count2,
+        'count_min':min([count1,count2]),
         'count_L':count1,
         'count_R':count2,
         'perc_L':perc1,

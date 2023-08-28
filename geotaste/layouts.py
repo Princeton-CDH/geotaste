@@ -56,9 +56,9 @@ class GeotasteLayout(BaseComponent):
     def layout(self, params=None):
         return dbc.Container(
             [
-                self.welcome_modal,
                 self.frozen_top_row,
                 self.comparison_panel.content,
+                self.welcome_modal,
             ],
             className='layout-container'
         )

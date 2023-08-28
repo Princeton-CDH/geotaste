@@ -334,7 +334,8 @@ class ComparisonPanel(BaseComponent):
     def get_content_right_tabs(self, compare=False):
         return dbc.Container([
             dbc.Row(
-                self.graphtabs_nocompare if not compare else self.graphtabs, 
+                # self.graphtabs_nocompare if not compare else self.graphtabs, 
+                self.graphtabs,
                 className='content-tabs-row'
             )
         ])
@@ -377,15 +378,6 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def content(self,params=None):
         return dbc.Container([self.content_left, self.content_right])
-        return dbc.Container(
-            dbc.Row(
-                [
-                    dbc.Col(self.content_left),
-                    dbc.Col(self.content_right)
-                ]
-            ), 
-            className='panel-comparison-layout layout-belownavbar'
-        )
         
     @cached_property
     def subcomponents(self): return (self.L, self.R)
@@ -459,21 +451,21 @@ class ComparisonPanel(BaseComponent):
     #     )
     #     return dbc.Container(graphtabs, className='graphtabs-container-container')
 
-    @cached_property
-    def graphtabs_nocompare(self):
-        tabs = get_tabs(
-            children=[
-                dict(label='Map', tab_id='map'),
-                dict(label='Data', tab_id='data'),
-            ], 
-            tab_level=1, 
-            className='graphtabs-container', 
-            active_tab='map'
-        )
-        return dbc.Container([
-            tabs,
-            self.graphtab_desc
-        ], className='graphtabs-container-container')
+    # @cached_property
+    # def graphtabs_nocompare(self):
+    #     tabs = get_tabs(
+    #         children=[
+    #             dict(label='Map', tab_id='map'),
+    #             dict(label='Data', tab_id='data'),
+    #         ], 
+    #         tab_level=1, 
+    #         className='graphtabs-container', 
+    #         active_tab='map'
+    #     )
+    #     return dbc.Container([
+    #         tabs,
+    #         self.graphtab_desc
+    #     ], className='graphtabs-container-container')
     
     @cached_property
     def graphtabs(self):
@@ -499,8 +491,12 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def graphtab(self):
+        # default = html.Pre('Loading...')
+        # view = viewfunc()
+        view = MemberMapView(LandmarksFigureFactory())
+
         return dbc.Container(
-            children=[html.Pre('Loading...')],
+            children=[view],
             className='graphtab-div',
             id=self.id('graphtab')
         )
@@ -511,7 +507,7 @@ class ComparisonPanel(BaseComponent):
         @app.callback(
             [
                 Output(self.content_left, 'is_open'),
-                Output(self.content_right, 'style'),
+                # Output(self.content_right, 'style'),
             ],
             Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
             State(self.content_left, 'is_open'),
@@ -520,33 +516,40 @@ class ComparisonPanel(BaseComponent):
         #@logger.catch
         def dropdown_the_filters(n_clicks_l, is_open):
             if not any(n_clicks_l): raise PreventUpdate
-            if is_open and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
+            if is_open:# and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
                 # then shut
-                return False, {'width':'100vw'}
+                return False,# {'width':'100vw'}
             else:
                 # then open
-                return True, {'width':'50vw'}
+                return True,# {'width':'100vw'}
 
 
         @app.callback(
-            Output(self.graphtab, 'children'),
+            [
+                Output(self.graphtab, 'children', allow_duplicate=True),
+                Output(self.content_left, 'is_open', allow_duplicate=True),
+            ],
             [
                 Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
                 Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
                 Input(self.L.store, 'data'),
                 Input(self.R.store, 'data'),
             ],
+            prevent_initial_call=True
         )
         #@logger.catch
-        def repopulate_graphtab(*args):
+        def repopulate_graphtab(tabs1, tabs2, fdL, fdR):
+            args = [tabs1,tabs2,fdL,fdR]
+            logger.debug(['switchtab'] + args)
             serialized_data = serialize(args)
-            return graphtab_cache(serialized_data)
+            left_open = False if 'maps' not in set(tabs1) else True
+            return graphtab_cache(serialized_data), left_open
         
         @app.callback(
             [
                 Output('storedescs-col-R', 'style'),
                 Output('panel_R', 'style'),
-                Output(self.content_right_tabs, 'children')
+                # Output(self.content_right_tabs, 'children')
             ],
             [
                 Input(self.L.store, 'data'),
@@ -561,22 +564,19 @@ class ComparisonPanel(BaseComponent):
             
             # both filtered
             if fdL and fdR:
-                return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=True)
+                return {'opacity':1}, {'display':'block'}#, self.get_content_right_tabs(compare=True)
 
             # neither filtered            
             if not fdL and not fdR:
-                return {'opacity':.35}, {'display':'none'}, self.get_content_right_tabs(compare=False)
+                return {'opacity':.35}, {'display':'none'}#, self.get_content_right_tabs(compare=False)
             
 
             # just left
             if fdL:
-                if not clicked_R%2:
-                    return {'opacity':.35}, {'display':'none'}, self.get_content_right_tabs(compare=False)
-                else:
-                    return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=False)
+                return {'opacity':1}, {'display':'block'}#, self.get_content_right_tabs(compare=False)
             
             # just right -- shouldnt be possible
-            return {'opacity':1}, {'display':'block'}, self.get_content_right_tabs(compare=False)
+            return {'opacity':1}, {'display':'block'}#, self.get_content_right_tabs(compare=False)
             
             
 

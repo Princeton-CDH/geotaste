@@ -705,56 +705,9 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
-    def plot_map(self, **kwargs):
-        # df = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
-        # kwargs={**self.kwargs, **kwargs}
-        # color_map = {label:get_color(label) for label in df['L_or_R'].apply(str).unique()}
-        
-
-
-        # # figure 1: scatter
-        # def get_scatter():
-        #     figdf=df.sample(frac=1)            
-        #     customdata=np.stack((figdf['hover_tooltip'], figdf['member_name']), axis=-1)
-        #     fig = px.scatter_mapbox(
-        #         figdf, 
-        #         lat='lat',
-        #         lon='lon', 
-        #         center=MAP_CENTER,
-        #         zoom=12, 
-        #         hover_name='member_name',
-        #         hover_data = 'hover_tooltip',
-        #         color='L_or_R',
-        #         color_discrete_map=color_map,
-        #         # height=height,
-        #         size_max=40,
-        #         template=PLOTLY_TEMPLATE,
-        #         # **kwargs
-        #     )
-        #     fig.update_traces(
-        #         marker=dict(size=10), 
-        #         customdata=customdata,
-        #         hovertemplate="%{customdata[0]}"
-        #     )
-        #     fig.update_mapboxes(
-        #         style='white-bg',
-        #         layers=[
-        #             {
-        #                 "below": 'traces',
-        #                 "sourcetype": "raster",
-        #                 "sourceattribution": "United States Geological Survey",
-        #                 "source": [
-        #                     "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
-        #                 ]
-        #             }
-        #         ]
-        #     )
-        #     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-        #     return fig
-
+    def plot_map(self, choro=False, **kwargs):
         fig1=self.L.plot_map(color=LEFT_COLOR)
         fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
-
         figdf = self.df_arronds.reset_index()
         def hover(row):
             if row.arrond_id and row.arrond_id.isdigit():
@@ -765,48 +718,54 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         figdf = self.df_arronds.reset_index()
         figdf['hover']=figdf.apply(hover,axis=1)
         
-        from colour import Color
-        Lcolor = Color(LEFT_COLOR)
-        Rcolor = Color(RIGHT_COLOR)
-        midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
-        midpoint.set_luminance(.95)
+        if choro:
+            from colour import Color
+            Lcolor = Color(LEFT_COLOR)
+            Rcolor = Color(RIGHT_COLOR)
+            midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+            midpoint.set_luminance(.95)
 
-        fig_choro = px.choropleth_mapbox(
-            figdf,
-            geojson=get_geojson_arrondissement(),
-            locations='arrond_id', 
-            color='perc_L->R',
-            center=MAP_CENTER,
-            zoom=14,
-            hover_data=[],
-            color_continuous_scale=[
-                Lcolor.hex,
-                midpoint.hex,
-                Rcolor.hex,
-            ],
-            opacity=.5,
-        )
-        customdata=np.stack((figdf['hover'],), axis=-1)
-        fig_choro.update_traces(
-            customdata=customdata,
-            hovertemplate="%{customdata[0]}"
-        )
-        fig_choro.update_mapboxes(
-            style='light',
-            layers=[
-                {
-                    "below":"traces",
-                    "sourcetype": "raster",
-                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                    "source": [
-                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                    ],
-                    "opacity":0.25
-                }
-            ]
-        )
-        
-        ofig = go.Figure(data=fig_choro.data + fig2.data, layout=fig_choro.layout)
+            fig_choro = px.choropleth_mapbox(
+                figdf,
+                geojson=get_geojson_arrondissement(),
+                locations='arrond_id', 
+                color='perc_L->R',
+                center=MAP_CENTER,
+                zoom=14,
+                hover_data=[],
+                color_continuous_scale=[
+                    Lcolor.hex,
+                    midpoint.hex,
+                    Rcolor.hex,
+                ],
+                opacity=.5,
+            )
+            customdata=np.stack((figdf['hover'],), axis=-1)
+            fig_choro.update_traces(
+                customdata=customdata,
+                hovertemplate="%{customdata[0]}"
+            )
+            fig_choro.update_mapboxes(
+                style='light',
+                layers=[
+                    {
+                        "below":"traces",
+                        "sourcetype": "raster",
+                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                        "source": [
+                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                        ],
+                        "opacity":0.25
+                    }
+                ]
+            )
+            
+            ofig = go.Figure(data=fig_choro.data + fig2.data, layout=fig_choro.layout)
+        else:
+            ofig = go.Figure(
+                data = fig1.data + fig2.data[0:1],
+                layout=fig1.layout
+            )
 
         ofig.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},

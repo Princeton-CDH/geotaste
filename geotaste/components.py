@@ -179,7 +179,7 @@ class CollapsibleCard(BaseComponent):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
     filter_data,selected,kwargs = unserialize(serialized_data)
@@ -257,9 +257,7 @@ class FilterComponent(FigureComponent):
         return html.Span(self.unfiltered, className='store_desc')
 
     def intersect_filters(self, *filters_d):
-        logger.debug(f'intersecting {len(filters_d)} filters')
-        filters_d = [d for d in filters_d if d]
-        return {k:v for d in filters_d for k,v in d.items()}
+        return intersect_filters(filters_d)
     
 
 
