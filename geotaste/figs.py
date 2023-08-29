@@ -260,7 +260,8 @@ class FigureFactory(DashFigureFactory, Logmaker):
         )
         fig.update_traces(textposition = 'auto', textfont_size=14)
 
-        cats=list(reversed(self.df_counts[self.key].index))        
+        # cats=list(reversed(self.df_counts[self.key].index))        
+        cats=list(self.df_counts[self.key].index)
         if self.vertical:
             fig.update_yaxes(categoryorder='array', categoryarray=cats, title_text='', tickangle=0, autorange='reversed')
             fig.update_xaxes(title_text=f'Number of {self.records_name}', visible=False)
@@ -316,8 +317,21 @@ class MemberNationalityFigure(NationalityFigure, MemberFigure):
 
 class MemberArrondMap(MemberFigure):
     key='arrond_id'
+    quant=False
+    vertical = True
+    text = 'count'
+
+    @cached_property
+    def df_counts(self):
+        odf=super().df_counts
+        series = odf[self.key]
+        odf=odf[series.apply(is_valid_arrond)]
+        odf['arrond_i'] = odf[self.key].apply(int)
+        odf=odf.sort_values('arrond_i')
+        odf.index = [x+1 for x in range(len(odf))]
+        return odf
     
-    def plot(self, color=None, height=250, **kwargs):
+    def plot_map(self, color=None, height=250, **kwargs):
         kwargs={**self.kwargs, **kwargs}
         counts_by_arrond = get_arrond_counts(self.df).reset_index()
         geojson = get_geojson_arrondissement()
