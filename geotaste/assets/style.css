@@ -356,6 +356,7 @@ p {
     width:fit-content;
     float:right;
     pointer-events: all;
+    flex-grow:1;
 }
 
 .content-tabs-row {
