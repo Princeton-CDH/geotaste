@@ -264,14 +264,17 @@ p {
 
 .comparison_map_graph {
     height: 100vh;
-    width:100%;
+    width:100vw;
     margin:0;
     padding:0;
     position:fixed;
     top:0;
     left:0;
-    display:block;
-    
+    display:block;   
+}
+
+.comparison_map_graph_choro {
+    width:50vw;
 }
 
 .comparison_map_table {
@@ -515,6 +518,13 @@ p {
 }
 .panel_L .card { 
     border: 1px solid rgba(64, 176, 166, 0.15);
+}
+
+.viewfunc-container {
+    /* border: 1px solid red; */
+    background-color: rgba(255,255,255,1);
+    width:50vw;
+    margin: 0 0 0 auto;
 }
 
 .storedescs-col-L, .storedescs-col-R {

@@ -400,56 +400,6 @@ class ComparisonPanel(BaseComponent):
             unfiltered=UNFILTERED_R
         )
     
-    # @cached_property
-    # def graphtabs(self):
-    #     map_tabs = get_tabs([
-    #         dict(label='Left vs. Filter 2s', tab_id='map_LR'),
-    #         # dict(label='Filter 1', tab_id='map_L'),
-    #         # dict(label='Right', tab_id='map_R'),
-    #     ], tab_level=2, className='graphtabs-container')
-        
-    #     tbl_tabs = get_tabs(
-    #         children=[
-    #             dict(label='By member', tab_id='tbl_members'),                
-    #             # dict(label='By arrondissement', tab_id='tbl_arrond'),
-    #         ], 
-    #         tab_level=2, className='graphtabs-container', active_tab='tbl_members'
-    #     )
-
-    #     analyze_tabs = get_tabs(
-    #         children=[
-    #             # dict(
-    #             #     label='Magnitude of difference',
-    #             #     tab_id='tbl_diff'
-    #             # ),                
-
-    #             dict(
-    #                 label='By arrondissement', 
-    #                 tab_id='tbl_arrond'
-    #             ),
-    #         ], 
-    #         tab_level=2, 
-    #         className='graphtabs-container'
-    #     )
-
-    #     graphtabs = get_tabs(
-    #         children=[
-    #             dict(
-    #                 children=map_tabs, 
-    #                 label='Map data', 
-    #                 tab_id='map',
-    #                 tooltip='Map where members lived'
-    #             ),
-    #             dict(children=tbl_tabs, label='View data', tab_id='tbl'),
-    #             dict(children=analyze_tabs, label='Analyze data', tab_id='analyze')
-    #         ], 
-    #         tab_level=1, 
-    #         className='graphtabs-container',
-    #         active_tab='map'
-    #     )
-    #     return dbc.Container(graphtabs, className='graphtabs-container-container')
-
-    
     @cached_property
     def graphtab_map(self):
         return dbc.Tab(
@@ -477,7 +427,10 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def graphtabs(self):
-        tabs = [self.graphtab_map, self.graphtab_data, self.graphtab_analysis]
+        tabs = [
+            self.graphtab_map, 
+            self.graphtab_analysis
+        ]
         active_tab = 'map'
         
         return dbc.Tabs(
@@ -559,28 +512,12 @@ class ComparisonPanel(BaseComponent):
                 outs[-1] = graphtab_cache(serialized_data)
 
                 # also collapse dropdowns if tab changed
-                if ctx.triggered_id == self.graphtabs.id:
-                    outs[0] = False
+                # if ctx.triggered_id == self.graphtabs.id:
+                    # outs[0] = False
             
             # logger.debug(outs)
             return outs
 
-
-
-            clicked_L,clicked_R=n_clicks
-            logger.debug(['n_clicks',n_clicks])
-            # STYLE_VIS = {**STYLE_VIS, 'border':'1px solid red'}
-            # both filtered
-            if fdL and fdR:
-                return {'opacity':1}, STYLE_VIS, self.content_right_tabs
-
-            # neither filtered            
-            if not fdL and not fdR:
-                return {'opacity':.35}, STYLE_INVIS, self.content_right_tabs
-            
-
-            # just left or just right
-            return {'opacity':1}, STYLE_VIS, self.content_right_tabs
 
         
             
@@ -613,7 +550,7 @@ def graphtab_cache(serialized_data):
     viewfunc = determine_view(tab_ids_1, tab_ids_2, num_filters=num_filters)
 
     # return view
-    return viewfunc(ff)
+    return dbc.Container(viewfunc(ff), className='viewfunc-container')
 
 
 def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filters=1):
@@ -623,6 +560,6 @@ def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filter
     elif 'map' in tab_ids_1_set:
         return MemberMapView
     elif 'analysis' in tab_ids_1_set:
-        return ArrondTableView if num_filters>1 else MemberTableView
+        return ArrondTableAndMapView if num_filters>1 else MemberTableView
     
     return default

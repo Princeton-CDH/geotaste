@@ -720,17 +720,19 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     
 
     def plot_map(self, choro=False, **kwargs):
-        fig1=self.L.plot_map(color=LEFT_COLOR)
-        fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
+        
+        # prepare data
         figdf = self.df_arronds.reset_index()
         def hover(row):
             if row.arrond_id and row.arrond_id.isdigit():
                 return describe_arronds_row(row)
             else:
                 return ''
-
         figdf = self.df_arronds.reset_index()
         figdf['hover']=figdf.apply(hover,axis=1)
+
+
+
         
         if choro:
             from colour import Color
@@ -774,8 +776,10 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 ]
             )
             
-            ofig = go.Figure(data=fig_choro.data + fig2.data, layout=fig_choro.layout)
+            ofig = fig_choro
         else:
+            fig1=self.L.plot_map(color=LEFT_COLOR)
+            fig2=self.R.plot_map(basefig=fig1, color=RIGHT_COLOR)
             ofig = go.Figure(
                 data = fig1.data + fig2.data[0:1],
                 layout=fig1.layout
