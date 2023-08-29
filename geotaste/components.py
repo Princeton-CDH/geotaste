@@ -178,7 +178,7 @@ class CollapsibleCard(BaseComponent):
             return now_is_open, '[–]' if now_is_open else '[+]'
 
 
-# @cache
+@cache
 # @cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')

@@ -334,8 +334,8 @@ class ComparisonPanel(BaseComponent):
     def get_content_right_tabs(self, compare=False):
         return dbc.Container([
             dbc.Row(
-                # self.graphtabs_nocompare if not compare else self.graphtabs, 
-                self.graphtabs,
+                self.graphtabs_nocompare if not compare else self.graphtabs, 
+                # self.graphtabs,
                 className='content-tabs-row'
             )
         ])
@@ -451,21 +451,21 @@ class ComparisonPanel(BaseComponent):
     #     )
     #     return dbc.Container(graphtabs, className='graphtabs-container-container')
 
-    # @cached_property
-    # def graphtabs_nocompare(self):
-    #     tabs = get_tabs(
-    #         children=[
-    #             dict(label='Map', tab_id='map'),
-    #             dict(label='Data', tab_id='data'),
-    #         ], 
-    #         tab_level=1, 
-    #         className='graphtabs-container', 
-    #         active_tab='map'
-    #     )
-    #     return dbc.Container([
-    #         tabs,
-    #         self.graphtab_desc
-    #     ], className='graphtabs-container-container')
+    @cached_property
+    def graphtabs_nocompare(self):
+        tabs = get_tabs(
+            children=[
+                dict(label='Map', tab_id='map'),
+                dict(label='Data', tab_id='data'),
+            ], 
+            tab_level=1, 
+            className='graphtabs-container', 
+            active_tab='map'
+        )
+        return dbc.Container([
+            tabs,
+            self.graphtab_desc
+        ], className='graphtabs-container-container')
     
     @cached_property
     def graphtabs(self):
@@ -504,52 +504,118 @@ class ComparisonPanel(BaseComponent):
     def component_callbacks(self, app):
         # super().component_callbacks(app)
 
-        @app.callback(
-            [
-                Output(self.content_left, 'is_open'),
-                # Output(self.content_right, 'style'),
-            ],
-            Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
-            State(self.content_left, 'is_open'),
-            prevent_initial_callback=True
-        )
-        #@logger.catch
-        def dropdown_the_filters(n_clicks_l, is_open):
-            if not any(n_clicks_l): raise PreventUpdate
-            if is_open:# and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
-                # then shut
-                return False,# {'width':'100vw'}
-            else:
-                # then open
-                return True,# {'width':'100vw'}
+        # @app.callback(
+        #     [
+        #         Output(self.content_left, 'is_open'),
+        #         # Output(self.content_right, 'style'),
+        #     ],
+        #     [
+        #         Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
+        #         Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
+        #         Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
+        #     ],
+        #     State(self.content_left, 'is_open'),
+        #     prevent_initial_callback=True
+        # )
+        # #@logger.catch
+        # def dropdown_the_filters(n_clicks_l, tabs1, tabs2, is_open):
+        #     if not any(n_clicks_l): raise PreventUpdate
+        #     logger.debug([ctx.triggered_id, tabs1, tabs2])
+        #     if is_open:# and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
+        #         # then shut
+        #         return False,# {'width':'100vw'}
+        #     else:
+        #         # then open
+        #         return True,# {'width':'100vw'}
 
 
-        @app.callback(
-            [
-                Output(self.graphtab, 'children', allow_duplicate=True),
-                Output(self.content_left, 'is_open', allow_duplicate=True),
-            ],
-            [
-                Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
-                Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-                Input(self.L.store, 'data'),
-                Input(self.R.store, 'data'),
-            ],
-            prevent_initial_call=True
-        )
-        #@logger.catch
-        def repopulate_graphtab(tabs1, tabs2, fdL, fdR):
-            args = [tabs1,tabs2,fdL,fdR]
-            logger.debug(['switchtab'] + args)
-            serialized_data = serialize(args)
-            left_open = False if 'maps' not in set(tabs1) else True
-            return graphtab_cache(serialized_data), left_open
+        # @app.callback(
+        #     [
+        #         Output(self.graphtab, 'children', allow_duplicate=True),
+        #         # Output(self.content_left, 'is_open', allow_duplicate=True),
+        #     ],
+        #     [
+        #         Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
+        #         Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
+        #     ],
+        #     [
+        #         State(self.L.store, 'data'),
+        #         State(self.R.store, 'data'),
+        #         State(self.content_left, 'is_open')
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # #@logger.catch
+        # def repopulate_graphtab(tabs1, tabs2, fdL, fdR, is_openL):
+        #     args = [tabs1,tabs2,fdL,fdR]
+        #     logger.debug(['switchtab'] + args)
+        #     serialized_data = serialize(args)
+        #     # left_open = False if tabs1[0]!='map' else True
+        #     left_open = False
+        #     # left_open=is_openL
+            # return graphtab_cache(serialized_data),# left_open
         
+        # @app.callback(
+        #     [
+        #         Output('storedescs-col-R', 'style'),
+        #         Output('panel_R', 'style'),
+        #         # Output('compare-filter-tab', 'style')
+        #         Output(self.content_right_tabs, 'children')
+        #     ],
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #         Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
+        #     ],
+        #     prevent_initial_callback=True
+        # )
+        # def allow_second_group(fdL, fdR, n_clicks):
+        #     clicked_L,clicked_R=n_clicks
+        #     logger.debug(['n_clicks',n_clicks])
+        #     # STYLE_VIS = {**STYLE_VIS, 'border':'1px solid red'}
+        #     # both filtered
+        #     if fdL and fdR:
+        #         return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=True)
+
+        #     # neither filtered            
+        #     if not fdL and not fdR:
+        #         return {'opacity':.35}, STYLE_INVIS, self.get_content_right_tabs(compare=False)
+            
+
+        #     # just left or just right
+        #     return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=False)
+
+        # @app.callback(
+        #     [
+        #         Output(self.content_left, 'is_open'),
+        #         # Output(self.content_right, 'style'),
+        #     ],
+        #     [
+        #         Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
+        #         Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
+        #         Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
+        #     ],
+        #     State(self.content_left, 'is_open'),
+        #     prevent_initial_callback=True
+        # )
+        # #@logger.catch
+        # def dropdown_the_filters(n_clicks_l, tabs1, tabs2, is_open):
+        #     if not any(n_clicks_l): raise PreventUpdate
+        #     logger.debug([ctx.triggered_id, tabs1, tabs2])
+        #     if is_open:# and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
+        #         # then shut
+        #         return False,# {'width':'100vw'}
+        #     else:
+        #         # then open
+        #         return True,# {'width':'100vw'}
+
         @app.callback(
             [
-                Output('storedescs-col-R', 'style'),
-                Output('panel_R', 'style'),
-                # Output(self.content_right_tabs, 'children')
+                Output(self.graphtab, 'children', allow_duplicate=True),   # actual content
+                Output(self.content_left, 'is_open'),                      # dropdowns open
+                Output('storedescs-col-R', 'style'),                       # whether right visible
+                Output('panel_R', 'style'),                                # ?
+                Output(self.content_right_tabs, 'children')             
             ],
             [
                 Input(self.L.store, 'data'),
@@ -561,23 +627,20 @@ class ComparisonPanel(BaseComponent):
         def allow_second_group(fdL, fdR, n_clicks):
             clicked_L,clicked_R=n_clicks
             logger.debug(['n_clicks',n_clicks])
-            
+            # STYLE_VIS = {**STYLE_VIS, 'border':'1px solid red'}
             # both filtered
             if fdL and fdR:
-                return {'opacity':1}, {'display':'block'}#, self.get_content_right_tabs(compare=True)
+                return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=True)
 
             # neither filtered            
             if not fdL and not fdR:
-                return {'opacity':.35}, {'display':'none'}#, self.get_content_right_tabs(compare=False)
+                return {'opacity':.35}, STYLE_INVIS, self.get_content_right_tabs(compare=False)
             
 
-            # just left
-            if fdL:
-                return {'opacity':1}, {'display':'block'}#, self.get_content_right_tabs(compare=False)
-            
-            # just right -- shouldnt be possible
-            return {'opacity':1}, {'display':'block'}#, self.get_content_right_tabs(compare=False)
-            
+            # just left or just right
+            return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=False)
+
+        
             
 
 # @cache
