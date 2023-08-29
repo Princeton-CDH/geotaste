@@ -452,7 +452,8 @@ class FilterSliderCard(FilterCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.ff().plot(),
+            # figure=self.ff().plot(),
+            figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
@@ -529,11 +530,13 @@ class FilterSliderCard(FilterCard):
                 Input(self.graph, 'selectedData'),
                 Input(self.input_start, 'value'),
                 Input(self.input_end, 'value'),
-                Input(self.button_clear, 'n_clicks')
+                Input(self.button_clear, 'n_clicks'),
+                Input(self.body, "is_open"),
             ],
             [
                 State(self.store, 'data'),
-                State(self.graph, 'figure')
+                State(self.graph, 'figure'),
+                State(self.store_desc, 'children')
             ],
             prevent_initial_call=True
         )
@@ -542,19 +545,16 @@ class FilterSliderCard(FilterCard):
                 start_value,
                 end_value,
                 clear_clicked,
+                body_open_now,
                 old_data={},
-                old_fig=None
+                old_fig=None,
+                old_desc=''
             ):
             def vstr(x): return f'{int(x)}' if x is not None else ''
 
-            logger.debug(['sel updated on slider!', ctx.triggered_id])
+            logger.debug(['sel updated on slider!', ctx.triggered_id, ctx.triggered])
 
-            if ctx.triggered_id == self.button_clear.id and clear_clicked:
-                logger.debug(f'CLEAR TRIGGERED')
-                ff=self.ff()
-                o=[ff.plot(), ff.minval, ff.maxval, {}, self.unfiltered]
-            
-            elif ctx.triggered_id == self.graph.id:
+            if ctx.triggered_id == self.graph.id:
                 logger.debug(f'GRAPH TRIGGERED')
                 new_data=self.ff().selected(selected_data)
                 if not new_data or new_data==old_data: raise PreventUpdate
@@ -570,17 +570,18 @@ class FilterSliderCard(FilterCard):
                     f'{vstr(minval)} – {vstr(maxval)}'
                 ]
             
-            elif ctx.triggered_id in {self.input_start.id, self.input_end.id}:
-                logger.debug(f'INPUT TRIGGERED TRIGGERED')
-                ff = self.ff(min_series_val=start_value, max_series_val=end_value)
-                newfig = ff.plot()
-                o=[
-                    newfig, 
-                    start_value, 
-                    end_value, 
-                    ff.seldata, 
-                    f'{vstr(start_value)} – {vstr(end_value)}'
-                ]
+            elif ctx.triggered_id in {self.body.id, self.input_start.id, self.input_end.id}:
+                if body_open_now:
+                    logger.debug(f'INPUT TRIGGERED TRIGGERED')
+                    ff = self.ff(min_series_val=start_value, max_series_val=end_value)
+                    newfig = ff.plot()
+                    o=[
+                        newfig, 
+                        start_value, 
+                        end_value, 
+                        ff.seldata if ctx.triggered_id!=self.body.id else old_data,
+                        f'{vstr(start_value)} – {vstr(end_value)}' if ctx.triggered_id!=self.body.id else old_desc,
+                    ]
             else:
                 raise PreventUpdate
             

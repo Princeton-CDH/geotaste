@@ -12,3 +12,4 @@ cache
 .vscode
 dev_*.txt
 *tiles*/*
+*.bak.py

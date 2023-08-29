@@ -37,7 +37,8 @@ DEFAULT_COLOR=LEFT_COLOR
 PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
-STYLE_VIS={'display':'block'}
+STYLE_HALFVIS={'opacity':.5, 'display':'block'}
+STYLE_VIS={'display':'block', 'opacity':1}
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 LOGO_SRC2="/assets/rulerlab-small.png"
 

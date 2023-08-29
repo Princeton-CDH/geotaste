@@ -266,62 +266,59 @@ class CombinedPanel(FilterPlotPanel):
 
 class ComparisonPanel(BaseComponent):
     figure_factory = ComparisonFigureFactory
-    # default_view = MemberMapView
+
+    @cached_property
+    def storedesc_L_btn(self):
+        return dbc.Button(
+            html.Span(self.L.store_desc), 
+            color="link", 
+            n_clicks=0,
+            className='button_store_desc store_desc query_str',
+            id='storedesc_L_btn',
+            style={'text-align':'center', 'height':'100px'}
+        )
+    
+    @cached_property
+    def storedesc_R_btn(self):
+        return dbc.Button(
+            html.Span(self.R.store_desc), 
+            color="link", 
+            n_clicks=0,
+            className='button_store_desc store_desc query_str',
+            id='storedesc_R_btn',
+            style={'text-align':'center', 'height':'100px'}
+        )
+    
+    
+    @cached_property
+    def storedesc_R_col(self):
+        return dbc.Col(
+            self.storedesc_R_btn,
+            className='storedescs-col storedescs-col-R',
+            id='storedescs-col-R'
+        )
+    
+    @cached_property
+    def storedesc_L_col(self):
+        return dbc.Col(
+            self.storedesc_L_btn,
+            className='storedescs-col storedescs-col-L',
+            id='storedescs-col-L'
+        )
+    
 
     @cached_property
     def content_left_tabs(self,params=None):
-        # p_L=html.Span([html.B('Filter 1 '), self.L.store_desc])
-        # p_R=html.Span([html.B('Filter 2 '), self.R.store_desc])
-        p_L=html.Span(self.L.store_desc)
-        p_R=html.Span(self.R.store_desc)
-        
-        def getbtn(x, cls=''):
-            className='button_store_desc store_desc query_str'
-            idx=dict(type='store_desc_btn', index=uid())
-            msg=f'(Click here to show/hide the filters). Here, {cls}-hand side in {"blue" if cls=="right" else "brown"}, filter for a group of library members and/or the books they borrowed. Then, see how it compare with the {"left" if cls=="right" else "right"}-hand group, on the map and in the data.'
-            return dbc.Container([
-                dbc.Button(
-                    x, 
-                    color="link", 
-                    n_clicks=0,
-                    className=className,
-                    id=idx,
-                    style={'text-align':'center', 'height':'100px'}
-                ),
-                # dbc.Popover(
-                #     [
-                #         dbc.PopoverHeader(f'ℹ️ Choose books/members for {cls}-hand group'),
-                #         dbc.PopoverBody(),
-                #     ],
-                #     target=idx,
-                #     trigger='hover',
-                #     style={'z-index':1000},
-                #     placement='right'
-                # )
-                # dbc.Tooltip(msg, target=idx)
-            ])
-
-
-        
-        btn_L = getbtn(p_L, cls='left')
-        btn_R = getbtn(p_R, cls='right')
-
+        spacercol=dbc.Col(
+            html.Nobr(), 
+            className='storedescs-inbetween',
+            width=1
+        )
         return dbc.Container(
             dbc.Row([
-                dbc.Col(
-                    btn_L,
-                    className='storedescs-col storedescs-col-L'
-                ),
-                dbc.Col(
-                    html.Nobr(), 
-                    className='storedescs-inbetween',
-                    width=1
-                ),
-                dbc.Col(
-                    btn_R,
-                    className='storedescs-col storedescs-col-R',
-                    id='storedescs-col-R'
-                ),
+                self.storedesc_L_col,
+                spacercol,
+                self.storedesc_R_col
             ]), 
             className='layout-toprow'
         )
@@ -329,42 +326,43 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def content_right_tabs(self,params=None):
-        return self.get_content_right_tabs(compare=False)
-    
-    def get_content_right_tabs(self, compare=False):
         return dbc.Container([
             dbc.Row(
-                self.graphtabs_nocompare if not compare else self.graphtabs, 
-                # self.graphtabs,
+                self.graphtabs, 
                 className='content-tabs-row'
             )
         ])
-
+    
+    @cached_property
+    def panel_R_col(self):
+        return dbc.Col(
+            self.R.layout(), 
+            width=6, 
+            className='panel_R panel',
+            id='panel_R'
+        )
+    @cached_property
+    def panel_L_col(self):
+        return dbc.Col(
+            self.L.layout(), 
+            width=6, 
+            className='panel_L panel',
+            id='panel_L'
+        )
     
     @cached_property
     def content_main_row(self,params=None):
-        return dbc.Row([
-            dbc.Col(
-                self.L.layout(params), 
-                width=6, 
-                className='panel_L panel'
-            ),
-            
-            dbc.Col(
-                self.R.layout(params), 
-                width=6, 
-                className='panel_R panel',
-                id='panel_R'
-            ),
-        ], 
-        className='layout-mainrow')
+        return dbc.Row(
+            [self.panel_L_col, self.panel_R_col],
+            className='layout-mainrow'
+        )
     
     @cached_property
     def content_left(self,params=None):
         return dbc.Collapse(
             self.content_main_row, 
             className='layout-leftcol',
-            is_open=False
+            is_open=True
         )
     
     @cached_property
@@ -451,38 +449,43 @@ class ComparisonPanel(BaseComponent):
     #     )
     #     return dbc.Container(graphtabs, className='graphtabs-container-container')
 
+    
     @cached_property
-    def graphtabs_nocompare(self):
-        tabs = get_tabs(
-            children=[
-                dict(label='Map', tab_id='map'),
-                dict(label='Data', tab_id='data'),
-            ], 
-            tab_level=1, 
-            className='graphtabs-container', 
-            active_tab='map'
+    def graphtab_map(self):
+        return dbc.Tab(
+            children=[],
+            label='Map',
+            tab_id='map',
         )
-        return dbc.Container([
-            tabs,
-            self.graphtab_desc
-        ], className='graphtabs-container-container')
+    
+    @cached_property
+    def graphtab_data(self):
+        return dbc.Tab(
+            children=[],
+            label='Data',
+            tab_id='data',
+        )
+    
+    @cached_property
+    def graphtab_analysis(self):
+        return dbc.Tab(
+            children=[],
+            label='Analysis',
+            tab_id='analysis',
+        )
+    
     
     @cached_property
     def graphtabs(self):
-        tabs = get_tabs(
-            children=[
-                dict(label='Map', tab_id='map'),
-                dict(label='Data', tab_id='data'),
-                dict(label='Compare filters', tab_id='analysis', id='compare-filter-tab')
-            ], 
-            tab_level=1, 
-            className='graphtabs-container', 
-            active_tab='map'
+        tabs = [self.graphtab_map, self.graphtab_data, self.graphtab_analysis]
+        active_tab = 'map'
+        
+        return dbc.Tabs(
+            children=tabs, 
+            active_tab=active_tab,
+            className='graphtabs-container',
+            id='graphtabs'
         )
-        return dbc.Container([
-            tabs,
-            self.graphtab_desc
-        ], className='graphtabs-container-container')
 
     @cached_property
     def graphtab_desc(self):
@@ -502,143 +505,82 @@ class ComparisonPanel(BaseComponent):
         )
 
     def component_callbacks(self, app):
-        # super().component_callbacks(app)
-
-        # @app.callback(
-        #     [
-        #         Output(self.content_left, 'is_open'),
-        #         # Output(self.content_right, 'style'),
-        #     ],
-        #     [
-        #         Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
-        #         Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
-        #         Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-        #     ],
-        #     State(self.content_left, 'is_open'),
-        #     prevent_initial_callback=True
-        # )
-        # #@logger.catch
-        # def dropdown_the_filters(n_clicks_l, tabs1, tabs2, is_open):
-        #     if not any(n_clicks_l): raise PreventUpdate
-        #     logger.debug([ctx.triggered_id, tabs1, tabs2])
-        #     if is_open:# and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
-        #         # then shut
-        #         return False,# {'width':'100vw'}
-        #     else:
-        #         # then open
-        #         return True,# {'width':'100vw'}
-
-
-        # @app.callback(
-        #     [
-        #         Output(self.graphtab, 'children', allow_duplicate=True),
-        #         # Output(self.content_left, 'is_open', allow_duplicate=True),
-        #     ],
-        #     [
-        #         Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
-        #         Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-        #     ],
-        #     [
-        #         State(self.L.store, 'data'),
-        #         State(self.R.store, 'data'),
-        #         State(self.content_left, 'is_open')
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def repopulate_graphtab(tabs1, tabs2, fdL, fdR, is_openL):
-        #     args = [tabs1,tabs2,fdL,fdR]
-        #     logger.debug(['switchtab'] + args)
-        #     serialized_data = serialize(args)
-        #     # left_open = False if tabs1[0]!='map' else True
-        #     left_open = False
-        #     # left_open=is_openL
-            # return graphtab_cache(serialized_data),# left_open
-        
-        # @app.callback(
-        #     [
-        #         Output('storedescs-col-R', 'style'),
-        #         Output('panel_R', 'style'),
-        #         # Output('compare-filter-tab', 'style')
-        #         Output(self.content_right_tabs, 'children')
-        #     ],
-        #     [
-        #         Input(self.L.store, 'data'),
-        #         Input(self.R.store, 'data'),
-        #         Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
-        #     ],
-        #     prevent_initial_callback=True
-        # )
-        # def allow_second_group(fdL, fdR, n_clicks):
-        #     clicked_L,clicked_R=n_clicks
-        #     logger.debug(['n_clicks',n_clicks])
-        #     # STYLE_VIS = {**STYLE_VIS, 'border':'1px solid red'}
-        #     # both filtered
-        #     if fdL and fdR:
-        #         return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=True)
-
-        #     # neither filtered            
-        #     if not fdL and not fdR:
-        #         return {'opacity':.35}, STYLE_INVIS, self.get_content_right_tabs(compare=False)
-            
-
-        #     # just left or just right
-        #     return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=False)
-
-        # @app.callback(
-        #     [
-        #         Output(self.content_left, 'is_open'),
-        #         # Output(self.content_right, 'style'),
-        #     ],
-        #     [
-        #         Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
-        #         Input({"type": "tab_level_1", "index": ALL}, "active_tab"),
-        #         Input({"type": "tab_level_2", "index": ALL}, "active_tab"),
-        #     ],
-        #     State(self.content_left, 'is_open'),
-        #     prevent_initial_callback=True
-        # )
-        # #@logger.catch
-        # def dropdown_the_filters(n_clicks_l, tabs1, tabs2, is_open):
-        #     if not any(n_clicks_l): raise PreventUpdate
-        #     logger.debug([ctx.triggered_id, tabs1, tabs2])
-        #     if is_open:# and n_clicks_l[-1]!=1:  # exception for adding filter for first time on R
-        #         # then shut
-        #         return False,# {'width':'100vw'}
-        #     else:
-        #         # then open
-        #         return True,# {'width':'100vw'}
+        super().component_callbacks(app)
 
         @app.callback(
             [
+                Output(self.content_left, 'is_open', allow_duplicate=True),                      # dropdowns open
+                Output(self.storedesc_R_col, 'style', allow_duplicate=True),                     # whether right filter button visible
+                Output(self.panel_R_col, 'style', allow_duplicate=True),                         # whether right filter panel visible
                 Output(self.graphtab, 'children', allow_duplicate=True),   # actual content
-                Output(self.content_left, 'is_open'),                      # dropdowns open
-                Output('storedescs-col-R', 'style'),                       # whether right visible
-                Output('panel_R', 'style'),                                # ?
-                Output(self.content_right_tabs, 'children')             
             ],
             [
-                Input(self.L.store, 'data'),
-                Input(self.R.store, 'data'),
-                Input({"type": "store_desc_btn", "index": ALL}, "n_clicks"),
+                Input(self.L.store, 'data'),                               # any changes in left filter
+                Input(self.R.store, 'data'),                               # any in right filter
+                Input(self.storedesc_L_btn, "n_clicks"),
+                Input(self.storedesc_R_btn, "n_clicks"),
+                Input(self.graphtabs, 'active_tab')
             ],
-            prevent_initial_callback=True
+            [
+                State(self.content_left, 'is_open')
+            ],
+            prevent_initial_call=True
         )
-        def allow_second_group(fdL, fdR, n_clicks):
+        def determine_dropdown_and_view(fdL, fdR, storedesc_L_clicked, storedesc_R_clicked, active_tab, filter_dropdown_open_now):
+            input_ids = [
+                self.L.store.id, 
+                self.R.store.id, 
+                self.storedesc_L_btn.id, 
+                self.storedesc_R_btn.id, 
+                self.graphtabs.id
+            ]
+            outs = [
+                dash.no_update,  # both dropdown vis
+                # dash.no_update,  # right vis
+                # dash.no_update,  # right vis
+                STYLE_VIS if fdL and storedesc_R_clicked else STYLE_HALFVIS,
+                STYLE_VIS if fdL and storedesc_R_clicked else STYLE_INVIS,
+                dash.no_update   # content
+            ]
+            
+            logger.debug(ctx.triggered_id)
+            logger.debug(input_ids)
+
+            # if we clicked the Left or Right top Filter tab button
+            if ctx.triggered_id in {self.storedesc_L_btn.id, self.storedesc_R_btn.id}:
+                if storedesc_R_clicked!=1:
+                    outs[0]=not filter_dropdown_open_now
+
+            # if the tab changed -- or the filters changed
+            elif ctx.triggered_id in {self.graphtabs.id, self.L.store.id, self.R.store.id}:
+                args = [[active_tab],[],fdL,fdR]
+                logger.debug(['switchtab'] + args)
+                serialized_data = serialize(args)
+                outs[-1] = graphtab_cache(serialized_data)
+
+                # also collapse dropdowns if tab changed
+                if ctx.triggered_id == self.graphtabs.id:
+                    outs[0] = False
+            
+            # logger.debug(outs)
+            return outs
+
+
+
             clicked_L,clicked_R=n_clicks
             logger.debug(['n_clicks',n_clicks])
             # STYLE_VIS = {**STYLE_VIS, 'border':'1px solid red'}
             # both filtered
             if fdL and fdR:
-                return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=True)
+                return {'opacity':1}, STYLE_VIS, self.content_right_tabs
 
             # neither filtered            
             if not fdL and not fdR:
-                return {'opacity':.35}, STYLE_INVIS, self.get_content_right_tabs(compare=False)
+                return {'opacity':.35}, STYLE_INVIS, self.content_right_tabs
             
 
             # just left or just right
-            return {'opacity':1}, STYLE_VIS, self.get_content_right_tabs(compare=False)
+            return {'opacity':1}, STYLE_VIS, self.content_right_tabs
 
         
             
