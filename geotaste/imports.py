@@ -26,7 +26,7 @@ BLANKSTR='‎‎‎‎'
 BLANK = ''
 UNFILTERED = 'Add filter'
 UNFILTERED_L = 'Filter 1'
-UNFILTERED_R = '+'
+UNFILTERED_R = 'Filter 2'
 
 NOFILTER = BLANK
 # LEFT_COLOR='#AB9155' #'#7d6ab6'

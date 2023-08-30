@@ -475,11 +475,18 @@ class ComparisonPanel(BaseComponent):
                 Input(self.graphtabs, 'active_tab')
             ],
             [
-                State(self.content_left, 'is_open')
+                State(self.content_left, 'is_open'),
             ],
             prevent_initial_call=True
         )
-        def determine_dropdown_and_view(fdL, fdR, storedesc_L_clicked, storedesc_R_clicked, active_tab, filter_dropdown_open_now):
+        def determine_dropdown_and_view(
+                fdL, 
+                fdR, 
+                storedesc_L_clicked, 
+                storedesc_R_clicked, 
+                active_tab, 
+                filter_dropdown_open_now,
+                ):
             input_ids = [
                 self.L.store.id, 
                 self.R.store.id, 
@@ -496,7 +503,7 @@ class ComparisonPanel(BaseComponent):
                 dash.no_update   # content
             ]
             
-            logger.debug(ctx.triggered_id)
+            logger.debug(ctx.triggered)
             logger.debug(input_ids)
 
             # if we clicked the Left or Right top Filter tab button
@@ -506,8 +513,12 @@ class ComparisonPanel(BaseComponent):
 
             # if the tab changed -- or the filters changed
             elif ctx.triggered_id in {self.graphtabs.id, self.L.store.id, self.R.store.id}:
+
+                # make sure change actually happened?
                 args = [[active_tab],[],fdL,fdR]
                 logger.debug(['switchtab'] + args)
+                # logger.debug([fdL, old_fdL])
+                # logger.debug([fdR, old_fdR])
                 serialized_data = serialize(args)
                 outs[-1] = graphtab_cache(serialized_data)
 

@@ -555,7 +555,7 @@ class FilterSliderCard(FilterCard):
             logger.debug(['sel updated on slider!', ctx.triggered_id, ctx.triggered])
 
             if ctx.triggered_id == self.graph.id:
-                logger.debug(f'GRAPH TRIGGERED')
+                logger.debug(f'GRAPH TRIGGERED: {len(selected_data)} len sel data')
                 new_data=self.ff().selected(selected_data)
                 if not new_data or new_data==old_data: raise PreventUpdate
 

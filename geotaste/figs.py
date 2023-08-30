@@ -256,6 +256,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
             log_y=self.log_y,
             text=self.text,
             template=PLOTLY_TEMPLATE,
+            hover_data={self.key:False, 'count':False},
             # **kwargs
         )
         fig.update_traces(textposition = 'auto', textfont_size=14)
@@ -278,6 +279,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
         )
         if self.opts_xaxis: fig.update_xaxes(**self.opts_xaxis)
         if self.opts_yaxis: fig.update_yaxes(**self.opts_yaxis)
+
         return fig
 
 class TypicalFigure(FigureFactory):
@@ -598,25 +600,38 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def book_filters_exist(self):
         return any(
-            fn.startswith('book_') or fn.startswith('author_') or fn.startswith('event_')
+            fn.startswith('book_') or fn.startswith('author_') or fn.startswith('event_') or fn.startswith('creator_')
             for fn in self.filter_data
         )
 
     def table(self, cols=[], sep=' ', **kwargs):
         df = self.df_dwellings.reset_index()
-        df = (
-            df.drop_duplicates('dwelling') 
-            if not self.book_filters_exist 
-            else df.drop_duplicates(['dwelling','book'])
-        )
-        return get_dash_table(
-            df,
-            cols=(
-                cols_members 
-                if not self.book_filters_exist 
-                else cols_members+cols_books
-            )
-        )
+        df=df[df.dwelling_address!='']
+        
+        # if only members filtered...
+        if not self.book_filters_exist:
+            df = df.drop_duplicates('dwelling')
+            cols = cols_members
+        else:
+            df = df.drop_duplicates(['dwelling','book'])
+            cols = cols_members+cols_books
+
+
+        return get_dash_table(df, cols=cols)
+
+        # df = (
+        #     df.drop_duplicates('member') 
+        #     if not self.book_filters_exist 
+        #     else df.drop_duplicates(['dwelling','book'])
+        # )
+        # return get_dash_table(
+        #     df,
+        #     cols=(
+        #         cols_members 
+        #         if not self.book_filters_exist 
+        #         else cols_members+cols_books
+        #     )
+        # )
 
     
     @cached_property
