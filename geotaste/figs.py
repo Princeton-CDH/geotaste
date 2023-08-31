@@ -495,7 +495,7 @@ class LandmarksFigureFactory(FigureFactory):
                 customdata=figdf['tooltip'],
                 hovertemplate='%{customdata}<extra></extra>',
                 textfont=dict(
-                    size=20,
+                    size=16,
                     family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
                     color='black'
                 ),
