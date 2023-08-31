@@ -165,7 +165,6 @@ class MembersDataset(Dataset):
     def data(self):
         df=super().data
         df['member'] = df['uri'].apply(get_member_id)
-        df['member'] = df['uri'].apply(get_member_id)
         df['membership_years'] = [[int(y) for y in x if y] for x in df['membership_years']]
         
         # other
