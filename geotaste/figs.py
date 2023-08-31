@@ -549,6 +549,7 @@ class LandmarksFigureFactory(FigureFactory):
             autosize=True
         )
         fig.layout._config = {'responsive':True, 'scrollZoom':True}
+        fig.layout.update(showlegend=False)
         return fig
     
     def table(self, cols=[], sep=' ', **kwargs):
