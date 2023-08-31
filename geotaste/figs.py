@@ -1030,6 +1030,7 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=6
         filter_action="native",
         page_action="native",
         # page_action="none",
+        export_format='csv',
         page_size=page_size,
         fixed_rows={'headers': True},
         style_cell={
