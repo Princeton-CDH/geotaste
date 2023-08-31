@@ -105,21 +105,21 @@ class LandmarksDataset(Dataset):
     url = URLS.get('landmarks')
     cols_q = ['lat', 'lon']
     
-    
     @cached_property
     def data(self):
         df=super().data
-        df['dwelling_distSCO_km'] = [
-            geodist(latlon, LATLON_SCO, unit='km')
-            for latlon in zip(df.lat, df.lon)
+        df['arrond_id'] = [
+            determine_arrond(lat,lon)
+            for lat,lon in zip(df.lat, df.lon)
         ]
 
-        def tooltip(row):
-            gdist = f'{round(float(row.dwelling_distSCO_km),1)}' if row.dwelling_distSCO_km else UNKNOWN
-            return wraphtml(f'''<b>{row.landmark}</b>, located at {row.address}, about {gdist}km from Shakespeare and Company.''')
-        
-        df['tooltip'] = df.apply(tooltip,axis=1)
+        df['tooltip'] = [
+            f'''{row.landmark}\n{row.address}\n{'Paris '+row.arrond_id+'ᵉ' if row.arrond_id.isdigit() else ''}'''.strip().replace('\n','<br>')
+            for i,row in df.iterrows()
+        ]
+
         return df
+
     
 
 
@@ -869,8 +869,6 @@ def get_geojson_arrondissement(force=False):
     
     # download if nec
     url=URLS.get('geojson_arrond')
-    # download if nec
-    url=URLS.get('geojson_arrond')
     fn=os.path.join(PATH_DATA,'arrondissements.geojson')
     if force or not os.path.exists(fn):
         data = requests.get(url)
@@ -983,3 +981,28 @@ def hover_tooltip(row, bdf):
 Member: {y1} – {y2}
 """.strip().replace('\n','<br>')
     return ostr
+
+
+
+
+
+
+
+def determine_arrond(lat, lon, default='NA'):
+    # use shapely code
+    import shapely.geometry as geo
+
+    # get geojson of Paris arrondissement
+    geojson = get_geojson_arrondissement()
+
+    # encode incoming point
+    point = geo.Point(lon, lat)
+    
+    # loop through features in geojson and find intersection
+    for feature in geojson['features']: 
+        polygon = geo.shape(feature['geometry'])
+        if polygon.contains(point):
+            return feature['properties']['arrond_id']
+    
+    # if none found, return default
+    return default

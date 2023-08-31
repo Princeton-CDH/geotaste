@@ -552,7 +552,7 @@ p {
 
 .panel_R { display: none; }
 
-.storedescs-col-R { opacity: .35; }
+/* .storedescs-col-R { opacity: .35; } */
 
 button {
     pointer-events: all;

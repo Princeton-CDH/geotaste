@@ -463,7 +463,7 @@ class ComparisonPanel(BaseComponent):
         @app.callback(
             [
                 Output(self.content_left, 'is_open', allow_duplicate=True),                      # dropdowns open
-                Output(self.storedesc_R_col, 'style', allow_duplicate=True),                     # whether right filter button visible
+                # Output(self.storedesc_R_col, 'style', allow_duplicate=True),                     # whether right filter button visible
                 Output(self.panel_R_col, 'style', allow_duplicate=True),                         # whether right filter panel visible
                 Output(self.graphtab, 'children', allow_duplicate=True),   # actual content
             ],
@@ -498,7 +498,8 @@ class ComparisonPanel(BaseComponent):
                 dash.no_update,  # both dropdown vis
                 # dash.no_update,  # right vis
                 # dash.no_update,  # right vis
-                STYLE_VIS if fdL and storedesc_R_clicked else STYLE_HALFVIS,
+                # STYLE_VIS if fdL and storedesc_R_clicked else STYLE_VIS,
+                # STYLE_VIS,
                 STYLE_VIS if fdL and storedesc_R_clicked else STYLE_INVIS,
                 dash.no_update   # content
             ]
