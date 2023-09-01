@@ -362,8 +362,6 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
         
         return o
 
-    logger.debug(dfL.member_gender.value_counts())
-    logger.debug(dfR.member_gender.value_counts())
     odf = pd.concat([dfL, dfR])
     odf[colname] = [assign(i) for i in odf.index]
     # odf = odf#.reset_index().drop_duplicates([odf.index.name,colname]).set_index(odf.index.name)

@@ -582,7 +582,13 @@ class FilterSliderCard(FilterCard):
                         ff.seldata if ctx.triggered_id!=self.body.id else old_data,
                         f'{vstr(start_value)} – {vstr(end_value)}' if ctx.triggered_id!=self.body.id else old_desc,
                     ]
+            
+            elif ctx.triggered_id == self.button_clear.id and clear_clicked:
+                ff=self.ff()
+                o=[ff.plot(), ff.minval, ff.maxval, {}, '']
+            
             else:
+                logger.debug('not updating')
                 raise PreventUpdate
             
             logger.debug(['graph_selection_updated->',o])

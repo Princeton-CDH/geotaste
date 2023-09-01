@@ -4,6 +4,7 @@
 PORT=8111
 HOST='0.0.0.0'
 DEBUG=False
+TEXTFONT_SIZE=20
 
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
@@ -24,7 +25,7 @@ MIN_P=.05
 # blanks etc
 BLANKSTR='‎‎‎‎'
 BLANK = ''
-UNFILTERED = 'Add filter'
+UNFILTERED = 'Filter 1'
 UNFILTERED_L = 'Filter 1'
 UNFILTERED_R = 'Filter 2'
 
