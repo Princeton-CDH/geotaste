@@ -196,6 +196,7 @@ def flatten_series(s:pd.Series) -> pd.Series:
         3    4
         dtype: object
     """
+    iname=s.name
     s=pd.Series(s)
     l=[]
     for i,x in zip(s.index, s):
@@ -204,7 +205,7 @@ def flatten_series(s:pd.Series) -> pd.Series:
         else:
             l+=[(i,x)]
     il,xl=zip(*l)
-    return pd.Series(xl,index=il)
+    return pd.Series(xl,index=il, name=iname)
 
 def make_counts_df(series:pd.Series) -> pd.Series:
     """This function takes a pandas Series as input and returns a DataFrame
@@ -361,8 +362,6 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
         
         return o
 
-    logger.debug(dfL.member_gender.value_counts())
-    logger.debug(dfR.member_gender.value_counts())
     odf = pd.concat([dfL, dfR])
     odf[colname] = [assign(i) for i in odf.index]
     # odf = odf#.reset_index().drop_duplicates([odf.index.name,colname]).set_index(odf.index.name)
@@ -674,3 +673,19 @@ def wraptxt(s, n, newline_char='\n'):
             current_line += ' ' + word
     lines.append(current_line.strip())
     return newline_char.join(lines)
+
+def wraphtml(x,xn=50): return wraptxt(x, ensure_int(xn), '<br>') if x else x
+
+def ifnanintstr(x,y='?'):
+    return ensure_int(x) if not np.isnan(x) else y
+
+
+
+def intersect_filters(filters_d):
+    logger.debug(f'intersecting {len(filters_d)} filters')
+    filters_d = [d for d in filters_d if d]
+    return {
+        k:v 
+        for d in filters_d 
+        for k,v in d.items()
+    }

@@ -21,6 +21,10 @@ def ArrondTableView(ff, Lstr='', Rstr=''):
         className='graphtab padded', 
     )
 
+def ArrondTableAndMapView(ff, Lstr='', Rstr=''):
+    right_side=ArrondTableView(ff,Lstr=Lstr,Rstr=Rstr)
+    left_side=MemberMapView(ff,choro=True,className='comparison_map_graph comparison_map_graph_choro')
+    return dbc.Container(dbc.Row([dbc.Col(left_side), dbc.Col(right_side)]))
 
 
 
@@ -50,12 +54,12 @@ def DifferenceDegreeView(ff):
         className='graphtab padded', 
     )
 
-def MemberMapView(ff):
-    ofig = ff.plot_map()
+def MemberMapView(ff, choro=None, className='comparison_map_graph', **kwargs):
+    ofig = ff.plot_map(choro=choro, **kwargs)
     ofig.update_layout(autosize=True)
     ograph = dcc.Graph(
         figure=ofig, 
-        className='comparison_map_graph',
+        className=className,
         config={'displayModeBar':False},
     )
     return dbc.Container(ograph, className='graphtab')

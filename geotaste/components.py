@@ -132,7 +132,7 @@ class CollapsibleCard(BaseComponent):
         return dbc.Collapse(
             dbc.CardBody(self.content), 
             is_open=self.body_is_open, 
-            id=self.id('body')
+            id=self.id('body'),
         )
     
     @cached_property
@@ -175,11 +175,11 @@ class CollapsibleCard(BaseComponent):
         def toggle_collapse(n1, n2, is_open):
             now_is_open = (not is_open if (n1 or n2) else is_open)
             logger.debug(f'{self.name} is now open? {now_is_open}')
-            return now_is_open, '[-]' if now_is_open else '[+]'
+            return now_is_open, '[–]' if now_is_open else '[+]'
 
 
-# @cache
-@cache_obj.memoize()
+@cache
+# @cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
     filter_data,selected,kwargs = unserialize(serialized_data)
@@ -187,7 +187,7 @@ def ff_cache(figure_class, serialized_data):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (
@@ -211,8 +211,10 @@ class FigureComponent(BaseComponent):
             serialized_data = serialize([filter_data, selected, kwargs])
             return ff_cache(self.figure_factory, serialized_data)
 
-    def plot(self, filter_data={}, existing_fig=None, **kwargs) -> go.Figure:
+    def plot(self, filter_data={}, existing_fig=None, min_val=None, max_val=None, **kwargs) -> go.Figure:
         ff = self.ff(filter_data)
+        if min_val is not None: ff.min_series_val=min_val
+        if max_val is not None: ff.min_series_val=max_val
         return ff.fig
     
 
@@ -236,6 +238,7 @@ class FigureComponent(BaseComponent):
         
 class FilterComponent(FigureComponent):
     desc = 'X'
+    unfiltered = UNFILTERED
     
     @cached_property
     def store(self):
@@ -251,12 +254,10 @@ class FilterComponent(FigureComponent):
     
     @cached_property
     def store_desc(self): 
-        return html.Span(UNFILTERED, className='store_desc')
+        return html.Span(self.unfiltered, className='store_desc')
 
     def intersect_filters(self, *filters_d):
-        logger.debug(f'intersecting {len(filters_d)} filters')
-        filters_d = [d for d in filters_d if d]
-        return {k:v for d in filters_d for k,v in d.items()}
+        return intersect_filters(filters_d)
     
 
 
@@ -315,26 +316,6 @@ class FilterCard(FilterComponent, CollapsibleCard):
             className='button_clear',
             id=self.id('button_clear')
         )
-    
-    def component_callbacks(self, app):
-        super().component_callbacks(app)
-
-        @app.callback(
-            [
-                Output(self.store_desc, 'children', allow_duplicate=True),
-                Output(self.footer, 'is_open', allow_duplicate=True)
-            ],
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        #@logger.catch
-        def store_data_updated(store_data):
-            # filter cleared?
-            if not store_data: return UNFILTERED, False
-            logger.debug('store_data_updated')
-            res=self.describe_filters(store_data)
-            o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else UNFILTERED
-            return o1, True
 
     
     
@@ -343,11 +324,31 @@ class FilterCard(FilterComponent, CollapsibleCard):
         return ', '.join(str(x) for x in flatten_list(store_data.get(self.key,[])))
 
 
+    # def component_callbacks(self, app):
+    #     super().component_callbacks(app)
+
+    #     @app.callback(
+    #         [
+    #             Output(self.store_desc, 'children', allow_duplicate=True),
+    #             Output(self.footer, 'is_open', allow_duplicate=True)
+    #         ],
+    #         Input(self.store, 'data'),
+    #         prevent_initial_call=True
+    #     )
+    #     #@logger.catch
+    #     def store_data_updated(store_data):
+    #         # filter cleared?
+    #         if not store_data: return UNFILTERED, False
+    #         logger.debug('store_data_updated')
+    #         res=self.describe_filters(store_data)
+    #         o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else UNFILTERED
+    #         return o1, True
 
 
 
 
 class FilterPlotCard(FilterCard):
+    body_is_open = False
     @cached_property
     def content(self): 
         logger.trace(self.name)
@@ -376,6 +377,25 @@ class FilterPlotCard(FilterCard):
         #@logger.catch
         def clear_selection(n_clicks):
             return {}, self.plot()
+        
+            
+        @app.callback(
+            [
+                Output(self.store_desc, 'children', allow_duplicate=True),
+                Output(self.footer, 'is_open', allow_duplicate=True)
+            ],
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        #@logger.catchq
+        def store_data_updated(store_data):
+            # filter cleared?
+            if not store_data: return self.unfiltered, False
+            logger.debug('store_data_updated')
+            res=self.describe_filters(store_data)
+            o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else self.unfiltered
+            return o1, True
+
         
 
         @app.callback(
@@ -415,14 +435,168 @@ class FilterPlotCard(FilterCard):
         )
         #@logger.catch
         def graph_selection_updated(selected_data, old_data={}):
+            logger.debug(f'[{self.name}) selection updated 1: {selected_data}')
             o=self.ff().selected(selected_data)
             if not o: raise PreventUpdate
-            logger.debug(f'[{self.name}) selection updated: {selected_data}')
             out=(o if o!=old_data else dash.no_update)
-            logger.debug(out)
+            logger.debug(f'[{self.name}) selection updated 2: {out}')
             return out
         
         
+class FilterSliderCard(FilterCard):
+    value=None
+    unfiltered=''
+    body_is_open = False
+
+
+    @cached_property
+    def graph(self): 
+        return dcc.Graph(
+            # figure=self.ff().plot(),
+            figure=get_empty_fig(),
+            id=self.id('graph'),
+            config={'displayModeBar':False},
+        )
+
+    @cached_property
+    def minval(self):
+        return self.ff().series_q.min()
+    @cached_property
+    def maxval(self):
+        return self.ff().series_q.max()
+    
+    @cached_property
+    def content(self): 
+        logger.trace(self.name)
+        return dbc.Container([
+            dbc.Row(self.graph),
+            dbc.Row([
+                dbc.Col(self.input_start),
+                dbc.Col(self.input_end, style={'text-align':'right'})
+            ])
+        ])
+
+    @cached_property
+    def input_start(self):
+        return dcc.Input(
+            type="number", 
+            min=self.minval, 
+            max=self.maxval, 
+            value=self.minval if self.value is None else self.value,
+            className='slider-input-num'
+        )
+    
+    @cached_property
+    def input_end(self):
+        return dcc.Input(
+            type="number", 
+            min=self.minval, 
+            max=self.maxval, 
+            value=self.maxval if self.value is None else self.value,
+            className='slider-input-num',
+            style={'text-align':'right'}
+        )
+    
+    def describe_filters(self,store_data):
+        vals=list(store_data.values())[0]
+        minval=min(vals) if vals else self.minval
+        maxval=max(vals) if vals else self.maxval
+        return f'{minval} to {maxval}'
+    
+
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
+
+        @app.callback(
+            Output(self.footer, 'is_open', allow_duplicate=True),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def store_data_updated(store_data):
+            # filter cleared?
+            if not store_data: return False
+            return True
+
+        @app.callback(
+            [
+                Output(self.graph, 'figure', allow_duplicate=True),
+                Output(self.input_start, 'value', allow_duplicate=True),
+                Output(self.input_end, 'value', allow_duplicate=True),
+                Output(self.store, "data", allow_duplicate=True),
+                Output(self.store_desc, 'children', allow_duplicate=True)
+            ],
+            [
+                Input(self.graph, 'selectedData'),
+                Input(self.input_start, 'value'),
+                Input(self.input_end, 'value'),
+                Input(self.button_clear, 'n_clicks'),
+                Input(self.body, "is_open"),
+            ],
+            [
+                State(self.store, 'data'),
+                State(self.graph, 'figure'),
+                State(self.store_desc, 'children')
+            ],
+            prevent_initial_call=True
+        )
+        def graph_selection_updated(
+                selected_data,
+                start_value,
+                end_value,
+                clear_clicked,
+                body_open_now,
+                old_data={},
+                old_fig=None,
+                old_desc=''
+            ):
+            def vstr(x): return f'{int(x)}' if x is not None else ''
+
+            logger.debug(['sel updated on slider!', ctx.triggered_id, ctx.triggered])
+
+            if ctx.triggered_id == self.graph.id:
+                logger.debug(f'GRAPH TRIGGERED: {len(selected_data)} len sel data')
+                new_data=self.ff().selected(selected_data)
+                if not new_data or new_data==old_data: raise PreventUpdate
+
+                vals=list(new_data.values())
+                minval=min(vals[0]) if vals else None
+                maxval=max(vals[0]) if vals else None
+                o=[
+                    old_fig, 
+                    minval, 
+                    maxval, 
+                    new_data, 
+                    f'{vstr(minval)} – {vstr(maxval)}'
+                ]
+            
+            elif ctx.triggered_id in {self.body.id, self.input_start.id, self.input_end.id}:
+                if body_open_now:
+                    logger.debug(f'INPUT TRIGGERED TRIGGERED')
+                    ff = self.ff(min_series_val=start_value, max_series_val=end_value)
+                    newfig = ff.plot()
+                    o=[
+                        newfig, 
+                        start_value, 
+                        end_value, 
+                        ff.seldata if ctx.triggered_id!=self.body.id else old_data,
+                        f'{vstr(start_value)} – {vstr(end_value)}' if ctx.triggered_id!=self.body.id else old_desc,
+                    ]
+            
+            elif ctx.triggered_id == self.button_clear.id and clear_clicked:
+                ff=self.ff()
+                o=[ff.plot(), ff.minval, ff.maxval, {}, '']
+            
+            else:
+                logger.debug('not updating')
+                raise PreventUpdate
+            
+            logger.debug(['graph_selection_updated->',o])
+            return o
+
+                
+    
+
 
 
 
@@ -554,32 +728,32 @@ class MemberNameCard(FilterInputCard):
     desc = 'Name'
     placeholder='Select individual members'
     figure_factory = MemberNameFigure
-    tooltip = 'Filter for particular members by name'
+    # tooltip = 'Filter for particular members by name'
 
-class MemberDOBCard(FilterPlotCard):
+class MemberDOBCard(FilterSliderCard):
     desc = 'Birth year'
     figure_factory = MemberDOBFigure 
-    tooltip = 'Filter members by date of birth'   
+    # tooltip = 'Filter members by date of birth'   
     
-class MembershipYearCard(FilterPlotCard):
+class MembershipYearCard(FilterSliderCard):
     desc = 'Years active'
     figure_factory = MembershipYearFigure    
-    tooltip = 'Filter for membership by years of active members'
+    # tooltip = 'Filter for membership by years of active members'
 
 class MemberGenderCard(FilterPlotCard):
     desc = 'Gender'
     figure_factory = MemberGenderFigure
-    tooltip = 'Filter for members by genre'
+    # tooltip = 'Filter for members by genre'
 
 class MemberNationalityCard(FilterPlotCard):
     desc = 'Nationality'
     figure_factory = MemberNationalityFigure
-    tooltip = 'Filter for members of particular nationalities'
+    # tooltip = 'Filter for members of particular nationalities'
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Arrondissement'
     figure_factory = MemberArrondMap
-    tooltip = 'Filter for members who ever lived in a given arrondissement'
+    # tooltip = 'Filter for members who ever lived in a given arrondissement'
 
 
 
@@ -591,44 +765,44 @@ class BookTitleCard(FilterInputCard):
     multi = True
     placeholder = 'Select books by title'
     figure_factory = BookTitleFigure
-    tooltip = 'Filter for particular books'
+    # tooltip = 'Filter for particular books'
 
 class CreatorNameCard(FilterInputCard):
     desc = 'Author'
     placeholder = 'Select books by creator'
     figure_factory = CreatorNameFigure
-    tooltip = 'Filter for particular authors'
+    # tooltip = 'Filter for particular authors'
 
-class BookYearCard(FilterPlotCard):
+class BookYearCard(FilterSliderCard):
     desc = "Publication date"
     figure_factory = BookYearFigure
-    tooltip = 'Filter by when the borrowed book was published'
+    # tooltip = 'Filter by when the borrowed book was published'
 
 class CreatorGenderCard(FilterPlotCard):
     desc = 'Author gender'
     figure_factory = CreatorGenderFigure
-    tooltip = 'Filter by the gender of the author'
+    # tooltip = 'Filter by the gender of the author'
 
 class BookGenreCard(FilterPlotCard):
     desc = 'Genre'
     figure_factory = BookGenreFigure
-    tooltip = 'Filter by genre of book'
+    # tooltip = 'Filter by genre of book'
 
 class CreatorNationalityCard(FilterPlotCard):
     desc = 'Author nationality'
     figure_factory = CreatorNationalityFigure
-    tooltip = 'Filter by the nationality of the author'
+    # tooltip = 'Filter by the nationality of the author'
 
     
-class EventYearCard(FilterPlotCard):
+class EventYearCard(FilterSliderCard):
     desc = 'Year of borrowing'
     figure_factory = EventYearFigure
-    tooltip = 'Filter for the books borrowed in a given year range'
+    # tooltip = 'Filter for the books borrowed in a given year range'
 
-class EventMonthCard(FilterPlotCard):
+class EventMonthCard(FilterSliderCard):
     desc = 'Month of borrowing'
     figure_factory = EventMonthFigure
-    tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
+    # tooltip = 'Filter for the books borrowed in a given month range (showing seasonal effects)'
 
 class EventTypeCard(FilterPlotCard):
     desc = 'type of event'
@@ -641,7 +815,7 @@ def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
             children=d.get('children'),
             label=d.get('label'),
             tab_id=d.get('tab_id'),
-            id=uid()
+            id=d.get('id', uid())
         )
         for d in children
     ]
@@ -675,3 +849,25 @@ def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
 
 def tooltip(component, tooltip=''):
     return dbc.Tooltip(tooltip, target=component.id)
+
+
+
+
+
+def get_welcome_modal():
+    return dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle(WELCOME_HEADER)),
+            dbc.ModalBody([
+                html.H3(WELCOME_HEADER2),
+                html.Br(),
+                html.P(WELCOME_BODY),
+            ])
+        ],
+        id="welcome-modal",
+        centered=True,
+        is_open=WELOME_MSG_ON,
+        size='lg'
+    )
+
+

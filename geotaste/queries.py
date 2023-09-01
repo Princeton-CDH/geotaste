@@ -68,7 +68,8 @@ def filter_query_str_series(
         return getplural()
     
     # if a range of ints, use a less/greater than syntax
-    elif is_range_of_ints(svals):
+    # elif is_range_of_ints(svals):
+    elif int in {type(svx) for svx in svals}:
         return getrange()
 
     # if simply too many vals

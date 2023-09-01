@@ -3,7 +3,8 @@
 # server
 PORT=8111
 HOST='0.0.0.0'
-DEBUG=True
+DEBUG=False
+TEXTFONT_SIZE=20
 
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
@@ -12,8 +13,11 @@ LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</
 # 10 for debug; 20 info, 25 success; 
 # 30 warning, 40 error, 50 critical;
 LOG_LEVEL = 10
+WELOME_MSG_ON = True
 
-    
+WELCOME_HEADER = 'Shakespeare and Company Project Lab'
+WELCOME_HEADER2 = 'Experiment 1: Geography and Taste'
+WELCOME_BODY = '''Use the filters to generate and compare maps showing where members of the Shakespeare and Company lending library lived and the books they borrowed.'''
 
 # stats
 MIN_P=.05
@@ -21,7 +25,10 @@ MIN_P=.05
 # blanks etc
 BLANKSTR='‎‎‎‎'
 BLANK = ''
-UNFILTERED = '(unfiltered)'
+UNFILTERED = 'Filter 1'
+UNFILTERED_L = 'Filter 1'
+UNFILTERED_R = 'Filter 2'
+
 NOFILTER = BLANK
 # LEFT_COLOR='#AB9155' #'#7d6ab6'
 RIGHT_COLOR='#7d6ab6' #rgb(125, 106, 182)
@@ -31,7 +38,8 @@ DEFAULT_COLOR=LEFT_COLOR
 PLOTLY_TEMPLATE='simple_white'
 UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
-STYLE_VIS={'display':'flex'}
+STYLE_HALFVIS={'opacity':.5, 'display':'block'}
+STYLE_VIS={'display':'block', 'opacity':1}
 LOGO_SRC="/assets/SCo_logo_graphic-small.png"
 LOGO_SRC2="/assets/rulerlab-small.png"
 
@@ -70,8 +78,11 @@ LATLON_SCO = (
 )
 
 CENTER = (
-    LATLON_SCO[0] + .005,
-    LATLON_SCO[1] - .015
+    # LATLON_SCO[0] + .005,
+    # LATLON_SCO[1] - .015
+
+    LATLON_SCO[0],
+    LATLON_SCO[1]
 )
 
 MAP_CENTER = dict(

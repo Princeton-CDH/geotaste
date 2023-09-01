@@ -103,6 +103,8 @@ def table_info(ctbl):
     perc2=count2/support2*100 if support2 else np.nan
     perc_diff=perc2-perc1
     return {
+        'count_sum':count1+count2,
+        'count_min':min([count1,count2]),
         'count_L':count1,
         'count_R':count2,
         'perc_L':perc1,
@@ -190,7 +192,7 @@ def describe_arronds(df_arronds, min_p=None, p_col=None):
         signif_df['odds_ratio'] = signif_df['odds_ratio'].replace(np.inf, np.nan)
         signif_df = signif_df[signif_df.odds_ratio.apply(is_numeric) & (~signif_df.odds_ratio.isna()) & (signif_df.odds_ratio!=0)]
 
-    desc_top = f'''Comparing where members from Group 1 and Group 2 lived produces **{len(signif_df)}** statistically significant arrondissement.'''
+    desc_top = f'''Comparing where members from Filter 1 and Filter 2 lived produces **{len(signif_df)}** statistically significant arrondissement.'''
     
     signif_more_L=signif_df[signif_df.odds_ratio>1]
     signif_more_R=signif_df[signif_df.odds_ratio<1]

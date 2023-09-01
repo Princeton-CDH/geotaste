@@ -10,7 +10,6 @@ from .imports import *
 class Dataset:
     id:str=''
     url:str = ''
-    url:str = ''
     path:str = ''
     cols:list = []
     cols_sep:list = []
@@ -43,81 +42,25 @@ class Dataset:
                 raise Exception('Neither URL nor path')
         # read from saved file
         df = pd.read_csv(self.path, on_bad_lines='warn')
-    def read_df(self):
-        assert self.path # assert path string exists
-        if not os.path.exists(self.path):
-            if self.url:
-                # download and save
-                df=pd.read_csv(self.url)
-                # make dir if not exists
-                if not os.path.exists(os.path.dirname(self.path)):
-                    os.makedirs(os.path.dirname(self.path))
-                # save csv
-                df.to_csv(self.path, index=False)
-                # return loaded df
-                return df
-            else:
-                raise Exception('Neither URL nor path')
-        # read from saved file
-        df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
-        
+
     @cached_property
     def data(self):  
         df=self.read_df()
-        if self.fillna is not None: 
-            df=df.fillna(self.fillna)
-        df=self.read_df()
-        if self.fillna is not None: 
-            df=df.fillna(self.fillna)
-        for c in self.cols_sep: 
+        if self.fillna is not None: df=df.fillna(self.fillna)
+
+        cols = [c for c in df.columns if not self.cols or c in set(self.cols)]
+        cols_sep = [c for c in self.cols_sep if c in set(cols)]
+        logger.debug(f'columns in {self.path} are {cols}')
+
+
+        for c in cols_sep: 
             df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
-            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
-        for c in self.cols_q:
-            df[c]=pd.to_numeric(df[c], errors='coerce')
-        if self.cols: 
-            badcols = list(set(df.columns) - set(self.cols))
-            df=df.drop(badcols, axis=1)
-        if self.cols_rename: 
-            df = df.rename(self.cols_rename, axis=1)
+        if cols: df=df[cols]
+        if self.cols_rename: df = df.rename(self.cols_rename, axis=1)
         return df
 
-    def filter(self, filter_data={}, **other_filter_data):
-        return intersect_filters(*[
-            self.filter_series(key,vals)
-            for key,vals in list(filter_data.items()) + list(other_filter_data.items())
-        ])
-    
-    def filter_df(self, filter_data={}):
-        # if not filter_data: filter_data=self.filter_data
-        return filter_df(self.data, filter_data)
 
-    def series(self, key) -> pd.Series:
-        try:
-            return self.data[key]
-        except KeyError:
-            try:
-                return self.data_orig[key]
-            except KeyError:
-                pass
-        return pd.Series()
-
-    def filter_series(
-            self, 
-            key, 
-            vals = [], 
-            test_func = isin_or_hasone,
-            matches = []
-            ):
-        
-        return filter_series(
-            series=self.series(key),
-            vals=vals,
-            test_func=test_func,
-            series_name=key,
-            matches = matches
-        )
-    
     
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
@@ -159,14 +102,31 @@ class Dataset:
 
 class LandmarksDataset(Dataset):
     path = PATHS.get('landmarks')
+    url = URLS.get('landmarks')
     cols_q = ['lat', 'lon']
+    
+    @cached_property
+    def data(self):
+        df=super().data
+        df['arrond_id'] = [
+            determine_arrond(lat,lon)
+            for lat,lon in zip(df.lat, df.lon)
+        ]
+
+        df['tooltip'] = [
+            f'''{row.landmark}\n{row.address}\n{'Paris '+row.arrond_id+'ᵉ' if row.arrond_id.isdigit() else ''}'''.strip().replace('\n','<br>')
+            for i,row in df.iterrows()
+        ]
+
+        return df
+
+    
 
 
 def get_member_id(uri):
     return uri.lower().split('/members/',1)[1][:-1] if '/members/' in uri else ''
 
 class MembersDataset(Dataset):
-    url:str = URLS.get('members')
     url:str = URLS.get('members')
     path:str = PATHS.get('members')
     sep:str = ';'
@@ -204,7 +164,6 @@ class MembersDataset(Dataset):
     @cached_property
     def data(self):
         df=super().data
-        df['member'] = df['uri'].apply(get_member_id)
         df['member'] = df['uri'].apply(get_member_id)
         df['membership_years'] = [[int(y) for y in x if y] for x in df['membership_years']]
         
@@ -507,16 +466,6 @@ class CreationsDataset(Dataset):
 
 
 
-
-@cache
-def Books(): return BooksDataset()
-        return pd.DataFrame(o).fillna(self.fillna).set_index('book')
-
-
-
-
-
-
 @cache
 def Books(): return BooksDataset()
 
@@ -666,6 +615,7 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
                     'dwelling_numposs':len(matches),
                     **{f'dwelling_{k}':v for k,v in match_d.items()},
                     **dict(row),
+                }
         ld=[]
         df=super().data
         for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings'):
@@ -679,9 +629,6 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
                     **{f'dwelling_{k}':v for k,v in match_d.items()},
                     **dict(row),
                 }
-                ld.append(d)
-        return pd.DataFrame(ld)
-    
                 ld.append(d)
         return pd.DataFrame(ld)
     
@@ -848,6 +795,14 @@ class CombinedDataset(Dataset):
             )
             if row.dwelling
         }
+        def newnicename(x): 
+            if not ',' in x: return x
+            a,b=x.split(',', 1)
+            ln=a.strip()
+            fn=b.split()[0].strip()
+            return f'{fn} {ln}'
+
+        odf['member_nicename'] = odf['member_name'].apply(newnicename)
         odf['hover_tooltip'] = [tooltip_d.get(dw,'') for dw in odf.dwelling]
         if save: odf.to_pickle(self.path)
         return odf
@@ -913,8 +868,6 @@ def get_geojson_arrondissement(force=False):
     
     # download if nec
     url=URLS.get('geojson_arrond')
-    # download if nec
-    url=URLS.get('geojson_arrond')
     fn=os.path.join(PATH_DATA,'arrondissements.geojson')
     if force or not os.path.exists(fn):
         data = requests.get(url)
@@ -973,7 +926,7 @@ def Landmarks(): return LandmarksDataset()
 #### other funcs
 
 def hover_tooltip(row, bdf):
-    UNKNOWN = '?'
+    UNKNOWN = ''
     def v(x): return x if x else UNKNOWN
     
     if not row.member_membership:
@@ -993,7 +946,7 @@ def hover_tooltip(row, bdf):
         )
     )
     xn=50
-    def wrap(x,xn=xn): return wraptxt(x, ensure_int(xn), '<br>') if x else x
+    def wrap(x,xn=xn): return wraphtml(x, xn)
     
     def bookdesc(r):
         o=f'* {r.creator}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
@@ -1007,15 +960,48 @@ def hover_tooltip(row, bdf):
             o+=f' and returned {r.event_end}'
         return wrap(o)
     
-    borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
-
+    # borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
     gdist = f'{round(float(row.dwelling_distSCO),1)}' if row.dwelling_distSCO else UNKNOWN
     nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
-    nats=f', from {oxfordcomma(nats, repr=lambda x: x)}' if nats else ''
-    gstr=f', {row.member_gender.lower()}'
+    nats=f', from {oxfordcomma(nats, repr=lambda x: x)}, ' if nats else ''
+    # gstr=f', {row.member_gender.lower()}'
+    dob=ifnanintstr(row.member_dob,'')
+    dod=ifnanintstr(row.member_dod,'')
+    birthdeath=f'{dob} – {dod}'
+    arrond=f'{row.arrond_id}ᵉ' if row.arrond_id else ''
     
-    otitle = wrap(f'<b>{row.member_name}</b> ({v(ensure_int(row.member_dob))}-{v(ensure_int(row.member_dod))}){nats}{gstr}')
-    obody = wrap(f'{row.member_title+" " if not row.member_nicename.startswith(row.member_title) else ""}{row.member_nicename} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')# {"These books were:" if numborrow_here>1 else "This book was:"}')
-    # o = '<br><br>'.join([otitle, obody,borrowbooks])
-    o = '<br><br>'.join([otitle, obody])
-    return o
+    # return wrap(f'''<b>{row.member_nicename}</b>  – {v(ifnanintstr(row.member_dod,'?'))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
+
+    ostr = f"""
+<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_nicename} ({birthdeath})
+{row.dwelling_address}
+{row.dwelling_city} {arrond}
+
+Member: {y1} – {y2}
+""".strip().replace('\n','<br>')
+    return ostr
+
+
+
+
+
+
+
+def determine_arrond(lat, lon, default='NA'):
+    # use shapely code
+    import shapely.geometry as geo
+
+    # get geojson of Paris arrondissement
+    geojson = get_geojson_arrondissement()
+
+    # encode incoming point
+    point = geo.Point(lon, lat)
+    
+    # loop through features in geojson and find intersection
+    for feature in geojson['features']: 
+        polygon = geo.shape(feature['geometry'])
+        if polygon.contains(point):
+            return feature['properties']['arrond_id']
+    
+    # if none found, return default
+    return default
