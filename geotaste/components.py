@@ -179,15 +179,15 @@ class CollapsibleCard(BaseComponent):
 
 
 @cache
-# @cache_obj.memoize()
+@cache_obj.memoize()
 def ff_cache(figure_class, serialized_data):
     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
     filter_data,selected,kwargs = unserialize(serialized_data)
     return figure_class(filter_data, selected, **kwargs)
 
 
-# @cache
-# @cache_obj.memoize()
+@cache
+@cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
     filter_data,existing_fig,kwargs = (
@@ -683,6 +683,23 @@ class FilterInputCard(FilterCard):
         def clear_selection(n_clicks):
             logger.debug('clear_selection')
             return {}, []
+        
+        @app.callback(
+            [
+                Output(self.store_desc, 'children', allow_duplicate=True),
+                Output(self.footer, 'is_open', allow_duplicate=True)
+            ],
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        #@logger.catchq
+        def store_data_updated(store_data):
+            # filter cleared?
+            if not store_data: return self.unfiltered, False
+            logger.debug('store_data_updated')
+            res=self.describe_filters(store_data)
+            o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else self.unfiltered
+            return o1, True
 
         @app.callback(
             Output(self.store, "data", allow_duplicate=True),
