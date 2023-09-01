@@ -1,7 +1,6 @@
 from geotaste.imports import *
 
-
-def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
+def get_app():
     with Logwatch(f'booting geotaste'):
         layout = GeotasteLayout()        
         app = DashApp(
@@ -13,8 +12,14 @@ def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
             }],
             assets_folder=PATH_ASSETS,
         )
-        server = app.app.server
+        return app
 
+def get_server():
+    app = get_app()
+    return app.app.server
+
+def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
+    app = get_app()
     with Logwatch('running app'):
         logger.debug(f'geotaste running at http://{host}:{port}')
         app.run(
