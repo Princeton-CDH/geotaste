@@ -77,134 +77,6 @@ class BaseComponent(DashComponent, Logmaker):
     
 
 
-
-
-
-    
-
-
-
-
-# class CollapsibleCard(BaseComponent):
-    # body_is_open = False
-    # className='collapsible-card'
-    # tooltip = ''
-
-    # def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
-    #     logger.trace(self.name)
-    #     children = []
-    #     if header and self.header is not None: children.append(self.header)
-    #     if body and self.body is not None: children.append(self.body)
-    #     if footer and self.footer is not None: children.append(self.footer)
-    #     return dbc.Card(children, className=f'collapsible-card {self.className}', **kwargs)
-
-    # @cached_property
-    # def header_btn(self):
-    #     return dbc.Button(
-    #         self.desc[0].upper() + self.desc[1:],
-    #         color="link",
-    #         n_clicks=0,
-    #         id=self.id('header_btn'),
-    #         className='card-title'
-    #     )
-    
-
-
-    # @cached_property
-    # def header(self):
-    #     logger.debug(self.name)
-    #     # children = [
-    #     #     html.Div(
-    #     #         [
-    #     #             self.showhide_btn,
-    #     #         ], 
-    #     #         className='button_showhide_div'
-    #     #     ),
-    #     #     btn_title
-    #     # ]
-    #     return dbc.CardHeader(
-    #         [self.header_btn, self.showhide_btn],
-    #         className=f'card-header-{self.className}'
-    #     )
-    
-    # @cached_property
-    # def body(self):
-    #     logger.trace(self.name)
-    #     return dbc.Collapse(
-    #         dbc.CardBody(self.content), 
-    #         is_open=self.body_is_open, 
-    #         id=self.id('body'),
-    #     )
-    
-    # @cached_property
-    # def footer(self):
-    #     logger.trace(self.name)
-    #     return dbc.Collapse(
-    #         dbc.CardFooter(BLANK), 
-    #         is_open=False,
-    #         id=self.id('footer')
-    #     )
-    
-    
-    # @cached_property
-    # def showhide_btn(self):
-    #     logger.trace(self.name)
-    #     return dbc.Button(
-    #         "[+]", 
-    #         color="link", 
-    #         n_clicks=0,
-    #         className='button_showhide',
-    #         id=self.id('button_showhide')
-    #     )
-    
-    # def component_callbacks(self, app):       
-    #     logger.trace(self.name) 
-    #     ## buttons
-    #     @app.callback(
-    #         [
-    #             Output(self.body, "is_open", allow_duplicate=True),
-    #             Output(self.showhide_btn, "children", allow_duplicate=True),
-    #         ],
-    #         [
-    #             Input(self.showhide_btn, "n_clicks"),
-    #             Input(self.header_btn, 'n_clicks')
-    #         ],
-    #         State(self.body, "is_open"),
-    #         prevent_initial_call=True
-    #     )
-    #     #@logger.catch
-    #     def toggle_collapse(n1, n2, is_open):
-    #         now_is_open = (not is_open if (n1 or n2) else is_open)
-    #         logger.debug(f'{self.name} is now open? {now_is_open}')
-    #         return now_is_open, '[–]' if now_is_open else '[+]'
-
-
-# @cache
-@cache_obj.memoize()
-def ff_cache(figure_class, serialized_data):
-    logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
-    filter_data,selected,kwargs = unserialize(serialized_data)
-    return figure_class(filter_data, selected, **kwargs)
-
-
-# @cache
-@cache_obj.memoize()
-def plot_cache(figure_class, serialized_data):
-    logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
-    filter_data,existing_fig,kwargs = (
-        unserialize(serialized_data) 
-        if serialized_data 
-        else ({},None,{})
-    )
-    ff = figure_class(filter_data)
-    fig = ff.plot(**kwargs)
-    if existing_fig: 
-        fig = combine_figs(fig, existing_fig)
-    return fig
-
-
-
-
         
 class FilterComponent(BaseComponent):
     desc = 'X'
@@ -251,33 +123,23 @@ class FilterComponent(BaseComponent):
 
 
 
-
-
-
-
 class FilterCard(FilterComponent):
     body_is_open = False
     className='collapsible-card'
     tooltip = ''
 
-    def layout(self, params=None, header=True, body=True, footer=True, **kwargs):
-        logger.trace(self.name)
-        children = []
-        if header and self.header is not None: children.append(self.header)
-        if body and self.body is not None: children.append(self.body)
-        if footer and self.footer is not None: children.append(self.footer)
-        return dbc.Card(children, className=f'collapsible-card {self.className}', **kwargs)
+    def layout(self, params=None):
+        return dbc.Card([
+            self.header,
+            self.body,
+            self.footer,
 
-    @cached_property
-    def header_btn(self):
-        return dbc.Button(
-            self.desc[0].upper() + self.desc[1:],
-            color="link",
-            n_clicks=0,
-            id=self.id('header_btn'),
-            className='card-title'
-        )
-    
+            # data
+            self.store, 
+            self.store_panel,
+            self.store_selection,
+
+        ], className=f'collapsible-card {self.className}')
 
 
     @cached_property
@@ -289,23 +151,14 @@ class FilterCard(FilterComponent):
         )
     
     @cached_property
-    def body(self):
-        logger.trace(self.name)
-        return dbc.Collapse(
-            dbc.CardBody(self.content), 
-            is_open=self.body_is_open, 
-            id=self.id('body'),
+    def header_btn(self):
+        return dbc.Button(
+            self.desc[0].upper() + self.desc[1:],
+            color="link",
+            n_clicks=0,
+            id=self.id('header_btn'),
+            className='card-title'
         )
-    
-    @cached_property
-    def footer(self):
-        logger.trace(self.name)
-        return dbc.Collapse(
-            dbc.CardFooter(BLANK), 
-            is_open=False,
-            id=self.id('footer')
-        )
-    
     
     @cached_property
     def showhide_btn(self):
@@ -317,44 +170,49 @@ class FilterCard(FilterComponent):
             className='button_showhide',
             id=self.id('button_showhide')
         )
-        
+    
+    
+    
+    
+    ## Body
+    
+    @cached_property
+    def body(self):
+        logger.trace(self.name)
+        return dbc.Collapse(
+            dbc.CardBody(self.content), 
+            is_open=self.body_is_open, 
+            id=self.id('body'),
+        )
+    
+    
+    
 
+
+    ## footer
+    
+    
     @cached_property
     def footer(self):
         logger.trace(self.name)
-        style_d={'color':self.color if self.color else 'inherit'}
+        style_d={'color':self.color if self.color else 'inherit', 'font-size':'.8em'}
         return dbc.Collapse(
-            dbc.CardFooter(dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            self.store, 
-                            self.store_panel,
-                            self.store_selection,
-                            html.Div(
-                                self.store_desc, 
-                                className='card-footer-desc'
-                            )
-                        ], 
-                        width=11
-                    ),
-                    dbc.Col(
-                        html.Div(self.button_clear, className='button_clear_div'),
-                        width=1
-                    )
+            dbc.CardFooter([
+                self.store_desc, 
+                self.button_clear,
                 ],
                 style=style_d
-            )),
+            ),
             is_open=False,
             id=self.id('footer')
         )
     
     @cached_property
     def store_desc(self): 
-        return dbc.Button(
+        return html.Span(
             UNFILTERED, 
             className='store_desc button_store_desc', 
-            color='link',
+            # color='link',
             id=self.id(f'store_desc'),
         )
     
@@ -370,9 +228,13 @@ class FilterCard(FilterComponent):
 
     
     
+
+
+
+
     def describe_filters(self, store_data):
-        # return filter_query_str(store_data)
-        return ', '.join(str(x) for x in flatten_list(store_data.get(self.key,[])))
+        vals=', '.join(str(x) for x in flatten_list(store_data.get(self.key,[])))
+        return vals
 
 
     def component_callbacks(self, app):
@@ -426,25 +288,25 @@ class FilterCard(FilterComponent):
         #@logger.catchq
         def toggle_footer_storedesc(store_data):
             # filter cleared?
-            if not store_data: return self.unfiltered, False
             logger.debug(f'[{self.name}] store_data_updated: {store_data}')
-            res=self.describe_filters(store_data)
-            o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else self.unfiltered
-            return o1, True
+            if not store_data: 
+                return self.unfiltered, False
+            else:
+                res=self.describe_filters(store_data)
+                if not res: res = self.unfiltered
+                return res, True
         
 
 
-    #     @app.callback(
-    #         [
-    #             Output(self.store, "data", allow_duplicate=True),
-    #             Output(self.graph, "figure", allow_duplicate=True),
-    #         ],
-    #         Input(self.button_clear, 'n_clicks'),
-    #         prevent_initial_call=True
-    #     )
-    #     #@logger.catch
-    #     def clear_selection(n_clicks):
-    #         return {}, self.plot()
+        @app.callback(
+            Output(self.store, "data", allow_duplicate=True),
+            Input(self.button_clear, 'n_clicks'),
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def clear_selection(n_clicks):
+            logger.debug(f'[{self.name}] clearing selection v1')
+            return {}
 
 
 class FilterPlotCard(FilterCard):
@@ -680,22 +542,6 @@ class FilterSliderCard(FilterCard):
     #         return o[:-1]
 
                 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -737,6 +583,8 @@ class FilterInputCard(FilterCard):
         def input_value_changed(vals):
             logger.debug(f'[{self.name}] {self.key} -> {vals}')
             return dash.no_update if not vals else {self.key:vals}
+        
+
         
         # # ## CLEAR? -- OVERWRITTEN
         # @app.callback(
@@ -793,22 +641,16 @@ class FilterInputCard(FilterCard):
         #     logger.debug('clear_selection')
         #     return {}, []
         
-        # @app.callback(
-        #     [
-        #         Output(self.store_desc, 'children', allow_duplicate=True),
-        #         Output(self.footer, 'is_open', allow_duplicate=True)
-        #     ],
-        #     Input(self.store, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catchq
-        # def store_data_updated(store_data):
-        #     # filter cleared?
-        #     if not store_data: return self.unfiltered, False
-        #     logger.debug('store_data_updated')
-        #     res=self.describe_filters(store_data)
-        #     o1 = dcc.Markdown(res.replace('[','').replace(']','')) if res else self.unfiltered
-        #     return o1, True
+        @app.callback(
+            Output(self.input, 'value'),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        #@logger.catchq
+        def store_data_updated(store_data):
+            # filter cleared?
+            if not store_data: return []
+            raise PreventUpdate
 
 
     
