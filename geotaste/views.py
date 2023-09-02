@@ -3,10 +3,7 @@ from .imports import *
 
 ### Views
 
-
-    
-
-def ArrondTableView(ff, Lstr='', Rstr=''):
+def ArrondTableView(ff, Lstr='Filter 1', Rstr='Filter 2'):
     desc_L,desc_R,desc_top = describe_arronds(ff.signif_arronds)
     return dbc.Container(
         [
@@ -20,6 +17,39 @@ def ArrondTableView(ff, Lstr='', Rstr=''):
         ], 
         className='graphtab padded', 
     )
+
+    
+
+def AnalysisTableView(ff, **kwargs):
+    odf = ff.compare(**kwargs)
+    odf['colpref'] = odf.col.apply(lambda x: x.split('_')[0])
+
+    out = []
+
+    for colpref, colpref_df in sorted(odf.groupby('colpref')):
+        desc_L,desc_R = describe_comparison(colpref_df, lim=10)
+        out_col = [
+            dbc.Row(html.H3(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
+            dbc.Row([
+                dbc.Col([
+                    html.H4(ff.L.filter_desc),
+                    dcc.Markdown('\n'.join(desc_L))
+                ], className='left-color'),
+
+                dbc.Col([
+                    html.H4(ff.R.filter_desc),
+                    dcc.Markdown('\n'.join(desc_R))
+                ], className='right-color'),
+            ]),
+
+            get_dash_table(colpref_df)
+        ]
+
+        out_tab = dbc.Tab(dbc.Container(out_col), label=colpref.title())
+
+        out.append(out_tab)
+    
+    return dbc.Container(dbc.Tabs(out), className='graphtab padded')
 
 def ArrondTableAndMapView(ff, Lstr='', Rstr=''):
     right_side=ArrondTableView(ff,Lstr=Lstr,Rstr=Rstr)

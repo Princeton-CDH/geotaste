@@ -12,7 +12,7 @@ cols_members=[
 ]
 
 cols_books = [
-    'creator_name',
+    'author_name',
     'book_title',
     'book_year',
     # 'num_borrows_overall',
@@ -115,9 +115,12 @@ class FigureFactory(DashFigureFactory, Logmaker):
             odf=odf.drop_duplicates(self.drop_duplicates)
         return odf
     
-    @property
+    @cached_property
     def filter_desc(self):
-        return format_intension(self.filter_data.get(INTENSION_KEY,{}))
+        return filter_query_str(
+            self.filter_data,
+            human=True
+        )
     
     def unique(
             self, 
@@ -407,18 +410,18 @@ class CreatorFigure(TypicalFigure):
     drop_duplicates=('creator',)
 
 class CreatorGenderFigure(CreatorFigure):
-    key='creator_gender'
+    key='author_gender'
     quant=False
     vertical = False
     text='count'
 
 
 class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
-    key='creator_nationalities'
+    key='author_nationalities'
     quant=False
 
 class CreatorDOBFigure(CreatorFigure):
-    key = 'creator_dob'
+    key = 'author_dob'
     quant = True
     min_series_val=1800
     max_series_val=1950
@@ -427,12 +430,12 @@ class MemberNameFigure(MemberFigure):
     key = 'member_name'
 
 class CreatorNameFigure(MemberFigure):
-    key = 'creator_name'
+    key = 'author_name'
 
 
 
 class EventFigure(TypicalFigure):
-    drop_duplicates = ('event',)
+    drop_duplicates = ('borrow',)
 
 class EventYearFigure(EventFigure):
     key = 'event_year'
@@ -604,7 +607,7 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def book_filters_exist(self):
         return any(
-            fn.startswith('book_') or fn.startswith('author_') or fn.startswith('event_') or fn.startswith('creator_')
+            fn.startswith('book_') or fn.startswith('author_') or fn.startswith('event_') or fn.startswith('author_')
             for fn in self.filter_data
         )
 
@@ -713,9 +716,45 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             self.R.valid_arronds,
         )
     
-    @cached_property
-    def signif_arronds(self):
-        return filter_signif(self.df_arronds)
+    
+    @cache
+    def compare(self, 
+            maxcats=None,
+            cols=PREDICT_COLS,
+            only_signif=False,
+            round=4,
+            min_count=PREDICT_MIN_COUNT,
+            min_sum=PREDICT_MIN_SUM,
+            **kwargs):
+        
+        return get_distinctive_qual_vals(
+            self.L.df,
+            self.R.df,
+            maxcats=maxcats,
+            cols=cols,
+            only_signif=only_signif,
+            round=round,
+            min_count=min_count,
+            min_sum=min_sum,
+            drop_duplicates={
+                'member':['member'],
+                'author':['author','borrow'],
+                'book':['book','borrow'],
+                'arrond_id':['arrond_id','member']
+            }
+        )
+    
+    def describe_comparison(self, comparison_df=None, **kwargs):
+        return describe_comparison(
+            comparison_df
+            if comparison_df is not None
+            else self.compare(**kwargs)
+        )
+
+        
+        
+        
+
     
     @cached_property
     def df_dwellings(self): 

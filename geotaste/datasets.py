@@ -18,7 +18,6 @@ class Dataset:
     fillna:object = ''
     cols_q:list = []
     filter_data:dict = {}
-    filter_data:dict = {}
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
         if path: self.path=path
@@ -51,7 +50,7 @@ class Dataset:
 
         cols = [c for c in df.columns if not self.cols or c in set(self.cols)]
         cols_sep = [c for c in self.cols_sep if c in set(cols)]
-        logger.debug(f'columns in {self.path} are {cols}')
+        logger.trace(f'columns in {self.path} are {cols}')
 
 
         for c in cols_sep: 
@@ -59,8 +58,6 @@ class Dataset:
         if cols: df=df[cols]
         if self.cols_rename: df = df.rename(self.cols_rename, axis=1)
         return df
-
-
     
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
@@ -96,6 +93,13 @@ class Dataset:
             test_func=test_func,
             series_name=key,
             matches = matches
+        )
+    
+    @cached_property
+    def filter_desc(self):
+        return filter_query_str(
+            self.filter_data,
+            human=True
         )
     
     
@@ -215,14 +219,11 @@ class DwellingsDataset(Dataset):
     def data(self):
         df=super().data
         df['member'] = df['member_uri'].apply(get_member_id)
-        df['arrond_id']=df['arrrondissement'].apply(lambda x: 'X' if not x else str(int(x)))
-        print(df['latitude'])
-        print(df['longitude'])
+        df['arrond_id']=df['arrrondissement'].apply(lambda x: '' if not x else str(int(x)))
         df['dist_from_SCO'] = [
             geodist(latlon, LATLON_SCO, unit='km')
             for latlon in zip(df.latitude, df.longitude)
         ]
-        print(df.dist_from_SCO)
         df['desc'] = df.apply(get_dwelling_desc, axis=1)
         df['dwelling'] = [self.sep.join(str(x) for x in l) for l in df[self.cols_id].values]
         # logger.debug(df.dwelling)
@@ -605,7 +606,7 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
     def data(self):
         ld=[]
         df=super().data
-        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings'):
+        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings (part 1)'):
             matches, reason = find_dwelling_ids(row)
             for match in matches:
                 match_d=Dwellings().data.loc[match] if match else {}
@@ -618,7 +619,7 @@ class MemberEventDwellingsDataset(MemberEventsDataset):
                 }
         ld=[]
         df=super().data
-        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings'):
+        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings (part 2)'):
             matches, reason = find_dwelling_ids(row)
             for match in matches:
                 match_d=Dwellings().data.loc[match] if match else {}
@@ -707,13 +708,21 @@ class CombinedDataset(Dataset):
     path=PATHS.get('combined')
     fillna=''
     cols_creations = {
-        'creator':'creator', 
-        'creator_sort_name':'creator_name',
-        'creator_role':'creator_role',
-        'creator_birth_date':'creator_dob',
-        'creator_death_date':'creator_dod',
-        'creator_gender':'creator_gender',
-        'creator_nationalities':'creator_nationalities',
+        # 'creator':'creator', 
+        # 'creator_sort_name':'creator_name',
+        # 'creator_role':'creator_role',
+        # 'creator_birth_date':'creator_dob',
+        # 'creator_death_date':'creator_dod',
+        # 'creator_gender':'creator_gender',
+        # 'creator_nationalities':'creator_nationalities',
+        
+        'creator':'author',
+        'creator_sort_name':'author_name',
+        'creator_role':'author_role',
+        'creator_birth_date':'author_dob',
+        'creator_death_date':'author_dod',
+        'creator_gender':'author_gender',
+        'creator_nationalities':'author_nationalities',
     }
     cols_books = {
         'title':'book_title',
@@ -732,7 +741,7 @@ class CombinedDataset(Dataset):
         'death_year':'member_dod',
         'gender':'member_gender',
         'nationalities':'member_nationalities',
-        'event':'event',
+        'event':'borrow',
         'book':'book',
         'dwelling':'dwelling',
         'dwelling_arrond_id':'arrond_id',
@@ -752,11 +761,11 @@ class CombinedDataset(Dataset):
         'dwelling_longitude':'lon',
         'dwelling_dist_from_SCO':'dwelling_distSCO',
     }
-    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
-    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
+    coltype_sort = ['member', 'borrow', 'book', 'dwelling', 'arrond', 'creator']
+    cols_prefix = ['member', 'borrow', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
-    cols_q = ['member_dob', 'member_dod', 'creator_dob', 'creator_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
-    cols_sep = ['member_nationalities', 'creator_nationalities', 'member_membership', 'book_genre']
+    cols_q = ['member_dob', 'member_dod', 'author_dob', 'author_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
+    cols_sep = ['member_nationalities', 'author_nationalities', 'member_membership', 'book_genre']
 
     def gen(self, save=False):
         # events and members (full outer join)
@@ -765,8 +774,18 @@ class CombinedDataset(Dataset):
             self.cols_members_events
         )
 
+        # only borrows!
+        events_members = events_members[
+            events_members.event_type.isin(
+                {'','Borrow'}
+            )
+        ]
+
         # creations and books (left join)
-        creations = selectrename_df(CreationsDataset().data, self.cols_creations) #.query('@overlaps(creator_role, ["", "author"])')
+        crdf=CreationsDataset().data
+        crdf=crdf[crdf.creator_role.isin({'','author'})] # only authors!
+        creations = selectrename_df(crdf, self.cols_creations)
+
         books = selectrename_df(BooksDataset().data, self.cols_books)
         creations_books = creations.join(books, how='outer')  # big to small, same index
 
@@ -824,6 +843,8 @@ class CombinedDataset(Dataset):
             for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
             # final filters?
             odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
+            # odf=odf[odf.event_type.isin({'','Borrow'})]
+            # odf=odf[odf.creator_role.isin({'','author'})]
             return odf
     
     def filter_query_str(self, filter_data={}):
@@ -950,7 +971,7 @@ def hover_tooltip(row, bdf):
     def wrap(x,xn=xn): return wraphtml(x, xn)
     
     def bookdesc(r):
-        o=f'* {r.creator}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
+        o=f'* {r.author}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
         if r.book_genre: o+=f' of {"and ".join(x.lower() for x in r.book_genre)}'
         o+=f' borrowed '
         if r.event_year and r.member_dob and is_numberish(r.member_dob) and is_numberish(r.event_year): 

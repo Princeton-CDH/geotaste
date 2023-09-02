@@ -6,6 +6,24 @@ HOST='0.0.0.0'
 DEBUG=False
 TEXTFONT_SIZE=20
 
+PREDICT_COLS=[
+    'member_title', 
+    'member_gender', 
+    'member_nationalities',
+
+    'author',
+    'author_gender',
+    'author_nationalities',
+
+    'book',
+    'book_format',
+    'book_genre',
+
+    'arrond_id'
+]
+PREDICT_MIN_COUNT=1
+PREDICT_MIN_SUM=10
+
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
 

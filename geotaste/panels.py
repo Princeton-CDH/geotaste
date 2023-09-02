@@ -476,6 +476,9 @@ class ComparisonPanel(BaseComponent):
             ],
             [
                 State(self.content_left, 'is_open'),
+                State(self.L.store, 'data'),
+                State(self.R.store, 'data'),
+
             ],
             prevent_initial_call=True
         )
@@ -486,6 +489,8 @@ class ComparisonPanel(BaseComponent):
                 storedesc_R_clicked, 
                 active_tab, 
                 filter_dropdown_open_now,
+                old_fdL,
+                old_fdR,
                 ):
             input_ids = [
                 self.L.store.id, 
@@ -518,8 +523,8 @@ class ComparisonPanel(BaseComponent):
                 # make sure change actually happened?
                 args = [[active_tab],[],fdL,fdR]
                 logger.debug(['switchtab'] + args)
-                # logger.debug([fdL, old_fdL])
-                # logger.debug([fdR, old_fdR])
+                logger.debug([fdL, old_fdL])
+                logger.debug([fdR, old_fdR])
                 serialized_data = serialize(args)
                 outs[-1] = graphtab_cache(serialized_data)
 
@@ -572,6 +577,6 @@ def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filter
     elif 'map' in tab_ids_1_set:
         return MemberMapView
     elif 'analysis' in tab_ids_1_set:
-        return ArrondTableAndMapView if num_filters>1 else MemberTableView
+        return AnalysisTableView if num_filters>1 else MemberTableView
     
     return default

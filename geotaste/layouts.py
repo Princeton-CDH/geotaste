@@ -52,6 +52,10 @@ class GeotasteLayout(BaseComponent):
     @cached_property
     def welcome_modal(self):
         return get_welcome_modal()
+    
+    @cached_property
+    def loading_spinner(self):
+        return dcc.Loading(id='layout-loading', type='circle', fullscreen=True)
 
     def layout(self, params=None):
         return dbc.Container(
@@ -59,6 +63,7 @@ class GeotasteLayout(BaseComponent):
                 self.frozen_top_row,
                 self.comparison_panel.content,
                 self.welcome_modal,
+                self.loading_spinner
             ],
             className='layout-container'
         )

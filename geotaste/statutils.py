@@ -194,6 +194,9 @@ def describe_arronds(df_arronds, min_p=None, p_col=None):
 
     desc_top = f'''Comparing where members from Filter 1 and Filter 2 lived produces **{len(signif_df)}** statistically significant arrondissement.'''
     
+    display(signif_df)
+
+
     signif_more_L=signif_df[signif_df.odds_ratio>1]
     signif_more_R=signif_df[signif_df.odds_ratio<1]
 
@@ -213,7 +216,8 @@ def describe_arronds_row(row,side='left'):
     cL2 = cL*pR
     cR2 = cR*pR
     astr=ordinal_str(int(row.arrond_id))
-    return f'* **{ratio:.1f}x** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
+    # return f'* **{ratio:.1f}x** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
+    return f'* **{ratio:.1f}x** more likely to live in the **{astr}** ({pL:.2f}% vs. {pR:.2f}%, or {cL2:.0f} or {cL:,.0f} vs. {cR2:.0f} of {cR:,.0f})'
 
 def describe_arronds_LR(signif_df, side='left'):
     descs=['',f'The {side.title()} Group is...']
@@ -222,3 +226,112 @@ def describe_arronds_LR(signif_df, side='left'):
         descs.append(describe_arronds_row(row,side=side))
     return '\n'.join(descs)
 
+
+
+
+@cache_obj.memoize()
+def get_distinctive_qual_vals(
+        dfL,
+        dfR,
+        maxcats=100,
+        cols=[
+            'member_title', 
+            'member_gender', 
+            'member_nationalities',
+            # 'event_type',
+            'creator_gender',
+            # 'creator_role',
+            'creator_nationalities',
+            'book_format',
+            'book_genre',
+            'arrond_id'
+        ],
+        only_signif=True,
+        round=4,
+        min_count=1,
+        min_sum=10,
+        drop_duplicates=[],
+        drop_empty=True
+        ):
+        
+    o=[]
+
+    if drop_duplicates:
+        if is_listy(drop_duplicates) or type(drop_duplicates)==str:
+            dfL=dfL.drop_duplicates(drop_duplicates)
+            dfR=dfR.drop_duplicates(drop_duplicates)
+
+
+    if cols is None: cols=list(set(dfL.columns) & set(dfR.columns))
+    
+    for col in cols:
+        colpref=col.split('_')[0]
+        if drop_duplicates and type(drop_duplicates)==dict:
+            if col in drop_duplicates: 
+                dedupby=drop_duplicates[col] 
+            elif colpref in drop_duplicates:
+                dedupby=drop_duplicates[colpref]
+            
+            dfLnow = dfL.drop_duplicates(dedupby)
+            dfRnow = dfR.drop_duplicates(dedupby)
+        else:
+            dedupby = []
+            dfLnow = dfL
+            dfRnow = dfR
+                
+        s1=qualquant_series(flatten_series(dfLnow[col]), quant=False, drop_empty=drop_empty)
+        s2=qualquant_series(flatten_series(dfRnow[col]), quant=False, drop_empty=drop_empty)
+
+        if maxcats and (s1.nunique()>maxcats or s2.nunique()>maxcats):
+            continue
+
+        coldf = analyze_contingency_tables(s1, s2)
+        coldf = coldf.query(
+            f'count_min>={min_count} & count_sum>={min_sum}'
+        ).assign(
+            col=col,
+            comparison_scale=' '.join(dedupby)
+        )
+        o.append(coldf)
+    
+    alldf=pd.concat(o).rename_axis('col_val').reset_index()
+    alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
+    alldf=alldf[alldf.fisher_exact!=0] # both must have counts?
+    alldf['odds_ratio_log']=alldf['odds_ratio'].apply(np.log10)
+    alldf['odds_ratio_pos']=alldf['odds_ratio'].apply(lambda x: 1/x if x<1 else x)
+    alldf=alldf[~alldf.col_val.str.contains('\n')]
+    # statcols=['col','col_val','count_sum','count_min','count_L','count_R','perc_L','perc_R','perc_L->R','odds_ratio','fisher_exact','fisher_exact_p']
+    prefcols=['col','col_val','comparison_scale','odds_ratio','perc_L','perc_R','count_L','count_R']
+    cols = prefcols + [c for c in alldf if c not in set(prefcols)]
+    alldf=alldf[cols].sort_values('fisher_exact',ascending=False)
+    sigdf=alldf.query('fisher_exact_p<=0.05')
+
+    return (sigdf if only_signif else alldf).round(round)
+
+
+
+
+def describe_comparison(comparison_df, lim=10):
+    idf=comparison_df.sort_values('odds_ratio_pos',ascending=False)
+    L,R=idf.query('odds_ratio>=1'),idf.query('odds_ratio<1')
+
+    def get_list_desc(xdf, LR='L'):
+        LR2='R' if LR=='L' else 'L'
+        o=[]
+        for i,row in xdf.iterrows():
+             pL=row[f'perc_{LR}']
+             pR=row[f'perc_{LR2}']
+             cL=row[f'count_{LR}']
+             cR=row[f'count_{LR2}']
+             tL=cL/(pL/100)
+             tR=cR/(pR/100)
+             orow=f'* **{row.odds_ratio_pos:.1f}** more likely to have *{row.col_val}* for {row.col.replace("_"," ").title()} ({pL:.1f}% vs. {pR:.1f}%, or {cL:.0f}/{tL:,.0f} vs. {cR:.0f}/{tR:,.0f} {row.comparison_scale}s)'
+             o.append(orow)
+             if lim and len(o)>=lim: break
+        return o
+    
+    return get_list_desc(L), get_list_desc(R)
+
+    
+    
+    

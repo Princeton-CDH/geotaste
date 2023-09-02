@@ -437,7 +437,7 @@ def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
     c2c = {k:v for k,v in col2col.items() if k in set(df.columns)}
     return df[c2c.keys()].rename(columns=c2c)
 
-def qualquant_series(series, quant=False):
+def qualquant_series(series, quant=False, drop_na=False, drop_empty=False):
     """This function takes a series as input and converts it into a pandas
     Series object if it is not already. If the 'quant' parameter is set to
     True, it converts the series into numeric values using the 'pd.to_numeric'
@@ -455,8 +455,10 @@ def qualquant_series(series, quant=False):
     series=pd.Series(series) if type(series)!=pd.Series else series
     if quant is True: 
         series=pd.to_numeric(series, errors='coerce')
+        if drop_na: series=series.dropna()
     elif quant is False:
         series=series.fillna('').apply(str)
+        if drop_empty: series=series[series!='']
     return series
 
 def uid(length=10):
