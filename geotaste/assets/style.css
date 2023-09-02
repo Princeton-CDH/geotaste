@@ -136,9 +136,10 @@ h5 { font-size:1.1rem;}
 .panel { 
     padding:0 2px;
     border:none;
-    width:25vw;
-    min-width:200px;
-    max-width:300px;
+    width:250px;
+    /* width:15vw; */
+    /* min-width:220px; */
+    /* max-width:300px; */
 }
 
 .card-header {
@@ -227,9 +228,14 @@ p {
     display:flex;
     padding:8px;
     z-index: 5000;
-    width:25vw;
+    
+    /* width:15vw;
     min-width:200px;
-    max-width:300px;
+    max-width:300px; */
+    width:250px;
+    min-width:250px;
+    max-width:250px;
+    
 }
 
 .storedescs-row {
@@ -274,7 +280,7 @@ p {
 }
 
 .comparison_map_graph_choro {
-    width:50vw;
+    width:35vw;
 }
 
 .comparison_map_table {
@@ -523,7 +529,7 @@ p {
 .viewfunc-container {
     /* border: 1px solid red; */
     background-color: rgba(255,255,255,1);
-    width:50vw;
+    width:65vw;
     margin: 0 0 0 auto;
 }
 

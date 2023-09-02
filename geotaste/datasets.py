@@ -672,24 +672,25 @@ def find_dwelling_ids(event_row, sep=DWELLING_ID_SEP, verbose=True, dispreferred
             borrow_end = event_row.end_date
 
             if borrow_start and borrow_end:
+                dfq=df
                 if borrow_start:
                     # If we know when the borrow began, then exclude dwellings which end before that date
-                    df = df[df.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
+                    dfq = dfq[dfq.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
                 if borrow_end:
                     # If we know when the borrow ended, then exclude dwellings which begin after that date
-                    df = df[df.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
+                    dfq = dfq[dfq.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
                 
                 # No longer ambiguous?
-                if len(df)==0: return [''], '❓ No dwelling after time filter'
-                elif len(df)==1: return list(df.index), '✅ One dwelling time filter'
+                if len(dfq)==0: return list(df.index), '❓ No dwelling after time filter'
+                elif len(dfq)==1: return list(dfq.index), '✅ One dwelling time filter'
                 
                 
             # Remove the non-Parisians?
-            df = df[pd.to_numeric(df.dist_from_SCO,errors='coerce') < 50]  # less than 50km
-            if len(df)==0: 
-                return [''], f'❓ No dwelling after 50km filter'
-            elif len(df)==1:
-                return list(df.index), f'✅ One dwelling after 50km filter'
+            dfq = df[pd.to_numeric(df.dist_from_SCO,errors='coerce') < 50]  # less than 50km
+            if len(dfq)==0: 
+                return list(df.index), f'❓ No dwelling after 50km filter'
+            elif len(dfq)==1:
+                return list(dfq.index), f'✅ One dwelling after 50km filter'
                 
         return list(df.index), f'❌ {len(df)} dwellings after all filters'
         
