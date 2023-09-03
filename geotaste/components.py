@@ -65,15 +65,27 @@ class BaseComponent(DashComponent, Logmaker):
     def graph_subcomponents(self): 
         return self.cards_with_attr('graph')
     
+    
     @cached_property
     def content(self,params=None):
-        cards=[
-            card.layout(params)
-            for card in self.subcomponents
-        ]
-        return dbc.Container(cards if cards else BLANK)
+        logger.debug(f'[{self.name}] getting content...')
+        return dbc.Container(
+            BLANK
+            if not self.subcomponents
+            else [
+                card.layout(params) 
+                for card in self.subcomponents
+            ]
+        )
     
-    def layout(self, params=None): return self.content
+    def get_content(self, params=None): 
+        return dbc.Container(BLANK)
+    
+        
+    
+    def layout(self, params=None): 
+        logger.debug(f'[{self.name}].layout()...')
+        return self.content
     
 
 
@@ -92,9 +104,9 @@ class FilterComponent(BaseComponent):
     def store_panel(self):
         return dcc.Store(id=self.id('store_panel'), data={})
     
-    @cached_property
-    def store_selection(self):
-        return dcc.Store(id=self.id('store_selection'), data={})
+    # @cached_property
+    # def store_selection(self):
+    #     return dcc.Store(id=self.id('store_selection'), data={})
     
     @cached_property
     def store_desc(self): 
@@ -104,21 +116,42 @@ class FilterComponent(BaseComponent):
         return intersect_filters(filters_d)
     
     def ff(self, filter_data={}, selected:dict|list={}, **kwargs):
-        if self.figure_factory is not None:
-            kwargs = {**self._kwargs, **kwargs}
-            serialized_data = serialize([filter_data, selected, kwargs])
-            return ff_cache(self.figure_factory, serialized_data)
+        # if self.figure_factory is not None:
+        #     kwargs = {**self._kwargs, **kwargs}
+        #     serialized_data = serialize([filter_data, selected, kwargs])
+        #     return ff_cache(self.figure_factory, serialized_data)
+        logger.debug(f'[{self.name}.ff({filter_data}, {selected}, **{kwargs})]')
+
+
+        filter_data={
+            k:v 
+            for k,v in filter_data.items() 
+            if k not in set(selected)
+            and k != self.key
+        }
+
+
+        return self.figure_factory(
+            filter_data=filter_data, 
+            selected=selected, 
+            **kwargs
+        )
 
     def plot(self, filter_data={}, existing_fig=None, min_val=None, max_val=None, **kwargs) -> go.Figure:
         ff = self.ff(filter_data)
         if min_val is not None: ff.min_series_val=min_val
         if max_val is not None: ff.min_series_val=max_val
-        return ff.fig        
+        # return ff.fig
+        return ff.plot(**kwargs)
 
     @cached_property
     def series(self): return self.ff().series
     @cached_property
-    def key(self): return self.ff().key
+    def key(self): 
+        try:
+            return self.figure_factory.key
+        except AttributeError:
+            return None
 
 
 
@@ -137,7 +170,7 @@ class FilterCard(FilterComponent):
             # data
             self.store, 
             self.store_panel,
-            self.store_selection,
+            # self.store_selection,
 
         ], className=f'collapsible-card {self.className}')
 
@@ -263,19 +296,35 @@ class FilterCard(FilterComponent):
             [
                 Output(self.body, "is_open", allow_duplicate=True),
                 Output(self.showhide_btn, "children", allow_duplicate=True),
+                Output(self.content, 'children', allow_duplicate=True),
             ],
             [
                 Input(self.showhide_btn, "n_clicks"),
-                Input(self.header_btn, 'n_clicks')
+                Input(self.header_btn, 'n_clicks'),
             ],
-            State(self.body, "is_open"),
+            [
+                State(self.body, "is_open"),
+                State(self.content,'children')
+            ],
             prevent_initial_call=True
         )
         #@logger.catch
-        def toggle_collapse(n1, n2, is_open):
-            now_is_open = (not is_open if (n1 or n2) else is_open)
-            logger.debug(f'{self.name} is now open? {now_is_open}')
-            return now_is_open, '[–]' if now_is_open else '[+]'
+        def toggle_collapse(_clicked1, _clicked2, body_open_now, content_now):
+            if body_open_now:
+                # then we're going to shut
+                logger.debug(f'[{self.name}] toggle_collapse: closing')
+                return False, '[+]', content_now
+            else:
+                # then we're going to open
+                logger.debug(f'[{self.name}] toggle_collapse: opening')
+                content_exists_already = bool(content_now)# and content_now.get('props',{}).get('children')
+                logger.trace(f'content currently exists? --> {content_exists_already}')
+                return True, '[-]', content_now if content_exists_already else self.get_content(
+
+                )
+
+
+            # return now_is_open, '[–]' if now_is_open else '[+]', content_now if content_now else self.get_content()
         
         @app.callback(
             [
@@ -311,10 +360,13 @@ class FilterCard(FilterComponent):
 
 class FilterPlotCard(FilterCard):
     body_is_open = False
-    @cached_property
-    def content(self): 
-        logger.trace(self.name)
-        return self.graph
+    
+    def get_content(self, filter_data={}, selected=[]): 
+        logger.debug(self.name)
+        ograph = self.graph
+        ograph.figure = self.plot(filter_data=filter_data, selected=selected)
+        return ograph
+
     @cached_property
     def graph(self): 
         return dcc.Graph(
@@ -323,10 +375,41 @@ class FilterPlotCard(FilterCard):
             config={'displayModeBar':False},
         )
     
+    def plot(self, filter_data={}, selected=[], **kwargs):
+        return self.ff(filter_data, selected=selected).plot(
+            color=self.color
+        )
+    
 
-    # def component_callbacks(self, app):
-    #     # do my parent's too
-    #     super().component_callbacks(app)
+    def component_callbacks(self, app):
+        # do my parent's too
+        super().component_callbacks(app)
+        
+        @app.callback(
+            Output(self.store, "data", allow_duplicate=True),
+            Input(self.graph, 'selectedData'),
+            State(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def graph_selection_updated(selected_data, old_data={}):
+            logger.debug(f'[{self.name}) selection updated 1: {selected_data}')
+            o=self.ff().selected(selected_data)
+            if not o: raise PreventUpdate
+            out=(o if o!=old_data else dash.no_update)
+            logger.debug(f'[{self.name}) selection updated 2: {out}')
+            return out
+        
+        @app.callback(
+            Output(self.graph, 'figure'),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def store_data_updated(store_data):
+            # filter cleared?
+            if store_data: raise PreventUpdate
+            logger.debug(f'[{self.name}] {self.key} cleared...')
+            return self.plot()
 
     #     @app.callback(
     #         [
@@ -341,53 +424,20 @@ class FilterPlotCard(FilterCard):
     #         return {}, self.plot()
         
             
+        @app.callback(
+            Output(self.graph, "figure", allow_duplicate=True),
+            Input(self.store_panel, 'data'),
+            [
+                State(self.store, 'data'),
+                State(self.body, 'is_open')
+            ],
+            prevent_initial_call=True
+        )
+        def panel_data_updated(panel_filter_data, my_filter_data, is_open):
+            logger.debug(f'[{self.name}] panel_data_updated: {panel_filter_data}')
+            if not is_open: return dash.no_update
+            return self.plot(panel_filter_data, selected=my_filter_data)
 
-
-        
-
-        # @app.callback(
-        #     Output(self.graph, "figure", allow_duplicate=True),
-        #     [
-        #         Input(self.body, "is_open"),
-        #         Input(self.store_panel, 'data')
-        #     ],
-        #     [
-        #         # State(self.graph, 'figure'),
-        #         # State(self.store_selection, 'data')
-        #         State(self.store, 'data')
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def toggle_collapse(is_open, panel_filter_data, my_filter_data):
-        #     # logger.debug(f'{self.name} is now open? {is_open}')
-        #     if not is_open: return dash.no_update
-            
-        #     filter_data={
-        #         k:v 
-        #         for k,v in panel_filter_data.items() 
-        #         if k not in my_filter_data
-        #         and k != self.key
-        #     }
-        #     ff = self.ff(filter_data, selected=my_filter_data)
-        #     return ff.fig
-
-
-
-        # @app.callback(
-        #     Output(self.store, "data", allow_duplicate=True),
-        #     Input(self.graph, 'selectedData'),
-        #     State(self.store, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def graph_selection_updated(selected_data, old_data={}):
-        #     logger.debug(f'[{self.name}) selection updated 1: {selected_data}')
-        #     o=self.ff().selected(selected_data)
-        #     if not o: raise PreventUpdate
-        #     out=(o if o!=old_data else dash.no_update)
-        #     logger.debug(f'[{self.name}) selection updated 2: {out}')
-        #     return out
         
         
 class FilterSliderCard(FilterCard):
@@ -427,9 +477,7 @@ class FilterSliderCard(FilterCard):
     def input_start(self):
         return dcc.Input(
             type="number", 
-            min=self.minval, 
-            max=self.maxval, 
-            value=self.minval if self.value is None else self.value,
+            value=0 if self.value is None else self.value,
             className='slider-input-num'
         )
     
@@ -437,9 +485,7 @@ class FilterSliderCard(FilterCard):
     def input_end(self):
         return dcc.Input(
             type="number", 
-            min=self.minval, 
-            max=self.maxval, 
-            value=self.maxval if self.value is None else self.value,
+            value=0 if self.value is None else self.value,
             className='slider-input-num',
             style={'text-align':'right'}
         )
@@ -551,10 +597,10 @@ class FilterInputCard(FilterCard):
     multi = True
     sort_by_count = True
     
-    @cached_property
-    def content(self): 
-        logger.trace(self.name)
+    def get_content(self): 
+        logger.debug(f'[{self.name}] getting content for input card')
         return self.input
+
     @cached_property
     def input(self):
         l=self.ff().unique(sort_by_count=self.sort_by_count)
@@ -579,11 +625,21 @@ class FilterInputCard(FilterCard):
             Input(self.input, 'value'),
             prevent_initial_call=True
         )
-        #@logger.catch
         def input_value_changed(vals):
             logger.debug(f'[{self.name}] {self.key} -> {vals}')
-            return dash.no_update if not vals else {self.key:vals}
+            return {self.key:vals} if vals else dash.no_update
         
+                
+        @app.callback(
+            Output(self.input, 'value'),
+            Input(self.store, 'data'),
+            prevent_initial_call=True
+        )
+        def store_data_updated(store_data):
+            # filter cleared?
+            if store_data: raise PreventUpdate
+            logger.debug(f'[{self.name}] {self.key} cleared...')
+            return []
 
         
         # # ## CLEAR? -- OVERWRITTEN
@@ -640,17 +696,6 @@ class FilterInputCard(FilterCard):
         # def clear_selection(n_clicks):
         #     logger.debug('clear_selection')
         #     return {}, []
-        
-        @app.callback(
-            Output(self.input, 'value'),
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        #@logger.catchq
-        def store_data_updated(store_data):
-            # filter cleared?
-            if not store_data: return []
-            raise PreventUpdate
 
 
     
