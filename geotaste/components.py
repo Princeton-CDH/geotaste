@@ -310,6 +310,18 @@ class FilterCard(FilterComponent):
         )
         #@logger.catch
         def toggle_collapse(_clicked1, _clicked2, body_open_now, content_now):
+            """Toggle the collapse state of a section.
+            
+            Args:
+                _clicked1 (any): The first clicked parameter.
+                _clicked2 (any): The second clicked parameter.
+                body_open_now (bool): The current state of the body.
+                content_now (any): The current content.
+            
+            Returns:
+                tuple: A tuple containing the new state of the body (bool), the new toggle symbol (str), and the new content (any).
+            """
+            
             if body_open_now:
                 # then we're going to shut
                 logger.debug(f'[{self.name}] toggle_collapse: closing')
@@ -429,13 +441,16 @@ class FilterPlotCard(FilterCard):
             Input(self.store_panel, 'data'),
             [
                 State(self.store, 'data'),
-                State(self.body, 'is_open')
+                # State(self.body, 'is_open')
+                State(self.showhide_btn, "n_clicks"),
+                State(self.header_btn, 'n_clicks'),
             ],
             prevent_initial_call=True
         )
-        def panel_data_updated(panel_filter_data, my_filter_data, is_open):
+        # def panel_data_updated(panel_filter_data, my_filter_data, is_open):
+        def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2):
             logger.debug(f'[{self.name}] panel_data_updated: {panel_filter_data}')
-            if not is_open: return dash.no_update
+            if not _clicked_open_1 and not _clicked_open_2: return dash.no_update
             return self.plot(panel_filter_data, selected=my_filter_data)
 
         

@@ -21,53 +21,53 @@ class FilterPanel(FilterCard):
     # #     )
 
 
-    # def component_callbacks(self, app):
-    #     super().component_callbacks(app)
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
         
-    #     # intersect and listen
-    #     if self.store_subcomponents:
-    #         @app.callback(
-    #             Output(self.store, 'data', allow_duplicate=True),
-    #             [
-    #                 Input(card.store, 'data')
-    #                 for card in self.store_subcomponents
-    #             ],
-    #             prevent_initial_call=True
-    #         )
-    #         def subcomponent_filters_updated(*filters_d):
-    #             logger.debug('subcomponent filters updated')
-    #             return self.intersect_filters(*filters_d)
+        # intersect and listen
+        if self.store_subcomponents:
+            @app.callback(
+                Output(self.store, 'data', allow_duplicate=True),
+                [
+                    Input(card.store, 'data')
+                    for card in self.store_subcomponents
+                ],
+                prevent_initial_call=True
+            )
+            def subcomponent_filters_updated(*filters_d):
+                logger.debug('subcomponent filters updated')
+                return self.intersect_filters(*filters_d)
             
-    #         @app.callback(
-    #             [
-    #                 Output(card.store_panel, 'data', allow_duplicate=True)
-    #                 for card in self.store_panel_subcomponents
-    #             ],
-    #             Input(self.store, 'data'),
-    #             [
-    #                 State(card.store_panel, 'data')
-    #                 for card in self.store_panel_subcomponents
-    #             ],
-    #             prevent_initial_call=True
-    #         )
-    #         #@logger.catch
-    #         def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
-    #             if panel_filter_data is None: panel_filter_data={}
-    #             logger.debug(f'panel_filter_data_changed({panel_filter_data})')
+            @app.callback(
+                [
+                    Output(card.store_panel, 'data', allow_duplicate=True)
+                    for card in self.store_panel_subcomponents
+                ],
+                Input(self.store, 'data'),
+                [
+                    State(card.store_panel, 'data')
+                    for card in self.store_panel_subcomponents
+                ],
+                prevent_initial_call=True
+            )
+            #@logger.catch
+            def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
+                if panel_filter_data is None: panel_filter_data={}
+                logger.debug(f'panel_filter_data_changed({panel_filter_data})')
 
 
-    #             logger.debug([card.key for card in self.store_panel_subcomponents])
+                logger.debug([card.key for card in self.store_panel_subcomponents])
 
-    #             new_filter_data_l = [
-    #                 {k:v for k,v in panel_filter_data.items() if k!=card.key}
-    #                 for card in self.store_panel_subcomponents    
-    #             ]
-    #             out = [
-    #                 (dash.no_update if old==new else new)
-    #                 for old,new in zip(old_filter_data_l, new_filter_data_l)
-    #             ]
-    #             logger.trace(f'out from panel {pformat(out)}')
-    #             return out
+                new_filter_data_l = [
+                    {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    for card in self.store_panel_subcomponents    
+                ]
+                out = [
+                    (dash.no_update if old==new else new)
+                    for old,new in zip(old_filter_data_l, new_filter_data_l)
+                ]
+                logger.trace(f'out from panel {pformat(out)}')
+                return out
             
 
             
