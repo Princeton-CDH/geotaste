@@ -1,7 +1,7 @@
 from .imports import *
 from scipy.stats.contingency import odds_ratio
 from scipy.stats import fisher_exact
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 
 def analyze_contingency_tables(
@@ -335,3 +335,53 @@ def describe_comparison(comparison_df, lim=10):
     
     
     
+
+
+
+
+def prune_when_dwelling_matches(df):
+    df_nonevent, df_event=df[df.event==''],df[df.event!='']
+    
+    # anyone's ok if they're not an event
+    ok_index = list(df_nonevent.index)
+    numpossd = {**{ii:np.nan for ii in df_nonevent.index}, **{ii:0 for ii in df_event.index}}
+    matchtype={ii:'NA' for ii in df_nonevent.index}
+    
+
+    # otherwise...
+    # for every event...
+    for e,edf in tqdm(df_event.groupby('event'), total=df_event.event.nunique()):
+        erow=edf.iloc[0]
+        e1,e2=erow.event_start,erow.event_end
+        event_inds = []
+
+        # certainty?
+        edf_certain = edf.query('dwelling_start!="" & dwelling_end!=""')
+        if len(edf_certain):
+            edf_match = edf_certain[[
+                (is_fuzzy_date_seq(d1,e1,d2) or is_fuzzy_date_seq(d1,e2,d2))
+                for (d1,d2) in zip(edf_certain.dwelling_start, edf_certain.dwelling_end)
+            ]]
+            if len(edf_match):
+                event_inds=list(edf_match.index)
+                for ii in edf.index: 
+                    matchtype[ii]='Exact' if ii in set(event_inds) else  'Exact (excl.)'
+                
+
+        # still not? then use all for evnt
+        if not event_inds:
+            event_inds = list(edf.index)
+            for ii in edf.index: 
+                matchtype[ii]='Ambiguous' if len(event_inds)>1 else 'Singular'
+        
+        # either way, add
+        ok_index.extend(event_inds)
+
+        # also add num poss
+        for ii in edf.index: 
+            numpossd[ii]=len(event_inds) if ii in set(event_inds) else np.nan
+    
+    df['dwelling_matchtype'] = matchtype
+    df['dwelling_numposs'] = numpossd
+    df['dwelling_likelihood'] = 1/df['dwelling_numposs']
+    return df.loc[ok_index]

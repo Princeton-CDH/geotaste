@@ -87,6 +87,7 @@ PATHS=dict(
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
     combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
+    combinedmini = os.path.join(PATH_DATA,'combined.mini.pkl.gz'),
     landmarks = os.path.join(PATH_DATA,'landmarks.csv'),
 )
 

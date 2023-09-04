@@ -678,7 +678,7 @@ def wraptxt(s, n, newline_char='\n'):
 
 def wraphtml(x,xn=50): return wraptxt(x, ensure_int(xn), '<br>') if x else x
 
-def ifnanintstr(x,y='?'):
+def ifnanintstr(x,y=''):
     return ensure_int(x) if not np.isnan(x) else y
 
 
@@ -691,3 +691,76 @@ def intersect_filters(filters_d):
         for d in filters_d 
         for k,v in d.items()
     }
+
+
+
+
+def postproc_df(df, 
+        cols=[],  # or dict to rename
+        cols_sep=[],
+        cols_q=[],
+        cols_pref=[], 
+        sep=';',
+        fillna=None,
+        ):
+        
+    # sep?
+    cols_qset=set(cols_q)
+    for c in cols_sep: 
+        df[c]=df[c].fillna('').apply(
+            lambda x: [
+                (
+                    y.strip()
+                    if c not in cols_qset
+                    else pd.to_numeric(
+                        y.strip(),
+                        errors='coerce'
+                    )
+                )
+                for y in str(x).split(sep)
+            ]
+        )
+    
+    # rename?
+    if cols: 
+        df=df[cols] if is_listy(cols) else selectrename_df(df, cols)
+    
+    # quantize?
+    for c in cols_q:
+        if c not in set(cols_sep) and c in set(df.columns):
+            df[c]=pd.to_numeric(df[c], errors='coerce')
+
+    # prefcols
+    if cols_pref:
+        cl1=[c for c in cols_pref if c in set(df.columns)] 
+        cl2=[c for c in df if c not in set(cols_pref)]
+        df=df[cl1+cl2]
+
+    if fillna is not None:
+        df=df.fillna(fillna)
+
+    return df
+
+
+
+
+def get_date_cmp(*l):
+    l=[str(x) for x in l]
+    minlen=min([len(x) for x in l])
+    return [x[:minlen] for x in l]
+
+def date_fuzzily_precedes(x,y):
+    x2,y2=get_date_cmp(x,y)
+    return x2<y2
+
+def date_fuzzily_follows(x,y):
+    x2,y2=get_date_cmp(x,y)    
+    return x2>y2
+
+
+
+def is_fuzzy_date_seq(x,y,z):
+    if any(not _ for _ in [x,y,z]): return False
+    
+    x,y,z=get_date_cmp(x,y,z)
+    return x<=y<=z
