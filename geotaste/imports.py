@@ -89,6 +89,7 @@ PATHS=dict(
     combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
     combinedmini = os.path.join(PATH_DATA,'combined.mini.pkl.gz'),
     landmarks = os.path.join(PATH_DATA,'landmarks.csv'),
+    log = os.path.join(PATH_DATA,'geotaste.log')
 )
 
 LATLON_SCO = (
@@ -132,7 +133,7 @@ DWELLING_ID_SEP='; '
 
 
 
-
+TCOLS=['event','dwelling','event_start','event_end','dwelling_start','dwelling_end']
 
 
 
@@ -187,7 +188,8 @@ from humanfriendly import format_timespan
 from loguru import logger
 logger.remove()
 logger.add(
-    sink = sys.stderr,
+    # sink = sys.stderr,
+    open(PATHS.get('log','geotaste.log'), 'w'),
     format=LOG_FORMAT, 
     level=LOG_LEVEL
 )

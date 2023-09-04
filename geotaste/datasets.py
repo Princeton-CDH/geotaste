@@ -1211,6 +1211,9 @@ class MiniCombinedDataset(Dataset):
         memberdwellings = dfmembers.merge(dfdwellings, on='member', how='outer')
         odf = memberdwellings.merge(bookevents, on='member', how='outer').fillna('')
         
+        # drop dups
+        odf = odf.drop_duplicates(['member','event','book','dwelling'])
+
         ## clean up
         for c in self._cols_sep: 
             odf[c]=[[] if x is '' else x for x in odf[c]]
@@ -1218,6 +1221,8 @@ class MiniCombinedDataset(Dataset):
             odf[c]=[np.nan if x is '' else x for x in odf[c]]
         for c in self._cols_sep_nonan:
             odf[c]=[[y for y in x if not np.isnan(y) and y] for x in odf[c]]
+
+        
         
         odf['hover_tooltip'] = odf.apply(hover_tooltip,axis=1)
         odf = prune_when_dwelling_matches(odf)
