@@ -240,13 +240,17 @@ class ComparisonPanel(BaseComponent):
 
 
     def layout(self, params=None):
+        
         return dbc.Container([
-            self.panel_L_col, 
-            self.panel_R_col,
-            self.mainview,
-            ], 
-            className='filters-container'
-        )
+            dbc.Container([
+                self.panel_L_col, 
+                self.panel_R_col,
+            ], className='filters-container'),
+
+            dbc.Container([
+                self.mainview
+            ], className='mainview-container')
+        ])
 
     
     @cached_property
