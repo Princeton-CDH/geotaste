@@ -53,7 +53,7 @@ def AnalysisTableView(ff, **kwargs):
 
 def ArrondTableAndMapView(ff, Lstr='', Rstr=''):
     right_side=ArrondTableView(ff,Lstr=Lstr,Rstr=Rstr)
-    left_side=MemberMapView(ff,choro=True,className='comparison_map_graph comparison_map_graph_choro')
+    left_side=MapView(ff,choro=True,className='comparison_map_graph comparison_map_graph_choro')
     return dbc.Container(dbc.Row([dbc.Col(left_side), dbc.Col(right_side)]))
 
 
@@ -84,7 +84,7 @@ def DifferenceDegreeView(ff):
         className='graphtab padded', 
     )
 
-def MemberMapView(ff, choro=None, className='comparison_map_graph', **kwargs):
+def MapView(ff, choro=None, className='comparison_map_graph', **kwargs):
     ofig = ff.plot_map(choro=choro, **kwargs)
     ofig.update_layout(autosize=True)
     ograph = dcc.Graph(
@@ -92,4 +92,19 @@ def MemberMapView(ff, choro=None, className='comparison_map_graph', **kwargs):
         className=className,
         config={'displayModeBar':False},
     )
-    return dbc.Container(ograph, className='graphtab')
+    return dbc.Container(ograph, className='graphtab', id='map_view')
+
+
+def TableView(ff):
+    if type(ff) is ComparisonFigureFactory:
+        return AnalysisTableView(ff)
+    
+    # otherwise
+    return dbc.Container(
+        [
+            html.H4('Data'), 
+            ff.table() if hasattr(ff,'table') else html.P('??')
+        ], 
+        className='graphtab padded', 
+        id='table_view'
+    )

@@ -302,24 +302,138 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def R(self): 
         return RightPanel()
-    
         
     @cached_property
     def mainview(self):
-        return dbc.Container('l0@didng ... ' * 100, className='mainview')
+        # return self.get_mainview()
+        ff=LandmarksFigureFactory()
+        return dbc.Container(
+            dbc.Tabs(
+                [
+                    dbc.Tab(
+                        dbc.Container(
+                            self.mainmap,
+                            className='graphtab',
+                            id='map_view'
+                        ),   
+                        label='Map', 
+                        tab_id='map'
+                    ),
+                    
+                    # analysis tab
+                    dbc.Tab(
+                        self.maintbl, 
+                        label='Analysis', 
+                        tab_id='table'
+                    ),
+                ],
+                id='mainview_tabs',  
+                active_tab='map'
+            ),
+            className='viewfunc-container'
+        )
+    
+    @cached_property
+    def mainmap(self):
+        ofig = self.ff().plot_map()
+        ofig.update_layout(autosize=True)
+        ograph = dcc.Graph(
+            figure=ofig, 
+            className='comparison_map_graph',
+            config={'displayModeBar':False},
+            id='mainmap'
+        )
+        return ograph
+    
+    @cached_property
+    def maintbl(self):
+        ff = LandmarksFigureFactory()
+        return dbc.Container(
+        [
+            html.H4('Data'), 
+            ff.table() if hasattr(ff,'table') else html.P('??')
+        ], 
+        className='graphtab padded', 
+        id='table_view'
+    )
+    
+    # def get_mainview(self, fdL={}, fdR={}, viewfunc = MapView):
+    #     # get figure factory
+    #     num_filters = len([x for x in [fdL,fdR] if x])
+    #     # 3 cases
+    #     if num_filters==0:
+    #         ff = LandmarksFigureFactory()
+
+    #     elif num_filters==1:
+    #         if fdL:
+    #             ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+    #         elif fdR:
+    #             ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+
+    #     elif num_filters == 2:
+    #         ff = ComparisonFigureFactory(fdL, fdR)
+
+    #     # return view
+    #     return dbc.Container(
+    #         dbc.Tabs(
+    #             [
+    #                 dbc.Tab(MapView(ff), label='Map', tab_id='map'),
+    #                 dbc.Tab(TableView(ff), label='Table', tab_id='table'),
+    #             ],
+    #             id='mainview_tabs',  
+    #             active_tab='map'
+    #         ),
+    #         className='viewfunc-container'
+    #     )
+
+    def ff(self, fdL={}, fdR={}, **kwargs):
+        # get figure factory
+        num_filters = len([x for x in [fdL,fdR] if x])
+        # 3 cases
+        if num_filters==0:
+            ff = LandmarksFigureFactory()
+
+        elif num_filters==1:
+            if fdL:
+                ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+            elif fdR:
+                ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+
+        elif num_filters == 2:
+            ff = ComparisonFigureFactory(fdL, fdR)
+
+        return ff
+
+    def get_mainmap(self, fdL={}, fdR={}):
+        return self.ff(fdL,fdR).plot_map()
+
 
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
         @app.callback(
-            Output(self.panel_R_col, 'style',allow_duplicate=True),
-            Input(self.L.store, 'data'),
+            [
+                Output(self.panel_R_col, 'style',allow_duplicate=True),
+                Output(self.mainmap, 'figure'),
+                Output(self.maintbl, 'children'),
+            ],
+            [
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+            ],
             prevent_initial_call=True
         )
-        def toggle_panel_R(Lstore):
-            return STYLE_INVIS if not Lstore else STYLE_VIS
+        def left_right_data_changed(Lstore, Rstore):
 
+
+            return (
+                STYLE_VIS if Lstore or Rstore else STYLE_INVIS,
+                {'data':self.get_mainmap(Lstore,Rstore).data},
+                'sorry'
+            )
+
+        
 
     # def component_callbacks(self, app):
     #     super().component_callbacks(app)
@@ -436,12 +550,12 @@ def graphtab_cache(serialized_data):
     return dbc.Container(viewfunc(ff), className='viewfunc-container')
 
 
-def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filters=1):
+def determine_view(tab_ids_1=[], tab_ids_2=[], default=MapView, num_filters=1):
     tab_ids_1_set=set(tab_ids_1)
     if 'data' in tab_ids_1_set:
         return MemberTableView
     elif 'map' in tab_ids_1_set:
-        return MemberMapView
+        return MapView
     elif 'analysis' in tab_ids_1_set:
         return AnalysisTableView if num_filters>1 else MemberTableView
     

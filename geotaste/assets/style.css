@@ -37,11 +37,6 @@ h5 { font-size:1.1rem;}
     width: 100%;
 }
 
-.panel { 
-    width:250px;
-    /* position:fixed; */
-}
-
 
 
 
@@ -51,6 +46,8 @@ h5 { font-size:1.1rem;}
 }
 
 .navbar-row {
+    top:0;
+    left:0;
     color:black;
     line-height:50px;  
     width:100vw;
@@ -59,7 +56,8 @@ h5 { font-size:1.1rem;}
     max-height:50px;
     min-height:50px;
     white-space:nowrap;
-    z-index: 4;
+    position:absolute;
+    z-index: 1000;
     overflow-y: hidden;
     overflow-x: hidden;
     display:block;
@@ -223,6 +221,18 @@ p {
 }
 
 
+
+
+
+
+.panel { 
+    width:250px;
+    position:fixed;
+    z-index:100;
+}
+
+
+
 .panel_R .card-header { 
     background-color: rgba(125, 106, 182, 0.4);
 }
@@ -257,7 +267,10 @@ button {
 }
 
 .panel_L {
-    float:left;
+    /* float:left; */
+    position:absolute;
+    top:50px;
+    left:0;
 }
 
 .filters-container {
@@ -278,3 +291,31 @@ button {
 .card-title { font-size:1.2em;font-style:normal;}
 .card-body .card-title {font-size:1.1em;padding-left:.5em;font-style: normal;}
 .card-body .card-body .card-title {font-size:1em;padding-left:1em; font-style: normal;}
+
+
+
+.comparison_map_graph {
+    height: 100vh;
+    width:100vw;
+    margin:0;
+    padding:0;
+    position:fixed;
+    top:0;
+    left:0;
+    display:block;   
+    z-index:0;
+}
+
+#mainview_tabs {
+    display:flex;
+    justify-content: end;
+    flex-grow: 1;
+}
+
+.viewfunc-container {
+    /* z-index:-1; */
+}
+
+.mainview-container {
+    /* z-index:-100; */
+}
