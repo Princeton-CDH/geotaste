@@ -684,7 +684,7 @@ def ifnanintstr(x,y=''):
 
 
 def intersect_filters(filters_d):
-    logger.trace(f'intersecting {len(filters_d)} filters')
+    # logger.trace(f'intersecting {len(filters_d)} filters')
     filters_d = [d for d in filters_d if d]
     return {
         k:v 

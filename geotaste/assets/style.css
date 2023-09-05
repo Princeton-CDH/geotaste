@@ -248,7 +248,7 @@ p {
 
 .panel_R { 
     float:left;
-    /* display: none;  */
+    display: none; 
 }
 
 

@@ -40,16 +40,11 @@ class FilterPanel(FilterCard):
             )
             def subcomponent_filters_updated(*args):
                 filters_d=args[:-1]
-                if not any(filters_d): raise PreventUpdate # likely from a clear we created
-
                 old_data=args[-1]
-                # if not any(filters_d): raise PreventUpdate
-                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}')
-                outd=self.intersect_filters(*filters_d)
-
-                if old_data == outd: raise PreventUpdate
-                logger.debug(f'[{self.name}] intersected subcomponent filter = {outd}, old_data = {old_data}')
-                return outd
+                intersected_filters=self.intersect_filters(*filters_d)
+                if old_data == intersected_filters: raise PreventUpdate # likely a clear
+                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
+                return intersected_filters
 
             
             @app.callback(
@@ -317,7 +312,13 @@ class ComparisonPanel(BaseComponent):
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-        
+        @app.callback(
+            Output(self.panel_R_col, 'style',allow_duplicate=True),
+            Input(self.L.store, 'data'),
+            prevent_initial_call=True
+        )
+        def toggle_panel_R(Lstore):
+            return STYLE_INVIS if not Lstore else STYLE_VIS
 
 
     # def component_callbacks(self, app):
