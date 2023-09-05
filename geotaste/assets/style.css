@@ -227,8 +227,8 @@ p {
 
 .panel { 
     width:250px;
-    position:fixed;
-    z-index:100;
+    /* position:fixed; */
+    /* z-index:100; */
 }
 
 
@@ -257,8 +257,11 @@ p {
 
 
 .panel_R { 
-    float:left;
+    position:absolute;
     display: none; 
+    top:50px;
+    left:250px;
+    z-index:100;
 }
 
 
@@ -271,6 +274,7 @@ button {
     position:absolute;
     top:50px;
     left:0;
+    z-index:100;
 }
 
 .filters-container {

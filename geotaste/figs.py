@@ -519,32 +519,7 @@ class LandmarksFigureFactory(FigureFactory):
         )
 
         # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
-
-        fig.update_mapboxes(
-            # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
-            # style='stamen-toner',
-            style="streets",
-            layers=[
-                {
-                    "below": 'traces',
-                    "sourcetype": "raster",
-                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                    "source": [
-                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        # "/tiles/{z}/{x}/{y}.png"
-                        # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
-                    ],
-                    # "opacity":0.75
-                }
-            ],
-            # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
-            accesstoken=mapbox_access_token,
-            bearing=0,
-            center=MAP_CENTER,
-            pitch=0,
-
-            zoom=14,
-        )
+        update_fig_mapbox_background(fig)
         fig.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
             legend=dict(
@@ -564,6 +539,34 @@ class LandmarksFigureFactory(FigureFactory):
 
 
 
+
+def update_fig_mapbox_background(fig):
+    fig.update_mapboxes(
+        # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
+        # style='stamen-toner',
+        style="streets",
+        layers=[
+            {
+                "below": 'traces',
+                "sourcetype": "raster",
+                "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                "source": [
+                    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    # "/tiles/{z}/{x}/{y}.png"
+                    # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
+                ],
+                # "opacity":0.75
+            }
+        ],
+        # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
+        accesstoken=mapbox_access_token,
+        bearing=0,
+        center=MAP_CENTER,
+        pitch=0,
+
+        zoom=14,
+    )
+    return fig
 
 
 
@@ -651,47 +654,51 @@ class CombinedFigureFactory(FigureFactory):
     def valid_arronds(self): 
         return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
 
-    def plot_map(self, color=None, color_text='black', basefig=None, **kwargs):
+    def plot_map(self, color=None, color_text='black', basefig=None, return_trace=False, **kwargs):
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
         figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
         # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
-        fig = go.Figure()
-        fig.add_trace(
-            go.Scattermapbox(
-                name=f'Member dwelling ({self.name})',
-                mode='markers+text',
-                lat=figdf['lat'],
-                lon=figdf['lon'],
-                customdata=figdf['hover_tooltip'],
-                hovertemplate='%{customdata}<extra></extra>',
-                marker=go.scattermapbox.Marker(
-                    color=color,
-                    symbol='circle',
-                    size=20,
-                    # size=(figdf['num_borrows'] / 20)+5,
-                    opacity=0.4
+
+        trace = go.Scattermapbox(
+            name=f'Member dwelling ({self.name})',
+            mode='markers+text',
+            lat=figdf['lat'],
+            lon=figdf['lon'],
+            customdata=figdf['hover_tooltip'],
+            hovertemplate='%{customdata}<extra></extra>',
+            marker=go.scattermapbox.Marker(
+                color=color,
+                symbol='circle',
+                size=20,
+                # size=(figdf['num_borrows'] / 20)+5,
+                opacity=0.4
+            ),
+            text=figdf['member_name_nice'],
+            textfont=dict(
+                size=TEXTFONT_SIZE,
+                color=color_text,
+                family='Louize, Recursive, Tahoma, Verdana, Times New Roman'
+            ),
+            hoverlabel=dict(
+                font=dict(
+                    size=16,
+                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                    # color='black'
                 ),
-                text=figdf['member_name_nice'],
-                textfont=dict(
-                    size=TEXTFONT_SIZE,
-                    color=color_text,
-                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman'
-                ),
-                hoverlabel=dict(
-                    font=dict(
-                        size=16,
-                        family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
-                        # color='black'
-                    ),
-                    bgcolor='white',
-                ),
-                textposition='bottom center',
-            )
+                bgcolor='white',
+            ),
+            textposition='bottom center',
         )
 
-        basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
-        return go.Figure(data=fig.data + basefig.data, layout=basefig.layout)
+        if return_trace: return trace
+
+
+        fig = go.Figure()
+        fig.add_trace(trace)
+        return fig
+        # basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
+        # return go.Figure(data=fig.data, layout=basefig.layout)
 
 
 

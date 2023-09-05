@@ -338,7 +338,7 @@ class ComparisonPanel(BaseComponent):
         ofig = self.ff().plot_map()
         ofig.update_layout(autosize=True)
         ograph = dcc.Graph(
-            figure=ofig, 
+            figure=go.Figure(ofig), 
             className='comparison_map_graph',
             config={'displayModeBar':False},
             id='mainmap'
@@ -404,10 +404,14 @@ class ComparisonPanel(BaseComponent):
 
         return ff
 
-    def get_mainmap(self, fdL={}, fdR={}):
-        return self.ff(fdL,fdR).plot_map()
-
-
+    def get_mainmap_data(self, fdL={}, fdR={}):
+        if fdL or fdR:
+            odata=[]
+            if fdL: odata.extend(self.ff(fdL=fdL).plot_map().data)
+            if fdR: odata.extend(self.ff(fdR=fdR).plot_map().data)
+        else:
+            odata = self.ff().plot_map().data
+        return odata
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -422,14 +426,27 @@ class ComparisonPanel(BaseComponent):
                 Input(self.L.store, 'data'),
                 Input(self.R.store, 'data'),
             ],
+            State(self.mainmap,'figure'),
             prevent_initial_call=True
         )
-        def left_right_data_changed(Lstore, Rstore):
-
+        def left_right_data_changed(Lstore, Rstore, oldfig):
+            newfigdata=self.get_mainmap_data(Lstore,Rstore)
+            # newfig.update_mapboxes(
+            #     bearing=oldfig['layout']['mapbox']['bearing'],
+            #     center=oldfig['layout']['mapbox']['center'],
+            #     pitch=oldfig['layout']['mapbox']['pitch'],
+            #     zoom=oldfig['layout']['mapbox']['zoom'],
+            # )
+            # logger.debug(oldfig['layout'])
+            # logger.debug(newfig.layout)
 
             return (
                 STYLE_VIS if Lstore or Rstore else STYLE_INVIS,
-                {'data':self.get_mainmap(Lstore,Rstore).data},
+                # {'data':[newdata, oldfig.data[0]]},
+                # newfig,
+                {'data':newfigdata, 'layout':oldfig['layout']},
+                # newfig,
+                # ofig,
                 'sorry'
             )
 
