@@ -163,8 +163,8 @@ class FilterCard(FilterComponent):
     def layout(self, params=None):
         return dbc.Card([
             self.header,
-            self.body,
             self.footer,
+            self.body,
 
             # data
             self.store, 
@@ -557,7 +557,6 @@ class FilterSliderCard(FilterPlotCard):
             type="number", 
             value=0 if self.maxval is None else self.maxval,
             className='slider-input-num',
-            style={'text-align':'right'},
             id=self.id('input_end')
         )
     

@@ -263,3 +263,14 @@ button {
 .filters-container {
     /* display:flex; */
 }
+
+.slider-input-num {
+    width:4em;
+    border:1px solid silver;
+    font-style: italic;
+    font-size:.9em;
+    text-align: left;
+    padding: 0;
+    margin:0;
+    font-family: Recursive, Tahoma, Verdana;
+}
