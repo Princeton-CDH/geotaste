@@ -274,3 +274,7 @@ button {
     margin:0;
     font-family: Recursive, Tahoma, Verdana;
 }
+
+.card-title { font-size:1.2em;font-style:normal;}
+.card-body .card-title {font-size:1.1em;padding-left:.5em;font-style: normal;}
+.card-body .card-body .card-title {font-size:1em;padding-left:1em; font-style: normal;}

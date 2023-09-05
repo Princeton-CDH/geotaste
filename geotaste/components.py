@@ -109,7 +109,7 @@ class FilterComponent(BaseComponent):
     
     @cached_property
     def store_desc(self): 
-        return html.Span(self.unfiltered, className='store_desc')
+        return html.Span(BLANK, className='store_desc')
 
     def intersect_filters(self, *filters_d):
         return intersect_filters(filters_d)
@@ -245,7 +245,7 @@ class FilterCard(FilterComponent):
     @cached_property
     def store_desc(self): 
         return html.Span(
-            UNFILTERED, 
+            BLANK, 
             className='store_desc button_store_desc', 
             # color='link',
             id=self.id(f'store_desc'),
@@ -356,11 +356,10 @@ class FilterCard(FilterComponent):
             # filter cleared?
             logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
             if not store_data: 
-                return self.unfiltered, False
+                return BLANK, False
             else:
                 res=self.describe_filters(store_data)
-                if not res: res = self.unfiltered
-                return res, True
+                return res if res else BLANK, True
         
 
 

@@ -40,13 +40,15 @@ class FilterPanel(FilterCard):
             )
             def subcomponent_filters_updated(*args):
                 filters_d=args[:-1]
+                if not any(filters_d): raise PreventUpdate # likely from a clear we created
+
                 old_data=args[-1]
                 # if not any(filters_d): raise PreventUpdate
-                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}')
+                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}')
                 outd=self.intersect_filters(*filters_d)
 
                 if old_data == outd: raise PreventUpdate
-                logger.debug(f'[{self.name}] intersected subcomponent filter = {outd}')
+                logger.debug(f'[{self.name}] intersected subcomponent filter = {outd}, old_data = {old_data}')
                 return outd
 
             
