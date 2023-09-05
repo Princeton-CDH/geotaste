@@ -108,3 +108,39 @@ def TableView(ff):
         className='graphtab padded', 
         id='table_view'
     )
+
+
+def get_ff_for_num_filters(self, fdL={}, fdR={}, **kwargs):
+    # get figure factory
+    num_filters = len([x for x in [fdL,fdR] if x])
+    # 3 cases
+    if num_filters==0:
+        ff = LandmarksFigureFactory()
+
+    elif num_filters==1:
+        if fdL:
+            ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+        elif fdR:
+            ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+
+    elif num_filters == 2:
+        ff = ComparisonFigureFactory(fdL, fdR)
+
+    return ff
+
+def get_mainmap_figdata(fdL={}, fdR={}):
+    if fdL or fdR:
+        odata=[]
+        if fdL: odata.extend(CombinedFigureFactory(fdL=fdL).plot_map().data)
+        if fdR: odata.extend(CombinedFigureFactory(fdR=fdR).plot_map().data)
+    else:
+        odata = LandmarksFigureFactory().plot_map().data
+    return odata
+
+
+@cache_obj.memoize()
+def get_cached_views(fdLR):
+    fdL,fdR=unserialize(fdLR)
+    figdata = get_mainmap_figdata(fdL,fdR)
+    tbl=TableView(get_ff_for_num_filters(fdL,fdR))
+    return figdata,tbl

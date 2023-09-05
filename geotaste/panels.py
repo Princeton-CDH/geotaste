@@ -272,8 +272,13 @@ class ComparisonPanel(BaseComponent):
             dbc.Container([
                 self.mainview_tabs,
                 self.mainview,
+                self.store_views,
             ], className='mainview-container')
         ])
+
+    @cached_property
+    def store_views(self):
+        return dcc.Store(id=self.id('store_views'), data={})
 
     
     @cached_property
@@ -420,6 +425,10 @@ class ComparisonPanel(BaseComponent):
         else:
             odata = self.ff().plot_map().data
         return odata
+    
+    def get_updated_fig(self, newfigdata, oldfig={}):
+        return {'data':newfigdata, 'layout':oldfig['layout']}
+
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -434,54 +443,74 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
         def resize_tbl_view(L_open, R_open, style_d):
+            if style_d is None: style_d={}
             style_d['left']=f'{500 if R_open else (250 if L_open else 0)}px'
             return style_d
-
+        
         @app.callback(
             [
-                Output(self.panel_R_col, 'style',allow_duplicate=True),
-                Output(self.mainmap, 'figure',allow_duplicate=True),
-                Output(self.maintbl,'children',allow_duplicate=True),
                 Output(self.mapview,'style',allow_duplicate=True),
                 Output(self.tblview,'style',allow_duplicate=True)
             ],
             [
-                Input(self.L.store, 'data'),
-                Input(self.R.store, 'data'),
                 Input(self.mainview_tabs, 'active_tab')
             ],
             [
                 State(self.mainmap,'figure'),
-                State(self.R.showhide_btn, "n_clicks"),
-                State(self.R.header_btn, 'n_clicks'),
                 State(self.mapview,'style'),
-                State(self.tblview,'style')
+                State(self.tblview,'style'),
+                State(self.L.body, "is_open"),
+                State(self.R.body, 'is_open'),
             ],
             prevent_initial_call=True
         )
-        def left_right_data_changed(Lstore, Rstore, active_tab, oldfig, clk1,clk2, imap_style, itbl_style):
-            logger.debug([Lstore, Rstore, active_tab, clk1,clk2])
+        def change_tab(active_tab, oldfig, imap_style, itbl_style, L_open, R_open):
+            if imap_style is None: imap_style={}
+            if itbl_style is None: itbl_style={}
+            logger.debug([active_tab, imap_style, itbl_style, L_open, R_open])
             if active_tab=='map':
-                newfigdata=self.get_mainmap_data(Lstore,Rstore)
-                ofig = {'data':newfigdata, 'layout':oldfig['layout']}
-                ofig_style = {**imap_style, **STYLE_VIS} if imap_style else STYLE_VIS
-                otbl = dash.no_update
-                otbl_style = {**itbl_style, **STYLE_INVIS} if itbl_style else STYLE_INVIS
-                otbl_style['left']=f'0px'
+                ofig_style = {**imap_style, **STYLE_VIS}
+                otbl_style = {**itbl_style, **STYLE_INVIS}
             else:
-                ofig = dash.no_update
-                ofig_style = {**imap_style, **STYLE_INVIS} if imap_style else STYLE_INVIS
-                otbl = 'Table! ' * 1000
-                otbl_style = {**itbl_style, **STYLE_VIS} if itbl_style else STYLE_VIS
-                # otbl_style['left']=f'{500 if R_open else (250 if L_open else 0)}px'
-            opnlR_style = STYLE_INVIS if not Lstore and not Rstore and not clk1 and not clk2 else STYLE_VIS
-            return (
-                opnlR_style,
-                ofig,
-                otbl,
-                ofig_style,
-                otbl_style
-            )
+                ofig_style = {**imap_style, **STYLE_INVIS}
+                otbl_style = {**itbl_style, **STYLE_VIS}
+
+            otbl_style['left']=f'{500 if R_open else (250 if L_open else 0)}px'
+
+            out = ofig_style, otbl_style
+            logger.debug(f'--> {out}')
+            return out
+
+
+        @app.callback(
+            [
+                Output(self.mainmap, 'figure',allow_duplicate=True),
+                Output(self.maintbl,'children',allow_duplicate=True),
+                Output(self.store_views, 'data',allow_duplicate=True)
+            ],
+            [
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+            ],
+            [
+                State(self.mainmap,'figure'),
+                State(self.store_views, 'data')
+            ],
+            prevent_initial_call=True
+        )
+        def update_LR_data(Lstore, Rstore, oldfig, oldviews):
+            if oldviews is None: oldviews = {}
+            with Logwatch('returning informations'):
+                args_id=serialize([Lstore,Rstore])
+                if args_id in oldviews:
+                    logger.debug(f'{args_id} found in oldviews!')
+                    return oldviews[args_id] + [dash.no_update]
+                
+                else:
+                    ofigdata,otbl = get_cached_views(args_id)
+                    oldviews[args_id] = [ofigdata,otbl]
+                    ofig = self.get_updated_fig(ofigdata,oldfig)
+                    return [ofig,otbl,oldviews]
 
 
 
