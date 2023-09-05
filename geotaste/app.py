@@ -13,6 +13,7 @@ def get_app():
             assets_folder=PATH_ASSETS,
             suppress_callback_exceptions=True
         )
+        app.app.config.suppress_callback_exceptions=True
         return app
 
 def get_server():
@@ -27,6 +28,7 @@ def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
             host=host,
             port=port,
             debug=debug,
+            dev_tools_ui=False,
             **kwargs
         )
     return app.app.server

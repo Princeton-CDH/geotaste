@@ -214,7 +214,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     
     @cached_property
     def seldata(self) -> dict:
-        return {self.key:self.series.unique()}
+        return {self.key:self.series.unique().tolist()}
     
     
     @cached_property
@@ -431,6 +431,7 @@ class CreatorDOBFigure(CreatorFigure):
 
 class MemberNameFigure(MemberFigure):
     key = 'member_name'
+    drop_duplicates=('member',)
 
 class CreatorNameFigure(MemberFigure):
     key = 'author_name'
@@ -438,7 +439,7 @@ class CreatorNameFigure(MemberFigure):
 
 
 class EventFigure(TypicalFigure):
-    drop_duplicates = ('borrow',)
+    drop_duplicates = ('event',)
 
 class EventYearFigure(EventFigure):
     key = 'event_year'
@@ -741,8 +742,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             min_sum=min_sum,
             drop_duplicates={
                 'member':['member'],
-                'author':['author','borrow'],
-                'book':['book','borrow'],
+                'author':['author','event'],
+                'book':['book','event'],
                 'arrond_id':['arrond_id','member']
             }
         )

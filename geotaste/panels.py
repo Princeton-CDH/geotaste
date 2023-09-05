@@ -20,6 +20,9 @@ class FilterPanel(FilterCard):
     # #         # style={'color':self.color}
     # #     )
 
+    def describe_filters(self, panel_data):
+        return filter_query_str(panel_data, human=True)
+
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
@@ -32,12 +35,17 @@ class FilterPanel(FilterCard):
                     Input(card.store, 'data')
                     for card in self.store_subcomponents
                 ],
+                State(self.store, 'data'),
                 prevent_initial_call=True
             )
-            def subcomponent_filters_updated(*filters_d):
+            def subcomponent_filters_updated(*args):
+                filters_d=args[:-1]
+                old_data=args[-1]
                 # if not any(filters_d): raise PreventUpdate
                 logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}')
                 outd=self.intersect_filters(*filters_d)
+
+                if old_data == outd: raise PreventUpdate
                 logger.debug(f'[{self.name}] intersected subcomponent filter = {outd}')
                 return outd
 
@@ -48,20 +56,29 @@ class FilterPanel(FilterCard):
                     for card in self.store_panel_subcomponents
                 ],
                 Input(self.store, 'data'),
+                [
+                    State(card.store_panel, 'data')
+                    for card in self.store_panel_subcomponents
+                ],
                 prevent_initial_call=True
             )
             #@logger.catch
-            def panel_filter_data_changed(panel_filter_data):
+            def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
                 #???
                 if panel_filter_data is None: panel_filter_data={}
-                if not panel_filter_data: raise PreventUpdate
-                logger.debug(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
+                logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
                 new_filter_data_l = [
-                    {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    # {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    panel_filter_data
                     for card in self.store_panel_subcomponents    
                 ]
-                logger.trace(f'out from panel --> {new_filter_data_l}')
-                return new_filter_data_l
+                out = new_filter_data_l
+                # out = [
+                #     new if new!=old else dash.no_update
+                #     for new,old in zip(new_filter_data_l, old_filter_data_l)
+                # ]
+                logger.debug(f'sending updates for new store_panel --> {out}')
+                return out
             
 
             
@@ -184,11 +201,25 @@ class CombinedPanel(FilterPanel):
     
     @cached_property
     def member_panel(self): 
-        return MemberPanel(name_context=self.name, **self._kwargs)
+        return MemberPanel(
+            name_context=self.name, 
+            desc=self.desc,
+            L_or_R=self.L_or_R,
+            color=self.color,
+            unfiltered=self.unfiltered,
+            **self._kwargs
+        )
 
     @cached_property
-    def book_panel(self):
-        return BookPanel(name_context=self.name, **self._kwargs)
+    def book_panel(self): 
+        return BookPanel(
+            name_context=self.name, 
+            desc=self.desc,
+            L_or_R=self.L_or_R,
+            color=self.color,
+            unfiltered=self.unfiltered,
+            **self._kwargs
+        )
     
 
     @cached_property

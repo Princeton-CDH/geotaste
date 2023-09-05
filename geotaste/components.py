@@ -34,7 +34,7 @@ class BaseComponent(DashComponent, Logmaker):
         )
 
         # ensure some exist
-        self.color = None
+        # self.color = None
         # self.filter_data = {}
         
         # overwritten here
@@ -178,7 +178,10 @@ class FilterCard(FilterComponent):
     def header(self):
         logger.trace(self.name)
         return dbc.CardHeader(
-            [self.header_btn, self.showhide_btn],
+            [
+                self.showhide_btn,
+                self.header_btn, 
+            ],
             className=f'card-header-{self.className}'
         )
     
@@ -394,7 +397,8 @@ class FilterPlotCard(FilterCard):
     
     def plot(self, filter_data={}, selected=[], **kwargs):
         return self.ff(filter_data, selected=selected).plot(
-            color=self.color
+            color=self.color,
+            **kwargs
         )
     
 
@@ -440,7 +444,10 @@ class FilterPlotCard(FilterCard):
         
             
         @app.callback(
-            Output(self.graph, "figure", allow_duplicate=True),
+            [
+                Output(self.graph, "figure", allow_duplicate=True),
+                Output(self.store, 'data', allow_duplicate=True)
+            ],
             Input(self.store_panel, 'data'),
             [
                 State(self.store, 'data'),
@@ -452,15 +459,17 @@ class FilterPlotCard(FilterCard):
         )
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
             if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
-            # newdata={k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
-            # if not newdata: raise PreventUpdate
-            newdata = panel_filter_data
+            if not panel_filter_data:
+                # then a panel wide clear?
+                my_filter_data = {}
 
-            # if current_sels: raise PreventUpdate
-            logger.debug(current_sels)
 
+            newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             logger.debug(f'[{self.name}] incoming panel data: {newdata}')
-            return self.plot(newdata, selected=my_filter_data)
+            return (
+                self.plot(newdata, selected=my_filter_data), 
+                my_filter_data if not panel_filter_data else dash.no_update
+            )
         
         
         
@@ -495,11 +504,26 @@ class FilterPlotCard(FilterCard):
 
         
         
-class FilterSliderCard(FilterCard):
+class FilterSliderCard(FilterPlotCard):
     value=None
     unfiltered=''
     body_is_open = False
 
+    def get_content(self, card_data={}, panel_data={}, selected=[], **kwargs):
+        logger.debug(self.name)
+        ograph = self.graph
+        ograph.figure = self.ff(
+            filter_data=panel_data if panel_data else card_data, 
+            selected=card_data if panel_data else selected      
+        ).plot(color=self.color, **kwargs)
+        
+        return dbc.Container([
+            dbc.Row(self.graph),
+            dbc.Row([
+                dbc.Col(self.input_start),
+                dbc.Col(self.input_end, style={'text-align':'right'})
+            ])
+        ])
 
     @cached_property
     def graph(self): 
@@ -517,32 +541,24 @@ class FilterSliderCard(FilterCard):
     def maxval(self):
         return self.ff().series_q.max()
     
-    @cached_property
-    def content(self): 
-        logger.trace(self.name)
-        return dbc.Container([
-            dbc.Row(self.graph),
-            dbc.Row([
-                dbc.Col(self.input_start),
-                dbc.Col(self.input_end, style={'text-align':'right'})
-            ])
-        ])
 
     @cached_property
     def input_start(self):
         return dcc.Input(
             type="number", 
-            value=0 if self.value is None else self.value,
-            className='slider-input-num'
+            value=0 if self.minval is None else self.minval,
+            className='slider-input-num',
+            id=self.id('input_start')
         )
     
     @cached_property
     def input_end(self):
         return dcc.Input(
             type="number", 
-            value=0 if self.value is None else self.value,
+            value=0 if self.maxval is None else self.maxval,
             className='slider-input-num',
-            style={'text-align':'right'}
+            style={'text-align':'right'},
+            id=self.id('input_end')
         )
     
     def describe_filters(self,store_data):
@@ -552,95 +568,123 @@ class FilterSliderCard(FilterCard):
         return f'{minval} to {maxval}'
     
 
-    # def component_callbacks(self, app):
-    #     super().component_callbacks(app)
+    def component_callbacks(self, app):
+        super().component_callbacks(app)
 
-    #     @app.callback(
-    #         Output(self.footer, 'is_open', allow_duplicate=True),
-    #         Input(self.store, 'data'),
-    #         prevent_initial_call=True
-    #     )
-    #     #@logger.catch
-    #     def store_data_updated(store_data):
-    #         # filter cleared?
-    #         if not store_data: return False
-    #         return True
+        @app.callback(
+            [
+                Output(self.graph,'figure'),
+                Output(self.store,'data'),
+                Output(self.id('input_start'), 'value'),
+                Output(self.id('input_end'), 'value'),
+            ],
+            [
+                Input(self.graph, 'selectedData'),
+                Input(self.id('input_start'), 'value'),
+                Input(self.id('input_end'), 'value'),
+            ],
+            [
+                State(self.store_panel,'data'),
+                # State(self.graph,'figure')
+            ],
+            prevent_initial_call=True
+        )
+        def graph_selection_updated2(graph_selected_data, start_value, end_value, panel_data):
+            if ctx.triggered_id == self.graph.id:
+                seldata=self.ff().selected(graph_selected_data)
+                if not seldata: raise PreventUpdate
 
-    #     @app.callback(
-    #         [
-    #             Output(self.graph, 'figure', allow_duplicate=True),
-    #             Output(self.input_start, 'value', allow_duplicate=True),
-    #             Output(self.input_end, 'value', allow_duplicate=True),
-    #             Output(self.store, "data", allow_duplicate=True),
-    #             # Output(self.store_desc, 'children', allow_duplicate=True)
-    #         ],
-    #         [
-    #             Input(self.graph, 'selectedData'),
-    #             Input(self.input_start, 'value'),
-    #             Input(self.input_end, 'value'),
-    #             Input(self.button_clear, 'n_clicks'),
-    #             Input(self.body, "is_open"),
-    #         ],
-    #         [
-    #             State(self.store, 'data'),
-    #             State(self.graph, 'figure'),
-    #             # State(self.store_desc, 'children')
-    #         ],
-    #         prevent_initial_call=True
-    #     )
-    #     def graph_selection_updated(
-    #             selected_data,
-    #             start_value,
-    #             end_value,
-    #             clear_clicked,
-    #             body_open_now,
-    #             old_data={},
-    #             old_fig=None,
-    #             old_desc=''
-    #         ):
-    #         def vstr(x): return f'{int(x)}' if x is not None else ''
+                vals=list(seldata.values())
+                minval=min(vals[0]) if vals else 0
+                maxval=max(vals[0]) if vals else 0
+                return dash.no_update,dash.no_update,minval,maxval
+            else:
+                newvals=list(range(start_value, end_value+1))
+                ofig = self.plot(
+                    filter_data=panel_data if panel_data else {},
+                    selected=newvals
+                )
+                odat = {self.figure_factory.key:newvals}
+                return ofig,odat,dash.no_update,dash.no_update
 
-    #         logger.debug(['sel updated on slider!', ctx.triggered_id, ctx.triggered])
 
-    #         if ctx.triggered_id == self.graph.id:
-    #             logger.debug(f'GRAPH TRIGGERED: {len(selected_data)} len sel data')
-    #             new_data=self.ff().selected(selected_data)
-    #             if not new_data or new_data==old_data: raise PreventUpdate
 
-    #             vals=list(new_data.values())
-    #             minval=min(vals[0]) if vals else None
-    #             maxval=max(vals[0]) if vals else None
-    #             o=[
-    #                 old_fig, 
-    #                 minval, 
-    #                 maxval, 
-    #                 new_data, 
-    #                 f'{vstr(minval)} – {vstr(maxval)}'
-    #             ]
+
+        # @app.callback(
+        #     [
+        #         Output(self.graph, 'figure', allow_duplicate=True),
+        #         Output(self.input_start, 'value', allow_duplicate=True),
+        #         Output(self.input_end, 'value', allow_duplicate=True),
+        #         Output(self.store, "data", allow_duplicate=True),
+        #         # Output(self.store_desc, 'children', allow_duplicate=True)
+        #     ],
+        #     [
+        #         Input(self.graph, 'selectedData'),
+        #         Input(self.input_start, 'value'),
+        #         Input(self.input_end, 'value'),
+        #         Input(self.button_clear, 'n_clicks'),
+        #         Input(self.body, "is_open"),
+        #     ],
+        #     [
+        #         State(self.store, 'data'),
+        #         State(self.graph, 'figure'),
+        #         # State(self.store_desc, 'children')
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def graph_selection_updated(
+        #         selected_data,
+        #         start_value,
+        #         end_value,
+        #         clear_clicked,
+        #         body_open_now,
+        #         old_data={},
+        #         old_fig=None,
+        #         old_desc=''
+        #     ):
+        #     def vstr(x): return f'{int(x)}' if x is not None else ''
+
+        #     logger.debug(['sel updated on slider!', ctx.triggered_id, ctx.triggered])
+
+        #     if ctx.triggered_id == self.graph.id:
+        #         logger.debug(f'GRAPH TRIGGERED: {len(selected_data)} len sel data')
+        #         new_data=self.ff().selected(selected_data)
+        #         if not new_data or new_data==old_data: raise PreventUpdate
+
+        #         vals=list(new_data.values())
+        #         minval=min(vals[0]) if vals else None
+        #         maxval=max(vals[0]) if vals else None
+        #         o=[
+        #             old_fig, 
+        #             minval, 
+        #             maxval, 
+        #             new_data, 
+        #             f'{vstr(minval)} – {vstr(maxval)}'
+        #         ]
             
-    #         elif ctx.triggered_id in {self.body.id, self.input_start.id, self.input_end.id}:
-    #             if body_open_now:
-    #                 logger.debug(f'INPUT TRIGGERED TRIGGERED')
-    #                 ff = self.ff(min_series_val=start_value, max_series_val=end_value)
-    #                 newfig = ff.plot()
-    #                 o=[
-    #                     newfig, 
-    #                     start_value, 
-    #                     end_value, 
-    #                     ff.seldata if ctx.triggered_id!=self.body.id else old_data,
-    #                     f'{vstr(start_value)} – {vstr(end_value)}' if ctx.triggered_id!=self.body.id else old_desc,
-    #                 ]
+        #     elif ctx.triggered_id in {self.body.id, self.input_start.id, self.input_end.id}:
+        #         if body_open_now:
+        #             logger.debug(f'INPUT TRIGGERED TRIGGERED')
+        #             ff = self.ff(min_series_val=start_value, max_series_val=end_value)
+        #             newfig = ff.plot()
+        #             o=[
+        #                 newfig, 
+        #                 start_value, 
+        #                 end_value, 
+        #                 ff.seldata if ctx.triggered_id!=self.body.id else old_data,
+        #                 f'{vstr(start_value)} – {vstr(end_value)}' if ctx.triggered_id!=self.body.id else old_desc,
+        #             ]
             
-    #         elif ctx.triggered_id == self.button_clear.id and clear_clicked:
-    #             ff=self.ff()
-    #             o=[ff.plot(), ff.minval, ff.maxval, {}, '']
+        #     elif ctx.triggered_id == self.button_clear.id and clear_clicked:
+        #         ff=self.ff()
+        #         o=[ff.plot(), ff.minval, ff.maxval, {}, '']
             
-    #         else:
-    #             logger.debug('not updating')
-    #             raise PreventUpdate
+        #     else:
+        #         logger.debug('not updating')
+        #         raise PreventUpdate
             
-    #         # logger.debug(['graph_selection_updated->',o])
-    #         return o[:-1]
+        #     # logger.debug(['graph_selection_updated->',o])
+        #     return o[:-1]
 
                 
 
@@ -684,6 +728,18 @@ class FilterInputCard(FilterCard):
             if not vals: raise PreventUpdate
             logger.debug(f'[{self.name}] {self.key} -> {vals}')
             return {self.key:vals}
+        
+        # Clear part 2
+        @app.callback(
+            Output(self.input,'value'),
+            Input(self.button_clear, 'n_clicks'),
+            prevent_initial_call=True
+        )
+        #@logger.catch
+        def clear_selection_input(n_clicks):
+            logger.debug('clear_selection as input')
+            return []
+
         
                 
         # @app.callback(

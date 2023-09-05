@@ -663,7 +663,7 @@ class CombinedDataset(Dataset):
         'death_year':'member_dod',
         'gender':'member_gender',
         'nationalities':'member_nationalities',
-        'event':'borrow',
+        'event':'event',
         'book':'book',
         'dwelling':'dwelling',
         'dwelling_arrond_id':'arrond_id',
@@ -683,8 +683,8 @@ class CombinedDataset(Dataset):
         'dwelling_longitude':'lon',
         'dwelling_dist_from_SCO':'dwelling_distSCO',
     }
-    coltype_sort = ['member', 'borrow', 'book', 'dwelling', 'arrond', 'creator']
-    cols_prefix = ['member', 'borrow', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
+    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
+    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
     cols_q = ['member_dob', 'member_dod', 'author_dob', 'author_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
     cols_sep = ['member_nationalities', 'author_nationalities', 'member_membership', 'book_genre']
