@@ -35,8 +35,12 @@ class FilterPanel(FilterCard):
                 prevent_initial_call=True
             )
             def subcomponent_filters_updated(*filters_d):
-                logger.debug('subcomponent filters updated')
-                return self.intersect_filters(*filters_d)
+                # if not any(filters_d): raise PreventUpdate
+                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}')
+                outd=self.intersect_filters(*filters_d)
+                logger.debug(f'[{self.name}] intersected subcomponent filter = {outd}')
+                return outd
+
             
             @app.callback(
                 [
@@ -44,30 +48,20 @@ class FilterPanel(FilterCard):
                     for card in self.store_panel_subcomponents
                 ],
                 Input(self.store, 'data'),
-                [
-                    State(card.store_panel, 'data')
-                    for card in self.store_panel_subcomponents
-                ],
                 prevent_initial_call=True
             )
             #@logger.catch
-            def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
+            def panel_filter_data_changed(panel_filter_data):
+                #???
                 if panel_filter_data is None: panel_filter_data={}
-                logger.debug(f'panel_filter_data_changed({panel_filter_data})')
-
-
-                logger.debug([card.key for card in self.store_panel_subcomponents])
-
+                if not panel_filter_data: raise PreventUpdate
+                logger.debug(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
                 new_filter_data_l = [
                     {k:v for k,v in panel_filter_data.items() if k!=card.key}
                     for card in self.store_panel_subcomponents    
                 ]
-                out = [
-                    (dash.no_update if old==new else new)
-                    for old,new in zip(old_filter_data_l, new_filter_data_l)
-                ]
-                logger.trace(f'out from panel {pformat(out)}')
-                return out
+                logger.trace(f'out from panel --> {new_filter_data_l}')
+                return new_filter_data_l
             
 
             

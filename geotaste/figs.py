@@ -77,7 +77,6 @@ class FigureFactory(DashFigureFactory, Logmaker):
             quant=self.quant
         ).sort_values().tolist()
         o={self.key:selected_records}
-        logger.debug(f'selected: {o}')
         return o
     
 
@@ -231,14 +230,18 @@ class FigureFactory(DashFigureFactory, Logmaker):
     def fig(self): 
         logger.debug(f'{self.__class__.__name__}.fig')
         fig = self.plot()
-        if self.sels:
-            fig.update_traces(selectedpoints=self.sels)
         return fig
         
 
     def plot(self, **kwargs):
         kwargs={**self.kwargs, **kwargs}
-        return self.plot_histogram(**kwargs)
+        
+        fig = self.plot_histogram(**kwargs)
+        
+        if self.sels:
+            fig.update_traces(selectedpoints=self.sels)
+
+        return fig
         
     def plot_histogram(self, color=None, **kwargs):
         color = color if color else self.color

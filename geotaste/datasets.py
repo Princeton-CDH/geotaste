@@ -748,9 +748,7 @@ class CombinedDataset(Dataset):
         # need to gen?
         if force or not os.path.exists(self.path):
             return self.gen(save=save)
-        # otherwise load
-        with Logwatch('reading pickled dataset'):
-            return pd.read_pickle(self.path)
+        return pd.read_pickle(self.path)
         
     @cached_property
     def data(self): 
@@ -1237,8 +1235,7 @@ class MiniCombinedDataset(Dataset):
             with Logwatch('generating combined dataset'):
                 df=self.gen(save=True)
         else:
-            with Logwatch('reading pickled dataset'):
-                df=pd.read_pickle(self.path)
+            df=pd.read_pickle(self.path)
         
         return postproc_df(df, cols_pref=self._cols_pref)
     

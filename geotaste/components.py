@@ -68,7 +68,6 @@ class BaseComponent(DashComponent, Logmaker):
     
     @cached_property
     def content(self,params=None):
-        logger.debug(f'[{self.name}] getting content...')
         return dbc.Container(
             BLANK
             if not self.subcomponents
@@ -78,7 +77,7 @@ class BaseComponent(DashComponent, Logmaker):
             ]
         )
     
-    def get_content(self, params=None): 
+    def get_content(self, params=None, **kwargs): 
         return dbc.Container(BLANK)
     
         
@@ -120,7 +119,7 @@ class FilterComponent(BaseComponent):
         #     kwargs = {**self._kwargs, **kwargs}
         #     serialized_data = serialize([filter_data, selected, kwargs])
         #     return ff_cache(self.figure_factory, serialized_data)
-        logger.debug(f'[{self.name}.ff({filter_data}, {selected}, **{kwargs})]')
+        logger.trace(f'[{self.name}.ff({filter_data}, {selected}, **{kwargs})]')
 
 
         filter_data={
@@ -304,12 +303,14 @@ class FilterCard(FilterComponent):
             ],
             [
                 State(self.body, "is_open"),
-                State(self.content,'children')
+                State(self.content,'children'),
+                State(self.store, 'data'),
+                State(self.store_panel, 'data'),
             ],
             prevent_initial_call=True
         )
         #@logger.catch
-        def toggle_collapse(_clicked1, _clicked2, body_open_now, content_now):
+        def toggle_collapse(_clicked1, _clicked2, body_open_now, content_now, card_data, panel_data):
             """Toggle the collapse state of a section.
             
             Args:
@@ -330,9 +331,10 @@ class FilterCard(FilterComponent):
                 # then we're going to open
                 logger.debug(f'[{self.name}] toggle_collapse: opening')
                 content_exists_already = bool(content_now)# and content_now.get('props',{}).get('children')
-                logger.trace(f'content currently exists? --> {content_exists_already}')
+                logger.debug(f'content currently exists? --> {content_exists_already}')
                 return True, '[-]', content_now if content_exists_already else self.get_content(
-
+                    card_data=card_data,
+                    panel_data=panel_data
                 )
 
 
@@ -349,7 +351,7 @@ class FilterCard(FilterComponent):
         #@logger.catchq
         def toggle_footer_storedesc(store_data):
             # filter cleared?
-            logger.debug(f'[{self.name}] store_data_updated: {store_data}')
+            logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
             if not store_data: 
                 return self.unfiltered, False
             else:
@@ -373,10 +375,13 @@ class FilterCard(FilterComponent):
 class FilterPlotCard(FilterCard):
     body_is_open = False
     
-    def get_content(self, filter_data={}, selected=[]): 
+    def get_content(self, card_data={}, panel_data={}, selected=[], **kwargs):
         logger.debug(self.name)
         ograph = self.graph
-        ograph.figure = self.plot(filter_data=filter_data, selected=selected)
+        ograph.figure = self.plot(
+            filter_data=panel_data if panel_data else card_data, 
+            selected=card_data if panel_data else selected      
+        )
         return ograph
 
     @cached_property
@@ -405,35 +410,33 @@ class FilterPlotCard(FilterCard):
         )
         #@logger.catch
         def graph_selection_updated(selected_data, old_data={}):
-            logger.debug(f'[{self.name}) selection updated 1: {selected_data}')
+            if selected_data is None: raise PreventUpdate
             o=self.ff().selected(selected_data)
-            if not o: raise PreventUpdate
-            out=(o if o!=old_data else dash.no_update)
-            logger.debug(f'[{self.name}) selection updated 2: {out}')
-            return out
+            if not o or o==old_data: raise PreventUpdate
+            logger.debug(f'[{self.name}) selection updated to {o}')
+            return o
         
+        # @app.callback(
+        #     Output(self.graph, 'figure'),
+        #     Input(self.store, 'data'),
+        #     prevent_initial_call=True
+        # )
+        # def store_data_updated(store_data):
+        #     # filter cleared?
+        #     if store_data: raise PreventUpdate
+        #     logger.debug(f'[{self.name}] {self.key} cleared...')
+        #     return self.plot()
+
         @app.callback(
-            Output(self.graph, 'figure'),
-            Input(self.store, 'data'),
+            Output(self.graph, "figure", allow_duplicate=True),
+            Input(self.button_clear, 'n_clicks'),
+            State(self.store_panel, 'data'),
             prevent_initial_call=True
         )
-        def store_data_updated(store_data):
-            # filter cleared?
-            if store_data: raise PreventUpdate
-            logger.debug(f'[{self.name}] {self.key} cleared...')
-            return self.plot()
-
-    #     @app.callback(
-    #         [
-    #             Output(self.store, "data", allow_duplicate=True),
-    #             Output(self.graph, "figure", allow_duplicate=True),
-    #         ],
-    #         Input(self.button_clear, 'n_clicks'),
-    #         prevent_initial_call=True
-    #     )
-    #     #@logger.catch
-    #     def clear_selection(n_clicks):
-    #         return {}, self.plot()
+        #@logger.catch
+        def clear_selection(clear_clicked, panel_data):
+            if not clear_clicked: raise PreventUpdate
+            return self.plot(panel_data)
         
             
         @app.callback(
@@ -441,17 +444,54 @@ class FilterPlotCard(FilterCard):
             Input(self.store_panel, 'data'),
             [
                 State(self.store, 'data'),
-                # State(self.body, 'is_open')
                 State(self.showhide_btn, "n_clicks"),
                 State(self.header_btn, 'n_clicks'),
+                State(self.graph, 'selectedData'),
             ],
             prevent_initial_call=True
         )
-        # def panel_data_updated(panel_filter_data, my_filter_data, is_open):
-        def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2):
-            logger.debug(f'[{self.name}] panel_data_updated: {panel_filter_data}')
-            if not _clicked_open_1 and not _clicked_open_2: return dash.no_update
-            return self.plot(panel_filter_data, selected=my_filter_data)
+        def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
+            if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
+            # newdata={k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
+            # if not newdata: raise PreventUpdate
+            newdata = panel_filter_data
+
+            # if current_sels: raise PreventUpdate
+            logger.debug(current_sels)
+
+            logger.debug(f'[{self.name}] incoming panel data: {newdata}')
+            return self.plot(newdata, selected=my_filter_data)
+        
+        
+        
+        # @app.callback(
+        #     [
+        #         Output(self.graph, 'figure', allow_duplicate=True),
+        #         Output(self.store, 'data', allow_duplicate=True)
+        #     ],
+        #     [
+        #         Input(self.store_panel,'data'),
+        #         Input(self.button_clear,'n_clicks'),
+        #     ],
+        #     [
+        #         State(self.store, 'data'),
+        #         State(self.showhide_btn, "n_clicks"),
+        #         State(self.header_btn, 'n_clicks'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def store_data_updated(panel_data, clear_clicked, card_data, show_clicked1, show_clicked2):
+        #     if ctx.triggered_id==self.store_panel.id and not panel_data: raise PreventUpdate
+        #     logger.debug(f'[{self.name}] triggered by {ctx.triggered_id}, with card data = {card_data} and panel_data = {panel_data}')
+
+        #     out_data = {} if ctx.triggered_id==self.button_clear.id else card_data
+        #     out_fig = dash.no_update if not show_clicked1 and not show_clicked2 else self.plot(
+        #         panel_data, 
+        #         selected=card_data
+        #     )
+        #     return out_fig, out_data
+            
+
 
         
         
@@ -612,7 +652,7 @@ class FilterInputCard(FilterCard):
     multi = True
     sort_by_count = True
     
-    def get_content(self): 
+    def get_content(self,**y): 
         logger.debug(f'[{self.name}] getting content for input card')
         return self.input
 
@@ -641,20 +681,21 @@ class FilterInputCard(FilterCard):
             prevent_initial_call=True
         )
         def input_value_changed(vals):
+            if not vals: raise PreventUpdate
             logger.debug(f'[{self.name}] {self.key} -> {vals}')
-            return {self.key:vals} if vals else dash.no_update
+            return {self.key:vals}
         
                 
-        @app.callback(
-            Output(self.input, 'value'),
-            Input(self.store, 'data'),
-            prevent_initial_call=True
-        )
-        def store_data_updated(store_data):
-            # filter cleared?
-            if store_data: raise PreventUpdate
-            logger.debug(f'[{self.name}] {self.key} cleared...')
-            return []
+        # @app.callback(
+        #     Output(self.input, 'value'),
+        #     Input(self.store, 'data'),
+        #     prevent_initial_call=True
+        # )
+        # def store_data_updated(store_data):
+        #     # filter cleared?
+        #     if store_data: raise PreventUpdate
+        #     logger.debug(f'[{self.name}] {self.key} cleared...')
+        #     return []
 
         
         # # ## CLEAR? -- OVERWRITTEN
