@@ -521,8 +521,8 @@ class FilterSliderCard(FilterPlotCard):
             dbc.Row([
                 dbc.Col(self.input_start),
                 dbc.Col(self.input_end, style={'text-align':'right'})
-            ])
-        ])
+            ], className='slider-row')
+        ], className='slider-container')
 
     @cached_property
     def graph(self): 

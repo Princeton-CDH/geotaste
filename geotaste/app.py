@@ -28,7 +28,6 @@ def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
             host=host,
             port=port,
             debug=debug,
-            dev_tools_ui=False,
             **kwargs
         )
     return app.app.server
