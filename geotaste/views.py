@@ -27,20 +27,21 @@ def AnalysisTableView(ff, **kwargs):
     odf['colpref'] = odf.col.apply(lambda x: x.split('_')[0])
 
     out = []
-
-    for colpref, colpref_df in sorted(odf.groupby('colpref')):
-        desc_L,desc_R = describe_comparison(colpref_df, lim=5)
+    ins = list(sorted(odf.groupby('colpref')))
+    ins += [('all data',odf)]
+    for colpref, colpref_df in sorted(ins):
+        desc_L,desc_R = describe_comparison(colpref_df, lim=10)
         out_col = [
             # dbc.Row(html.H4(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
             
             dbc.Row([
                 dbc.Col([
-                    html.H5(ff.L.filter_desc),
+                    html.H5([f'10 most distinctive {"features" if colpref=="all data" else colpref+"s"} for Filter 1 (', ff.L.filter_desc,')']),
                     dcc.Markdown('\n'.join(desc_L))
                 ], className='left-color'),
 
                 dbc.Col([
-                    html.H5(ff.R.filter_desc),
+                    html.H5([f'10 most distinctive {"features" if colpref=="all data" else colpref+"s"} for Filter 2 (', ff.R.filter_desc,')']),
                     dcc.Markdown('\n'.join(desc_R))
                 ], className='right-color'),
             ])

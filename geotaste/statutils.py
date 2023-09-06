@@ -326,7 +326,7 @@ def describe_comparison(comparison_df, lim=10):
              cR=row[f'count_{LR2}']
              tL=cL/(pL/100)
              tR=cR/(pR/100)
-             orow=f'* **{row.odds_ratio_pos:.1f}** more likely to have *{row.col_val}* for {row.col.replace("_"," ").title()} ({pL:.1f}% vs. {pR:.1f}%, or {cL:.0f}/{tL:,.0f} vs. {cR:.0f}/{tR:,.0f} {row.comparison_scale}s)'
+             orow=f'* *{row.odds_ratio_pos:.1f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** ({pL:.1f}% vs. {pR:.1f}%, or {cL:.0f}/{tL:,.0f} vs. {cR:.0f}/{tR:,.0f} {row.comparison_scale}s)'
              o.append(orow)
              if lim and len(o)>=lim: break
         return o

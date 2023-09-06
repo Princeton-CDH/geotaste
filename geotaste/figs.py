@@ -816,7 +816,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 locations='arrond_id', 
                 color='perc_L->R',
                 center=MAP_CENTER,
-                zoom=10,
+                zoom=11,
                 # hover_data=[],
                 hover_data={'arrond_id':False, 'perc_L->R':False},
                 color_continuous_scale=[
