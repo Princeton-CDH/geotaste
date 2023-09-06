@@ -256,7 +256,7 @@ p {
 }
 
 .card-footer {
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.8);
 }
 
 .card-footer-desc .store_desc {
@@ -296,9 +296,6 @@ p {
 
 .panel_R .card-header { 
     background-color: rgba(125, 106, 182, 0.9);
-}
-.panel_R .card-footer { 
-    background-color: rgba(125, 106, 182, 0.7);
 }
 
 .panel_R .card-body .card-header {
@@ -377,7 +374,7 @@ button {
 
 /* level 1 */
 .card-title { 
-    font-size:1.2em;
+    font-size:1.1em;
     font-style:normal;
 }
 
@@ -482,3 +479,12 @@ button {
 }
 
 /* .dash-spreadsheet-menu div { margin:0 0 0 auto;} */
+
+
+.left-color { 
+    color:#40b0a6; 
+}
+
+.right-color { 
+    color: #7d6ab6; 
+}

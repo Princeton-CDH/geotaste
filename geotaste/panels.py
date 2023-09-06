@@ -272,6 +272,7 @@ class ComparisonPanel(BaseComponent):
             dbc.Container([
                 self.mainview_tabs,
                 self.mainview,
+                self.store,
                 self.store_views,
             ], className='mainview-container')
         ])
@@ -279,6 +280,9 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def store_views(self):
         return dcc.Store(id=self.id('store_views'), data={})
+    @cached_property
+    def store(self):
+        return dcc.Store(id=self.id('store_views'), data=[])
 
     
     @cached_property
@@ -434,37 +438,49 @@ class ComparisonPanel(BaseComponent):
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-        @app.callback(
-            Output('tblview-container','style',allow_duplicate=True),
-            [
-                Input(self.L.showhide_btn, "n_clicks"),
-                Input(self.L.header_btn, 'n_clicks'),
-                Input(self.R.showhide_btn, "n_clicks"),
-                Input(self.R.header_btn, 'n_clicks'),
-                Input(self.L.body, 'is_open'),
-                Input(self.R.body, 'is_open'),
-            ],
-            [
-                State('tblview-container','style'),
-            ],
-            prevent_initial_call=True
-        )
-        def resize_tbl_view(clk1,clk2,clk3,clk4, L_open,R_open, style_d):
-            logger.debug([clk1,clk2,clk3,clk4, L_open,R_open, style_d])
-            if style_d is None: style_d={}
-            style_d['padding-left']=f'{501 if R_open else (251 if L_open else 0)}px'
-            logger.debug(f'--> {style_d}')
-            return style_d
+        # @app.callback(
+        #     Output('tblview-container','style',allow_duplicate=True),
+        #     [
+        #         Input(self.L.showhide_btn, "n_clicks"),
+        #         Input(self.L.header_btn, 'n_clicks'),
+        #         Input(self.R.showhide_btn, "n_clicks"),
+        #         Input(self.R.header_btn, 'n_clicks'),
+        #         Input(self.L.body, 'is_open'),
+        #         Input(self.R.body, 'is_open'),
+        #     ],
+        #     [
+        #         State('tblview-container','style'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def resize_tbl_view(clk1,clk2,clk3,clk4, L_open,R_open, style_d):
+        #     logger.debug([clk1,clk2,clk3,clk4, L_open,R_open, style_d])
+        #     if style_d is None: style_d={}
+        #     style_d['padding-left']=f'{501 if R_open else (251 if L_open else 0)}px'
+        #     logger.debug(f'--> {style_d}')
+        #     return style_d
         
 
 
         ## CHANGING DATA
-        
+
+        @app.callback(
+            Output(self.maintbl,'children',allow_duplicate=True),
+            Input(self.store,'data'),
+            background=True,
+            manager=background_manager,
+            prevent_initial_call=True
+        )
+        def redo_tbl(data):
+            with Logwatch('running long callback computation'):
+                fdL,fdR=data
+                return get_server_cached_view(serialize([fdL,fdR,'table']))
 
         @app.callback(
             [
                 Output(self.mainmap,'figure',allow_duplicate=True),
                 Output(self.maintbl,'children',allow_duplicate=True),
+                Output(self.store,'data'),
             ],
             [
                 Input(self.L.store, 'data'),
@@ -481,9 +497,10 @@ class ComparisonPanel(BaseComponent):
             with Logwatch('computing figdata on server'):
                 newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
                 ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
-                otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
+                # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
+                otbl='loading...'
                 # logger.debug(tbldata)
-                return ofig,otbl
+                return ofig,otbl,[Lstore,Rstore]
 
 
             

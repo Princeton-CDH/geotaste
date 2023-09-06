@@ -230,7 +230,7 @@ def describe_arronds_LR(signif_df, side='left'):
 
 
 
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def get_distinctive_qual_vals(
         dfL,
         dfR,

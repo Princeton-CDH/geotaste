@@ -730,7 +730,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     
     @cache
     def compare(self, 
-            maxcats=None,
+            maxcats=COMPARISON_MAXCATS,
             cols=PREDICT_COLS,
             only_signif=False,
             round=4,

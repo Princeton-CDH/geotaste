@@ -27,17 +27,17 @@ def AnalysisTableView(ff, **kwargs):
     out = []
 
     for colpref, colpref_df in sorted(odf.groupby('colpref')):
-        desc_L,desc_R = describe_comparison(colpref_df, lim=10)
+        desc_L,desc_R = describe_comparison(colpref_df, lim=5)
         out_col = [
-            dbc.Row(html.H3(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
+            dbc.Row(html.H4(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
             dbc.Row([
                 dbc.Col([
-                    html.H4(ff.L.filter_desc),
+                    html.H5(ff.L.filter_desc),
                     dcc.Markdown('\n'.join(desc_L))
                 ], className='left-color'),
 
                 dbc.Col([
-                    html.H4(ff.R.filter_desc),
+                    html.H5(ff.R.filter_desc),
                     dcc.Markdown('\n'.join(desc_R))
                 ], className='right-color'),
             ]),
@@ -95,15 +95,16 @@ def MapView(ff, choro=None, className='comparison_map_graph', **kwargs):
     return dbc.Container(ograph, className='graphtab', id='map_view')
 
 
-def TableView(ff):
+def TableView(ff, title='Data',desc=''):
     if type(ff) is ComparisonFigureFactory:
         return AnalysisTableView(ff)
     
     # otherwise
     return dbc.Container(
         [
-            html.H4('Data'), 
-            ff.table() if hasattr(ff,'table') else html.P('??')
+            html.H4(title), 
+            html.P(desc),
+            ff.table()
         ], 
         className='table_view_container'
     )
