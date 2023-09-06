@@ -484,6 +484,7 @@ class ComparisonPanel(BaseComponent):
                 Output(self.mainmap,'figure',allow_duplicate=True),
                 Output(self.maintbl,'children',allow_duplicate=True),
                 Output(self.store,'data'),
+                # Output('layout-loading', 'children') # spinner
             ],
             [
                 Input(self.L.store, 'data'),
@@ -503,7 +504,7 @@ class ComparisonPanel(BaseComponent):
                 # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
                 otbl='loading...'
                 # logger.debug(tbldata)
-                return ofig,otbl,[Lstore,Rstore]
+                return ofig,otbl,[Lstore,Rstore]#,True
 
 
             

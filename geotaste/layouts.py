@@ -20,7 +20,6 @@ class GeotasteLayout(BaseComponent):
 
     def layout(self, params=None):
         return dbc.Container([
-            
             ## logo row
             dbc.Row([
                 html.Div([
@@ -33,7 +32,10 @@ class GeotasteLayout(BaseComponent):
                             className='logo-title'
                         ),
                     ], className='logo-title'),
-                ], className='logo')
+                ], className='logo'),
+
+
+
             ], className='navbar-row'),
 
             dbc.Row([
@@ -45,6 +47,8 @@ class GeotasteLayout(BaseComponent):
 
                 # and progress bar
                 # loading spinner
-                dcc.Loading(id='layout-loading', type='circle', fullscreen=True),
-            ], className='content-row')
+            ], className='content-row'),
+
+            # dcc.Loading(id='layout-loading', type='circle', fullscreen=True),
+
         ], className='layout-container')
