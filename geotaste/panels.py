@@ -151,16 +151,16 @@ class BookPanel(FilterPanel):
         return BookGenreCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_card(self):
-        return CreatorNameCard(name_context=self.name, **self._kwargs)
+    def author_card(self):
+        return AuthorNameCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_gender_card(self):
-        return CreatorGenderCard(name_context=self.name, **self._kwargs)
+    def author_gender_card(self):
+        return AuthorGenderCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_nationality_card(self):
-        return CreatorNationalityCard(name_context=self.name, **self._kwargs)
+    def author_nationality_card(self):
+        return AuthorNationalityCard(name_context=self.name, **self._kwargs)
     
     @cached_property
     def event_year_card(self): 
@@ -176,9 +176,9 @@ class BookPanel(FilterPanel):
             self.title_card,
             self.year_card,
             self.genre_card,
-            self.creator_card,
-            self.creator_gender_card,
-            self.creator_nationality_card,
+            self.author_card,
+            self.author_gender_card,
+            self.author_nationality_card,
             self.event_year_card,
             self.event_month_card,
         ]
@@ -339,8 +339,8 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def mainview(self):
         return dbc.Container([
-            self.mapview,
-            self.tblview
+            dbc.Container(self.mapview, id='mapview-container'),
+            dbc.Container(self.tblview, id='tblview-container')
         ],
         className='mainview',
         id='mainview'
@@ -348,7 +348,11 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def mainmap(self):
-        ofig = self.ff().plot_map()
+        return self.get_mainmap()
+    
+    def get_mainmap(self, ff=None):
+        if ff is None: ff=self.ff()
+        ofig = ff.plot_map()
         ofig.update_layout(autosize=True)
         ograph = dcc.Graph(
             figure=go.Figure(ofig), 
@@ -367,7 +371,7 @@ class ComparisonPanel(BaseComponent):
             ff.table() if hasattr(ff,'table') else html.P('??')
         ], 
         className='graphtab padded', 
-        id='table_view'
+        id='maintbl'
     )
     
     # def get_mainview(self, fdL={}, fdR={}, viewfunc = MapView):
@@ -425,92 +429,142 @@ class ComparisonPanel(BaseComponent):
         else:
             odata = self.ff().plot_map().data
         return odata
-    
-    def get_updated_fig(self, newfigdata, oldfig={}):
-        return {'data':newfigdata, 'layout':oldfig['layout']}
 
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
         @app.callback(
-            Output(self.tblview,'style',allow_duplicate=True),
+            Output('tblview-container','style',allow_duplicate=True),
             [
-                Input(self.L.body, "is_open"),
+                Input(self.L.showhide_btn, "n_clicks"),
+                Input(self.L.header_btn, 'n_clicks'),
+                Input(self.R.showhide_btn, "n_clicks"),
+                Input(self.R.header_btn, 'n_clicks'),
+                Input(self.L.body, 'is_open'),
                 Input(self.R.body, 'is_open'),
             ],
-            State(self.tblview,'style'),
+            [
+                State('tblview-container','style'),
+            ],
             prevent_initial_call=True
         )
-        def resize_tbl_view(L_open, R_open, style_d):
+        def resize_tbl_view(clk1,clk2,clk3,clk4, L_open,R_open, style_d):
+            logger.debug([clk1,clk2,clk3,clk4, L_open,R_open, style_d])
             if style_d is None: style_d={}
-            style_d['left']=f'{500 if R_open else (250 if L_open else 0)}px'
+            style_d['padding-left']=f'{501 if R_open else (251 if L_open else 0)}px'
+            logger.debug(f'--> {style_d}')
             return style_d
         
-        @app.callback(
-            [
-                Output(self.mapview,'style',allow_duplicate=True),
-                Output(self.tblview,'style',allow_duplicate=True)
-            ],
-            [
-                Input(self.mainview_tabs, 'active_tab')
-            ],
-            [
-                State(self.mainmap,'figure'),
-                State(self.mapview,'style'),
-                State(self.tblview,'style'),
-                State(self.L.body, "is_open"),
-                State(self.R.body, 'is_open'),
-            ],
-            prevent_initial_call=True
-        )
-        def change_tab(active_tab, oldfig, imap_style, itbl_style, L_open, R_open):
-            if imap_style is None: imap_style={}
-            if itbl_style is None: itbl_style={}
-            logger.debug([active_tab, imap_style, itbl_style, L_open, R_open])
-            if active_tab=='map':
-                ofig_style = {**imap_style, **STYLE_VIS}
-                otbl_style = {**itbl_style, **STYLE_INVIS}
-            else:
-                ofig_style = {**imap_style, **STYLE_INVIS}
-                otbl_style = {**itbl_style, **STYLE_VIS}
 
-            otbl_style['left']=f'{500 if R_open else (250 if L_open else 0)}px'
 
-            out = ofig_style, otbl_style
-            logger.debug(f'--> {out}')
-            return out
-
+        ## CHANGING DATA
+        
 
         @app.callback(
             [
-                Output(self.mainmap, 'figure',allow_duplicate=True),
+                Output(self.mainmap,'figure',allow_duplicate=True),
                 Output(self.maintbl,'children',allow_duplicate=True),
-                Output(self.store_views, 'data',allow_duplicate=True)
             ],
             [
                 Input(self.L.store, 'data'),
                 Input(self.R.store, 'data'),
+                # Input(self.mainview_tabs, 'active_tab')
             ],
             [
                 State(self.mainmap,'figure'),
-                State(self.store_views, 'data')
             ],
             prevent_initial_call=True
         )
-        def update_LR_data(Lstore, Rstore, oldfig, oldviews):
-            if oldviews is None: oldviews = {}
-            with Logwatch('returning informations'):
-                args_id=serialize([Lstore,Rstore])
-                if args_id in oldviews:
-                    logger.debug(f'{args_id} found in oldviews!')
-                    return oldviews[args_id] + [dash.no_update]
+        def update_LR_data(Lstore, Rstore, oldfig):
+            logger.debug([Lstore,Rstore])
+            with Logwatch('computing figdata on server'):
+                newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
+                ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
+                otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
+                # logger.debug(tbldata)
+                return ofig,otbl
+
+
+            
+            
+        ### SWITCHING TABS
+
+        @app.callback(
+            Output('tblview','style',allow_duplicate=True),
+            Input(self.mainview_tabs,'active_tab'),
+            State('tblview','style'),
+            prevent_initial_call=True
+        )
+        def switch_tab_simple(active_tab, style_d):
+            if style_d is None: style_d={}
+            return {**style_d, **(STYLE_INVIS if active_tab=='map' else STYLE_VIS)}
+
+
+        # @app.callback(
+        #     [
+        #         Output(self.mapview,'style',allow_duplicate=True),
+        #         Output(self.tblview,'style',allow_duplicate=True)
+        #     ],
+        #     [
+        #         Input(self.mainview_tabs, 'active_tab')
+        #     ],
+        #     [
+        #         State(self.mainmap,'figure'),
+        #         State(self.mapview,'style'),
+        #         State(self.tblview,'style'),
+        #         State(self.L.body, "is_open"),
+        #         State(self.R.body, 'is_open'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def change_tab(active_tab, oldfig, imap_style, itbl_style, L_open, R_open):
+        #     if imap_style is None: imap_style={}
+        #     if itbl_style is None: itbl_style={}
+        #     logger.debug([active_tab, imap_style, itbl_style, L_open, R_open])
+        #     if active_tab=='map':
+        #         ofig_style = {**imap_style, **STYLE_VIS}
+        #         otbl_style = {**itbl_style, **STYLE_INVIS}
+        #     else:
+        #         ofig_style = {**imap_style, **STYLE_INVIS}
+        #         otbl_style = {**itbl_style, **STYLE_VIS}
+
+        #     otbl_style['left']=f'{500 if R_open else (250 if L_open else 0)}px'
+
+        #     out = ofig_style, otbl_style
+        #     logger.debug(f'--> {out}')
+        #     return out
+
+
+        # @app.callback(
+        #     [
+        #         Output(self.mainmap, 'figure',allow_duplicate=True),
+        #         Output(self.maintbl,'children',allow_duplicate=True),
+        #         Output(self.store_views, 'data',allow_duplicate=True)
+        #     ],
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #     ],
+        #     [
+        #         State(self.mainmap,'figure'),
+        #         State(self.store_views, 'data')
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def update_LR_data(Lstore, Rstore, oldfig, oldviews):
+        #     if oldviews is None: oldviews = {}
+        #     with Logwatch('returning informations'):
+        #         args_id=serialize([Lstore,Rstore])
+        #         if args_id in oldviews:
+        #             logger.debug(f'{args_id} found in oldviews!')
+        #             return oldviews[args_id] + [dash.no_update]
                 
-                else:
-                    ofigdata,otbl = get_cached_views(args_id)
-                    oldviews[args_id] = [ofigdata,otbl]
-                    ofig = self.get_updated_fig(ofigdata,oldfig)
-                    return [ofig,otbl,oldviews]
+        #         else:
+        #             ofigdata,otbl = get_cached_views(args_id)
+        #             oldviews[args_id] = [ofigdata,otbl]
+        #             ofig = self.get_updated_fig(ofigdata,oldfig)
+        #             return [ofig,otbl,oldviews]
 
 
 

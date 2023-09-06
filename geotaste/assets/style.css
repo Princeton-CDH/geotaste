@@ -57,7 +57,7 @@ h5 { font-size:1.1rem;}
     min-height:50px;
     white-space:nowrap;
     position:absolute;
-    z-index: 1000;
+    z-index: 50;
     overflow-y: hidden;
     overflow-x: hidden;
     display:block;
@@ -113,7 +113,7 @@ h5 { font-size:1.1rem;}
     display:inline-block;
     width:fit-content;
     color:black;
-    background:rgba(225, 225, 225, 0.5);
+    background:rgba(225, 225, 225, 0.65);
 }
 
 #mainview_tabs .nav-link.link, #mainview_tabs .nav-link.visited {
@@ -131,7 +131,7 @@ h5 { font-size:1.1rem;}
     margin:0;
     display:inline-block;
     width:fit-content;
-    background:rgba(225, 225, 225, 0.85);
+    background:rgba(225, 225, 225, 1);
     font-weight:600;
 }
 
@@ -232,7 +232,7 @@ p {
 }
 
 .btn-link {
-    vertical-align: top;
+    vertical-align: inherit;
     margin: 0;
     padding: 0;
     text-decoration: none;
@@ -327,7 +327,9 @@ p {
 }
 
 
-
+button {
+    pointer-events: all;
+}
 
 .panel_L .card { 
     border: 1px solid rgba(64, 176, 166, 0.15);
@@ -337,16 +339,16 @@ p {
 
 .panel_R { 
     position:absolute;
-    display: none; 
     top:50px;
-    left:250px;
-    z-index:100;
+    left:251px;
+    z-index:50;
+    /* opacity:.7; */
 }
+/* .panel_R button {
+    pointer-events: none;
+} */
 
 
-button {
-    pointer-events: all;
-}
 
 .panel_L {
     /* float:left; */
@@ -379,9 +381,14 @@ button {
     font-style:normal;
 }
 
-.card-header {
-    height:35px;
+/* .card-header {
+    height:50px;
+    line-height:50px;
 }
+.card-body .card-header {
+    height:35px;
+    line-height:35px;
+} */
 
 .card-body .card-body {
     background: white;
@@ -441,13 +448,37 @@ button {
 }
 
 #mainview {
-    position:absolute;
-    left:0;
-    top:85px;
+    /* position:absolute; */
+    /* left:0; */
+    /* top:50px; */
     /* width:99vw; */
     /* height:100vw; */
     margin:0;
     padding:0;
     z-index:0;
  }
-#tblview {display:none; position:absolute;}
+#tblview-container {
+    position:absolute;
+    top:50px;
+    padding-left:501px;
+    /* height:100vh; */
+    height:fit-content;
+    width:100vw;
+    overflow-x: hidden;
+    z-index:10;
+}
+
+
+#tblview {
+    display:none;
+    z-index:100;
+    border:1px solid gray;
+    margin:0 5px 5px auto;
+    border-top:none;
+    /* width:fit-content; */
+    /* width */
+    padding:10px;
+    background-color: rgba(255,255,255,1); 
+}
+
+/* .dash-spreadsheet-menu div { margin:0 0 0 auto;} */

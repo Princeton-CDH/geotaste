@@ -368,7 +368,7 @@ def prune_when_dwelling_matches(df):
             numpossd[ii]=len(xdf)
 
     def declare_exact_miss(xdf):
-        logger.debug(f'for event {e}, a certain match was found, with {len(xdf)} possibilities')
+        logger.trace(f'for event {e}, a certain match was found, with {len(xdf)} possibilities')
         for ii in xdf.index: 
             matchtyped[ii]='Exact (excl.)'
             excludedd[ii]=True
@@ -390,7 +390,7 @@ def prune_when_dwelling_matches(df):
             (is_fuzzy_date_seq(d1,e1,d2) or is_fuzzy_date_seq(d1,e2,d2))
             for (d1,d2) in zip(xdf.dwelling_start, xdf.dwelling_end)
         ]]
-        logger.debug(f'found {len(match)} exact matches for {(e1, e2)} with options {list(zip(xdf.dwelling_start, xdf.dwelling_end))}')
+        logger.trace(f'found {len(match)} exact matches for {(e1, e2)} with options {list(zip(xdf.dwelling_start, xdf.dwelling_end))}')
         return match
 
     def declare_heuristic_miss(xdf, htype=''):
@@ -416,12 +416,12 @@ def prune_when_dwelling_matches(df):
         # if certainty is possible, i.e. we have dwelling records with start and end dates...
         edf_certain = edf.query('dwelling_start!="" & dwelling_end!=""')
         if len(edf_certain):
-            logger.debug(f'for event {e}, certainty is possible, with {len(edf_certain)} possibilities')
+            logger.trace(f'for event {e}, certainty is possible, with {len(edf_certain)} possibilities')
             # is there a match? a point where start or end of event is within range of dwelling start or end?
             edf_match = find_exact_matches(edf_certain)
             # if so, then add indices only for the match, not the other rows
             if len(edf_match):
-                logger.debug(f'for event {e}, a certain match was found, with {len(edf_match)} possibilities')
+                logger.trace(f'for event {e}, a certain match was found, with {len(edf_match)} possibilities')
                 declare_exact_match(edf_match)
                 declare_exact_miss(edf[~edf.index.isin(edf_match.index)])
                 continue
@@ -448,7 +448,7 @@ def prune_when_dwelling_matches(df):
             caveats.append('-distance')
 
         # otherwise, declare ambiguous?
-        logger.debug(f'for event {e}, still no matches found. using all {len(edf)} possible indices')
+        logger.trace(f'for event {e}, still no matches found. using all {len(edf)} possible indices')
         declare_ambiguous(edf,caveats=caveats)
         
     # add to dataframe a few stats on the dwelling matches

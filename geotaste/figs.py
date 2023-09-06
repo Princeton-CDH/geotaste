@@ -408,22 +408,22 @@ class BookYearFigure(BookFigure):
     min_series_val=1800
     max_series_val=1950
 
-class CreatorFigure(TypicalFigure):
-    records_name='creators'
-    drop_duplicates=('creator',)
+class AuthorFigure(TypicalFigure):
+    records_name='authors'
+    drop_duplicates=('author',)
 
-class CreatorGenderFigure(CreatorFigure):
+class AuthorGenderFigure(AuthorFigure):
     key='author_gender'
     quant=False
     vertical = False
     text='count'
 
 
-class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
+class AuthorNationalityFigure(NationalityFigure, AuthorFigure):
     key='author_nationalities'
     quant=False
 
-class CreatorDOBFigure(CreatorFigure):
+class AuthorDOBFigure(AuthorFigure):
     key = 'author_dob'
     quant = True
     min_series_val=1800
@@ -433,7 +433,7 @@ class MemberNameFigure(MemberFigure):
     key = 'member_name'
     drop_duplicates=('member',)
 
-class CreatorNameFigure(MemberFigure):
+class AuthorNameFigure(MemberFigure):
     key = 'author_name'
 
 
@@ -535,7 +535,7 @@ class LandmarksFigureFactory(FigureFactory):
         return fig
     
     def table(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.data)
+        return get_dash_table(self.data, cols=['landmark','address','arrond_id','lat','lon'])
 
 
 
@@ -1069,7 +1069,7 @@ def combine_figs(fig_new, fig_old):
     )
 
 
-def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=60):
+def get_dash_table(df, cols=[], page_size=5, height_table='80vh', height_cell=60):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -1093,7 +1093,7 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=6
             'whiteSpace': 'normal',
         },
         style_table={
-            'height':height_cell * 12, 
+            'height':400, 
             'overflowY':'auto',
             # 'display':'block',
             # 'flex-didrection':'column',

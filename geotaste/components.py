@@ -881,10 +881,10 @@ class BookTitleCard(FilterInputCard):
     figure_factory = BookTitleFigure
     # tooltip = 'Filter for particular books'
 
-class CreatorNameCard(FilterInputCard):
+class AuthorNameCard(FilterInputCard):
     desc = 'Author'
     placeholder = 'Select books by creator'
-    figure_factory = CreatorNameFigure
+    figure_factory = AuthorNameFigure
     # tooltip = 'Filter for particular authors'
 
 class BookYearCard(FilterSliderCard):
@@ -892,9 +892,9 @@ class BookYearCard(FilterSliderCard):
     figure_factory = BookYearFigure
     # tooltip = 'Filter by when the borrowed book was published'
 
-class CreatorGenderCard(FilterPlotCard):
+class AuthorGenderCard(FilterPlotCard):
     desc = 'Author gender'
-    figure_factory = CreatorGenderFigure
+    figure_factory = AuthorGenderFigure
     # tooltip = 'Filter by the gender of the author'
 
 class BookGenreCard(FilterPlotCard):
@@ -902,9 +902,9 @@ class BookGenreCard(FilterPlotCard):
     figure_factory = BookGenreFigure
     # tooltip = 'Filter by genre of book'
 
-class CreatorNationalityCard(FilterPlotCard):
+class AuthorNationalityCard(FilterPlotCard):
     desc = 'Author nationality'
-    figure_factory = CreatorNationalityFigure
+    figure_factory = AuthorNationalityFigure
     # tooltip = 'Filter by the nationality of the author'
 
     

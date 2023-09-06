@@ -105,12 +105,11 @@ def TableView(ff):
             html.H4('Data'), 
             ff.table() if hasattr(ff,'table') else html.P('??')
         ], 
-        className='graphtab padded', 
-        id='table_view'
+        className='table_view_container'
     )
 
 
-def get_ff_for_num_filters(self, fdL={}, fdR={}, **kwargs):
+def get_ff_for_num_filters(fdL={}, fdR={}, **kwargs):
     # get figure factory
     num_filters = len([x for x in [fdL,fdR] if x])
     # 3 cases
@@ -131,16 +130,31 @@ def get_ff_for_num_filters(self, fdL={}, fdR={}, **kwargs):
 def get_mainmap_figdata(fdL={}, fdR={}):
     if fdL or fdR:
         odata=[]
-        if fdL: odata.extend(CombinedFigureFactory(fdL=fdL).plot_map().data)
-        if fdR: odata.extend(CombinedFigureFactory(fdR=fdR).plot_map().data)
+        if fdL: odata.extend(CombinedFigureFactory(fdL).plot_map(color=LEFT_COLOR).data)
+        if fdR: odata.extend(CombinedFigureFactory(fdR).plot_map(color=RIGHT_COLOR).data)
     else:
         odata = LandmarksFigureFactory().plot_map().data
     return odata
 
 
-@cache_obj.memoize()
-def get_cached_views(fdLR):
-    fdL,fdR=unserialize(fdLR)
-    figdata = get_mainmap_figdata(fdL,fdR)
-    tbl=TableView(get_ff_for_num_filters(fdL,fdR))
-    return figdata,tbl
+# @cache_obj.memoize()
+# @cache
+def get_server_cached_view(args_id):
+    fdL,fdR,active_tab=unserialize(args_id)
+    ff=get_ff_for_num_filters(fdL,fdR)
+    if active_tab=='map':
+        return ff.plot_map()
+    else:
+        return TableView(ff)
+
+
+# @cache
+# def get_server_cached_view(args_id):
+#     fdL,fdR,active_tab=unserialize(args_id)
+#     ff = get_ff_for_num_filters(fdL,fdR)
+#     if active_tab=='map':
+#         return MapView(ff)
+#     else:
+#         return TableView(ff)
+    
+

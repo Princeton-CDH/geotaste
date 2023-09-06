@@ -189,8 +189,8 @@ from humanfriendly import format_timespan
 from loguru import logger
 logger.remove()
 logger.add(
-    # sink = sys.stderr,
-    open(PATHS.get('log','geotaste.log'), 'w'),
+    sink = sys.stderr,
+    # open(PATHS.get('log','geotaste.log'), 'w'),
     format=LOG_FORMAT, 
     level=LOG_LEVEL
 )

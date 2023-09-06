@@ -683,7 +683,7 @@ class CombinedDataset(Dataset):
         'dwelling_longitude':'lon',
         'dwelling_dist_from_SCO':'dwelling_distSCO',
     }
-    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond', 'creator']
+    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond_id', 'creator']
     cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
     cols_q = ['member_dob', 'member_dod', 'author_dob', 'author_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
@@ -850,7 +850,7 @@ def hover_tooltip(row):
     return f"""
 <a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_name} ({ifnanintstr(row.member_dob)} – {ifnanintstr(row.member_dod)})
 {row.dwelling_address}
-{row.dwelling_city} {row.arrond}ᵉ
+{row.dwelling_city} {row.arrond_id}ᵉ
 
 Member: {int(min(row.member_membership)) if row.member_membership else ''} – {int(max(row.member_membership)) if row.member_membership else ''}
 """.strip().replace('\n','<br>')
@@ -1163,7 +1163,7 @@ class MiniDwellingsDataset(DwellingsDataset):
     _cols_rename = dict(
         member='member',
         dwelling='dwelling',
-        arrond_id='arrond',
+        arrond_id='arrond_id',
         start_date='dwelling_start',
         end_date='dwelling_end',
         street_address='dwelling_address',
@@ -1196,7 +1196,7 @@ class MiniCombinedDataset(Dataset):
     ]
     _cols_q = ['member_dob','member_dod','lat','lon','book_year','author_dob','author_dod']
     _cols_sep_nonan=['member_membership']
-    _cols_pref=['member','event','dwelling','arrond','book','author']
+    _cols_pref=['member','event','dwelling','arrond_id','book','author']
 
     def gen(self, save=True):
         dfmembers = Members().data
