@@ -463,6 +463,8 @@ button {
     width:100vw;
     overflow-x: hidden;
     z-index:10;
+    pointer-events: none;
+
 }
 
 
@@ -475,7 +477,8 @@ button {
     /* width:fit-content; */
     /* width */
     padding:10px;
-    background-color: rgba(255,255,255,1); 
+    background-color: rgba(255,255,255,1);
+    pointer-events: all;
 }
 
 /* .dash-spreadsheet-menu div { margin:0 0 0 auto;} */
@@ -487,4 +490,8 @@ button {
 
 .right-color { 
     color: #7d6ab6; 
+}
+
+.distinctive-feature-h4 {
+    margin-top:1em;
 }

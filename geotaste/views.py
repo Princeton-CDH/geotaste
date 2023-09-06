@@ -22,6 +22,8 @@ def ArrondTableView(ff, Lstr='Filter 1', Rstr='Filter 2'):
 
 def AnalysisTableView(ff, **kwargs):
     odf = ff.compare(**kwargs)
+    fig = ff.plot_map(choro=True)
+    logger.debug(fig)
     odf['colpref'] = odf.col.apply(lambda x: x.split('_')[0])
 
     out = []
@@ -30,6 +32,7 @@ def AnalysisTableView(ff, **kwargs):
         desc_L,desc_R = describe_comparison(colpref_df, lim=5)
         out_col = [
             # dbc.Row(html.H4(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
+            
             dbc.Row([
                 dbc.Col([
                     html.H5(ff.L.filter_desc),
@@ -40,18 +43,20 @@ def AnalysisTableView(ff, **kwargs):
                     html.H5(ff.R.filter_desc),
                     dcc.Markdown('\n'.join(desc_R))
                 ], className='right-color'),
-            ]),
-
-            get_dash_table(colpref_df)
+            ])
         ]
+
+        out_col.append(dbc.Row(get_dash_table(colpref_df)))
 
         out_tab = dbc.Tab(dbc.Container(out_col), label=colpref.title())
 
         out.append(out_tab)
     
     return dbc.Container([
-        html.H4(f'Most distinctive features'),
-        dbc.Tabs(out)
+        dbc.Row(html.H4(f'Distinctive arrondissement map')),
+        dbc.Row(dcc.Graph(figure=fig, id='mini_arrond_analysis_map')),
+        dbc.Row(html.H4(f'Distinctive feature data', className='distinctive-feature-h4')),
+        dbc.Row(dbc.Tabs(out))
     ])
 
 def ArrondTableAndMapView(ff, Lstr='', Rstr=''):

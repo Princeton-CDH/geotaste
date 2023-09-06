@@ -816,8 +816,9 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 locations='arrond_id', 
                 color='perc_L->R',
                 center=MAP_CENTER,
-                zoom=14,
-                hover_data=[],
+                zoom=10,
+                # hover_data=[],
+                hover_data={'arrond_id':False, 'perc_L->R':False},
                 color_continuous_scale=[
                     Lcolor.hex,
                     midpoint.hex,
@@ -825,11 +826,11 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 ],
                 opacity=.5,
             )
-            customdata=np.stack((figdf['hover'],), axis=-1)
-            fig_choro.update_traces(
-                customdata=customdata,
-                hovertemplate="%{customdata[0]}"
-            )
+            # customdata=np.stack((figdf['hover'],), axis=-1)
+            # fig_choro.update_traces(
+            #     customdata=customdata,
+            #     hovertemplate="%{customdata[0]}"
+            # )
             fig_choro.update_mapboxes(
                 style='light',
                 layers=[
