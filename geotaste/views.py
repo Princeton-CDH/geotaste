@@ -165,4 +165,3 @@ def get_server_cached_view(args_id):
 #     else:
 #         return TableView(ff)
     
-

@@ -395,9 +395,13 @@ class FilterPlotCard(FilterCard):
         )
     
     def plot(self, filter_data={}, selected=[], **kwargs):
-        return self.ff(filter_data, selected=selected).plot(
-            color=self.color,
-            **kwargs
+        return plot_cache(
+            self.figure_factory,
+            serialize([
+                filter_data,
+                selected,
+                {**kwargs, **{'color':self.color}}
+            ])
         )
     
 
@@ -511,10 +515,22 @@ class FilterSliderCard(FilterPlotCard):
     def get_content(self, card_data={}, panel_data={}, selected=[], **kwargs):
         logger.debug(self.name)
         ograph = self.graph
-        ograph.figure = self.ff(
-            filter_data=panel_data if panel_data else card_data, 
-            selected=card_data if panel_data else selected      
-        ).plot(color=self.color, **kwargs)
+        filter_data=panel_data if panel_data else card_data
+        selected=card_data if panel_data else selected
+        
+        # ograph.figure = self.ff(
+        #     filter_data=panel_data if panel_data else card_data, 
+        #     selected=card_data if panel_data else selected      
+        # ).plot(color=self.color, **kwargs)
+
+        ograph.figure = plot_cache(
+            self.figure_factory,
+            serialize([
+                filter_data,
+                selected,
+                {**kwargs, **{'color':self.color}}
+            ])
+        )
         
         return dbc.Container([
             dbc.Row(self.graph),

@@ -1129,26 +1129,42 @@ def get_color(x):
 
 
 
-# @cache
-@cache_obj.memoize()
-def ff_cache(figure_class, serialized_data):
-    logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
-    filter_data,selected,kwargs = unserialize(serialized_data)
-    return figure_class(filter_data, selected, **kwargs)
+# # @cache
+# @cache_obj.memoize()
+# def ff_cache(figure_class, serialized_data):
+#     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
+#     filter_data,selected,kwargs = unserialize(serialized_data)
+#     return figure_class(filter_data, selected, **kwargs)
+
+
+# # @cache
+# @cache_obj.memoize()
+# def plot_cache(figure_class, serialized_data):
+#     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
+#     filter_data,existing_fig,kwargs = (
+#         unserialize(serialized_data) 
+#         if serialized_data 
+#         else ({},None,{})
+#     )
+#     ff = figure_class(filter_data)
+#     fig = ff.plot(**kwargs)
+#     if existing_fig: 
+#         fig = combine_figs(fig, existing_fig)
+#     return fig
+
+
 
 
 # @cache
 @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
-    logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
-    filter_data,existing_fig,kwargs = (
+    logger.debug(f'plot_cache({figure_class}, {serialized_data})')
+    filter_data,selected,kwargs = (
         unserialize(serialized_data) 
         if serialized_data 
         else ({},None,{})
     )
-    ff = figure_class(filter_data)
+    ff = figure_class(filter_data=filter_data, selected=selected)
     fig = ff.plot(**kwargs)
-    if existing_fig: 
-        fig = combine_figs(fig, existing_fig)
     return fig
 
