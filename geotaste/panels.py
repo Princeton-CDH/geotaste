@@ -282,7 +282,7 @@ class ComparisonPanel(BaseComponent):
         return dcc.Store(id=self.id('store_views'), data={})
     @cached_property
     def store(self):
-        return dcc.Store(id=self.id('store_views'), data=[])
+        return dcc.Store(id=self.id('store'), data=[])
 
     
     @cached_property
