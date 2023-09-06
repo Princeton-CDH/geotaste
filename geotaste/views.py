@@ -29,7 +29,7 @@ def AnalysisTableView(ff, **kwargs):
     for colpref, colpref_df in sorted(odf.groupby('colpref')):
         desc_L,desc_R = describe_comparison(colpref_df, lim=5)
         out_col = [
-            dbc.Row(html.H4(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
+            # dbc.Row(html.H4(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
             dbc.Row([
                 dbc.Col([
                     html.H5(ff.L.filter_desc),
@@ -49,7 +49,10 @@ def AnalysisTableView(ff, **kwargs):
 
         out.append(out_tab)
     
-    return dbc.Container(dbc.Tabs(out), className='graphtab padded')
+    return dbc.Container([
+        html.H4(f'Most distinctive features'),
+        dbc.Tabs(out)
+    ])
 
 def ArrondTableAndMapView(ff, Lstr='', Rstr=''):
     right_side=ArrondTableView(ff,Lstr=Lstr,Rstr=Rstr)

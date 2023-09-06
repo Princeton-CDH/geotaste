@@ -338,7 +338,10 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def tblview(self):
-        return dbc.Container(self.maintbl,id='tblview')
+        return dbc.Container(
+            self.maintbl,
+            id='tblview'
+        )
 
     @cached_property
     def mainview(self):
@@ -467,8 +470,8 @@ class ComparisonPanel(BaseComponent):
         @app.callback(
             Output(self.maintbl,'children',allow_duplicate=True),
             Input(self.store,'data'),
-            background=True,
-            manager=background_manager,
+            # background=True,
+            # manager=background_manager,
             prevent_initial_call=True
         )
         def redo_tbl(data):
