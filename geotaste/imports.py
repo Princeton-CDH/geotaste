@@ -169,7 +169,7 @@ cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 # cache = cache_obj.memoize()
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL, DiskcacheManager
-background_manager = DiskcacheManager(cache_obj)
+# background_manager = DiskcacheManager(cache_obj)
 BLANKDIV = html.Div(BLANKSTR)
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
