@@ -470,8 +470,8 @@ class ComparisonPanel(BaseComponent):
         @app.callback(
             Output(self.maintbl,'children',allow_duplicate=True),
             Input(self.store,'data'),
-            # background=True,
-            # manager=background_manager,
+            background=True,
+            manager=background_manager,
             prevent_initial_call=True
         )
         def redo_tbl(data):
