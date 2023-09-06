@@ -287,6 +287,8 @@ p {
 
 .panel { 
     width:250px;
+    min-width:250px;
+    max-width:250px;
     /* position:fixed; */
     /* z-index:100; */
     backdrop-filter: blur(3px);
@@ -361,7 +363,8 @@ button {
 
 .slider-input-num {
     width:4em;
-    border:1px solid silver;
+    /* border:1px solid silver; */
+    border:none;
     font-style: italic;
     font-size:.9em;
     text-align: left;
