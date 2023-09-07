@@ -788,6 +788,70 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
+    def plot_oddsratio_map(self, figdf, col='odds_ratio_log', **kwargs):
+        figdf=figdf.query('col=="arrond_id"')
+        from colour import Color
+        Lcolor = Color(LEFT_COLOR)
+        Rcolor = Color(RIGHT_COLOR)
+        midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+        midpoint.set_luminance(.95)
+
+        fig_choro = px.choropleth_mapbox(
+            figdf,
+            geojson=get_geojson_arrondissement(),
+            locations='col_val', 
+            color=col,
+            center=MAP_CENTER,
+            zoom=11,
+            # hover_data=[],
+            hover_data={'col_val':False, col:False},
+            color_continuous_scale=[
+                Lcolor.hex,
+                midpoint.hex,
+                Rcolor.hex,
+            ],
+            opacity=.5,
+        )
+        fig_choro.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below":"traces",
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ],
+                    "opacity":0.25
+                }
+            ]
+        )
+        
+        ofig = fig_choro
+
+        ofig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
+            coloraxis=dict(
+                colorbar=dict(
+                    orientation='h', 
+                    y=.01,
+                    lenmode='fraction',
+                    len=.5,
+                    thickness=10,
+                    xanchor='right',
+                    x=.99
+                )
+            )
+        )
+        return ofig
+
+
     def plot_map(self, choro=False, **kwargs):
         
         # prepare data
