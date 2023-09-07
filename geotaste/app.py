@@ -11,7 +11,10 @@ def get_app():
                 "content": "width=device-width, initial-scale=1"
             }],
             assets_folder=PATH_ASSETS,
+            suppress_callback_exceptions=True,
+            url_base_pathname='/sco/1/'
         )
+        app.app.config.suppress_callback_exceptions=True
         return app
 
 def get_server():
@@ -28,7 +31,7 @@ def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
             debug=debug,
             **kwargs
         )
-    return server
+    return app.app.server
 
 def run_debug(host=HOST, port=PORT, debug=True, **kwargs):
     return run(host=host,port=port,debug=debug,**kwargs)

@@ -2,23 +2,26 @@ from .imports import *
 from .views import *
 
 
-class FilterPanel(FilterComponent):
+class FilterPanel(FilterCard):
     unfiltered = UNFILTERED
 
-    @cached_property
-    def content(self,params=None):
-        return dbc.Container([self.store] + super().content.children)
+    # @cached_property
+    # def content(self,params=None):
+    #     return dbc.Container([self.store] + super().content.children)
     
-    @cached_property
-    def store_desc(self): 
-        return html.Span(
-            self.unfiltered,
-            id=self.id('query_str'), 
-            className='store_desc query_str', 
-            # placeholder=UNFILTERED, 
-            # value='', 
-            # style={'color':self.color}
-        )
+    # # @cached_property
+    # # def store_desc(self): 
+    # #     return html.Span(
+    # #         self.unfiltered,
+    # #         id=self.id('query_str'), 
+    # #         className='store_desc query_str', 
+    # #         # placeholder=UNFILTERED, 
+    # #         # value='', 
+    # #         # style={'color':self.color}
+    # #     )
+
+    def describe_filters(self, panel_data):
+        return filter_query_str(panel_data, human=True)
 
 
     def component_callbacks(self, app):
@@ -27,22 +30,22 @@ class FilterPanel(FilterComponent):
         # intersect and listen
         if self.store_subcomponents:
             @app.callback(
-                [
-                    Output(self.store, 'data', allow_duplicate=True),
-                    Output(self.store_desc, 'children', allow_duplicate=True),
-                ],
+                Output(self.store, 'data', allow_duplicate=True),
                 [
                     Input(card.store, 'data')
                     for card in self.store_subcomponents
                 ],
+                State(self.store, 'data'),
                 prevent_initial_call=True
-            #@logger.catch
             )
-            def subcomponent_filters_updated(*filters_d):
-                logger.debug('subcomponent filters updated')
-                filter_data = self.intersect_filters(*filters_d)
-                filter_desc = filter_query_str(filter_data, human=True) if filter_data else UNFILTERED
-                return filter_data, filter_desc
+            def subcomponent_filters_updated(*args):
+                filters_d=args[:-1]
+                old_data=args[-1]
+                intersected_filters=self.intersect_filters(*filters_d)
+                if old_data == intersected_filters: raise PreventUpdate # likely a clear
+                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
+                return intersected_filters
+
             
             @app.callback(
                 [
@@ -58,75 +61,28 @@ class FilterPanel(FilterComponent):
             )
             #@logger.catch
             def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
+                #???
                 if panel_filter_data is None: panel_filter_data={}
-                logger.debug(f'panel_filter_data_changed({panel_filter_data})')
-
-
-                logger.debug([card.key for card in self.store_panel_subcomponents])
-
+                logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
                 new_filter_data_l = [
-                    {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    # {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    panel_filter_data
                     for card in self.store_panel_subcomponents    
                 ]
-                out = [
-                    (dash.no_update if old==new else new)
-                    for old,new in zip(old_filter_data_l, new_filter_data_l)
-                ]
-                logger.trace(f'out from panel {pformat(out)}')
+                out = new_filter_data_l
+                # out = [
+                #     new if new!=old else dash.no_update
+                #     for new,old in zip(new_filter_data_l, old_filter_data_l)
+                # ]
+                logger.debug(f'sending updates for new store_panel --> {out}')
                 return out
             
 
             
 
-        
+  
 
-
-class FilterPlotPanel(FilterPanel):
-    def component_callbacks(self, app):
-        super().component_callbacks(app)
-
-        # if self.graph_subcomponents:
-        #     @app.callback(
-        #         [
-        #             Output(card.graph,'figure',allow_duplicate=True)
-        #             for card in self.graph_subcomponents
-        #         ],
-        #         [
-        #             Input(self.store, 'data'),
-        #         ],
-        #         [
-        #             State(card.body,'is_open')
-        #             for card in self.graph_subcomponents
-        #         ],
-        #         prevent_initial_call=True
-        #     )
-        #     def redraw_graphs_from_new_data(filter_data, *cards_open):
-        #         logger.debug(f'redraw_graphs_from_new_data({filter_data})')
-        #         filtered_keys = set(filter_data.keys())
-        #         existing_fig = None # @TODO?
-                
-        #         return [
-        #             (
-        #                 dash.no_update 
-        #                 if (
-        #                     card.key in filtered_keys 
-        #                     or 
-        #                     not cards_open[i]
-        #                 )
-        #                 else card.plot(
-        #                     filter_data, 
-        #                     existing_fig=existing_fig
-        #                 )
-        #             )
-        #             for i,card in enumerate(self.graph_subcomponents)
-        #         ]
-            
-class CollapsiblePanel(CollapsibleCard):
-    body_is_open = False
-    className='collapsible-panel'
-
-
-class MemberPanel(CollapsiblePanel):
+class MemberPanel(FilterPanel):
     name='MP'
     figure_factory = CombinedFigureFactory
     desc = 'Members of the library'
@@ -175,7 +131,7 @@ class MemberPanel(CollapsiblePanel):
     
     
 
-class BookPanel(CollapsiblePanel):
+class BookPanel(FilterPanel):
     name='BP'
     figure_factory = CombinedFigureFactory
     desc = 'Books they borrowed'
@@ -195,16 +151,16 @@ class BookPanel(CollapsiblePanel):
         return BookGenreCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_card(self):
-        return CreatorNameCard(name_context=self.name, **self._kwargs)
+    def author_card(self):
+        return AuthorNameCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_gender_card(self):
-        return CreatorGenderCard(name_context=self.name, **self._kwargs)
+    def author_gender_card(self):
+        return AuthorGenderCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_nationality_card(self):
-        return CreatorNationalityCard(name_context=self.name, **self._kwargs)
+    def author_nationality_card(self):
+        return AuthorNationalityCard(name_context=self.name, **self._kwargs)
     
     @cached_property
     def event_year_card(self): 
@@ -220,9 +176,9 @@ class BookPanel(CollapsiblePanel):
             self.title_card,
             self.year_card,
             self.genre_card,
-            self.creator_card,
-            self.creator_gender_card,
-            self.creator_nationality_card,
+            self.author_card,
+            self.author_gender_card,
+            self.author_nationality_card,
             self.event_year_card,
             self.event_month_card,
         ]
@@ -236,15 +192,31 @@ class BookPanel(CollapsiblePanel):
 
 
 
-class CombinedPanel(FilterPlotPanel):
+class CombinedPanel(FilterPanel):
+    name = 'CombinedPanel'
+    desc = 'Combined Panel'
     
     @cached_property
     def member_panel(self): 
-        return MemberPanel(name_context=self.name, **self._kwargs)
+        return MemberPanel(
+            name_context=self.name, 
+            desc=self.desc,
+            L_or_R=self.L_or_R,
+            color=self.color,
+            unfiltered=self.unfiltered,
+            **self._kwargs
+        )
 
     @cached_property
-    def book_panel(self):
-        return BookPanel(name_context=self.name, **self._kwargs)
+    def book_panel(self): 
+        return BookPanel(
+            name_context=self.name, 
+            desc=self.desc,
+            L_or_R=self.L_or_R,
+            color=self.color,
+            unfiltered=self.unfiltered,
+            **self._kwargs
+        )
     
 
     @cached_property
@@ -261,279 +233,441 @@ class CombinedPanel(FilterPlotPanel):
             for card in panel.subcomponents
             if hasattr(card,attrname)
         ]
+    
+
+
+
+class LeftPanel(CombinedPanel):
+    name='Filter 1'
+    desc='Filter 1'
+    L_or_R='L'
+    color=LEFT_COLOR
+    unfiltered=UNFILTERED_L
+
+class RightPanel(CombinedPanel):
+    name='Filter 2'
+    desc='Filter 2'
+    L_or_R='R'
+    color=RIGHT_COLOR
+    unfiltered=UNFILTERED_R
+
+
+
+
 
 
 
 class ComparisonPanel(BaseComponent):
     figure_factory = ComparisonFigureFactory
 
-    @cached_property
-    def storedesc_L_btn(self):
-        return dbc.Button(
-            html.Span(self.L.store_desc), 
-            color="link", 
-            n_clicks=0,
-            className='button_store_desc store_desc query_str',
-            id='storedesc_L_btn',
-            style={'text-align':'center', 'height':'100px'}
-        )
-    
-    @cached_property
-    def storedesc_R_btn(self):
-        return dbc.Button(
-            html.Span(self.R.store_desc), 
-            color="link", 
-            n_clicks=0,
-            className='button_store_desc store_desc query_str',
-            id='storedesc_R_btn',
-            style={'text-align':'center', 'height':'100px'}
-        )
-    
-    
-    @cached_property
-    def storedesc_R_col(self):
-        return dbc.Col(
-            self.storedesc_R_btn,
-            className='storedescs-col storedescs-col-R',
-            id='storedescs-col-R'
-        )
-    
-    @cached_property
-    def storedesc_L_col(self):
-        return dbc.Col(
-            self.storedesc_L_btn,
-            className='storedescs-col storedescs-col-L',
-            id='storedescs-col-L'
-        )
-    
+
+    def layout(self, params=None):
+        
+        return dbc.Container([
+            dbc.Container([
+                self.panel_L_col, 
+                self.panel_R_col,
+            ], className='filters-container'),
+
+            dbc.Container([
+                self.mainview_tabs,
+                self.mainview,
+                self.store,
+                self.store_views,
+            ], className='mainview-container')
+        ])
 
     @cached_property
-    def content_left_tabs(self,params=None):
-        spacercol=dbc.Col(
-            html.Nobr(), 
-            className='storedescs-inbetween',
-            width=1
-        )
-        return dbc.Container(
-            dbc.Row([
-                self.storedesc_L_col,
-                spacercol,
-                self.storedesc_R_col
-            ]), 
-            className='layout-toprow'
-        )
-    
-    
+    def store_views(self):
+        return dcc.Store(id=self.id('store_views'), data={})
     @cached_property
-    def content_right_tabs(self,params=None):
-        return dbc.Container([
-            dbc.Row(
-                self.graphtabs, 
-                className='content-tabs-row'
-            )
-        ])
+    def store(self):
+        return dcc.Store(id=self.id('store'), data=[])
+
     
-    @cached_property
-    def panel_R_col(self):
-        return dbc.Col(
-            self.R.layout(), 
-            width=6, 
-            className='panel_R panel',
-            id='panel_R'
-        )
     @cached_property
     def panel_L_col(self):
-        return dbc.Col(
-            self.L.layout(), 
-            width=6, 
+        return dbc.Container(
+            [dbc.Row(self.L.layout())], 
             className='panel_L panel',
             id='panel_L'
         )
     
     @cached_property
-    def content_main_row(self,params=None):
-        return dbc.Row(
-            [self.panel_L_col, self.panel_R_col],
-            className='layout-mainrow'
-        )
-    
-    @cached_property
-    def content_left(self,params=None):
-        return dbc.Collapse(
-            self.content_main_row, 
-            className='layout-leftcol',
-            is_open=False
-        )
-    
-    @cached_property
-    def content_right(self,params=None):
-        return dbc.Collapse(
-            dbc.Container(self.graphtab, className='content-belowtabs-row'),
-            className='layout-rightcol',
-            is_open=True
+    def panel_R_col(self):
+        return dbc.Container(
+            [dbc.Row(self.R.layout())],
+            className='panel_R panel',
+            id='panel_R'
         )
 
-    @cached_property
-    def content(self,params=None):
-        return dbc.Container([self.content_left, self.content_right])
-        
+
     @cached_property
     def subcomponents(self): return (self.L, self.R)
 
     @cached_property
     def L(self): 
-        return CombinedPanel(
-            name='L',
-            L_or_R='L', 
-            color=LEFT_COLOR,
-            desc='Left-hand Group Panel',
-            unfiltered=UNFILTERED_L
-        )
+        return LeftPanel()
     
     @cached_property
     def R(self): 
-        return CombinedPanel(
-            name='R',
-            L_or_R='R',
-            color=RIGHT_COLOR,
-            desc='Right-hand Group Panel',
-            unfiltered=UNFILTERED_R
-        )
-    
-    @cached_property
-    def graphtab_map(self):
-        return dbc.Tab(
-            children=[],
-            label='Map',
-            tab_id='map',
-        )
-    
-    @cached_property
-    def graphtab_data(self):
-        return dbc.Tab(
-            children=[],
-            label='Data',
-            tab_id='data',
-        )
-    
-    @cached_property
-    def graphtab_analysis(self):
-        return dbc.Tab(
-            children=[],
-            label='Analysis',
-            tab_id='analysis',
-        )
-    
-    
-    @cached_property
-    def graphtabs(self):
-        tabs = [
-            self.graphtab_map, 
-            self.graphtab_analysis
-        ]
-        active_tab = 'map'
+        return RightPanel()
         
-        return dbc.Tabs(
-            children=tabs, 
-            active_tab=active_tab,
-            className='graphtabs-container',
-            id='graphtabs'
-        )
 
     @cached_property
-    def graphtab_desc(self):
-        ## @TODO
-        return html.P(BLANK, className='graphtab_desc')
+    def mainview_tabs(self):
+        return dbc.Tabs(
+            [
+                dbc.Tab(
+                    label='Map', 
+                    tab_id='map'
+                ),
+
+                dbc.Tab(
+                    label='Analysis', 
+                    tab_id='table'
+                ),
+            ],
+            id='mainview_tabs',  
+            active_tab='map'
+        )
     
     @cached_property
-    def graphtab(self):
-        # default = html.Pre('Loading...')
-        # view = viewfunc()
-        view = MemberMapView(LandmarksFigureFactory())
-
+    def mapview(self):
+        return dbc.Container(self.mainmap,id='mapview')
+    
+    @cached_property
+    def tblview(self):
         return dbc.Container(
-            children=[view],
-            className='graphtab-div',
-            id=self.id('graphtab')
+            self.maintbl,
+            id='tblview'
         )
+
+    @cached_property
+    def mainview(self):
+        return dbc.Container([
+            dbc.Container(self.mapview, id='mapview-container'),
+            dbc.Container(self.tblview, id='tblview-container')
+        ],
+        className='mainview',
+        id='mainview'
+    )
+    
+    @cached_property
+    def mainmap(self):
+        return self.get_mainmap()
+    
+    def get_mainmap(self, ff=None):
+        if ff is None: ff=self.ff()
+        ofig = ff.plot_map()
+        ofig.update_layout(autosize=True)
+        ograph = dcc.Graph(
+            figure=go.Figure(ofig), 
+            className='comparison_map_graph',
+            config={'displayModeBar':False},
+            id='mainmap'
+        )
+        return ograph
+    
+    @cached_property
+    def maintbl(self):
+        ff = LandmarksFigureFactory()
+        return dbc.Container(
+        [
+            html.H4('Data'), 
+            ff.table() if hasattr(ff,'table') else html.P('??')
+        ], 
+        className='graphtab padded', 
+        id='maintbl'
+    )
+    
+    # def get_mainview(self, fdL={}, fdR={}, viewfunc = MapView):
+    #     # get figure factory
+    #     num_filters = len([x for x in [fdL,fdR] if x])
+    #     # 3 cases
+    #     if num_filters==0:
+    #         ff = LandmarksFigureFactory()
+
+    #     elif num_filters==1:
+    #         if fdL:
+    #             ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+    #         elif fdR:
+    #             ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+
+    #     elif num_filters == 2:
+    #         ff = ComparisonFigureFactory(fdL, fdR)
+
+    #     # return view
+    #     return dbc.Container(
+    #         dbc.Tabs(
+    #             [
+    #                 dbc.Tab(MapView(ff), label='Map', tab_id='map'),
+    #                 dbc.Tab(TableView(ff), label='Table', tab_id='table'),
+    #             ],
+    #             id='mainview_tabs',  
+    #             active_tab='map'
+    #         ),
+    #         className='viewfunc-container'
+    #     )
+
+    def ff(self, fdL={}, fdR={}, **kwargs):
+        # get figure factory
+        num_filters = len([x for x in [fdL,fdR] if x])
+        # 3 cases
+        if num_filters==0:
+            ff = LandmarksFigureFactory()
+
+        elif num_filters==1:
+            if fdL:
+                ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+            elif fdR:
+                ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+
+        elif num_filters == 2:
+            ff = ComparisonFigureFactory(fdL, fdR)
+
+        return ff
+
+    def get_mainmap_data(self, fdL={}, fdR={}):
+        if fdL or fdR:
+            odata=[]
+            if fdL: odata.extend(self.ff(fdL=fdL).plot_map().data)
+            if fdR: odata.extend(self.ff(fdR=fdR).plot_map().data)
+        else:
+            odata = self.ff().plot_map().data
+        return odata
+
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
+        # @app.callback(
+        #     Output('tblview-container','style',allow_duplicate=True),
+        #     [
+        #         Input(self.L.showhide_btn, "n_clicks"),
+        #         Input(self.L.header_btn, 'n_clicks'),
+        #         Input(self.R.showhide_btn, "n_clicks"),
+        #         Input(self.R.header_btn, 'n_clicks'),
+        #         Input(self.L.body, 'is_open'),
+        #         Input(self.R.body, 'is_open'),
+        #     ],
+        #     [
+        #         State('tblview-container','style'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def resize_tbl_view(clk1,clk2,clk3,clk4, L_open,R_open, style_d):
+        #     logger.debug([clk1,clk2,clk3,clk4, L_open,R_open, style_d])
+        #     if style_d is None: style_d={}
+        #     style_d['padding-left']=f'{501 if R_open else (251 if L_open else 0)}px'
+        #     logger.debug(f'--> {style_d}')
+        #     return style_d
+        
+
+
+        ## CHANGING DATA
+
+        @app.callback(
+            Output(self.maintbl,'children',allow_duplicate=True),
+            Input(self.store,'data'),
+            # background=True,
+            # manager=background_manager,
+            prevent_initial_call=True
+        )
+        def redo_tbl(data):
+            with Logwatch('running long callback computation'):
+                fdL,fdR=data
+                return get_server_cached_view(serialize([fdL,fdR,'table']))
+
         @app.callback(
             [
-                Output(self.content_left, 'is_open', allow_duplicate=True),                      # dropdowns open
-                # Output(self.storedesc_R_col, 'style', allow_duplicate=True),                     # whether right filter button visible
-                Output(self.panel_R_col, 'style', allow_duplicate=True),                         # whether right filter panel visible
-                Output(self.graphtab, 'children', allow_duplicate=True),   # actual content
+                Output(self.mainmap,'figure',allow_duplicate=True),
+                Output(self.maintbl,'children',allow_duplicate=True),
+                Output(self.store,'data'),
+                # Output('layout-loading', 'children') # spinner
             ],
             [
-                Input(self.L.store, 'data'),                               # any changes in left filter
-                Input(self.R.store, 'data'),                               # any in right filter
-                Input(self.storedesc_L_btn, "n_clicks"),
-                Input(self.storedesc_R_btn, "n_clicks"),
-                Input(self.graphtabs, 'active_tab')
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+                # Input(self.mainview_tabs, 'active_tab')
             ],
             [
-                State(self.content_left, 'is_open'),
-                State(self.L.store, 'data'),
-                State(self.R.store, 'data'),
-
+                State(self.mainmap,'figure'),
             ],
             prevent_initial_call=True
         )
-        def determine_dropdown_and_view(
-                fdL, 
-                fdR, 
-                storedesc_L_clicked, 
-                storedesc_R_clicked, 
-                active_tab, 
-                filter_dropdown_open_now,
-                old_fdL,
-                old_fdR,
-                ):
-            input_ids = [
-                self.L.store.id, 
-                self.R.store.id, 
-                self.storedesc_L_btn.id, 
-                self.storedesc_R_btn.id, 
-                self.graphtabs.id
-            ]
-            outs = [
-                dash.no_update,  # both dropdown vis
-                # dash.no_update,  # right vis
-                # dash.no_update,  # right vis
-                # STYLE_VIS if fdL and storedesc_R_clicked else STYLE_VIS,
-                # STYLE_VIS,
-                STYLE_VIS if fdL and storedesc_R_clicked else STYLE_INVIS,
-                dash.no_update   # content
-            ]
+        def update_LR_data(Lstore, Rstore, oldfig):
+            logger.debug([Lstore,Rstore])
+            with Logwatch('computing figdata on server'):
+                newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
+                ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
+                # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
+                otbl='loading...'
+                # logger.debug(tbldata)
+                return ofig,otbl,[Lstore,Rstore]#,True
+
+
             
-            logger.debug(ctx.triggered)
-            logger.debug(input_ids)
-
-            # if we clicked the Left or Right top Filter tab button
-            if ctx.triggered_id in {self.storedesc_L_btn.id, self.storedesc_R_btn.id}:
-                if storedesc_R_clicked!=1:
-                    outs[0]=not filter_dropdown_open_now
-
-            # if the tab changed -- or the filters changed
-            elif ctx.triggered_id in {self.graphtabs.id, self.L.store.id, self.R.store.id}:
-
-                # make sure change actually happened?
-                args = [[active_tab],[],fdL,fdR]
-                logger.debug(['switchtab'] + args)
-                logger.debug([fdL, old_fdL])
-                logger.debug([fdR, old_fdR])
-                serialized_data = serialize(args)
-                outs[-1] = graphtab_cache(serialized_data)
-
-                # also collapse dropdowns if tab changed
-                # if ctx.triggered_id == self.graphtabs.id:
-                    # outs[0] = False
             
-            # logger.debug(outs)
-            return outs
+        ### SWITCHING TABS
+
+        @app.callback(
+            Output('tblview','style',allow_duplicate=True),
+            Input(self.mainview_tabs,'active_tab'),
+            State('tblview','style'),
+            prevent_initial_call=True
+        )
+        def switch_tab_simple(active_tab, style_d):
+            if style_d is None: style_d={}
+            return {**style_d, **(STYLE_INVIS if active_tab=='map' else STYLE_VIS)}
+
+
+        # @app.callback(
+        #     [
+        #         Output(self.mapview,'style',allow_duplicate=True),
+        #         Output(self.tblview,'style',allow_duplicate=True)
+        #     ],
+        #     [
+        #         Input(self.mainview_tabs, 'active_tab')
+        #     ],
+        #     [
+        #         State(self.mainmap,'figure'),
+        #         State(self.mapview,'style'),
+        #         State(self.tblview,'style'),
+        #         State(self.L.body, "is_open"),
+        #         State(self.R.body, 'is_open'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def change_tab(active_tab, oldfig, imap_style, itbl_style, L_open, R_open):
+        #     if imap_style is None: imap_style={}
+        #     if itbl_style is None: itbl_style={}
+        #     logger.debug([active_tab, imap_style, itbl_style, L_open, R_open])
+        #     if active_tab=='map':
+        #         ofig_style = {**imap_style, **STYLE_VIS}
+        #         otbl_style = {**itbl_style, **STYLE_INVIS}
+        #     else:
+        #         ofig_style = {**imap_style, **STYLE_INVIS}
+        #         otbl_style = {**itbl_style, **STYLE_VIS}
+
+        #     otbl_style['left']=f'{500 if R_open else (250 if L_open else 0)}px'
+
+        #     out = ofig_style, otbl_style
+        #     logger.debug(f'--> {out}')
+        #     return out
+
+
+        # @app.callback(
+        #     [
+        #         Output(self.mainmap, 'figure',allow_duplicate=True),
+        #         Output(self.maintbl,'children',allow_duplicate=True),
+        #         Output(self.store_views, 'data',allow_duplicate=True)
+        #     ],
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #     ],
+        #     [
+        #         State(self.mainmap,'figure'),
+        #         State(self.store_views, 'data')
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def update_LR_data(Lstore, Rstore, oldfig, oldviews):
+        #     if oldviews is None: oldviews = {}
+        #     with Logwatch('returning informations'):
+        #         args_id=serialize([Lstore,Rstore])
+        #         if args_id in oldviews:
+        #             logger.debug(f'{args_id} found in oldviews!')
+        #             return oldviews[args_id] + [dash.no_update]
+                
+        #         else:
+        #             ofigdata,otbl = get_cached_views(args_id)
+        #             oldviews[args_id] = [ofigdata,otbl]
+        #             ofig = self.get_updated_fig(ofigdata,oldfig)
+        #             return [ofig,otbl,oldviews]
+
+
+
+    # def component_callbacks(self, app):
+    #     super().component_callbacks(app)
+
+    #     @app.callback(
+    #         [
+    #             Output(self.content_left, 'is_open', allow_duplicate=True),                      # dropdowns open
+    #             # Output(self.storedesc_R_col, 'style', allow_duplicate=True),                     # whether right filter button visible
+    #             Output(self.panel_R_col, 'style', allow_duplicate=True),                         # whether right filter panel visible
+    #             Output(self.graphtab, 'children', allow_duplicate=True),   # actual content
+    #             Output('layout-loading', 'children') # spinner
+    #         ],
+    #         [
+    #             Input(self.L.store, 'data'),                               # any changes in left filter
+    #             Input(self.R.store, 'data'),                               # any in right filter
+    #             Input(self.storedesc_L_btn, "n_clicks"),
+    #             Input(self.storedesc_R_btn, "n_clicks"),
+    #             Input(self.graphtabs, 'active_tab')
+    #         ],
+    #         [
+    #             State(self.content_left, 'is_open'),
+    #             State(self.L.store, 'data'),
+    #             State(self.R.store, 'data'),
+
+    #         ],
+    #         prevent_initial_call=True
+    #     )
+    #     def determine_dropdown_and_view(
+    #             fdL, 
+    #             fdR, 
+    #             storedesc_L_clicked, 
+    #             storedesc_R_clicked, 
+    #             active_tab, 
+    #             filter_dropdown_open_now,
+    #             old_fdL,
+    #             old_fdR,
+    #             ):
+    #         input_ids = [
+    #             self.L.store.id, 
+    #             self.R.store.id, 
+    #             self.storedesc_L_btn.id, 
+    #             self.storedesc_R_btn.id, 
+    #             self.graphtabs.id
+    #         ]
+    #         outs = [
+    #             dash.no_update,  # both dropdown vis
+    #             # dash.no_update,  # right vis
+    #             # dash.no_update,  # right vis
+    #             # STYLE_VIS if fdL and storedesc_R_clicked else STYLE_VIS,
+    #             # STYLE_VIS,
+    #             STYLE_VIS if fdL and storedesc_R_clicked else STYLE_INVIS,
+    #             dash.no_update   # content,
+    #         ]
+            
+    #         logger.debug(ctx.triggered)
+    #         logger.debug(input_ids)
+
+    #         # if we clicked the Left or Right top Filter tab button
+    #         if ctx.triggered_id in {self.storedesc_L_btn.id, self.storedesc_R_btn.id}:
+    #             if storedesc_R_clicked!=1:
+    #                 outs[0]=not filter_dropdown_open_now
+
+    #         # if the tab changed -- or the filters changed
+    #         elif ctx.triggered_id in {self.graphtabs.id, self.L.store.id, self.R.store.id}:
+
+    #             # make sure change actually happened?
+    #             args = [[active_tab],[],fdL,fdR]
+    #             logger.debug(['switchtab'] + args)
+    #             logger.debug([fdL, old_fdL])
+    #             logger.debug([fdR, old_fdR])
+    #             serialized_data = serialize(args)
+    #             outs[-1] = graphtab_cache(serialized_data)
+
+    #             # also collapse dropdowns if tab changed
+    #             # if ctx.triggered_id == self.graphtabs.id:
+    #                 # outs[0] = False
+            
+    #         # logger.debug(outs)
+    #         return outs + [True]
+
 
 
         
@@ -570,12 +704,12 @@ def graphtab_cache(serialized_data):
     return dbc.Container(viewfunc(ff), className='viewfunc-container')
 
 
-def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filters=1):
+def determine_view(tab_ids_1=[], tab_ids_2=[], default=MapView, num_filters=1):
     tab_ids_1_set=set(tab_ids_1)
     if 'data' in tab_ids_1_set:
         return MemberTableView
     elif 'map' in tab_ids_1_set:
-        return MemberMapView
+        return MapView
     elif 'analysis' in tab_ids_1_set:
         return AnalysisTableView if num_filters>1 else MemberTableView
     

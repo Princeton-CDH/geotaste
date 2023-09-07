@@ -18,6 +18,7 @@ class Dataset:
     fillna:object = ''
     cols_q:list = []
     filter_data:dict = {}
+    prefcols:list = []
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
         if path: self.path=path
@@ -42,22 +43,25 @@ class Dataset:
         # read from saved file
         df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
+    
+    def postproc_df(self, df=None):
+        return postproc_df(
+            df=df if df is not None else self.data,
+            prefcols=self.prefcols,    
+            cols_rename=self.cols_rename
+        )
 
     @cached_property
     def data(self):  
         df=self.read_df()
-        if self.fillna is not None: df=df.fillna(self.fillna)
-
-        cols = [c for c in df.columns if not self.cols or c in set(self.cols)]
-        cols_sep = [c for c in self.cols_sep if c in set(cols)]
-        logger.trace(f'columns in {self.path} are {cols}')
-
-
-        for c in cols_sep: 
-            df[c]=df[c].fillna('').apply(lambda x: [y.strip() for y in str(x).split(self.sep)])
-        if cols: df=df[cols]
-        if self.cols_rename: df = df.rename(self.cols_rename, axis=1)
-        return df
+        return postproc_df(
+            df,
+            cols=self.cols_rename if self.cols_rename else self.cols,
+            cols_sep=self.cols_sep,
+            cols_q=self.cols_q,
+            sep=self.sep,
+            fillna=self.fillna
+        )
     
     def filter(self, filter_data={}, **other_filter_data):
         return intersect_filters(*[
@@ -162,6 +166,11 @@ class MembersDataset(Dataset):
     cols_q = [
         'birth_year',
         'death_year',
+        'membership_years'
+    ]
+    cols_pref = [
+        'member',
+        'member_nicename',
     ]
     
 
@@ -169,11 +178,8 @@ class MembersDataset(Dataset):
     def data(self):
         df=super().data
         df['member'] = df['uri'].apply(get_member_id)
-        df['membership_years'] = [[int(y) for y in x if y] for x in df['membership_years']]
-        
-        # other
-        df = df.set_index('member')
-        return df
+        df['nice_name'] = df['sort_name'].apply(to_name_nice)
+        return postproc_df(df,cols_pref=self.cols_pref)
 
 
 
@@ -215,22 +221,28 @@ class DwellingsDataset(Dataset):
     # cols_id=['member','street_address','city','postal_code','start_date','end_date']
     cols_id = ['member', 'latitude', 'longitude','start_date','end_date']
 
+    cols_pref=[
+        'dwelling',
+        'member',
+        'arrond_id',
+        'street_address',
+        'city',
+        'postal_code',
+        'latitude',
+        'longitude',
+        'start_date',
+        'end_date'
+    ]
+
     @cached_property
     def data(self):
         df=super().data
         df['member'] = df['member_uri'].apply(get_member_id)
-        df['arrond_id']=df['arrrondissement'].apply(lambda x: '' if not x else str(int(x)))
-        df['dist_from_SCO'] = [
-            geodist(latlon, LATLON_SCO, unit='km')
-            for latlon in zip(df.latitude, df.longitude)
-        ]
-        df['desc'] = df.apply(get_dwelling_desc, axis=1)
         df['dwelling'] = [self.sep.join(str(x) for x in l) for l in df[self.cols_id].values]
-        # logger.debug(df.dwelling)
-        # logger.debug([len(df),'len df1'])
-        # logger.debug(df.dwelling.value_counts())
-        # df=df.drop_duplicates('dwelling')
-        return df.set_index('dwelling')
+        df['arrond_id']=df['arrrondissement'].apply(lambda x: '' if not x else str(int(x)))
+        return postproc_df(df,cols_pref=self.cols_pref)
+        
+        
 
     def get_member(self, member):
         return self.data[self.data['member'] == member]
@@ -283,7 +295,6 @@ class BooksDataset(Dataset):
         'uri',
         'title',
         'genre',
-        'genre',
         'author',
         'editor',
         'translator',
@@ -312,19 +323,16 @@ class BooksDataset(Dataset):
         'photographer',
         'circulation_years',
         'genre'
-        'circulation_years',
-        'genre'
     ]
 
-    cols_q = ['year', 'borrow_count', 'purchase_count']
-
-    cols_q = ['year', 'borrow_count', 'purchase_count']
+    cols_q = ['year', 'borrow_count', 'purchase_count','circulation_years']
+    cols_pref = ['book','title','author','year','genre']
 
     @cached_property
     def data(self):
         df=super().data
         df['book']=df.uri.apply(lambda x: x.split('/books/',1)[1][:-1] if '/books/' in x else '')
-        return df.set_index('book')
+        return postproc_df(df, cols_pref=self.cols_pref)
 
 
 
@@ -359,7 +367,7 @@ class CreatorsDataset(Dataset):
         # 'Key',
         'Gender',
         'Nationality',
-        'Language',
+        # 'Language',
         'Birth Date',
         'Death Date',
         # 'LoC Name',
@@ -381,40 +389,29 @@ class CreatorsDataset(Dataset):
         # 'Wikipedia URL',
         # 'WorldCat Identity URL'
     ]
+    cols_pref = ['creator', 'gender','nationality','birth_date','end_date']
+    cols_sep = ['Nationality']
     
     @cached_property
     def data(self):
-        def reformat_nation(x):
-            x=x.strip()
-            if ' - ' in x:
-                x=x.split(' - ',1)[-1]
-            if x.endswith('-'): x=x[:-1]
-            return [x.strip()]
-
-        def reformat_nation(x):
-            x=x.strip()
-            if ' - ' in x:
-                x=x.split(' - ',1)[-1]
-            if x.endswith('-'): x=x[:-1]
-            return [x.strip()]
-
         df=super().data
         df.columns = [c.lower().replace(' ','_') for c in df]
-        df['creator']=df['sort_name']  # needs to be name for now  .apply(to_name_id)
-        df['nationalities'] = df['nationality'].apply(reformat_nation)
-        df.columns = [c.lower().replace(' ','_') for c in df]
-        df['creator']=df['sort_name']  # needs to be name for now  .apply(to_name_id)
-        df['nationalities'] = df['nationality'].apply(reformat_nation)
-        return df.set_index('creator')
+        df['creator']=df['sort_name'].apply(to_name_id)
+        df['nice_name']=df['sort_name'].apply(to_name_nice)
+        odf=postproc_df(df, cols_pref=self.cols_pref)
+        return odf.rename(columns={'nationality':'nationalities'})
 
 
 def to_name_id(x):
     x=''.join(y for y in x if y.isalpha() or y==' ')
     return x.strip().replace(' ','-').lower()
-def to_name_id(x):
-    x=''.join(y for y in x if y.isalpha() or y==' ')
-    return x.strip().replace(' ','-').lower()
 
+def to_name_nice(x):
+    if not ',' in x: return x
+    a,b=x.split(',', 1)
+    ln=a.strip()
+    fn=b.split()[0].strip()
+    return f'{fn} {ln}'
 
 class CreationsDataset(Dataset):
     cols_creators = [
@@ -468,7 +465,7 @@ class CreationsDataset(Dataset):
 
 
 @cache
-def Books(): return BooksDataset()
+def Books(): return MiniBooksDataset()
 
 
 
@@ -538,16 +535,7 @@ class EventsDataset(Dataset):
         'member_sort_names'
     ]
 
-    @cached_property
-    def data(self):
-        df=super().data
-        df['event']=[f'E{i+1:05}' for i in range(len(df))]
-        df['start_year'] = pd.to_numeric([estr[:4] for estr in df['start_date'].apply(str)], errors='coerce')
-        df['start_month'] = pd.to_numeric([
-            x[5:7] if len(x)>=7 and x[:4].isdigit() and x[4]=='-' else None
-            for x in df['start_date'].apply(str)
-        ], errors='coerce')
-        return df.set_index('event')
+    cols_pref = ['event']
 
     @cached_property
     def data(self):
@@ -558,81 +546,15 @@ class EventsDataset(Dataset):
             x[5:7] if len(x)>=7 and x[:4].isdigit() and x[4]=='-' else None
             for x in df['start_date'].apply(str)
         ], errors='coerce')
-        return df.set_index('event')
+        return postproc_df(df,cols_pref=self.cols_pref)
 
-
-
-class MemberEventsDataset(EventsDataset):
-    cols_events = [
-        'event_type',
-        'start_date',
-        'end_date'
-    ]
-    
-    @cached_property
-    def data(self):
-        l=[]
-        for event,row in super().data.iterrows():
-            for i,member_uri in enumerate(row['member_uris']):
-                d={
-                    'member':get_member_id(member_uri),
-                    'book':get_book_id(row['item_uri']),
-                    'event':event,
-                    **dict(row)
-                }
-                l.append(d)
-        df_events = pd.DataFrame(l)
-        return df_events.merge(
-            Members().data, 
-            on='member', 
-            how='outer',
-            suffixes=('','_member')
-        ).fillna('')
 
 @cache
-def MemberEvents(): return MemberEventsDataset()
-
-@cache
-def Events(): return EventsDataset()
+def Events(): return MiniEventsDataset()
 
 
 
 
-
-
-
-class MemberEventDwellingsDataset(MemberEventsDataset):
-    @cached_property
-    def data(self):
-        ld=[]
-        df=super().data
-        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings (part 1)'):
-            matches, reason = find_dwelling_ids(row)
-            for match in matches:
-                match_d=Dwellings().data.loc[match] if match else {}
-                d={
-                    'dwelling':match,
-                    'dwelling_reason':reason,
-                    'dwelling_numposs':len(matches),
-                    **{f'dwelling_{k}':v for k,v in match_d.items()},
-                    **dict(row),
-                }
-        ld=[]
-        df=super().data
-        for i,row in tqdm(list(df.iterrows()), desc='Finding dwellings (part 2)'):
-            matches, reason = find_dwelling_ids(row)
-            for match in matches:
-                match_d=Dwellings().data.loc[match] if match else {}
-                d={
-                    'dwelling':match,
-                    'dwelling_reason':reason,
-                    'dwelling_numposs':len(matches),
-                    **{f'dwelling_{k}':v for k,v in match_d.items()},
-                    **dict(row),
-                }
-                ld.append(d)
-        return pd.DataFrame(ld)
-    
 
 
 
@@ -741,7 +663,7 @@ class CombinedDataset(Dataset):
         'death_year':'member_dod',
         'gender':'member_gender',
         'nationalities':'member_nationalities',
-        'event':'borrow',
+        'event':'event',
         'book':'book',
         'dwelling':'dwelling',
         'dwelling_arrond_id':'arrond_id',
@@ -761,8 +683,8 @@ class CombinedDataset(Dataset):
         'dwelling_longitude':'lon',
         'dwelling_dist_from_SCO':'dwelling_distSCO',
     }
-    coltype_sort = ['member', 'borrow', 'book', 'dwelling', 'arrond', 'creator']
-    cols_prefix = ['member', 'borrow', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
+    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond_id', 'creator']
+    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
 
     cols_q = ['member_dob', 'member_dod', 'author_dob', 'author_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
     cols_sep = ['member_nationalities', 'author_nationalities', 'member_membership', 'book_genre']
@@ -815,14 +737,8 @@ class CombinedDataset(Dataset):
             )
             if row.dwelling
         }
-        def newnicename(x): 
-            if not ',' in x: return x
-            a,b=x.split(',', 1)
-            ln=a.strip()
-            fn=b.split()[0].strip()
-            return f'{fn} {ln}'
 
-        odf['member_nicename'] = odf['member_name'].apply(newnicename)
+        odf['member_nicename'] = odf['member_name'].apply(to_name_nice)
         odf['hover_tooltip'] = [tooltip_d.get(dw,'') for dw in odf.dwelling]
         if save: odf.to_pickle(self.path)
         return odf
@@ -832,9 +748,7 @@ class CombinedDataset(Dataset):
         # need to gen?
         if force or not os.path.exists(self.path):
             return self.gen(save=save)
-        # otherwise load
-        with Logwatch('reading pickled dataset'):
-            return pd.read_pickle(self.path)
+        return pd.read_pickle(self.path)
         
     @cached_property
     def data(self): 
@@ -853,19 +767,6 @@ class CombinedDataset(Dataset):
             multiline=False,
             plural_cols=self.cols_sep
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -927,15 +828,13 @@ def get_all_arrond_ids():
 
 
 @cache
-def Members(): return MembersDataset()
+def Members(): return MiniMembersDataset()
 @cache
-def Dwellings(): return DwellingsDataset()
-@cache
-def MemberEventDwellings(): return MemberEventDwellingsDataset()
+def Dwellings(): return MiniDwellingsDataset()
 @cache
 def Combined(): 
     logger.debug('Combined()')
-    return CombinedDataset()
+    return MiniCombinedDataset()
 
 
 @cache
@@ -947,7 +846,18 @@ def Landmarks(): return LandmarksDataset()
 
 #### other funcs
 
-def hover_tooltip(row, bdf):
+def hover_tooltip(row):
+    return f"""
+<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_name} ({ifnanintstr(row.member_dob)} – {ifnanintstr(row.member_dod)})
+{row.dwelling_address}
+{row.dwelling_city} {row.arrond_id}ᵉ
+
+Member: {int(min(row.member_membership)) if row.member_membership else ''} – {int(max(row.member_membership)) if row.member_membership else ''}
+""".strip().replace('\n','<br>')
+
+
+
+def hover_tooltip_maximalist(row, bdf):
     UNKNOWN = ''
     def v(x): return x if x else UNKNOWN
     
@@ -1027,3 +937,307 @@ def determine_arrond(lat, lon, default='NA'):
     
     # if none found, return default
     return default
+
+
+
+
+
+
+
+
+
+#####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class MiniMembersDataset(MembersDataset):
+    _cols_rename = {
+        'member':'member',
+        'nice_name':'member_name',
+        'title':'member_title',
+        'gender':'member_gender',
+        'membership_years':'member_membership',
+        'birth_year':'member_dob',
+        'death_year':'member_dod',
+        'gender':'member_gender',
+        'nationalities':'member_nationalities',
+    }
+
+    @cached_property
+    def data(self):
+        odf=postproc_df(super().data, self._cols_rename)
+        for c in ['member_dob','member_dod']:
+            odf[c]=odf[c].apply(lambda x: int(x) if x else x)
+        return odf
+    
+
+
+
+
+
+
+
+
+
+
+class MiniBooksDataset(BooksDataset):
+    ## ONLY AUTHORS
+    _cols_rename={
+        'book':'book',
+        'author':'author',
+        'author_nice_name':'author_name',
+        'title':'book_title',
+        'year':'book_year',
+        'genre':'book_genre',
+        'format':'book_format',
+        'circulation_years':'book_circulated',
+        'borrow_count':'book_numborrow',
+        'author_birth_date':'author_dob',
+        'author_death_date':'author_dod',
+        'author_gender':'author_gender',
+        'author_nationalities':'author_nationalities',
+    }
+
+    @cached_property
+    def data(self):
+        df=super().data
+        dfau=CreatorsDataset().data.set_index('creator')
+        ld=[]
+        for i,row in df.iterrows():
+            for author in row.author if row.author else ['']:
+                d=dict(row)
+                aid=d['author']=to_name_id(author)
+                try:
+                    for k,v in dict(dfau.loc[aid]).items():
+                        d[f'author_{k}']=v
+                except KeyError:
+                    pass
+                ld.append(d)
+        odf=pd.DataFrame(ld)
+        odf=postproc_df(odf, cols=self._cols_rename, cols_q=['author_dob','book_year'])
+        odf['author_nationalities']=odf['author_nationalities'].apply(
+            lambda x: [] if x is np.nan else x
+        )
+        odf['author_gender']=odf['author_gender'].fillna('')
+        odf['author_name']=odf['author_name'].fillna('')
+        return odf
+
+
+
+
+
+
+
+
+
+
+class MiniEventsDataset(Dataset):
+    only_borrows = True
+
+    @cached_property
+    def data(self):
+        # disaggregate EventsDataset by member_uris and get books too
+        ld=[]
+        for i,row in EventsDataset().data.iterrows():
+            if self.only_borrows and row.event_type!='Borrow': continue
+            for i,member_uri in enumerate(row['member_uris']):
+                d={
+                    'event':row.event,
+                    'event_type':row.event_type,
+                    'member':get_member_id(member_uri),
+                    'book':get_book_id(row.item_uri),
+                    'event_start':row.start_date,
+                    'event_end':row.end_date,
+                    'event_year':str(ifnanintstr(row.start_year,'')),
+                    'event_month':str(ifnanintstr(row.start_month,'')),
+                }
+                ld.append(d)
+        dfevents = pd.DataFrame(ld)
+        
+        return dfevents
+    
+
+
+
+
+
+
+class MiniDwellingsDataset(DwellingsDataset):
+    _cols_rename = dict(
+        member='member',
+        dwelling='dwelling',
+        arrond_id='arrond_id',
+        start_date='dwelling_start',
+        end_date='dwelling_end',
+        street_address='dwelling_address',
+        city='dwelling_city',
+        latitude='lat',
+        longitude='lon',
+    )
+
+    @cached_property
+    def data(self):
+        return postproc_df(super().data, self._cols_rename)
+
+
+
+
+
+
+
+
+
+
+class MiniCombinedDataset(Dataset):
+    path=PATHS.get('combinedmini')    
+    _cols_sep = [
+        'member_membership', 
+        'member_nationalities', 
+        'book_genre', 
+        'book_circulated', 
+        'author_nationalities'
+    ]
+    _cols_q = ['member_dob','member_dod','lat','lon','book_year','author_dob','author_dod']
+    _cols_sep_nonan=['member_membership']
+    _cols_pref=['member','event','dwelling','arrond_id','book','author']
+
+    def gen(self, save=True):
+        dfmembers = Members().data
+        dfbooks = Books().data
+        dfevents = Events().data
+        dfdwellings = Dwellings().data
+        
+        ## merge!
+        bookevents = dfevents.merge(dfbooks, on='book', how='outer')
+        memberdwellings = dfmembers.merge(dfdwellings, on='member', how='outer')
+        odf = memberdwellings.merge(bookevents, on='member', how='outer').fillna('')
+        
+        # drop dups
+        odf = odf.drop_duplicates(['member','event','book','dwelling'])
+
+        ## clean up
+        for c in self._cols_sep: 
+            odf[c]=[[] if x is '' else x for x in odf[c]]
+        for c in self._cols_q:
+            odf[c]=[np.nan if x is '' else x for x in odf[c]]
+        for c in self._cols_sep_nonan:
+            odf[c]=[[y for y in x if not np.isnan(y) and y] for x in odf[c]]
+
+        
+        
+        odf['hover_tooltip'] = odf.apply(hover_tooltip,axis=1)
+        odf = prune_when_dwelling_matches(odf)
+        if save: odf.to_pickle(self.path)
+        return odf
+
+    
+    @cached_property
+    def data(self): 
+        # need to gen?
+        if not os.path.exists(self.path): 
+            with Logwatch('generating combined dataset'):
+                df=self.gen(save=True)
+        else:
+            df=pd.read_pickle(self.path)
+        
+        return postproc_df(df, cols_pref=self._cols_pref)
+    
+
+    

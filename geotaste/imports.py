@@ -5,6 +5,7 @@ PORT=8111
 HOST='0.0.0.0'
 DEBUG=False
 TEXTFONT_SIZE=20
+COMPARISON_MAXCATS=None
 
 PREDICT_COLS=[
     'member_title', 
@@ -24,7 +25,8 @@ PREDICT_COLS=[
 PREDICT_MIN_COUNT=1
 PREDICT_MIN_SUM=10
 
-LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
+# LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{message}</level> | <cyan>{function}</cyan> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
+LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
 
 
 # 5 to include traces; 
@@ -75,7 +77,7 @@ URLS=dict(
     events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
     landmarks='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/landmarks.csv',
     dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
-    creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.2/creators.csv',
+    creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/creators.csv',
     geojson_arrond='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
 )
 
@@ -87,7 +89,9 @@ PATHS=dict(
     dwellings = os.path.join(PATH_DATA,'dwellings.csv'),
     creators = os.path.join(PATH_DATA,'creators.csv'),
     combined = os.path.join(PATH_DATA,'combined.pkl.gz'),
+    combinedmini = os.path.join(PATH_DATA,'combined.mini.pkl.gz'),
     landmarks = os.path.join(PATH_DATA,'landmarks.csv'),
+    log = os.path.join(PATH_DATA,'geotaste.log')
 )
 
 LATLON_SCO = (
@@ -131,7 +135,7 @@ DWELLING_ID_SEP='; '
 
 
 
-
+TCOLS=['event','dwelling','event_start','event_end','dwelling_start','dwelling_end']
 
 
 
@@ -164,7 +168,8 @@ from diskcache import Cache
 cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 # cache = cache_obj.memoize()
 import dash
-from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL
+from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL, DiskcacheManager
+# background_manager = DiskcacheManager(cache_obj)
 BLANKDIV = html.Div(BLANKSTR)
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
@@ -186,7 +191,8 @@ from humanfriendly import format_timespan
 from loguru import logger
 logger.remove()
 logger.add(
-    sink = sys.stderr,
+    # sink = sys.stderr,
+    open(PATHS.get('log','geotaste.log'), 'a'),
     format=LOG_FORMAT, 
     level=LOG_LEVEL
 )

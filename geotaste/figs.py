@@ -77,7 +77,6 @@ class FigureFactory(DashFigureFactory, Logmaker):
             quant=self.quant
         ).sort_values().tolist()
         o={self.key:selected_records}
-        logger.debug(f'selected: {o}')
         return o
     
 
@@ -215,7 +214,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     
     @cached_property
     def seldata(self) -> dict:
-        return {self.key:self.series.unique()}
+        return {self.key:self.series.unique().tolist()}
     
     
     @cached_property
@@ -231,14 +230,18 @@ class FigureFactory(DashFigureFactory, Logmaker):
     def fig(self): 
         logger.debug(f'{self.__class__.__name__}.fig')
         fig = self.plot()
-        if self.sels:
-            fig.update_traces(selectedpoints=self.sels)
         return fig
         
 
     def plot(self, **kwargs):
         kwargs={**self.kwargs, **kwargs}
-        return self.plot_histogram(**kwargs)
+        
+        fig = self.plot_histogram(**kwargs)
+        
+        if self.sels:
+            fig.update_traces(selectedpoints=self.sels)
+
+        return fig
         
     def plot_histogram(self, color=None, **kwargs):
         color = color if color else self.color
@@ -405,22 +408,22 @@ class BookYearFigure(BookFigure):
     min_series_val=1800
     max_series_val=1950
 
-class CreatorFigure(TypicalFigure):
-    records_name='creators'
-    drop_duplicates=('creator',)
+class AuthorFigure(TypicalFigure):
+    records_name='authors'
+    drop_duplicates=('author',)
 
-class CreatorGenderFigure(CreatorFigure):
+class AuthorGenderFigure(AuthorFigure):
     key='author_gender'
     quant=False
     vertical = False
     text='count'
 
 
-class CreatorNationalityFigure(NationalityFigure, CreatorFigure):
+class AuthorNationalityFigure(NationalityFigure, AuthorFigure):
     key='author_nationalities'
     quant=False
 
-class CreatorDOBFigure(CreatorFigure):
+class AuthorDOBFigure(AuthorFigure):
     key = 'author_dob'
     quant = True
     min_series_val=1800
@@ -428,14 +431,15 @@ class CreatorDOBFigure(CreatorFigure):
 
 class MemberNameFigure(MemberFigure):
     key = 'member_name'
+    drop_duplicates=('member',)
 
-class CreatorNameFigure(MemberFigure):
+class AuthorNameFigure(MemberFigure):
     key = 'author_name'
 
 
 
 class EventFigure(TypicalFigure):
-    drop_duplicates = ('borrow',)
+    drop_duplicates = ('event',)
 
 class EventYearFigure(EventFigure):
     key = 'event_year'
@@ -515,32 +519,7 @@ class LandmarksFigureFactory(FigureFactory):
         )
 
         # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
-
-        fig.update_mapboxes(
-            # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
-            # style='stamen-toner',
-            style="streets",
-            layers=[
-                {
-                    "below": 'traces',
-                    "sourcetype": "raster",
-                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                    "source": [
-                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        # "/tiles/{z}/{x}/{y}.png"
-                        # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
-                    ],
-                    # "opacity":0.75
-                }
-            ],
-            # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
-            accesstoken=mapbox_access_token,
-            bearing=0,
-            center=MAP_CENTER,
-            pitch=0,
-
-            zoom=14,
-        )
+        update_fig_mapbox_background(fig)
         fig.update_layout(
             margin={"r":0,"t":0,"l":0,"b":0},
             legend=dict(
@@ -556,10 +535,38 @@ class LandmarksFigureFactory(FigureFactory):
         return fig
     
     def table(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.data)
+        return get_dash_table(self.data, cols=['landmark','address','arrond_id','lat','lon'])
 
 
 
+
+def update_fig_mapbox_background(fig):
+    fig.update_mapboxes(
+        # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
+        # style='stamen-toner',
+        style="streets",
+        layers=[
+            {
+                "below": 'traces',
+                "sourcetype": "raster",
+                "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                "source": [
+                    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    # "/tiles/{z}/{x}/{y}.png"
+                    # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
+                ],
+                # "opacity":0.75
+            }
+        ],
+        # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
+        accesstoken=mapbox_access_token,
+        bearing=0,
+        center=MAP_CENTER,
+        pitch=0,
+
+        zoom=14,
+    )
+    return fig
 
 
 
@@ -647,47 +654,51 @@ class CombinedFigureFactory(FigureFactory):
     def valid_arronds(self): 
         return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
 
-    def plot_map(self, color=None, color_text='black', basefig=None, **kwargs):
+    def plot_map(self, color=None, color_text='black', basefig=None, return_trace=False, **kwargs):
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
         figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
         # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
-        fig = go.Figure()
-        fig.add_trace(
-            go.Scattermapbox(
-                name=f'Member dwelling ({self.name})',
-                mode='markers+text',
-                lat=figdf['lat'],
-                lon=figdf['lon'],
-                customdata=figdf['hover_tooltip'],
-                hovertemplate='%{customdata}<extra></extra>',
-                marker=go.scattermapbox.Marker(
-                    color=color,
-                    symbol='circle',
-                    size=20,
-                    # size=(figdf['num_borrows'] / 20)+5,
-                    opacity=0.4
+
+        trace = go.Scattermapbox(
+            name=f'Member dwelling ({self.name})',
+            mode='markers+text',
+            lat=figdf['lat'],
+            lon=figdf['lon'],
+            customdata=figdf['hover_tooltip'],
+            hovertemplate='%{customdata}<extra></extra>',
+            marker=go.scattermapbox.Marker(
+                color=color,
+                symbol='circle',
+                size=20,
+                # size=(figdf['num_borrows'] / 20)+5,
+                opacity=0.4
+            ),
+            text=figdf['member_name_nice'],
+            textfont=dict(
+                size=TEXTFONT_SIZE,
+                color=color_text,
+                family='Louize, Recursive, Tahoma, Verdana, Times New Roman'
+            ),
+            hoverlabel=dict(
+                font=dict(
+                    size=16,
+                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                    # color='black'
                 ),
-                text=figdf['member_name_nice'],
-                textfont=dict(
-                    size=TEXTFONT_SIZE,
-                    color=color_text,
-                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman'
-                ),
-                hoverlabel=dict(
-                    font=dict(
-                        size=16,
-                        family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
-                        # color='black'
-                    ),
-                    bgcolor='white',
-                ),
-                textposition='bottom center',
-            )
+                bgcolor='white',
+            ),
+            textposition='bottom center',
         )
 
-        basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
-        return go.Figure(data=fig.data + basefig.data, layout=basefig.layout)
+        if return_trace: return trace
+
+
+        fig = go.Figure()
+        fig.add_trace(trace)
+        return fig
+        # basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
+        # return go.Figure(data=fig.data, layout=basefig.layout)
 
 
 
@@ -719,7 +730,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     
     @cache
     def compare(self, 
-            maxcats=None,
+            maxcats=COMPARISON_MAXCATS,
             cols=PREDICT_COLS,
             only_signif=False,
             round=4,
@@ -738,8 +749,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             min_sum=min_sum,
             drop_duplicates={
                 'member':['member'],
-                'author':['author','borrow'],
-                'book':['book','borrow'],
+                'author':['author','event'],
+                'book':['book','event'],
                 'arrond_id':['arrond_id','member']
             }
         )
@@ -777,6 +788,70 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         # return combine_LR_df(self.L.df_members, self.R.df_members)
     
 
+    def plot_oddsratio_map(self, figdf, col='odds_ratio_log', **kwargs):
+        figdf=figdf.query('col=="arrond_id"')
+        from colour import Color
+        Lcolor = Color(RIGHT_COLOR)
+        Rcolor = Color(LEFT_COLOR)
+        midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
+        midpoint.set_luminance(.95)
+
+        fig_choro = px.choropleth_mapbox(
+            figdf,
+            geojson=get_geojson_arrondissement(),
+            locations='col_val', 
+            color=col,
+            center=MAP_CENTER,
+            zoom=11,
+            # hover_data=[],
+            hover_data={'col_val':False, col:False},
+            color_continuous_scale=[
+                Lcolor.hex,
+                midpoint.hex,
+                Rcolor.hex,
+            ],
+            opacity=.5,
+        )
+        fig_choro.update_mapboxes(
+            style='light',
+            layers=[
+                {
+                    "below":"traces",
+                    "sourcetype": "raster",
+                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                    "source": [
+                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                    ],
+                    "opacity":0.25
+                }
+            ]
+        )
+        
+        ofig = fig_choro
+
+        ofig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            legend=dict(
+                yanchor="bottom",
+                y=0.06,
+                xanchor="right",
+                x=0.99
+            ),
+            coloraxis=dict(
+                colorbar=dict(
+                    orientation='h', 
+                    y=.01,
+                    lenmode='fraction',
+                    len=.5,
+                    thickness=10,
+                    xanchor='right',
+                    x=.99
+                )
+            )
+        )
+        return ofig
+
+
     def plot_map(self, choro=False, **kwargs):
         
         # prepare data
@@ -805,8 +880,9 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 locations='arrond_id', 
                 color='perc_L->R',
                 center=MAP_CENTER,
-                zoom=14,
-                hover_data=[],
+                zoom=11,
+                # hover_data=[],
+                hover_data={'arrond_id':False, 'perc_L->R':False},
                 color_continuous_scale=[
                     Lcolor.hex,
                     midpoint.hex,
@@ -814,11 +890,11 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 ],
                 opacity=.5,
             )
-            customdata=np.stack((figdf['hover'],), axis=-1)
-            fig_choro.update_traces(
-                customdata=customdata,
-                hovertemplate="%{customdata[0]}"
-            )
+            # customdata=np.stack((figdf['hover'],), axis=-1)
+            # fig_choro.update_traces(
+            #     customdata=customdata,
+            #     hovertemplate="%{customdata[0]}"
+            # )
             fig_choro.update_mapboxes(
                 style='light',
                 layers=[
@@ -1058,7 +1134,7 @@ def combine_figs(fig_new, fig_old):
     )
 
 
-def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=60):
+def get_dash_table(df, cols=[], page_size=5, height_table='80vh', height_cell=60):
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -1082,7 +1158,7 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=6
             'whiteSpace': 'normal',
         },
         style_table={
-            'height':height_cell * 12, 
+            'height':400, 
             'overflowY':'auto',
             # 'display':'block',
             # 'flex-didrection':'column',
@@ -1095,8 +1171,8 @@ def get_dash_table(df, cols=[], page_size=10, height_table='80vh', height_cell=6
 
 
 
-def get_empty_fig(height=100, **layout_kwargs):
-    fig=go.Figure(layout=dict(height=height, **layout_kwargs))
+def get_empty_fig(height=100, width=250, **layout_kwargs):
+    fig=go.Figure(layout=dict(height=height, width=width, **layout_kwargs))
     fig.update_layout(showlegend=False, template='simple_white')
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
@@ -1107,3 +1183,52 @@ def get_color(x):
     if x=='L' or 'Left' in x: return LEFT_COLOR
     if x=='R' or 'Right' in x: return RIGHT_COLOR
     return BOTH_COLOR
+
+
+
+
+
+
+
+
+
+
+# # @cache
+# @cache_obj.memoize()
+# def ff_cache(figure_class, serialized_data):
+#     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
+#     filter_data,selected,kwargs = unserialize(serialized_data)
+#     return figure_class(filter_data, selected, **kwargs)
+
+
+# # @cache
+# @cache_obj.memoize()
+# def plot_cache(figure_class, serialized_data):
+#     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
+#     filter_data,existing_fig,kwargs = (
+#         unserialize(serialized_data) 
+#         if serialized_data 
+#         else ({},None,{})
+#     )
+#     ff = figure_class(filter_data)
+#     fig = ff.plot(**kwargs)
+#     if existing_fig: 
+#         fig = combine_figs(fig, existing_fig)
+#     return fig
+
+
+
+
+# @cache
+@cache_obj.memoize()
+def plot_cache(figure_class, serialized_data):
+    logger.debug(f'plot_cache({figure_class}, {serialized_data})')
+    filter_data,selected,kwargs = (
+        unserialize(serialized_data) 
+        if serialized_data 
+        else ({},None,{})
+    )
+    ff = figure_class(filter_data=filter_data, selected=selected)
+    fig = ff.plot(**kwargs)
+    return fig
+

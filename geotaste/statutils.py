@@ -1,7 +1,7 @@
 from .imports import *
 from scipy.stats.contingency import odds_ratio
 from scipy.stats import fisher_exact
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 
 def analyze_contingency_tables(
@@ -176,7 +176,8 @@ def geodist(latlon1, latlon2, unit='km'):
     except ValueError as e:
         return np.nan
     
-
+def get_dist_from_SCO(lat,lon):
+    return geodist((lat,lon), LATLON_SCO)
 
 
 
@@ -229,7 +230,7 @@ def describe_arronds_LR(signif_df, side='left'):
 
 
 
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def get_distinctive_qual_vals(
         dfL,
         dfR,
@@ -325,7 +326,7 @@ def describe_comparison(comparison_df, lim=10):
              cR=row[f'count_{LR2}']
              tL=cL/(pL/100)
              tR=cR/(pR/100)
-             orow=f'* **{row.odds_ratio_pos:.1f}** more likely to have *{row.col_val}* for {row.col.replace("_"," ").title()} ({pL:.1f}% vs. {pR:.1f}%, or {cL:.0f}/{tL:,.0f} vs. {cR:.0f}/{tR:,.0f} {row.comparison_scale}s)'
+             orow=f'* *{row.odds_ratio_pos:.1f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** ({pL:.1f}% vs. {pR:.1f}%, or {cL:.0f}/{tL:,.0f} vs. {cR:.0f}/{tR:,.0f} {row.comparison_scale}s)'
              o.append(orow)
              if lim and len(o)>=lim: break
         return o
@@ -335,3 +336,127 @@ def describe_comparison(comparison_df, lim=10):
     
     
     
+
+
+
+#@TODO: PARIS FILTER
+def prune_when_dwelling_matches(df):
+    df_nonevent, df_event=df[df.event==''],df[df.event!='']
+    
+    # anyone's ok if they're not an event
+    numpossd = {ii:np.nan for ii in df.index}
+    matchtyped={
+        **{ii:'NA' for ii in df_nonevent.index},
+        **{ii:'?' for ii in df_event.index}
+    }
+    matchfoundd={ii:None for ii in df.index}
+    excludedd={ii:False for ii in df.index}
+
+
+    def declare_impossible(xdf):
+        # but declare them impossible to match to a dwelling
+        for ii in xdf.index:
+            matchtyped[ii]='Impossible'
+            numpossd[ii]=0
+            matchfoundd[ii]=False
+            excludedd[ii]=True
+
+    def declare_exact_match(xdf):
+        for ii in xdf.index:
+            matchtyped[ii]='Exact'
+            matchfoundd[ii]=True
+            numpossd[ii]=len(xdf)
+
+    def declare_exact_miss(xdf):
+        logger.trace(f'for event {e}, a certain match was found, with {len(xdf)} possibilities')
+        for ii in xdf.index: 
+            matchtyped[ii]='Exact (excl.)'
+            excludedd[ii]=True
+            matchfoundd[ii]=False
+
+    def declare_ambiguous(xdf, caveats=[]):
+        for ii in xdf.index: 
+            probtype = 'Colens' if not len(xdf[xdf.dwelling_start!='']) else 'Raphael'
+            mt=f'Ambiguous ({probtype})' if len(xdf)>1 else 'Singular'
+            # if caveats: mt+=f' ({", ".join(caveats)})'
+            matchtyped[ii]=mt
+            matchfoundd[ii]=True
+            numpossd[ii]=len(xdf)
+
+    def find_exact_matches(xdf):
+        erow=xdf.iloc[0]
+        e1,e2=erow.event_start,erow.event_end
+        match = xdf[[
+            (is_fuzzy_date_seq(d1,e1,d2) or is_fuzzy_date_seq(d1,e2,d2))
+            for (d1,d2) in zip(xdf.dwelling_start, xdf.dwelling_end)
+        ]]
+        logger.trace(f'found {len(match)} exact matches for {(e1, e2)} with options {list(zip(xdf.dwelling_start, xdf.dwelling_end))}')
+        return match
+
+    def declare_heuristic_miss(xdf, htype=''):
+        for ii in xdf.index: 
+            matchtyped[ii]=f'Heuristic (excl.{" by "+htype if htype else ""})'
+            matchfoundd[ii]=False
+            excludedd[ii]=True
+
+
+    
+    # for every event...
+    for e,edf in tqdm(df_event.groupby('event'), total=df_event.event.nunique(), desc='Locating events'):
+        logger.trace(f'event: {e}, with {len(edf)} dwelling possibilities')
+        ## if there are no dwellings at all...
+        nadf=edf[edf.dwelling=='']
+        declare_impossible(nadf)
+
+        edf=edf[edf.dwelling!=''].drop_duplicates('dwelling')
+        if not len(edf):
+            logger.trace(f'for event {e}, no dwelling possibilities because empty dwellings')
+            continue
+    
+        # if certainty is possible, i.e. we have dwelling records with start and end dates...
+        edf_certain = edf.query('dwelling_start!="" & dwelling_end!=""')
+        if len(edf_certain):
+            logger.trace(f'for event {e}, certainty is possible, with {len(edf_certain)} possibilities')
+            # is there a match? a point where start or end of event is within range of dwelling start or end?
+            edf_match = find_exact_matches(edf_certain)
+            # if so, then add indices only for the match, not the other rows
+            if len(edf_match):
+                logger.trace(f'for event {e}, a certain match was found, with {len(edf_match)} possibilities')
+                declare_exact_match(edf_match)
+                declare_exact_miss(edf[~edf.index.isin(edf_match.index)])
+                continue
+
+        # try dispreferred caveats
+        caveats=[]
+        edf0 = edf
+        edf = edf[~edf.dwelling_address.isin(DISPREFERRED_ADDRESSES)]
+        if not len(edf):
+            logger.trace(f'for event {e}, only a dispreferred address remained; allowing')
+            edf=edf0
+        elif len(edf)!=len(edf0):
+            declare_heuristic_miss(edf0[~edf0.index.isin(edf.index)], htype='dispref')
+            caveats.append('-dispref')
+
+        # try distance caveat
+        edf0 = edf
+        edf = edf[[get_dist_from_SCO(lat,lon)<50 for lat,lon in zip(edf.lat, edf.lon)]]
+        if not len(edf):
+            logger.trace(f'for event {e}, only non-Parisian places remaining; allowing')
+            edf=edf0
+        elif len(edf)!=len(edf0):
+            declare_heuristic_miss(edf0[~edf0.index.isin(edf.index)], htype='distance')
+            caveats.append('-distance')
+
+        # otherwise, declare ambiguous?
+        logger.trace(f'for event {e}, still no matches found. using all {len(edf)} possible indices')
+        declare_ambiguous(edf,caveats=caveats)
+        
+    # add to dataframe a few stats on the dwelling matches
+    df['dwelling_matchfound'] = matchfoundd
+    df['dwelling_matchtype'] = matchtyped
+    df['dwelling_numposs'] = numpossd
+    df['dwelling_excluded'] = excludedd
+    df['dwelling_likelihood'] = 1/df['dwelling_numposs']
+
+    # return only ok rows
+    return df.loc[~df.dwelling_excluded]

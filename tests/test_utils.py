@@ -250,3 +250,12 @@ def test_delist_df():
 
     # assert that the function works as expected
     assert_frame_equal(delist_df(df3), expected_df3)
+
+
+
+def test_fuzzydates():
+    assert date_fuzzily_precedes('1750', '1750-12-12') == False
+    assert date_fuzzily_follows('1750', '1750-12-12') == False
+    assert date_fuzzily_follows('1750', '1751-12-12') == False
+    assert date_fuzzily_follows('1750', '1749-12-12') == True
+    assert date_fuzzily_precedes('1799-10-01', '1800') == True
