@@ -11,7 +11,8 @@ def get_app():
                 "content": "width=device-width, initial-scale=1"
             }],
             assets_folder=PATH_ASSETS,
-            suppress_callback_exceptions=True
+            suppress_callback_exceptions=True,
+            url_base_pathname='/sco/1/'
         )
         app.app.config.suppress_callback_exceptions=True
         return app
