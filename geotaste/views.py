@@ -22,7 +22,7 @@ def ArrondTableView(ff, Lstr='Filter 1', Rstr='Filter 2'):
 
 def AnalysisTableView(ff, **kwargs):
     odf = ff.compare(**kwargs)
-    fig = ff.plot_oddsratio_map()
+    fig = ff.plot_oddsratio_map(odf)
     logger.debug(fig)
     odf['colpref'] = odf.col.apply(lambda x: x.split('_')[0])
 

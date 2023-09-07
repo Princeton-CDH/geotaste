@@ -791,8 +791,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     def plot_oddsratio_map(self, figdf, col='odds_ratio_log', **kwargs):
         figdf=figdf.query('col=="arrond_id"')
         from colour import Color
-        Lcolor = Color(LEFT_COLOR)
-        Rcolor = Color(RIGHT_COLOR)
+        Lcolor = Color(RIGHT_COLOR)
+        Rcolor = Color(LEFT_COLOR)
         midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
         midpoint.set_luminance(.95)
 
