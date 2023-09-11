@@ -468,7 +468,10 @@ class ComparisonPanel(BaseComponent):
         ## CHANGING DATA
 
         @app.callback(
-            Output(self.maintbl,'children',allow_duplicate=True),
+            [
+                Output(self.maintbl,'children',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
+            ],
             Input(self.store,'data'),
             # background=True,
             # manager=background_manager,
@@ -477,14 +480,14 @@ class ComparisonPanel(BaseComponent):
         def redo_tbl(data):
             with Logwatch('running long callback computation'):
                 fdL,fdR=data
-                return get_server_cached_view(serialize([fdL,fdR,'table']))
+                return get_server_cached_view(serialize([fdL,fdR,'table'])), True
 
         @app.callback(
             [
                 Output(self.mainmap,'figure',allow_duplicate=True),
                 Output(self.maintbl,'children',allow_duplicate=True),
                 Output(self.store,'data'),
-                # Output('layout-loading', 'children') # spinner
+                Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
             ],
             [
                 Input(self.L.store, 'data'),
@@ -502,9 +505,10 @@ class ComparisonPanel(BaseComponent):
                 newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
                 ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
                 # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
-                otbl='loading...'
+                otbl='Loading... this may take up to 30 seconds.'
                 # logger.debug(tbldata)
-                return ofig,otbl,[Lstore,Rstore]#,True
+                # time.sleep(30)
+                return ofig,otbl,[Lstore,Rstore],True
 
 
             

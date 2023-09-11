@@ -32,8 +32,17 @@ class GeotasteLayout(BaseComponent):
                             className='logo-title'
                         ),
                     ], className='logo-title'),
+
                 ], className='logo'),
 
+
+                dcc.Loading(
+                    id='layout-loading', 
+                    children=html.Div(id="layout-loading-output"),
+                    type='graph', 
+                    fullscreen=False, 
+                    style={'background-color':'rgba(255,255,255,0)'},
+                ),
 
 
             ], className='navbar-row'),
@@ -49,6 +58,6 @@ class GeotasteLayout(BaseComponent):
                 # loading spinner
             ], className='content-row'),
 
-            # dcc.Loading(id='layout-loading', type='circle', fullscreen=True),
+            
 
         ], className='layout-container')
