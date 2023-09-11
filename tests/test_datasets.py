@@ -26,11 +26,14 @@ def test_dataset():
 
 
 def test_members_dataset():
-    obj = Members()
-    df = obj.data
-    assert 'James Joyce' in set(df.name)
+    obj = MembersDataset()
+    namecol = 'name'
+    df = obj.data.set_index('member')
+    print(df.columns)
+    names = df[namecol]
+    assert 'James Joyce' in set(names)
 
-    dfj = df[df.name=='James Joyce']
+    dfj = df[df[namecol]=='James Joyce']
     assert set(dfj.index) == {'joyce-james'}
 
     for col in obj.cols_sep:
@@ -40,6 +43,6 @@ def test_members_dataset():
 
 def test_authors_dataset():
     obj = CreatorsDataset()
-    df = obj.data.reset_index()
-    assert 'Joyce, James' in set(df['creator'])
+    df = obj.data
+    assert 'joyce-james' in set(df['creator'])
 

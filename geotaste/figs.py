@@ -483,6 +483,7 @@ class LandmarksFigureFactory(FigureFactory):
 
     def plot_map(self, color='gray', **kwargs):
         figdf = self.data
+        if not 'tooltip' in set(figdf.columns): figdf['tooltip']=''
         fig = go.Figure()
         fig.add_trace(
             go.Scattermapbox(

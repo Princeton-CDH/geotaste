@@ -1,7 +1,7 @@
 ## Constants
 
 # server
-PORT=8111
+PORT=1919
 HOST='0.0.0.0'
 DEBUG=False
 TEXTFONT_SIZE=20
@@ -60,8 +60,8 @@ UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
 STYLE_HALFVIS={'opacity':.5, 'display':'block'}
 STYLE_VIS={'display':'block', 'opacity':1}
-LOGO_SRC="/assets/SCo_logo_graphic-small.png"
-LOGO_SRC2="/assets/rulerlab-small.png"
+LOGO_SRC="/sco/1/assets/SCo_logo_graphic-small.png"
+LOGO_SRC2="/sco/1/assets/rulerlab-small.png"
 
 # paths
 import os
@@ -69,6 +69,7 @@ PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.expanduser('~/geotaste_data')
 PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
+PATH_SRVR = os.path.join(PATH_DATA,'webview.db')
 
 # Urls
 URLS=dict(
@@ -157,7 +158,6 @@ from collections.abc import *
 
 ## Non-sys imports
 import orjson
-from sqlitedict import SqliteDict
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 import warnings
