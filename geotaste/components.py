@@ -535,8 +535,10 @@ class FilterSliderCard(FilterPlotCard):
         return dbc.Container([
             dbc.Row(self.graph),
             dbc.Row([
-                dbc.Col(self.input_start),
-                dbc.Col(self.input_end, style={'text-align':'right'})
+                dbc.Col(self.input_start, width=3),
+                dbc.Col('–', width=1),
+                dbc.Col(self.input_end, width=3),
+                dbc.Col(self.input_btn, width=5, style={'text-align':'right'})
             ], className='slider-row')
         ], className='slider-container')
 
@@ -575,6 +577,16 @@ class FilterSliderCard(FilterPlotCard):
             id=self.id('input_end')
         )
     
+    @cached_property
+    def input_btn(self):
+        return dbc.Button(
+            'Set',
+            color="link",
+            n_clicks=0,
+            id=self.id('input_btn'),
+            className='slider-input-btn'
+        )
+    
     def describe_filters(self,store_data):
         vals=list(store_data.values())[0]
         minval=min(vals) if vals else self.minval
@@ -594,16 +606,17 @@ class FilterSliderCard(FilterPlotCard):
             ],
             [
                 Input(self.graph, 'selectedData'),
-                Input(self.id('input_start'), 'value'),
-                Input(self.id('input_end'), 'value'),
+                Input(self.id('input_btn'), 'n_clicks'),
             ],
             [
+                State(self.id('input_start'), 'value'),
+                State(self.id('input_end'), 'value'),
                 State(self.store_panel,'data'),
                 # State(self.graph,'figure')
             ],
             prevent_initial_call=True
         )
-        def graph_selection_updated2(graph_selected_data, start_value, end_value, panel_data):
+        def graph_selection_updated2(graph_selected_data, btn_clk, start_value, end_value, panel_data):
             if ctx.triggered_id == self.graph.id:
                 seldata=self.ff().selected(graph_selected_data)
                 if not seldata: raise PreventUpdate

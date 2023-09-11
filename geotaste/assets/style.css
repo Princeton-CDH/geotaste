@@ -361,7 +361,7 @@ button {
     /* display:flex; */
 }
 
-.slider-input-num {
+.slider-input-num, .slider-input-btn {
     width:4em;
     /* border:1px solid silver; */
     border:none;
@@ -497,4 +497,13 @@ button {
 
 .distinctive-feature-h4 {
     margin-top:1em;
+}
+
+.slider-input-btn {
+    text-align: right;
+    width:fit-content;
+}
+
+.slider-row {
+    padding: 0 .5em;
 }
