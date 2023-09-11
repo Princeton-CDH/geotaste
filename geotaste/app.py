@@ -12,7 +12,7 @@ def get_app():
             }],
             assets_folder=PATH_ASSETS,
             suppress_callback_exceptions=True,
-            url_base_pathname='/sco/1/'
+            url_base_pathname='/sco/1/',
         )
         app.app.config.suppress_callback_exceptions=True
         return app

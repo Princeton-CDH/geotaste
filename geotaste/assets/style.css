@@ -1,17 +1,17 @@
 @font-face {
     font-family: 'Recursive';
-    src: url('/assets/Recursive_VF_1.085.woff2') format('woff2-variations');
+    src: url('/sco/1/assets/Recursive_VF_1.085.woff2') format('woff2-variations');
     font-weight: 300 1000;
 }
 
 @font-face {
     font-family: SCo;
-    src: url(/assets/Brown-Regular.otf);
+    src: url(/sco/1/assets/Brown-Regular.otf);
 }
 
 @font-face {
     font-family: Louize;
-    src: url(/assets/LouizeTrial-Regular.otf);
+    src: url(/sco/1/assets/LouizeTrial-Regular.otf);
 }
 
 html {height:100%}
