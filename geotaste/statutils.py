@@ -266,34 +266,37 @@ def get_distinctive_qual_vals(
     if cols is None: cols=list(set(dfL.columns) & set(dfR.columns))
     
     for col in cols:
-        colpref=col.split('_')[0]
-        if drop_duplicates and type(drop_duplicates)==dict:
-            if col in drop_duplicates: 
-                dedupby=drop_duplicates[col] 
-            elif colpref in drop_duplicates:
-                dedupby=drop_duplicates[colpref]
-            
-            dfLnow = dfL.drop_duplicates(dedupby)
-            dfRnow = dfR.drop_duplicates(dedupby)
-        else:
-            dedupby = []
-            dfLnow = dfL
-            dfRnow = dfR
+        try:
+            colpref=col.split('_')[0]
+            if drop_duplicates and type(drop_duplicates)==dict:
+                if col in drop_duplicates: 
+                    dedupby=drop_duplicates[col] 
+                elif colpref in drop_duplicates:
+                    dedupby=drop_duplicates[colpref]
                 
-        s1=qualquant_series(flatten_series(dfLnow[col]), quant=False, drop_empty=drop_empty)
-        s2=qualquant_series(flatten_series(dfRnow[col]), quant=False, drop_empty=drop_empty)
+                dfLnow = dfL.drop_duplicates(dedupby)
+                dfRnow = dfR.drop_duplicates(dedupby)
+            else:
+                dedupby = []
+                dfLnow = dfL
+                dfRnow = dfR
+                    
+            s1=qualquant_series(flatten_series(dfLnow[col]), quant=False, drop_empty=drop_empty)
+            s2=qualquant_series(flatten_series(dfRnow[col]), quant=False, drop_empty=drop_empty)
 
-        if maxcats and (s1.nunique()>maxcats or s2.nunique()>maxcats):
-            continue
+            if maxcats and (s1.nunique()>maxcats or s2.nunique()>maxcats):
+                continue
 
-        coldf = analyze_contingency_tables(s1, s2)
-        coldf = coldf.query(
-            f'count_min>={min_count} & count_sum>={min_sum}'
-        ).assign(
-            col=col,
-            comparison_scale=' '.join(dedupby)
-        )
-        o.append(coldf)
+            coldf = analyze_contingency_tables(s1, s2)
+            coldf = coldf.query(
+                f'count_min>={min_count} & count_sum>={min_sum}'
+            ).assign(
+                col=col,
+                comparison_scale=' '.join(dedupby)
+            )
+            o.append(coldf)
+        except Exception as e:
+            logger.error(e)
     
     alldf=pd.concat(o).rename_axis('col_val').reset_index()
     alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
@@ -314,7 +317,7 @@ def get_distinctive_qual_vals(
 
 def describe_comparison(comparison_df, lim=10):
     idf=comparison_df.sort_values('odds_ratio_pos',ascending=False)
-    L,R=idf.query('odds_ratio>=1'),idf.query('odds_ratio<1')
+    L,R=idf.query('perc_L>perc_R'),idf.query('perc_R>perc_L')
 
     def get_list_desc(xdf, LR='L'):
         LR2='R' if LR=='L' else 'L'
@@ -326,7 +329,7 @@ def describe_comparison(comparison_df, lim=10):
              cR=row[f'count_{LR2}']
              tL=cL/(pL/100)
              tR=cR/(pR/100)
-             orow=f'* *{row.odds_ratio_pos:.1f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** ({pL:.1f}% vs. {pR:.1f}%, or {cL:.0f}/{tL:,.0f} vs. {cR:.0f}/{tR:,.0f} {row.comparison_scale}s)'
+             orow=f'* *{row.odds_ratio_pos:.1f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** ({pL:.1f}% \[1] vs. {pR:.1f}% \[2], or {cL:.0f}/{tL:,.0f} \[1] vs. {cR:.0f}/{tR:,.0f} \[2] {row.comparison_scale.replace("_id","")}s)'
              o.append(orow)
              if lim and len(o)>=lim: break
         return o
