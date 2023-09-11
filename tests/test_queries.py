@@ -1,3 +1,6 @@
+import sys,os
+sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from geotaste.queries import *
 
 def test_filter_query_str_series():

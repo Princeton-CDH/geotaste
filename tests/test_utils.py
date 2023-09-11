@@ -1,3 +1,5 @@
+import sys,os
+sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.utils import *
 import tempfile
 from pandas.testing import assert_frame_equal
