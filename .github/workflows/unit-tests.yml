@@ -37,6 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -U pip wheeel
           pip install -r requirements.txt
           pip install -r dev-requirements.txt
 
