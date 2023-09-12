@@ -195,7 +195,11 @@ from loguru import logger
 logger.remove()
 logger.add(
     sink = sys.stderr,
-    # open(PATHS.get('log','geotaste.log'), 'a'),
+    format=LOG_FORMAT, 
+    level=LOG_LEVEL
+)
+logger.add(
+    sink = open(PATHS.get('log','geotaste.log'), 'a'),
     format=LOG_FORMAT, 
     level=LOG_LEVEL
 )
