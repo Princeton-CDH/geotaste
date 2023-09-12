@@ -199,7 +199,7 @@ logger.add(
     format=LOG_FORMAT, 
     level=LOG_LEVEL
 )
-MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiR2hvTkhaeGFIWXdZamgxTTNKdWVtbGlkSE42TUdKMUluMC43TlF2YnhXclo0NnpTeFQ1MWd4UEFR'
+MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3'
 mapbox_access_token = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 px.set_mapbox_access_token(mapbox_access_token)
 

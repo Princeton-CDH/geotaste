@@ -384,6 +384,7 @@ class MemberArrondMap(MemberFigure):
             clickmode='event+select', 
             dragmode=False,
         )
+        ofig.update_layout(mapbox_accesstoken=mapbox_access_token)
         ofig.update_coloraxes(colorbar=dict(orientation='h', y=-0.25, thickness=10))
         ofig.update_xaxes(fixedrange = True)
         ofig.update_yaxes(fixedrange = True)
@@ -531,6 +532,7 @@ class LandmarksFigureFactory(FigureFactory):
             ),
             autosize=True
         )
+        fig.update_layout(mapbox_accesstoken=mapbox_access_token)
         fig.layout._config = {'responsive':True, 'scrollZoom':True}
         fig.layout.update(showlegend=False)
         return fig
@@ -697,6 +699,7 @@ class CombinedFigureFactory(FigureFactory):
 
         fig = go.Figure()
         fig.add_trace(trace)
+        fig.update_layout(mapbox_accesstoken=mapbox_access_token)
         return fig
         # basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
         # return go.Figure(data=fig.data, layout=basefig.layout)
@@ -825,7 +828,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                     ],
                     "opacity":0.25
                 }
-            ]
+            ],
+            accesstoken=mapbox_access_token,
         )
         
         ofig = fig_choro
@@ -908,7 +912,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                         ],
                         "opacity":0.25
                     }
-                ]
+                ],
+                accesstoken=mapbox_access_token,
             )
             
             ofig = fig_choro
@@ -940,6 +945,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 )
             )
         )
+        ofig.update_layout(mapbox_accesstoken=mapbox_access_token)
         return ofig
 
         
@@ -992,7 +998,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
                         ]
                     }
-                ]
+                ],
+                accesstoken=mapbox_access_token,
             )
             customdata=np.stack((figdf['hover'],), axis=-1)
             fig_choro.update_traces(
