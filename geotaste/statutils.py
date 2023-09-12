@@ -58,7 +58,7 @@ def analyze_contingency_tables(
     return df
 
 
-def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterable'=[], min_count:int|None=None):
+def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterable'=[], min_count:int=None):
     """
     Iterates over contingency tables for two sets of values.
 

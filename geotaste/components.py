@@ -114,7 +114,7 @@ class FilterComponent(BaseComponent):
     def intersect_filters(self, *filters_d):
         return intersect_filters(filters_d)
     
-    def ff(self, filter_data={}, selected:dict|list={}, **kwargs):
+    def ff(self, filter_data={}, selected:list=[], **kwargs):
         # if self.figure_factory is not None:
         #     kwargs = {**self._kwargs, **kwargs}
         #     serialized_data = serialize([filter_data, selected, kwargs])

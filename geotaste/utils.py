@@ -764,3 +764,9 @@ def is_fuzzy_date_seq(x,y,z):
     
     x,y,z=get_date_cmp(x,y,z)
     return x<=y<=z
+
+
+def ensure_dir(fn):
+    dirname=os.path.dirname(fn)
+    if not os.path.exists:
+        os.makedirs(dirname)

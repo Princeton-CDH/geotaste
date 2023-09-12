@@ -81,7 +81,7 @@ def filter_query_str_series(
         return getsinglequerygroup()
         
 
-def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list|None=None, human:bool=False) -> str:
+def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list=None, human:bool=False) -> str:
     """Filter a query string based on the given filter data.
 
     Args:
@@ -109,7 +109,7 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, 
         if svals is not None
     ])
 
-def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, operator:str='and', plural_cols:list|None=None, return_query:bool=False) -> pd.DataFrame:
+def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, operator:str='and', plural_cols:list=None, return_query:bool=False) -> pd.DataFrame:
     """Filter a pandas DataFrame based on the provided filter data.
 
     Args:
