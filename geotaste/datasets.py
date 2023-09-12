@@ -1113,7 +1113,7 @@ class MiniBooksDataset(BooksDataset):
         odf=pd.DataFrame(ld)
         odf=postproc_df(odf, cols=self._cols_rename, cols_q=['author_dob','book_year'])
         odf['author_nationalities']=odf['author_nationalities'].apply(
-            lambda x: [] if x==np.nan else x
+            lambda x: [] if x is np.nan else x
         )
         odf['author_gender']=odf['author_gender'].fillna('')
         odf['author_name']=odf['author_name'].fillna('')
