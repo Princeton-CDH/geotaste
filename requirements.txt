@@ -14,4 +14,3 @@ diskcache
 colour
 pywebview
 screeninfo
-simple-crypt @ git+https://github.com/quadrismegistus/simple-crypt

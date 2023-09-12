@@ -188,7 +188,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from humanfriendly import format_timespan
 
-from simplecrypt import decrypt
 from base64 import b64decode
 
 # setup logs
@@ -200,30 +199,11 @@ logger.add(
     format=LOG_FORMAT, 
     level=LOG_LEVEL
 )
-SECRET_TOKEN = 'U. P.'
-MAPBOX_ACCESS_TOKEN_encr=b'c2MAAjiUtkYEbT2bQD7jUK2Tc+gvrif5Hfzl+Cra2XJrylsCWd5TYkuuVzzMiSkAk57DlWZR4TFCAeCWHE2hVFlgv1AW0kv3CoPPcNCEHnGnoUj2nAfCq7tGKmX6EXkbmNda3nLPl6RZDBb1/4rJR8KjBpBHI22jQM1uqGpqRn0J7Au+87M9Nn3tAwccoLb9NdLOa/GUbpHhmVIoQdQcJbo='
-MAPBOX_ACCESS_TOKEN_path=os.path.join(PATH_DATA,'.mapbox_token')
-
-## Setup plotly
-# Plotly mapbox public token
-
-
-
-from .utils import *
-
-
-try:
-    with open(MAPBOX_ACCESS_TOKEN_path) as f:
-        mapbox_access_token = f.read()
-
-except FileNotFoundError:
-    with Logwatch('decrypting mapbox token and saving'):
-        mapbox_access_token = decrypt(SECRET_TOKEN, b64decode(MAPBOX_ACCESS_TOKEN_encr)).decode('utf-8')
-        with open(MAPBOX_ACCESS_TOKEN_path,'w') as of:
-            of.write(mapbox_access_token)
-
+MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiR2hvTkhaeGFIWXdZamgxTTNKdWVtbGlkSE42TUdKMUluMC43TlF2YnhXclo0NnpTeFQ1MWd4UEFR'
+mapbox_access_token = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 px.set_mapbox_access_token(mapbox_access_token)
 
+from .utils import *
 from .queries import *
 from .statutils import *
 from .queries import *
