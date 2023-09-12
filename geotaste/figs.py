@@ -548,19 +548,19 @@ def update_fig_mapbox_background(fig):
         # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
         # style='stamen-toner',
         style="streets",
-        layers=[
-            {
-                "below": 'traces',
-                "sourcetype": "raster",
-                "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                "source": [
-                    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                    # "/tiles/{z}/{x}/{y}.png"
-                    # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
-                ],
-                # "opacity":0.75
-            }
-        ],
+        # layers=[
+        #     {
+        #         "below": 'traces',
+        #         "sourcetype": "raster",
+        #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+        #         "source": [
+        #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+        #             # "/tiles/{z}/{x}/{y}.png"
+        #             # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
+        #         ],
+        #         # "opacity":0.75
+        #     }
+        # ],
         # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
         accesstoken=mapbox_access_token,
         bearing=0,
@@ -818,17 +818,17 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
         fig_choro.update_mapboxes(
             style='light',
-            layers=[
-                {
-                    "below":"traces",
-                    "sourcetype": "raster",
-                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                    "source": [
-                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                    ],
-                    "opacity":0.25
-                }
-            ],
+            # layers=[
+            #     {
+            #         "below":"traces",
+            #         "sourcetype": "raster",
+            #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+            #         "source": [
+            #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+            #         ],
+            #         "opacity":0.25
+            #     }
+            # ],
             accesstoken=mapbox_access_token,
         )
         
@@ -902,17 +902,17 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             # )
             fig_choro.update_mapboxes(
                 style='light',
-                layers=[
-                    {
-                        "below":"traces",
-                        "sourcetype": "raster",
-                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                        "source": [
-                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        ],
-                        "opacity":0.25
-                    }
-                ],
+                # layers=[
+                #     {
+                #         "below":"traces",
+                #         "sourcetype": "raster",
+                #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                #         "source": [
+                #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                #         ],
+                #         "opacity":0.25
+                #     }
+                # ],
                 accesstoken=mapbox_access_token,
             )
             
@@ -989,16 +989,16 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             )
             fig_choro.update_mapboxes(
                 style='light',
-                layers=[
-                    {
-                        "below": 'traces',
-                        "sourcetype": "raster",
-                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                        "source": [
-                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        ]
-                    }
-                ],
+                # layers=[
+                #     {
+                #         "below": 'traces',
+                #         "sourcetype": "raster",
+                #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                #         "source": [
+                #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                #         ]
+                #     }
+                # ],
                 accesstoken=mapbox_access_token,
             )
             customdata=np.stack((figdf['hover'],), axis=-1)
