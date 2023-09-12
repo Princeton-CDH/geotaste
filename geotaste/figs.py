@@ -545,21 +545,8 @@ class LandmarksFigureFactory(FigureFactory):
 
 def update_fig_mapbox_background(fig):
     fig.update_mapboxes(
-        # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
-        # style='stamen-toner',
         style="streets",
         layers=[
-            # {
-            #     "below": 'traces',
-            #     "sourcetype": "raster",
-            #     "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-            #     "source": [
-            #         "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-            #         # "/tiles/{z}/{x}/{y}.png"
-            #         # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
-            #     ],
-            #     # "opacity":0.75
-            # }
             {
                 "below": 'traces',
                 "sourcetype": "raster",
@@ -567,15 +554,12 @@ def update_fig_mapbox_background(fig):
                 "source": [
                     "http://134.209.216.92:8080/data/paris1937/{z}/{x}/{y}.png"
                 ],
-                # "opacity":0.75
             }
         ],
-        # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
         accesstoken=mapbox_access_token,
         bearing=0,
         center=MAP_CENTER,
         pitch=0,
-
         zoom=14,
     )
     return fig

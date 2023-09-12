@@ -60,8 +60,13 @@ UNKNOWN='(Unknown)'
 STYLE_INVIS={'display':'none'}
 STYLE_HALFVIS={'opacity':.5, 'display':'block'}
 STYLE_VIS={'display':'block', 'opacity':1}
-LOGO_SRC="/sco/1/assets/SCo_logo_graphic-small.png"
-LOGO_SRC2="/sco/1/assets/rulerlab-small.png"
+
+
+ROOT_URL = '/sco/1'
+ASSETS_URL = f'{ROOT_URL}/assets'
+
+LOGO_SRC=f"{ASSETS_URL}/SCo_logo_graphic-small.png"
+LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
 
 # paths
 import os
