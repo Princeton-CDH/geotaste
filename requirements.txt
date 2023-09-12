@@ -14,4 +14,4 @@ diskcache
 colour
 pywebview
 screeninfo
-simplecrypt
+simple-crypt
