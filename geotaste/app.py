@@ -1,6 +1,8 @@
 from geotaste.imports import *
 
 def get_app(url_base_pathname=ROOT_URL):
+    if not url_base_pathname.endswith('/'):
+        url_base_pathname+='/'
     with Logwatch(f'booting geotaste'):
         layout = GeotasteLayout()        
         app = DashApp(
