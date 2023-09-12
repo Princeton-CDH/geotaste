@@ -1214,9 +1214,9 @@ class MiniCombinedDataset(Dataset):
 
         ## clean up
         for c in self._cols_sep: 
-            odf[c]=[[] if x=='' else x for x in odf[c]]
+            odf[c]=[[] if x is '' else x for x in odf[c]]
         for c in self._cols_q:
-            odf[c]=[np.nan if x=='' else x for x in odf[c]]
+            odf[c]=[np.nan if x is '' else x for x in odf[c]]
         for c in self._cols_sep_nonan:
             odf[c]=[[y for y in x if not np.isnan(y) and y] for x in odf[c]]
 
