@@ -188,6 +188,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from humanfriendly import format_timespan
 
+from simplecrypt import decrypt
+from base64 import b64decode
+
 # setup logs
 from loguru import logger
 logger.remove()
@@ -204,6 +207,8 @@ MAPBOX_ACCESS_TOKEN_path=os.path.join(PATH_DATA,'.mapbox_token')
 ## Setup plotly
 # Plotly mapbox public token
 
+
+
 from .utils import *
 
 
@@ -213,8 +218,6 @@ try:
 
 except FileNotFoundError:
     with Logwatch('decrypting mapbox token and saving'):
-        from simplecrypt import decrypt
-        from base64 import b64decode
         mapbox_access_token = decrypt(SECRET_TOKEN, b64decode(MAPBOX_ACCESS_TOKEN_encr)).decode('utf-8')
         with open(MAPBOX_ACCESS_TOKEN_path,'w') as of:
             of.write(mapbox_access_token)
