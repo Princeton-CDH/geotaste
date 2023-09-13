@@ -152,11 +152,6 @@ STYLE_INVIS={'display':'none'}
 STYLE_HALFVIS={'opacity':.5, 'display':'block'}
 STYLE_VIS={'display':'block', 'opacity':1}
 
-BASEMAP_SOURCES = [
-    "http://134.209.216.92:8080/data/paris1937/{z}/{x}/{y}.png",
-    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-]
-
 ROOT_URL = ''
 
 
@@ -238,6 +233,12 @@ if ROOT_URL.endswith('/'): ROOT_URL=ROOT_URL[:-1]
 ASSETS_URL = f'{ROOT_URL}/assets'
 LOGO_SRC=f"{ASSETS_URL}/SCo_logo_graphic-small.png"
 LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
+
+BASEMAP_SOURCES = [
+    # "http://134.209.216.92:8080/data/paris1937/{z}/{x}/{y}.png",
+    "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
+    # "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+]
 
 
 from .utils import *
