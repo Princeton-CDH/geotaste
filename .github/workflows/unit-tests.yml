@@ -44,7 +44,7 @@ jobs:
       - name: Run pytest
         run: py.test --cov=geotaste --cov-report=xml
 
-      - name: Upload test coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          flags: python
+      # - name: Upload test coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     flags: python
