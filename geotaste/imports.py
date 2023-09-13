@@ -111,11 +111,11 @@ PREDICT_COLS=[
     'member_gender', 
     'member_nationalities',
 
-    'author',
+    # 'author',
     'author_gender',
     'author_nationalities',
 
-    'book',
+    # 'book',
     'book_format',
     'book_genre',
 
@@ -206,14 +206,8 @@ import shutil,json
 
 PATH_CONFIG_DEFAULT = os.path.join(PATH_REPO,'config_default.json')
 PATH_CONFIG = os.path.join(PATH_DATA,'config.json')
-
-if not os.path.exists(PATH_DATA):
-    os.makedirs(PATH_DATA)
-
-if not os.path.exists(PATH_CONFIG):
-    shutil.copyfile(PATH_CONFIG_DEFAULT, PATH_CONFIG)
-
 def read_config_json(fn):
+    if not os.path.exists(fn): return {}
     try:
         with open(fn) as f:
             return json.load(f)
@@ -221,12 +215,20 @@ def read_config_json(fn):
         logger.exception(e)
         return {} 
 
+# read
 CONFIG = {
     **read_config_json(PATH_CONFIG_DEFAULT),
     **read_config_json(PATH_CONFIG)
 }
+
+# copy to globals
 for ck,cv in CONFIG.items(): 
     globals()[ck]=cv
+
+# ensure exists? -- empty?
+if not os.path.exists(PATH_DATA): os.makedirs(PATH_DATA)
+if not os.path.exists(PATH_CONFIG):
+    with open(PATH_CONFIG,'w') as of: json.dump({}, of)
 #######################################################
 
 if ROOT_URL.endswith('/'): ROOT_URL=ROOT_URL[:-1]
