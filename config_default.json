@@ -1,6 +1,6 @@
 {
-    "BASEMAP_SOURCES":[
-        "http://134.209.216.92:8080/data/paris1937/{z}/{x}/{y}.png",
+    "BASEMAP_SOURCES": [
+        "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
         "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
     ],
     "CENTER": [

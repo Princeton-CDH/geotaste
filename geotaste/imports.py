@@ -84,7 +84,10 @@ px.set_mapbox_access_token(mapbox_access_token)
 #### CONSTANTS ########################################
 
 
-
+BASEMAP_SOURCES = [
+    "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
+    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+]
 
 # Paths
 PATHS=dict(
@@ -235,12 +238,6 @@ if ROOT_URL.endswith('/'): ROOT_URL=ROOT_URL[:-1]
 ASSETS_URL = f'{ROOT_URL}/assets'
 LOGO_SRC=f"{ASSETS_URL}/SCo_logo_graphic-small.png"
 LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
-
-BASEMAP_SOURCES = [
-    # "http://134.209.216.92:8080/data/paris1937/{z}/{x}/{y}.png",
-    "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
-    # "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-]
 
 
 from .utils import *
