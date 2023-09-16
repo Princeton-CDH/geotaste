@@ -1,7 +1,7 @@
 from .imports import *
 
 cols_members=[
-    'member_name_nice',
+    'member_name',
     'member_dob',
     'member_dod',
     'member_nationalities',
@@ -585,22 +585,7 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def df_dwellings(self): 
         assert 'dwelling' in set(self.data.columns)
-        #o=self.data.drop_duplicates('dwelling').set_index('dwelling')
-        bookcount={
-            member_dwelling:len(set(member_dwelling_df.book))
-            for member_dwelling,member_dwelling_df in self.data.groupby('dwelling')
-        }
-        def reversename(x):
-            if not ',' in x: return x
-            a,b=x.split(', ',1)
-            return f'{b} {a}'
-        return self.data.assign(
-            num_borrows=[
-                bookcount.get(x,0) for x in self.data.dwelling
-            ],
-            member_name_nice=self.data.member_name.apply(reversename),
-            member_url=self.data.member.apply(lambda x: f'https://shakespeareandco.princeton.edu/members/{x}/')
-        )
+        return self.data.drop_duplicates('dwelling').set_index('dwelling')
     
     @cached_property
     def df_members(self): 
@@ -672,7 +657,7 @@ class CombinedFigureFactory(FigureFactory):
                 # size=(figdf['num_borrows'] / 20)+5,
                 opacity=0.4
             ),
-            text=figdf['member_name_nice'],
+            text=figdf['member_name'],
             textfont=dict(
                 size=TEXTFONT_SIZE,
                 color=color_text,
@@ -1223,7 +1208,7 @@ def get_color(x):
 
 
 # @cache
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class}, {serialized_data})')
     filter_data,selected,kwargs = (

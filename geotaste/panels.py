@@ -237,6 +237,10 @@ class RightPanel(CombinedPanel):
 class ComparisonPanel(BaseComponent):
     figure_factory = ComparisonFigureFactory
 
+    @cached_property
+    def store_json(self):
+        return dcc.Store(id=self.id('store_json'))
+
 
     def layout(self, params=None):
         
@@ -251,6 +255,7 @@ class ComparisonPanel(BaseComponent):
                 self.mainview,
                 self.store,
                 self.store_views,
+                self.store_json,
             ], className='mainview-container')
         ])
 
@@ -403,12 +408,9 @@ class ComparisonPanel(BaseComponent):
 
 
         ## CHANGING MAP
-        
-
         @app.callback(
             [
-                Output(self.mainmap,'figure',allow_duplicate=True),
-                Output(self.maintbl,'children',allow_duplicate=True),
+                Output(self.store_json, 'data'),
                 Output(self.store,'data'),
                 Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
             ],
@@ -426,31 +428,75 @@ class ComparisonPanel(BaseComponent):
             logger.debug([Lstore,Rstore])
             with Logwatch('computing figdata on server'):
                 newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
-                ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
-                # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
-                otbl='Loading... this may take up to 30 seconds.'
-                # logger.debug(tbldata)
-                # time.sleep(30)
-                return ofig,otbl,[Lstore,Rstore],True
+                ostore=[Lstore,Rstore]
+                ojson=pio.to_json(go.Figure(data=newfig.data, layout=oldfig['layout']))
+                ojsongz=b64encode(zlib.compress(ojson.encode()))
+                logger.debug(f'Assigning a json string of length {len(ojson)}, size {sys.getsizeof(ojson)}, but size {sys.getsizeof(ojsongz)} compressed, to self.store_json')
+                return ojsongz.decode('utf-8'),ostore,True
+            
 
-
-
-        ## CHANGING DATA TABLE
-
-        @app.callback(
-            [
-                Output(self.maintbl,'children',allow_duplicate=True),
-                Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
-            ],
-            Input(self.store,'data'),
-            # background=True,
-            # manager=background_manager,
+        app.clientside_callback(
+            """
+            function(json_gz) {
+                let compressedData = Uint8Array.from(atob(json_gz), (c) => c.charCodeAt(0));
+                let decompressedData = pako.inflate(compressedData, { to: "string" });
+                let jsonObject = JSON.parse(decompressedData);
+                return jsonObject;
+            }
+            """,
+            Output(self.mainmap, 'figure', allow_duplicate=True),
+            Input(self.store_json, 'data'),
             prevent_initial_call=True
         )
-        def redo_tbl(data):
-            with Logwatch('running long callback computation'):
-                fdL,fdR=data
-                return get_server_cached_view(serialize([fdL,fdR,'table'])), True
+
+
+
+        # @app.callback(
+        #     [
+        #         Output(self.mainmap,'figure',allow_duplicate=True),
+        #         Output(self.maintbl,'children',allow_duplicate=True),
+        #         Output(self.store,'data'),
+        #         Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
+        #     ],
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #         # Input(self.mainview_tabs, 'active_tab')
+        #     ],
+        #     [
+        #         State(self.mainmap,'figure'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def update_LR_data(Lstore, Rstore, oldfig):
+        #     logger.debug([Lstore,Rstore])
+        #     with Logwatch('computing figdata on server'):
+        #         newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
+        #         ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
+        #         # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
+        #         otbl='Loading... this may take up to 30 seconds.'
+        #         # logger.debug(tbldata)
+        #         # time.sleep(30)
+        #         return ofig,otbl,[Lstore,Rstore],True
+
+
+
+        # ## CHANGING DATA TABLE
+
+        # @app.callback(
+        #     [
+        #         Output(self.maintbl,'children',allow_duplicate=True),
+        #         Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
+        #     ],
+        #     Input(self.store,'data'),
+        #     # background=True,
+        #     # manager=background_manager,
+        #     prevent_initial_call=True
+        # )
+        # def redo_tbl(data):
+        #     with Logwatch('running long callback computation'):
+        #         fdL,fdR=data
+        #         return get_server_cached_view(serialize([fdL,fdR,'table'])), True
 
 
             

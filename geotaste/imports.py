@@ -45,6 +45,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 import numpy as np
 import pandas as pd
 # import pandas_dash
@@ -52,8 +53,8 @@ from pandas.api.types import is_numeric_dtype, is_string_dtype
 import plotly.express as px
 import plotly.graph_objects as go
 from humanfriendly import format_timespan
-
-from base64 import b64decode
+import zlib
+from base64 import b64decode,b64encode
 
 # setup logs
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
