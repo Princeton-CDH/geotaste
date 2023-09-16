@@ -337,7 +337,7 @@ class FilterCard(FilterComponent):
         @app.callback(
             [
                 Output(self.store_desc, 'children', allow_duplicate=True),
-                Output(self.footer, 'is_open', allow_duplicate=True)
+                Output(self.footer, 'is_open', allow_duplicate=True),
             ],
             Input(self.store, 'data'),
             prevent_initial_call=True
@@ -420,16 +420,16 @@ class FilterPlotCard(FilterCard):
         #     logger.debug(f'[{self.name}] {self.key} cleared...')
         #     return self.plot()
 
-        @app.callback(
-            Output(self.store_json, "data", allow_duplicate=True),
-            Input(self.button_clear, 'n_clicks'),
-            State(self.store_panel, 'data'),
-            prevent_initial_call=True
-        )
-        #@logger.catch
-        def clear_selection(clear_clicked, panel_data):
-            if not clear_clicked: raise PreventUpdate
-            return self.plot(panel_data)
+        # @app.callback(
+        #     Output(self.store_json, "data", allow_duplicate=True),
+        #     Input(self.button_clear, 'n_clicks'),
+        #     State(self.store_panel, 'data'),
+        #     prevent_initial_call=True
+        # )
+        # #@logger.catch
+        # def clear_selection(clear_clicked, panel_data):
+        #     if not clear_clicked: raise PreventUpdate
+        #     return self.plot(panel_data)
         
         @app.callback(
             Output(self.store_json, "data", allow_duplicate=True),
@@ -453,7 +453,9 @@ class FilterPlotCard(FilterCard):
                 Output(self.store_json, "data", allow_duplicate=True),
                 Output(self.store, 'data', allow_duplicate=True)
             ],
-            Input(self.store_panel, 'data'),
+            [
+                Input(self.store_panel, 'data'),
+            ],
             [
                 State(self.store, 'data'),
                 State(self.showhide_btn, "n_clicks"),
@@ -489,36 +491,7 @@ class FilterPlotCard(FilterCard):
             Input(self.store_json, 'data'),
             prevent_initial_call=True
         )
-        
-        
-        
-        # @app.callback(
-        #     [
-        #         Output(self.graph, 'figure', allow_duplicate=True),
-        #         Output(self.store, 'data', allow_duplicate=True)
-        #     ],
-        #     [
-        #         Input(self.store_panel,'data'),
-        #         Input(self.button_clear,'n_clicks'),
-        #     ],
-        #     [
-        #         State(self.store, 'data'),
-        #         State(self.showhide_btn, "n_clicks"),
-        #         State(self.header_btn, 'n_clicks'),
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # def store_data_updated(panel_data, clear_clicked, card_data, show_clicked1, show_clicked2):
-        #     if ctx.triggered_id==self.store_panel.id and not panel_data: raise PreventUpdate
-        #     logger.debug(f'[{self.name}] triggered by {ctx.triggered_id}, with card data = {card_data} and panel_data = {panel_data}')
 
-        #     out_data = {} if ctx.triggered_id==self.button_clear.id else card_data
-        #     out_fig = dash.no_update if not show_clicked1 and not show_clicked2 else self.plot(
-        #         panel_data, 
-        #         selected=card_data
-        #     )
-        #     return out_fig, out_data
-            
 
 
         
@@ -528,26 +501,8 @@ class FilterSliderCard(FilterPlotCard):
     unfiltered=''
     body_is_open = False
 
-    def get_content(self, card_data={}, panel_data={}, selected=[], **kwargs):
-        logger.debug(self.name)
-        ograph = self.graph
-        filter_data=panel_data if panel_data else card_data
-        selected=card_data if panel_data else selected
-        
-        # ograph.figure = self.ff(
-        #     filter_data=panel_data if panel_data else card_data, 
-        #     selected=card_data if panel_data else selected      
-        # ).plot(color=self.color, **kwargs)
-
-        ograph.figure = plot_cache(
-            self.figure_factory,
-            serialize([
-                filter_data,
-                selected,
-                {**kwargs, **{'color':self.color}}
-            ])
-        )
-        
+    @cached_property
+    def content(self, card_data={}, panel_data={}, selected=[], **kwargs):
         return dbc.Container([
             dbc.Row(self.graph),
             dbc.Row([
@@ -615,10 +570,10 @@ class FilterSliderCard(FilterPlotCard):
 
         @app.callback(
             [
-                Output(self.graph,'figure'),
-                Output(self.store,'data'),
-                Output(self.id('input_start'), 'value'),
-                Output(self.id('input_end'), 'value'),
+                Output(self.store_json,'data',allow_duplicate=True),
+                Output(self.store,'data',allow_duplicate=True),
+                Output(self.id('input_start'), 'value',allow_duplicate=True),
+                Output(self.id('input_end'), 'value',allow_duplicate=True),
             ],
             [
                 Input(self.graph, 'selectedData'),
@@ -643,91 +598,26 @@ class FilterSliderCard(FilterPlotCard):
                 return dash.no_update,dash.no_update,minval,maxval
             else:
                 newvals=list(range(start_value, end_value+1))
-                ofig = self.plot(
+                ofig_json_gz_str = self.plot(
                     filter_data=panel_data if panel_data else {},
                     selected=newvals
                 )
                 odat = {self.figure_factory.key:newvals}
-                return ofig,odat,dash.no_update,dash.no_update
-
-
-
-
-        # @app.callback(
-        #     [
-        #         Output(self.graph, 'figure', allow_duplicate=True),
-        #         Output(self.input_start, 'value', allow_duplicate=True),
-        #         Output(self.input_end, 'value', allow_duplicate=True),
-        #         Output(self.store, "data", allow_duplicate=True),
-        #         # Output(self.store_desc, 'children', allow_duplicate=True)
-        #     ],
-        #     [
-        #         Input(self.graph, 'selectedData'),
-        #         Input(self.input_start, 'value'),
-        #         Input(self.input_end, 'value'),
-        #         Input(self.button_clear, 'n_clicks'),
-        #         Input(self.body, "is_open"),
-        #     ],
-        #     [
-        #         State(self.store, 'data'),
-        #         State(self.graph, 'figure'),
-        #         # State(self.store_desc, 'children')
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # def graph_selection_updated(
-        #         selected_data,
-        #         start_value,
-        #         end_value,
-        #         clear_clicked,
-        #         body_open_now,
-        #         old_data={},
-        #         old_fig=None,
-        #         old_desc=''
-        #     ):
-        #     def vstr(x): return f'{int(x)}' if x is not None else ''
-
-        #     logger.debug(['sel updated on slider!', ctx.triggered_id, ctx.triggered])
-
-        #     if ctx.triggered_id == self.graph.id:
-        #         logger.debug(f'GRAPH TRIGGERED: {len(selected_data)} len sel data')
-        #         new_data=self.ff().selected(selected_data)
-        #         if not new_data or new_data==old_data: raise PreventUpdate
-
-        #         vals=list(new_data.values())
-        #         minval=min(vals[0]) if vals else None
-        #         maxval=max(vals[0]) if vals else None
-        #         o=[
-        #             old_fig, 
-        #             minval, 
-        #             maxval, 
-        #             new_data, 
-        #             f'{vstr(minval)} – {vstr(maxval)}'
-        #         ]
+                return ofig_json_gz_str,odat,dash.no_update,dash.no_update
             
-        #     elif ctx.triggered_id in {self.body.id, self.input_start.id, self.input_end.id}:
-        #         if body_open_now:
-        #             logger.debug(f'INPUT TRIGGERED TRIGGERED')
-        #             ff = self.ff(min_series_val=start_value, max_series_val=end_value)
-        #             newfig = ff.plot()
-        #             o=[
-        #                 newfig, 
-        #                 start_value, 
-        #                 end_value, 
-        #                 ff.seldata if ctx.triggered_id!=self.body.id else old_data,
-        #                 f'{vstr(start_value)} – {vstr(end_value)}' if ctx.triggered_id!=self.body.id else old_desc,
-        #             ]
-            
-        #     elif ctx.triggered_id == self.button_clear.id and clear_clicked:
-        #         ff=self.ff()
-        #         o=[ff.plot(), ff.minval, ff.maxval, {}, '']
-            
-        #     else:
-        #         logger.debug('not updating')
-        #         raise PreventUpdate
-            
-        #     # logger.debug(['graph_selection_updated->',o])
-        #     return o[:-1]
+        @app.callback(
+            [
+                Output(self.id('input_start'), 'value',allow_duplicate=True),
+                Output(self.id('input_end'), 'value',allow_duplicate=True),
+            ],
+            Input(self.button_clear, 'n_clicks'),
+            State(self.store_panel, 'data'),
+            prevent_initial_call=True
+        )
+        def clear_selection_inputs(clear_clicked, panel_data):
+            if not clear_clicked: raise PreventUpdate
+            ff=self.ff(panel_data)
+            return ff.minval, ff.maxval
 
                 
 
