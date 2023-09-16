@@ -152,10 +152,17 @@ def get_mainmap_figdata(fdL={}, fdR={}):
 def get_server_cached_view(args_id):
     fdL,fdR,active_tab=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)
+    logger.debug([args_id,ff])
     if active_tab=='map':
-        return ff.plot_map()
+        out=ff.plot_map()
     else:
-        return TableView(ff)
+        out=ff.table()
+
+    ojson=pio.to_json(out)
+    ojsongz=b64encode(zlib.compress(ojson.encode()))
+    ojsongzstr=ojsongz.decode('utf-8')
+    return ojsongzstr
+    
 
 
 # @cache

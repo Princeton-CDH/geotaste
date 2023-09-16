@@ -712,7 +712,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
     
     
-    @cache
     def compare(self, 
             maxcats=COMPARISON_MAXCATS,
             cols=PREDICT_COLS,
@@ -745,6 +744,50 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             if comparison_df is not None
             else self.compare(**kwargs)
         )
+    
+    def table(self, **kwargs):
+        #return get_dash_table(self.compare(**kwargs))
+        return self.table_content(**kwargs)
+    
+    def table_content(self,predict_cols=['arrond_id'],**kwargs):
+        odf = self.compare(cols=predict_cols, **kwargs)
+        fig = self.plot_oddsratio_map(odf)
+        # logger.debug(fig)
+        odf['colpref'] = odf.col.apply(lambda x: x.split('_')[0])
+
+        out = []
+        ins = list(sorted(odf.groupby('colpref')))
+        ins += [('all data',odf)]
+        for colpref, colpref_df in sorted(ins):
+            desc_L,desc_R = describe_comparison(colpref_df, lim=10)
+            out_col = [
+                # dbc.Row(html.H4(f'Most distinctive {colpref} features of Filter 1 vs. Filter 2')),
+                
+                dbc.Row([
+                    dbc.Col([
+                        html.H5([f'10 most distinctive {"features" if colpref=="all data" else colpref+"s"} for Filter 1 (', self.L.filter_desc,')']),
+                        dcc.Markdown('\n'.join(desc_L))
+                    ], className='left-color'),
+
+                    dbc.Col([
+                        html.H5([f'10 most distinctive {"features" if colpref=="all data" else colpref+"s"} for Filter 2 (', self.R.filter_desc,')']),
+                        dcc.Markdown('\n'.join(desc_R))
+                    ], className='right-color'),
+                ])
+            ]
+
+            out_col.append(dbc.Row(get_dash_table(colpref_df)))
+
+            out_tab = dbc.Tab(dbc.Container(out_col), label=colpref.title())
+
+            out.append(out_tab)
+        
+        return dbc.Container([
+            dbc.Row(html.H4(f'Distinctive arrondissement map')),
+            dbc.Row(dcc.Graph(figure=fig, id='mini_arrond_analysis_map')),
+            dbc.Row(html.H4(f'Distinctive feature data', className='distinctive-feature-h4')),
+            dbc.Row(dbc.Tabs(out))
+        ])
 
         
         

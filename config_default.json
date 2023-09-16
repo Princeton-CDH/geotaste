@@ -18,9 +18,11 @@
     "PREDICT_COLS": [
         "member_title",
         "member_gender",
+        "author",
         "member_nationalities",
         "author_gender",
         "author_nationalities",
+        "book",
         "book_format",
         "book_genre",
         "arrond_id"

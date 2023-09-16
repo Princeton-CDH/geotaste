@@ -256,6 +256,7 @@ class ComparisonPanel(BaseComponent):
                 self.store,
                 self.store_views,
                 self.store_json,
+                self.table_json,
             ], className='mainview-container')
         ])
 
@@ -265,6 +266,9 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def store(self):
         return dcc.Store(id=self.id('store'), data=[])
+    @cached_property
+    def table_json(self):
+        return dcc.Store(id=self.id('table_json'), data='')
 
     
     @cached_property
@@ -320,10 +324,26 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def tblview(self):
-        return dbc.Container(
-            self.maintbl,
+        return dbc.Container([
+                self.maintbl_preface,
+                self.maintbl,
+            ],
             id='tblview'
         )
+
+    @cached_property
+    def maintbl_preface(self):
+        return dbc.Container(
+            [
+                html.H4('Data')
+            ]
+        )
+    
+    @cached_property
+    def maintbl(self):
+        ff = LandmarksFigureFactory()
+        dtbl=ff.table()
+        return dbc.Container(dtbl,id='maintbl-container')
 
     @cached_property
     def mainview(self):
@@ -350,18 +370,6 @@ class ComparisonPanel(BaseComponent):
             id='mainmap'
         )
         return ograph
-    
-    @cached_property
-    def maintbl(self):
-        ff = LandmarksFigureFactory()
-        return dbc.Container(
-        [
-            html.H4('Data'), 
-            ff.table() if hasattr(ff,'table') else html.P('??')
-        ], 
-        className='graphtab padded', 
-        id='maintbl'
-    )
 
     def ff(self, fdL={}, fdR={}, **kwargs):
         # get figure factory
@@ -397,22 +405,52 @@ class ComparisonPanel(BaseComponent):
         ### SWITCHING TABS
 
         @app.callback(
-            Output('tblview','style',allow_duplicate=True),
-            Input(self.mainview_tabs,'active_tab'),
-            State('tblview','style'),
+            [
+                Output(self.tblview,'style',allow_duplicate=True),
+                Output(self.table_json,'data',allow_duplicate=True),
+            ],
+            [
+                Input(self.mainview_tabs,'active_tab'),
+                Input(self.store,'data')
+            ],
+            [
+                State(self.tblview,'style'),
+            ],
             prevent_initial_call=True
         )
-        def switch_tab_simple(active_tab, style_d):
+        def switch_tab_simple(active_tab, data, style_d):
             if style_d is None: style_d={}
-            return {**style_d, **(STYLE_INVIS if active_tab=='map' else STYLE_VIS)}
+            if active_tab!='table':
+                ostyle={**style_d, **STYLE_INVIS}
+                return ostyle, dash.no_update
+            else:
+                ostyle={**style_d, **STYLE_VIS}
+                fdL,fdR=data if data else ({},{})
+                ojson=get_server_cached_view(serialize([fdL,fdR,'table']))
+                return ostyle,ojson
+            
+        app.clientside_callback(
+            """
+            function(json_gz) {
+                let compressedData = Uint8Array.from(atob(json_gz), (c) => c.charCodeAt(0));
+                let decompressedData = pako.inflate(compressedData, { to: "string" });
+                let jsonObject = JSON.parse(decompressedData);
+                return jsonObject;
+            }
+            """,
+            Output(self.maintbl, 'children', allow_duplicate=True),
+            Input(self.table_json, 'data'),
+            prevent_initial_call=True
+        )
 
 
         ## CHANGING MAP
         @app.callback(
             [
-                Output(self.store_json, 'data'),
-                Output(self.store,'data'),
-                Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
+                Output(self.store_json, 'data',allow_duplicate=True),
+                Output(self.store,'data',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
+                # Output(self.mainview_tabs,'active_tab')
             ],
             [
                 Input(self.L.store, 'data'),
@@ -425,17 +463,14 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
         def update_LR_data(Lstore, Rstore, oldfig):
-            logger.debug([Lstore,Rstore])
+            ostore=[Lstore,Rstore]
+            logger.debug(ostore)
             with Logwatch('computing figdata on server'):
-                newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
+                newfig_gz_str=get_server_cached_view(serialize([Lstore,Rstore,'map']))
             
-            with Logwatch('compressing json'):
-                ostore=[Lstore,Rstore]
-                ojson=pio.to_json(go.Figure(data=newfig.data, layout=oldfig['layout']))
-                ojsongz=b64encode(zlib.compress(ojson.encode()))
-                logger.debug(f'Assigning a json string of length {len(ojson)}, size {sys.getsizeof(ojson)}, but size {sys.getsizeof(ojsongz)} compressed, to self.store_json')
+            logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
                 
-            return ojsongz.decode('utf-8'),ostore,True
+            return newfig_gz_str,ostore,True#,'map'
             
 
         app.clientside_callback(
@@ -451,37 +486,6 @@ class ComparisonPanel(BaseComponent):
             Input(self.store_json, 'data'),
             prevent_initial_call=True
         )
-
-
-
-        # @app.callback(
-        #     [
-        #         Output(self.mainmap,'figure',allow_duplicate=True),
-        #         Output(self.maintbl,'children',allow_duplicate=True),
-        #         Output(self.store,'data'),
-        #         Output('layout-loading-output', 'children', allow_duplicate=True) # spinner
-        #     ],
-        #     [
-        #         Input(self.L.store, 'data'),
-        #         Input(self.R.store, 'data'),
-        #         # Input(self.mainview_tabs, 'active_tab')
-        #     ],
-        #     [
-        #         State(self.mainmap,'figure'),
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # def update_LR_data(Lstore, Rstore, oldfig):
-        #     logger.debug([Lstore,Rstore])
-        #     with Logwatch('computing figdata on server'):
-        #         newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
-        #         ofig = newfig if not oldfig else {'data':newfig.data, 'layout':oldfig['layout']}
-        #         # otbl = get_server_cached_view(serialize([Lstore,Rstore,'table']))
-        #         otbl='Loading... this may take up to 30 seconds.'
-        #         # logger.debug(tbldata)
-        #         # time.sleep(30)
-        #         return ofig,otbl,[Lstore,Rstore],True
-
 
 
         # ## CHANGING DATA TABLE

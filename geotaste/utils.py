@@ -320,7 +320,6 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
     """
     # logger.debug([dfL.columns, 'dfL cols'])
     # logger.debug([dfR.columns, 'dfR cols'])
-    print(dfL.index.name, dfR.index.name)
     assert dfL.index.name == dfR.index.name
     allL, allR = set(dfL.index), set(dfR.index)
     print(allR)
@@ -337,7 +336,7 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
      )
     
     
-    logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
+    # logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
 
     def assign(idx, underdog=True):
         if not onlyL and not onlyR: # nothing distinct
@@ -357,16 +356,12 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
                 else:
                     o=colval_L
         
-            if 'hemingway' in str(idx):
-                logger.debug([idx,idx in allL, idx in allR, idx in both, idx in either, '->',o])
-        
         return o
 
     odf = pd.concat([dfL, dfR])
     odf[colname] = [assign(i) for i in odf.index]
-    # odf = odf#.reset_index().drop_duplicates([odf.index.name,colname]).set_index(odf.index.name)
-    logger.debug([odf.columns, 'combo cols'])
-    logger.debug([odf.index.name, 'combo index name'])
+    logger.trace([odf.columns, 'combo cols'])
+    logger.trace([odf.index.name, 'combo index name'])
     return odf
 
 
