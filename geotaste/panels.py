@@ -428,11 +428,14 @@ class ComparisonPanel(BaseComponent):
             logger.debug([Lstore,Rstore])
             with Logwatch('computing figdata on server'):
                 newfig=get_server_cached_view(serialize([Lstore,Rstore,'map']))
+            
+            with Logwatch('compressing json'):
                 ostore=[Lstore,Rstore]
                 ojson=pio.to_json(go.Figure(data=newfig.data, layout=oldfig['layout']))
                 ojsongz=b64encode(zlib.compress(ojson.encode()))
                 logger.debug(f'Assigning a json string of length {len(ojson)}, size {sys.getsizeof(ojson)}, but size {sys.getsizeof(ojsongz)} compressed, to self.store_json')
-                return ojsongz.decode('utf-8'),ostore,True
+                
+            return ojsongz.decode('utf-8'),ostore,True
             
 
         app.clientside_callback(
