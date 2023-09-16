@@ -100,6 +100,10 @@ class FilterComponent(BaseComponent):
         return dcc.Store(id=self.id('store'), data={})
     
     @cached_property
+    def store_json(self):
+        return dcc.Store(id=self.id('store_json'), data='')
+    
+    @cached_property
     def store_panel(self):
         return dcc.Store(id=self.id('store_panel'), data={})
     
@@ -168,6 +172,7 @@ class FilterCard(FilterComponent):
 
             # data
             self.store, 
+            self.store_json,
             self.store_panel,
             # self.store_selection,
 
@@ -275,30 +280,12 @@ class FilterCard(FilterComponent):
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-    #     @app.callback(
-    #         [
-    #             # Output(self.store_desc, 'children', allow_duplicate=True),
-    #             Output(self.footer, 'is_open', allow_duplicate=True)
-    #         ],
-    #         Input(self.store, 'data'),
-    #         prevent_initial_call=True
-    #     )
-    #     #@logger.catch
-    #     def store_data_updated_card(store_data):
-    #         # filter cleared?
-    #         return [True]
-    #         if not store_data: return UNFILTERED, False
-    #         logger.debug(f'store_data_updated to {store_data}')
-    #         res=self.describe_filters(store_data)
-    #         o1 = res.replace('[','').replace(']','') if res else UNFILTERED
-    #         return o1, True
-
-
         @app.callback(
             [
                 Output(self.body, "is_open", allow_duplicate=True),
                 Output(self.showhide_btn, "children", allow_duplicate=True),
                 Output(self.content, 'children', allow_duplicate=True),
+                # Output(self.store_json, "data", allow_duplicate=True),
             ],
             [
                 Input(self.showhide_btn, "n_clicks"),
@@ -307,8 +294,10 @@ class FilterCard(FilterComponent):
             [
                 State(self.body, "is_open"),
                 State(self.content,'children'),
+                # State(self.store_json, 'data'),
                 State(self.store, 'data'),
                 State(self.store_panel, 'data'),
+                
             ],
             prevent_initial_call=True
         )
@@ -335,6 +324,8 @@ class FilterCard(FilterComponent):
                 logger.debug(f'[{self.name}] toggle_collapse: opening')
                 content_exists_already = bool(content_now)# and content_now.get('props',{}).get('children')
                 logger.debug(f'content currently exists? --> {content_exists_already}')
+
+
                 return True, '[-]', content_now if content_exists_already else self.get_content(
                     card_data=card_data,
                     panel_data=panel_data
@@ -376,15 +367,10 @@ class FilterCard(FilterComponent):
 
 class FilterPlotCard(FilterCard):
     body_is_open = False
-    
-    def get_content(self, card_data={}, panel_data={}, selected=[], **kwargs):
-        logger.debug(self.name)
-        ograph = self.graph
-        ograph.figure = self.plot(
-            filter_data=panel_data if panel_data else card_data, 
-            selected=card_data if panel_data else selected      
-        )
-        return ograph
+
+    @cached_property
+    def content(self,params=None):
+        return dbc.Container(self.graph)
 
     @cached_property
     def graph(self): 
@@ -435,7 +421,7 @@ class FilterPlotCard(FilterCard):
         #     return self.plot()
 
         @app.callback(
-            Output(self.graph, "figure", allow_duplicate=True),
+            Output(self.store_json, "data", allow_duplicate=True),
             Input(self.button_clear, 'n_clicks'),
             State(self.store_panel, 'data'),
             prevent_initial_call=True
@@ -445,10 +431,26 @@ class FilterPlotCard(FilterCard):
             if not clear_clicked: raise PreventUpdate
             return self.plot(panel_data)
         
+        @app.callback(
+            Output(self.store_json, "data", allow_duplicate=True),
+            Input(self.body, "is_open"),
+            [
+                State(self.store_json, "data"),
+                State(self.store, "data"),
+                State(self.store_panel, "data"),
+            ],
+            prevent_initial_call=True
+        )
+        def draw(is_open,json_now, my_filter_data, panel_filter_data):
+            if not is_open or json_now: raise PreventUpdate
+            newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
+            ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
+            return ofig_json_gz_str
+            
             
         @app.callback(
             [
-                Output(self.graph, "figure", allow_duplicate=True),
+                Output(self.store_json, "data", allow_duplicate=True),
                 Output(self.store, 'data', allow_duplicate=True)
             ],
             Input(self.store_panel, 'data'),
@@ -456,7 +458,7 @@ class FilterPlotCard(FilterCard):
                 State(self.store, 'data'),
                 State(self.showhide_btn, "n_clicks"),
                 State(self.header_btn, 'n_clicks'),
-                State(self.graph, 'selectedData'),
+                State(self.graph, 'selectedData')
             ],
             prevent_initial_call=True
         )
@@ -469,10 +471,24 @@ class FilterPlotCard(FilterCard):
 
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             logger.debug(f'[{self.name}] incoming panel data: {newdata}')
-            return (
-                self.plot(newdata, selected=my_filter_data), 
-                my_filter_data if not panel_filter_data else dash.no_update
-            )
+            ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
+            logger.debug(f'Assigning a json string of size {sys.getsizeof(ofig_json_gz_str)} compressed, to self.store_json')
+            odat=my_filter_data if not panel_filter_data else dash.no_update
+            return ofig_json_gz_str,odat
+        
+        app.clientside_callback(
+            """
+            function(json_gz) {
+                let compressedData = Uint8Array.from(atob(json_gz), (c) => c.charCodeAt(0));
+                let decompressedData = pako.inflate(compressedData, { to: "string" });
+                let jsonObject = JSON.parse(decompressedData);
+                return jsonObject;
+            }
+            """,
+            Output(self.graph, 'figure', allow_duplicate=True),
+            Input(self.store_json, 'data'),
+            prevent_initial_call=True
+        )
         
         
         

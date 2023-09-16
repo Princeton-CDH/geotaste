@@ -148,7 +148,7 @@ def get_mainmap_figdata(fdL={}, fdR={}):
     return odata
 
 
-@cache_obj.memoize()
+# @cache_obj.memoize()
 def get_server_cached_view(args_id):
     fdL,fdR,active_tab=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)

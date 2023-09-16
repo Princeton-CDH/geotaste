@@ -1208,7 +1208,7 @@ def get_color(x):
 
 
 # @cache
-# @cache_obj.memoize()
+@cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
     logger.debug(f'plot_cache({figure_class}, {serialized_data})')
     filter_data,selected,kwargs = (
@@ -1218,5 +1218,12 @@ def plot_cache(figure_class, serialized_data):
     )
     ff = figure_class(filter_data=filter_data, selected=selected)
     fig = ff.plot(**kwargs)
-    return fig
+
+    fig_json_gz_str = b64encode(
+        zlib.compress(
+            pio.to_json(fig).encode()
+        )
+    ).decode('utf-8')
+
+    return fig_json_gz_str
 
