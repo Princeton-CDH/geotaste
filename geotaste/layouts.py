@@ -51,7 +51,7 @@ class GeotasteLayout(BaseComponent):
                     self.comparison_panel.mainview_tabs,
 
                     width=6,
-                    style={'align-items':'end'}
+                    style={'display':'flex'}
                 ),
             ], className='navbar-row'),
 
