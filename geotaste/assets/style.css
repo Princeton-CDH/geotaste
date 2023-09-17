@@ -104,8 +104,8 @@ h5 { font-size:1.1rem;}
 
 #mainview_tabs .nav-link { 
     border: 1px solid rgba(150, 150, 150, 1);
-    height:35px;
-    line-height:35px;
+    height:50px;
+    line-height:50px;
     padding:0 1rem;
     margin:0;
     border-top-left-radius: 0px;
@@ -116,7 +116,7 @@ h5 { font-size:1.1rem;}
     display:inline-block;
     width:fit-content;
     color:black;
-    background:rgba(225, 225, 225, 0.65);
+    background:rgba(225, 225, 225, 0);
 }
 
 #mainview_tabs .nav-link.link, #mainview_tabs .nav-link.visited {
@@ -438,7 +438,8 @@ button {
     z-index: 100;
     position:absolute;
     right:0;
-    top:50px;
+    top:0;
+    height:50px;
     width:fit-content;
 }
 
