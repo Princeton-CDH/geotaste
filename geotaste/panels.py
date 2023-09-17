@@ -251,7 +251,7 @@ class ComparisonPanel(BaseComponent):
             ], className='filters-container'),
 
             dbc.Container([
-                self.mainview_tabs,
+                # self.mainview_tabs,
                 self.mainview,
                 self.store,
                 self.store_views,

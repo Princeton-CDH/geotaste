@@ -24,7 +24,8 @@ body {
     width:100vw;
     margin:0;
     padding:0; 
-    overflow-x:hidden;
+    /* overflow-x:hidden; */
+    min-width:800px;
 }
 
 h1 { font-size:2rem;}
@@ -63,9 +64,10 @@ h5 { font-size:1.1rem;}
     z-index: 50;
     overflow-y: hidden;
     overflow-x: hidden;
-    display:block;
+    /* display:block; */
     backdrop-filter: blur(5px);
     background:rgba(225, 225, 225, 0.666);
+    min-width:800px;
 }
 
 .mainview {
@@ -433,12 +435,12 @@ button {
 
 #mainview_tabs {
     /* display:flex; */
-    /* justify-content: end; */
-    /* flex-grow: 1; */
+    justify-content: end;
+    flex-grow: 1;
     z-index: 100;
-    position:absolute;
-    right:0;
-    top:0;
+    /* position:absolute; */
+    /* right:0; */
+    /* top:0; */
     height:50px;
     width:fit-content;
 }
@@ -486,6 +488,7 @@ button {
     padding:10px;
     background-color: rgba(255,255,255,1);
     pointer-events: all;
+    min-width:300px;
 }
 
 /* .dash-spreadsheet-menu div { margin:0 0 0 auto;} */
@@ -523,3 +526,5 @@ button {
 .table_content .row {
     margin-top:1em;
 }
+
+.layout-container {min-width:800px;}
