@@ -317,7 +317,7 @@ def get_distinctive_qual_vals(
 
 
 
-def describe_comparison(comparison_df, lim=10, min_fac=None):
+def describe_comparison(comparison_df, lim=10, min_fac=1.1):
     idf=comparison_df.sort_values('odds_ratio_pos',ascending=False)
     L,R=idf.query('perc_L>perc_R'),idf.query('perc_R>perc_L')
 
@@ -334,8 +334,10 @@ def describe_comparison(comparison_df, lim=10, min_fac=None):
              tR=cR/(pR/100)
              p=row.fisher_exact_p
              pstr='\*\*\*' if p<0.01 else ('\*\*' if p<0.05 else ('\*' if p<0.1 else ''))
-             orow=f'''* *{row.odds_ratio_pos:.2f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** {pstr}
-    * ({pL:.1f}% \[1] vs. {pR:.1f}% \[2], or {cL:.0f}/{tL:,.0f} \[1] vs. {cR:.0f}/{tR:,.0f} \[2] {row.comparison_scale.replace("_id","")}s)
+             colval=row.col_val.replace("[","\[").replace("]","\]")
+             orow=f'''* *{row.odds_ratio_pos:.2f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{colval}** {pstr}
+    * Group 1: {pL:.1f}% ({cL:.0f} of {tL:,.0f})
+    * Group 2: {pR:.1f}% ({cR:.0f} of {tR:,.0f})
 '''
              o.append(orow)
              if lim and len(o)>=lim: break
