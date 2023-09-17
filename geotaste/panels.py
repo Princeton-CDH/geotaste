@@ -325,19 +325,70 @@ class ComparisonPanel(BaseComponent):
     @cached_property
     def tblview(self):
         return dbc.Container([
-                self.maintbl_preface,
+                self.maintbl_preface_landmarks,
+                self.maintbl_preface_members,
+                self.maintbl_preface_analysis,
                 self.maintbl,
             ],
             id='tblview'
         )
 
     @cached_property
-    def maintbl_preface(self):
-        return dbc.Container(
+    def maintbl_preface_landmarks(self):
+        return dbc.Collapse(
             [
-                html.H4('Data')
-            ]
+                html.H4('Data on Landmarks')
+            ],
+            is_open=True
         )
+    
+    @cached_property
+    def maintbl_preface_members(self):
+        return dbc.Collapse(
+            [
+                html.H4('Data on members')
+            ],
+            is_open=False
+        )
+    
+    @cached_property
+    def maintbl_preface_analysis(self):
+        return dbc.Collapse(
+            [
+                html.H4('Data comparing filters'),
+                self.maintbl_preface_analysis_tabs,
+                self.maintbl_preface_analysis_content,
+            ],
+            is_open=False
+        )
+    
+    @cached_property
+    def maintbl_preface_analysis_tabs(self):
+        return dbc.Tabs([
+            dbc.Tab(label='Arrondissement', tab_id='arrond'),
+            dbc.Tab(label='Members', tab_id='member'),
+            dbc.Tab(label='Authors', tab_id='author'),
+            dbc.Tab(label='Books', tab_id='book'),
+        ], id='maintbl_preface_analysis_tabs')
+    
+    @cached_property
+    def maintbl_preface_analysis_content(self):
+        return dbc.Container()
+
+    def get_maintbl_preface_analysis_content(self, colpref, desc_L, desc_R):
+        return dbc.Row([
+            dbc.Col([
+                html.H5([f'10 most distinctive {"features" if colpref=="all data" else colpref+"s"} for Filter 1 (', self.L.filter_desc,')']),
+                dcc.Markdown('\n'.join(desc_L))
+            ], className='left-color'),
+
+            dbc.Col([
+                html.H5([f'10 most distinctive {"features" if colpref=="all data" else colpref+"s"} for Filter 2 (', self.R.filter_desc,')']),
+                dcc.Markdown('\n'.join(desc_R))
+            ], className='right-color'),
+        ])
+
+    
     
     @cached_property
     def maintbl(self):
@@ -408,36 +459,48 @@ class ComparisonPanel(BaseComponent):
             [
                 Output(self.tblview,'style',allow_duplicate=True),
                 Output(self.table_json,'data',allow_duplicate=True),
+
+                Output(self.maintbl_preface_landmarks, 'is_open', allow_duplicate=True),
+                Output(self.maintbl_preface_members, 'is_open', allow_duplicate=True),
+                Output(self.maintbl_preface_analysis, 'is_open', allow_duplicate=True),
+
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.mainview_tabs,'active_tab'),
-                Input(self.store,'data')
+                Input(self.store,'data'),
+                Input(self.maintbl_preface_analysis_tabs, 'active_tab')
             ],
             [
                 State(self.tblview,'style'),
             ],
             prevent_initial_call=True
         )
-        def switch_tab_simple(active_tab, data, style_d):
+        def switch_tab_simple(active_tab, data, analysis_tab, style_d):
             if style_d is None: style_d={}
+            is_open_l = [False, False, False]
             if active_tab!='table':
                 ostyle={**style_d, **STYLE_INVIS}
-                return ostyle, dash.no_update
+                return [ostyle, dash.no_update] + [dash.no_update for _ in is_open_l] + [True]
+            
+            # table is active tab
+            ostyle={**style_d, **STYLE_VIS}
+            fdL,fdR=data if data else ({},{})
+            if not fdL and not fdR:
+                is_open_l=[True,False,False]
+            elif fdL and fdR:
+                is_open_l=[False,False,True]
             else:
-                ostyle={**style_d, **STYLE_VIS}
-                fdL,fdR=data if data else ({},{})
-                ojson=get_server_cached_view(serialize([fdL,fdR,'table']))
-                return ostyle,ojson
+                is_open_l=[False,True,False]
+            
+            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab]))
+            return [ostyle,ojson]+is_open_l+[True]
             
         app.clientside_callback(
-            """
-            function(json_gz) {
-                let compressedData = Uint8Array.from(atob(json_gz), (c) => c.charCodeAt(0));
-                let decompressedData = pako.inflate(compressedData, { to: "string" });
-                let jsonObject = JSON.parse(decompressedData);
-                return jsonObject;
-            }
-            """,
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='decompress'
+            ),
             Output(self.maintbl, 'children', allow_duplicate=True),
             Input(self.table_json, 'data'),
             prevent_initial_call=True
@@ -466,22 +529,21 @@ class ComparisonPanel(BaseComponent):
             ostore=[Lstore,Rstore]
             logger.debug(ostore)
             with Logwatch('computing figdata on server'):
-                newfig_gz_str=get_server_cached_view(serialize([Lstore,Rstore,'map']))
+                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','']))
+            
+            newfig = from_json_gz_str(newfig_gz_str)
+            ofig = go.Figure(data=newfig.data, layout=oldfig['layout'])
             
             logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
                 
-            return newfig_gz_str,ostore,True#,'map'
+            return to_json_gz_str(ofig),ostore,True#,'map'
             
 
         app.clientside_callback(
-            """
-            function(json_gz) {
-                let compressedData = Uint8Array.from(atob(json_gz), (c) => c.charCodeAt(0));
-                let decompressedData = pako.inflate(compressedData, { to: "string" });
-                let jsonObject = JSON.parse(decompressedData);
-                return jsonObject;
-            }
-            """,
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='decompress'
+            ),
             Output(self.mainmap, 'figure', allow_duplicate=True),
             Input(self.store_json, 'data'),
             prevent_initial_call=True

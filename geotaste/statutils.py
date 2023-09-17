@@ -297,7 +297,9 @@ def get_distinctive_qual_vals(
             o.append(coldf)
         except Exception as e:
             logger.error(e)
-    
+
+    if not len(o): return pd.DataFrame()
+
     alldf=pd.concat(o).rename_axis('col_val').reset_index()
     alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
     alldf=alldf[alldf.fisher_exact!=0] # both must have counts?
@@ -315,7 +317,7 @@ def get_distinctive_qual_vals(
 
 
 
-def describe_comparison(comparison_df, lim=10):
+def describe_comparison(comparison_df, lim=10, min_fac=None):
     idf=comparison_df.sort_values('odds_ratio_pos',ascending=False)
     L,R=idf.query('perc_L>perc_R'),idf.query('perc_R>perc_L')
 
@@ -323,13 +325,18 @@ def describe_comparison(comparison_df, lim=10):
         LR2='R' if LR=='L' else 'L'
         o=[]
         for i,row in xdf.iterrows():
+             if min_fac and row.odds_ratio_pos<min_fac: continue
              pL=row[f'perc_{LR}']
              pR=row[f'perc_{LR2}']
              cL=row[f'count_{LR}']
              cR=row[f'count_{LR2}']
              tL=cL/(pL/100)
              tR=cR/(pR/100)
-             orow=f'* *{row.odds_ratio_pos:.1f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** ({pL:.1f}% \[1] vs. {pR:.1f}% \[2], or {cL:.0f}/{tL:,.0f} \[1] vs. {cR:.0f}/{tR:,.0f} \[2] {row.comparison_scale.replace("_id","")}s)'
+             p=row.fisher_exact_p
+             pstr='\*\*\*' if p<0.01 else ('\*\*' if p<0.05 else ('\*' if p<0.1 else ''))
+             orow=f'''* *{row.odds_ratio_pos:.2f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{row.col_val}** {pstr}
+    * ({pL:.1f}% \[1] vs. {pR:.1f}% \[2], or {cL:.0f}/{tL:,.0f} \[1] vs. {cR:.0f}/{tR:,.0f} \[2] {row.comparison_scale.replace("_id","")}s)
+'''
              o.append(orow)
              if lim and len(o)>=lim: break
         return o

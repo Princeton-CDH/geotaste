@@ -148,21 +148,30 @@ def get_mainmap_figdata(fdL={}, fdR={}):
     return odata
 
 
-# @cache_obj.memoize()
-def get_server_cached_view(args_id):
-    fdL,fdR,active_tab=unserialize(args_id)
+@cache_obj.memoize()
+def get_cached_fig_or_table(args_id):
+    fdL,fdR,active_tab,analysis_tab=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)
     logger.debug([args_id,ff])
     if active_tab=='map':
         out=ff.plot_map()
     else:
-        out=ff.table()
+        pcols=[c for c in PREDICT_COLS if c.startswith(analysis_tab)] if analysis_tab else PREDICT_COLS
+        out=ff.table(cols=pcols)
+    return to_json_gz_str(out)
 
+def to_json_gz_str(out):
     ojson=pio.to_json(out)
     ojsongz=b64encode(zlib.compress(ojson.encode()))
     ojsongzstr=ojsongz.decode('utf-8')
     return ojsongzstr
-    
+
+def from_json_gz_str(ojsongzstr):
+    ojsongz=b64decode(ojsongzstr.encode())
+    ojson=zlib.decompress(ojsongz)
+    ojsonstr=ojson.decode('utf-8')
+    obj=pio.from_json(ojsonstr)
+    return obj
 
 
 # @cache

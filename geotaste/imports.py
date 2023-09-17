@@ -115,11 +115,11 @@ PREDICT_COLS=[
     'member_gender', 
     'member_nationalities',
 
-    'author',
+    # 'author',
     'author_gender',
     'author_nationalities',
 
-    'book',
+    # 'book',
     'book_format',
     'book_genre',
 

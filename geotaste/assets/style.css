@@ -518,3 +518,7 @@ button {
     top:0;
     right:0;
 } */
+
+.table_content .row {
+    margin-top:1em;
+}

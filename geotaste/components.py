@@ -479,14 +479,10 @@ class FilterPlotCard(FilterCard):
             return ofig_json_gz_str,odat
         
         app.clientside_callback(
-            """
-            function(json_gz) {
-                let compressedData = Uint8Array.from(atob(json_gz), (c) => c.charCodeAt(0));
-                let decompressedData = pako.inflate(compressedData, { to: "string" });
-                let jsonObject = JSON.parse(decompressedData);
-                return jsonObject;
-            }
-            """,
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='decompress'
+            ),
             Output(self.graph, 'figure', allow_duplicate=True),
             Input(self.store_json, 'data'),
             prevent_initial_call=True
