@@ -1,3 +1,4 @@
+dash[testing]
 black>=22.10.0
 pre-commit>=2.20.0
 tox

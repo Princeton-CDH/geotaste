@@ -298,22 +298,15 @@ def concat_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colva
 
 def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
     """
-    Combines two dataframes dfL and dfR by joining them on their indexes. 
-    The function creates a new column indicating whether a row belongs to the left dataframe, 
-    the right dataframe, or both. The resultant dataframe is returned.
+    Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.
 
     Args:
         dfL (pandas.DataFrame): The left dataframe.
         dfR (pandas.DataFrame): The right dataframe.
-        colname (str, optional): The name of the new column that indicates whether a row 
-                                 belongs to the left dataframe, the right dataframe, 
-                                 or both. Default is 'L_or_R'.
-        colval_L (str, optional): The value in the new column for rows that belong 
-                                  only to the left dataframe. Default is 'L'.
-        colval_R (str, optional): The value in the new column for rows that belong 
-                                  only to the right dataframe. Default is 'R'.
-        colval_LR (str, optional): The value in the new column for rows that belong 
-                                   to both dataframes. Default is 'LR'.
+        colname (str, optional): The name of the new column that indicates whether a row belongs to the left dataframe, the right dataframe, or both. Default is 'L_or_R'.
+        colval_L (str, optional): The value in the new column for rows that belong only to the left dataframe. Default is 'L'.
+        colval_R (str, optional): The value in the new column for rows that belong only to the right dataframe. Default is 'R'.
+        colval_LR (str, optional): The value in the new column for rows that belong to both dataframes. Default is 'LR'.
 
     Returns:
         pandas.DataFrame: The combined dataframe.
