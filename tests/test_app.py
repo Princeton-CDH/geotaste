@@ -19,21 +19,6 @@ def test_showhide_components(dash_duo):
 
     assert dash_duo.find_element('#logo_popup').text == SITE_TITLE
 
-    
-    panel_clicks = [
-        '#button_showhide-Filter_1',
-        '#button_showhide-MP-Filter_1',
-        '#button_showhide-BP-Filter_1',
-        '#button_showhide-Filter_2',
-        '#button_showhide-MP-Filter_2',
-        '#button_showhide-BP-Filter_2'
-    ]
-    button_showhide_ids = [
-        '#'+x.get_attribute('id')
-        for x in dash_duo.find_elements('.button_showhide')
-        if '#'+x.get_attribute('id') not in set(panel_clicks)
-    ]
-
     def test_button_showhide_l(button_showhide_ids, close=False):    
         for btn_id in button_showhide_ids:
             body_id='#body-'+btn_id.split('-',1)[-1]
@@ -46,10 +31,54 @@ def test_showhide_components(dash_duo):
             if close:
                 dash_duo.multiple_click(btn_id, 1)
                 assert dash_duo.wait_for_style_to_equal(body_id,'display','none')
-            
 
-    test_button_showhide_l(panel_clicks)
-    test_button_showhide_l(button_showhide_ids, close=True)
+    
+    button_showhide_ids = [
+        '#'+x.get_attribute('id')
+        for x in dash_duo.find_elements('.button_showhide')
+    ]
+
+    member_cards1 = [x for x in button_showhide_ids if '-MP-' in x and 'Card' in x and 'Filter_1' in x]
+    member_cards2 = [x for x in button_showhide_ids if '-MP-' in x and 'Card' in x and 'Filter_2' in x]
+    book_cards1 = [x for x in button_showhide_ids if '-BP-' in x and 'Card' in x and 'Filter_1' in x]
+    book_cards2 = [x for x in button_showhide_ids if '-BP-' in x and 'Card' in x and 'Filter_2' in x]
+
+    top_panel_ids=[
+        '#button_showhide-Filter_1',
+        '#button_showhide-Filter_2',
+    ]
+
+    mpbp_ids=[
+        '#button_showhide-MP-Filter_1',
+        '#button_showhide-BP-Filter_1',
+        '#button_showhide-MP-Filter_2',
+        '#button_showhide-BP-Filter_2'
+    ]
+
+    test_button_showhide_l(top_panel_ids, close=False)
+    test_button_showhide_l(mpbp_ids, close=True)
+
+    ## member cards
+    dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
+    test_button_showhide_l(member_cards1, close=True)
+    dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
+
+    dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
+    test_button_showhide_l(member_cards2, close=True)
+    dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
+
+    ## book cards
+    dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
+    test_button_showhide_l(book_cards1, close=True)
+    dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
+
+    dash_duo.multiple_click('#button_showhide-BP-Filter_2', 1)
+    test_button_showhide_l(book_cards2, close=True)
+    dash_duo.multiple_click('#button_showhide-BP-Filter_2', 1)
+
+
+
+
 
 
 
