@@ -1,7 +1,7 @@
 from .imports import *
 
 cols_members=[
-    'member_name_nice',
+    'member_name',
     'member_dob',
     'member_dod',
     'member_nationalities',
@@ -384,6 +384,7 @@ class MemberArrondMap(MemberFigure):
             clickmode='event+select', 
             dragmode=False,
         )
+        ofig.update_layout(mapbox_accesstoken=mapbox_access_token)
         ofig.update_coloraxes(colorbar=dict(orientation='h', y=-0.25, thickness=10))
         ofig.update_xaxes(fixedrange = True)
         ofig.update_yaxes(fixedrange = True)
@@ -483,6 +484,7 @@ class LandmarksFigureFactory(FigureFactory):
 
     def plot_map(self, color='gray', **kwargs):
         figdf = self.data
+        if not 'tooltip' in set(figdf.columns): figdf['tooltip']=''
         fig = go.Figure()
         fig.add_trace(
             go.Scattermapbox(
@@ -530,6 +532,7 @@ class LandmarksFigureFactory(FigureFactory):
             ),
             autosize=True
         )
+        fig.update_layout(mapbox_accesstoken=mapbox_access_token)
         fig.layout._config = {'responsive':True, 'scrollZoom':True}
         fig.layout.update(showlegend=False)
         return fig
@@ -549,13 +552,8 @@ def update_fig_mapbox_background(fig):
             {
                 "below": 'traces',
                 "sourcetype": "raster",
-                "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                "source": [
-                    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                    # "/tiles/{z}/{x}/{y}.png"
-                    # "http://127.0.0.1:5000/tiles/{z}/{x}/{y}.png"
-                ],
-                # "opacity":0.75
+                "sourceattribution": "paris1937",
+                "source": BASEMAP_SOURCES,
             }
         ],
         # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
@@ -587,22 +585,7 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def df_dwellings(self): 
         assert 'dwelling' in set(self.data.columns)
-        #o=self.data.drop_duplicates('dwelling').set_index('dwelling')
-        bookcount={
-            member_dwelling:len(set(member_dwelling_df.book))
-            for member_dwelling,member_dwelling_df in self.data.groupby('dwelling')
-        }
-        def reversename(x):
-            if not ',' in x: return x
-            a,b=x.split(', ',1)
-            return f'{b} {a}'
-        return self.data.assign(
-            num_borrows=[
-                bookcount.get(x,0) for x in self.data.dwelling
-            ],
-            member_name_nice=self.data.member_name.apply(reversename),
-            member_url=self.data.member.apply(lambda x: f'https://shakespeareandco.princeton.edu/members/{x}/')
-        )
+        return self.data.drop_duplicates('dwelling').set_index('dwelling')
     
     @cached_property
     def df_members(self): 
@@ -674,7 +657,7 @@ class CombinedFigureFactory(FigureFactory):
                 # size=(figdf['num_borrows'] / 20)+5,
                 opacity=0.4
             ),
-            text=figdf['member_name_nice'],
+            text=figdf['member_name'],
             textfont=dict(
                 size=TEXTFONT_SIZE,
                 color=color_text,
@@ -696,6 +679,7 @@ class CombinedFigureFactory(FigureFactory):
 
         fig = go.Figure()
         fig.add_trace(trace)
+        fig.update_layout(mapbox_accesstoken=mapbox_access_token)
         return fig
         # basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
         # return go.Figure(data=fig.data, layout=basefig.layout)
@@ -728,7 +712,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
     
     
-    @cache
     def compare(self, 
             maxcats=COMPARISON_MAXCATS,
             cols=PREDICT_COLS,
@@ -761,6 +744,38 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             if comparison_df is not None
             else self.compare(**kwargs)
         )
+    
+    def table(self, **kwargs):
+        # return get_dash_table(self.compare(**kwargs))
+        return self.table_content(**kwargs)
+    
+    def table_content(self,cols=['arrond_id'],**kwargs):
+        odf = self.compare(cols=cols, **kwargs)
+        if not len(odf):
+            return dbc.Container('Analysis failed, likely because one or both groups returns no data, or because both groups are identical.')
+        
+        fig=None
+        if 'arrond_id' in set(cols):
+            fig = self.plot_oddsratio_map(odf)
+        desc_L,desc_R = describe_comparison(odf, lim=10)
+        summary_row = dbc.Row([
+            dbc.Col([
+                html.H5([f'10 most distinctive features for Filter 1 (', self.L.filter_desc,')']),
+                dcc.Markdown('\n'.join(desc_L))
+            ], className='left-color'),
+
+            dbc.Col([
+                html.H5([f'10 most distinctive features for Filter 2 (', self.R.filter_desc,')']),
+                dcc.Markdown('\n'.join(desc_R))
+            ], className='right-color'),
+        ])
+        
+        table_row = dbc.Row(get_dash_table(odf))
+
+        fig_row_l = [] if not fig else [dbc.Row(dcc.Graph(figure=fig))]
+        rows = fig_row_l + [summary_row,table_row]
+        
+        return dbc.Container(rows, className='table_content')
 
         
         
@@ -814,17 +829,18 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
         fig_choro.update_mapboxes(
             style='light',
-            layers=[
-                {
-                    "below":"traces",
-                    "sourcetype": "raster",
-                    "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                    "source": [
-                        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                    ],
-                    "opacity":0.25
-                }
-            ]
+            # layers=[
+            #     {
+            #         "below":"traces",
+            #         "sourcetype": "raster",
+            #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+            #         "source": [
+            #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+            #         ],
+            #         "opacity":0.25
+            #     }
+            # ],
+            accesstoken=mapbox_access_token,
         )
         
         ofig = fig_choro
@@ -897,17 +913,18 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             # )
             fig_choro.update_mapboxes(
                 style='light',
-                layers=[
-                    {
-                        "below":"traces",
-                        "sourcetype": "raster",
-                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                        "source": [
-                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        ],
-                        "opacity":0.25
-                    }
-                ]
+                # layers=[
+                #     {
+                #         "below":"traces",
+                #         "sourcetype": "raster",
+                #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                #         "source": [
+                #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                #         ],
+                #         "opacity":0.25
+                #     }
+                # ],
+                accesstoken=mapbox_access_token,
             )
             
             ofig = fig_choro
@@ -939,6 +956,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                 )
             )
         )
+        ofig.update_layout(mapbox_accesstoken=mapbox_access_token)
         return ofig
 
         
@@ -982,16 +1000,17 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             )
             fig_choro.update_mapboxes(
                 style='light',
-                layers=[
-                    {
-                        "below": 'traces',
-                        "sourcetype": "raster",
-                        "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-                        "source": [
-                            "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-                        ]
-                    }
-                ]
+                # layers=[
+                #     {
+                #         "below": 'traces',
+                #         "sourcetype": "raster",
+                #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
+                #         "source": [
+                #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+                #         ]
+                #     }
+                # ],
+                accesstoken=mapbox_access_token,
             )
             customdata=np.stack((figdf['hover'],), axis=-1)
             fig_choro.update_traces(
@@ -1230,5 +1249,12 @@ def plot_cache(figure_class, serialized_data):
     )
     ff = figure_class(filter_data=filter_data, selected=selected)
     fig = ff.plot(**kwargs)
-    return fig
+
+    fig_json_gz_str = b64encode(
+        zlib.compress(
+            pio.to_json(fig).encode()
+        )
+    ).decode('utf-8')
+
+    return fig_json_gz_str
 

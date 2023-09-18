@@ -1,0 +1,74 @@
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
+
+
+  build:
+    needs: create_release # we need to know the upload URL
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest']
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.10.7
+
+    - run: python -m pip install -U pip wheel
+    - run: python -m pip install -r requirements.txt
+    - run: python -m pip install -r dev-requirements.txt
+
+    - name: Build app
+      run: pyinstaller -y build.spec
+
+    - name: Zip if app
+      if: runner.os == 'macOS'
+      run: mv dist/Shakespeare_and_Co_Project_Lab_1.app ./Shakespeare_and_Co_Project_Lab_1.app && zip -r9 Shakespeare_and_Co_Project_Lab_1.app.zip Shakespeare_and_Co_Project_Lab_1.app && mv Shakespeare_and_Co_Project_Lab_1.app.zip dist/
+
+    - name: Zip if app
+      if: matrix.os == 'ubuntu-latest'
+      run: mv dist/Shakespeare_and_Co_Project_Lab_1 . && zip -r9 Shakespeare_and_Co_Project_Lab_1.zip Shakespeare_and_Co_Project_Lab_1 && mv Shakespeare_and_Co_Project_Lab_1.zip dist/
+
+    - name: Upload release assets for linux
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_name: Shakespeare_and_Co_Project_Lab_1-linux.zip
+        asset_path: ./dist/Shakespeare_and_Co_Project_Lab_1.zip
+        asset_content_type: application/octet-stream
+
+    - name: Upload release assets for mac
+      if: runner.os == 'macOS'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_name: Shakespeare_and_Co_Project_Lab_1-macos.zip
+        asset_path: ./dist/Shakespeare_and_Co_Project_Lab_1.app.zip
+        asset_content_type: application/octet-stream

@@ -1,17 +1,20 @@
 @font-face {
     font-family: 'Recursive';
-    src: url('/sco/1/assets/Recursive_VF_1.085.woff2') format('woff2-variations');
     font-weight: 300 1000;
+    src: url('/assets/Recursive_VF_1.085.woff2') format('woff2-variations'),
+         url('/sco/1/assets/Recursive_VF_1.085.woff2') format('woff2-variations');
 }
 
 @font-face {
     font-family: SCo;
-    src: url(/sco/1/assets/Brown-Regular.otf);
+    src: url(/assets/Brown-Regular.otf),
+         url(/sco/1/assets/Brown-Regular.otf);
 }
 
 @font-face {
     font-family: Louize;
-    src: url(/sco/1/assets/LouizeTrial-Regular.otf);
+    src: url(/assets/LouizeTrial-Regular.otf),
+         url(/sco/1/assets/LouizeTrial-Regular.otf);
 }
 
 html {height:100%}
@@ -21,7 +24,8 @@ body {
     width:100vw;
     margin:0;
     padding:0; 
-    overflow-x:hidden;
+    /* overflow-x:hidden; */
+    min-width:800px;
 }
 
 h1 { font-size:2rem;}
@@ -60,9 +64,10 @@ h5 { font-size:1.1rem;}
     z-index: 50;
     overflow-y: hidden;
     overflow-x: hidden;
-    display:block;
+    /* display:block; */
     backdrop-filter: blur(5px);
     background:rgba(225, 225, 225, 0.666);
+    min-width:800px;
 }
 
 .mainview {
@@ -101,8 +106,8 @@ h5 { font-size:1.1rem;}
 
 #mainview_tabs .nav-link { 
     border: 1px solid rgba(150, 150, 150, 1);
-    height:35px;
-    line-height:35px;
+    height:50px;
+    line-height:50px;
     padding:0 1rem;
     margin:0;
     border-top-left-radius: 0px;
@@ -113,7 +118,7 @@ h5 { font-size:1.1rem;}
     display:inline-block;
     width:fit-content;
     color:black;
-    background:rgba(225, 225, 225, 0.65);
+    background:rgba(225, 225, 225, 0);
 }
 
 #mainview_tabs .nav-link.link, #mainview_tabs .nav-link.visited {
@@ -430,12 +435,13 @@ button {
 
 #mainview_tabs {
     /* display:flex; */
-    /* justify-content: end; */
-    /* flex-grow: 1; */
+    justify-content: end;
+    flex-grow: 1;
     z-index: 100;
-    position:absolute;
-    right:0;
-    top:50px;
+    /* position:absolute; */
+    /* right:0; */
+    /* top:0; */
+    height:50px;
     width:fit-content;
 }
 
@@ -464,6 +470,7 @@ button {
     /* height:100vh; */
     height:fit-content;
     width:100vw;
+    min-width:800px;
     overflow-x: hidden;
     z-index:10;
     pointer-events: none;
@@ -482,6 +489,7 @@ button {
     padding:10px;
     background-color: rgba(255,255,255,1);
     pointer-events: all;
+    min-width:300px;
 }
 
 /* .dash-spreadsheet-menu div { margin:0 0 0 auto;} */
@@ -515,3 +523,9 @@ button {
     top:0;
     right:0;
 } */
+
+.table_content .row {
+    margin-top:1em;
+}
+
+.layout-container {min-width:800px;}

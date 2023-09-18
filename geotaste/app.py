@@ -1,6 +1,8 @@
 from geotaste.imports import *
 
-def get_app():
+def get_app(url_base_pathname=ROOT_URL):
+    if not url_base_pathname.endswith('/'):
+        url_base_pathname+='/'
     with Logwatch(f'booting geotaste'):
         layout = GeotasteLayout()        
         app = DashApp(
@@ -12,7 +14,7 @@ def get_app():
             }],
             assets_folder=PATH_ASSETS,
             suppress_callback_exceptions=True,
-            url_base_pathname='/sco/1/',
+            url_base_pathname=url_base_pathname,
         )
         app.app.config.suppress_callback_exceptions=True
         return app
@@ -21,8 +23,8 @@ def get_server():
     app = get_app()
     return app.app.server
 
-def run(host=HOST, port=PORT, debug=DEBUG, **kwargs):
-    app = get_app()
+def run(host=HOST, port=PORT, debug=DEBUG, url_base_pathname=ROOT_URL, **kwargs):
+    app = get_app(url_base_pathname=url_base_pathname)
     with Logwatch('running app'):
         logger.debug(f'geotaste running at http://{host}:{port}')
         app.run(

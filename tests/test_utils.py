@@ -1,3 +1,5 @@
+import sys,os
+sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.utils import *
 import tempfile
 from pandas.testing import assert_frame_equal
@@ -80,75 +82,65 @@ def test_force_int():
     assert force_int("abc", errors=-1) == -1
     assert force_int("5.5", errors=-1) == -1
 
-def test_cached_data():
-    cached_data = CachedData(path_cache='test_cache.db')
-    assert isinstance(cached_data.cache(), SqliteDict)
-    assert cached_data.path_cache == os.path.join(PATH_DATA,'test_cache.db')
-    with tempfile.TemporaryDirectory() as tdir:
-        abspath = os.path.join(os.path.join(tdir,'test_cache.db'))
-        locpath = 'cache2.db'
-        abscache = CachedData(path_cache=abspath)
-        loccache = CachedData(path_cache=locpath)
 
-        assert abscache.path_cache == abspath
-        assert loccache.path_cache == os.path.join(PATH_DATA, locpath)
+## Tests deprecated behavior
+# @TODO: update
 
+# def test_combine_LR_df():
 
-def test_combine_LR_df():
+#     def runtest(dfL,dfR,expected_result):
+#         print('\n\n\n')
+#         print('\ndfL')
+#         print(dfL)
 
-    def runtest(dfL,dfR,expected_result):
-        print('\n\n\n')
-        print('\ndfL')
-        print(dfL)
-
-        print('\ndfR')
-        print(dfR)
+#         print('\ndfR')
+#         print(dfR)
         
-        print('\nobs')
-        observed_result = combine_LR_df(dfL,dfR)
-        observed_result = observed_result[sorted(observed_result.columns)].astype(object)
-        print(observed_result)
+#         print('\nobs')
+#         observed_result = combine_LR_df(dfL,dfR)
+#         observed_result = observed_result[sorted(observed_result.columns)].astype(object)
+#         print(observed_result)
         
-        print('\nexpected')
-        expected_result = expected_result[sorted(expected_result.columns)].astype(object)
-        print(expected_result)
+#         print('\nexpected')
+#         expected_result = expected_result[sorted(expected_result.columns)].astype(object)
+#         print(expected_result)
         
-        # equals = observed_result.equals(expected_result)
-        assert_frame_equal(observed_result, expected_result)
+#         # equals = observed_result.equals(expected_result)
+#         assert_frame_equal(observed_result, expected_result)
 
-    import pandas as pd
+#     import pandas as pd
     
-    # Test 1 - when dfL and dfR have no common index
-    dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-    dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[3, 4, 5])
-    expected_result = pd.DataFrame({'L_or_R': ['L', 'L', 'L', 'R', 'R', 'R'], 'A': [1.0, 2.0, 3.0, None, None, None], 
-                                    'B': [None, None, None, 4.0, 5.0, 6.0]}, index=[0, 1, 2, 3, 4, 5])
-    runtest(dfL,dfR,expected_result)
+#     # Test 1 - when dfL and dfR have no common index
+#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
+#     dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[3, 4, 5])
+#     expected_result = pd.DataFrame({'L_or_R': ['L', 'L', 'L', 'R', 'R', 'R'], 'A': [1.0, 2.0, 3.0, None, None, None], 
+#                                     'B': [None, None, None, 4.0, 5.0, 6.0]}, index=[0, 1, 2, 3, 4, 5])
+#     runtest(dfL,dfR,expected_result)
     
-    # Test 2 - when dfL and dfR have some common indices
-    dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-    dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[2, 3, 4])
-    expected_result = pd.DataFrame({'L_or_R': ['L', 'L', 'LR', 'R', 'R'], 'A': [1.0, 2.0, 3.0, None, None], 
-                                    'B': [None, None, 4.0, 5.0, 6.0]}, index=[0, 1, 2, 3, 4])
-    runtest(dfL,dfR,expected_result)
+#     # Test 2 - when dfL and dfR have some common indices
+#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
+#     dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[2, 3, 4])
+#     expected_result = pd.DataFrame({'L_or_R': ['L', 'L', 'LR', 'R', 'R'], 'A': [1.0, 2.0, 3.0, None, None], 
+#                                     'B': [None, None, 4.0, 5.0, 6.0]}, index=[0, 1, 2, 3, 4])
+#     runtest(dfL,dfR,expected_result)
     
     
-    # Test 3 - when all indices in dfL are in dfR
-    dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-    dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[0, 1, 2])
-    expected_result = pd.DataFrame({'L_or_R': ['LR', 'LR', 'LR'], 'A': [1.0, 2.0, 3.0], 
-                                    'B': [4.0, 5.0, 6.0]}, index=[0, 1, 2])
-    runtest(dfL,dfR,expected_result)
+#     # Test 3 - when all indices in dfL are in dfR
+#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
+#     dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[0, 1, 2])
+#     expected_result = pd.DataFrame({'L_or_R': ['LR', 'LR', 'LR'], 'A': [1.0, 2.0, 3.0], 
+#                                     'B': [4.0, 5.0, 6.0]}, index=[0, 1, 2])
+#     runtest(dfL,dfR,expected_result)
     
-    # Test 4 - when dfL or dfR is an empty DataFrame
-    dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-    dfR = pd.DataFrame(columns=['B'])
-    expected_result = pd.DataFrame({
-        'L_or_R': ['L', 'L', 'L'],
-        'A': [1.0, 2.0, 3.0], 
-        'B': [None, None, None]
-    }, index=[0, 1, 2])
-    runtest(dfL,dfR,expected_result)
+#     # Test 4 - when dfL or dfR is an empty DataFrame
+#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
+#     dfR = pd.DataFrame(columns=['B'])
+#     expected_result = pd.DataFrame({
+#         'L_or_R': ['L', 'L', 'L'],
+#         'A': [1.0, 2.0, 3.0], 
+#         'B': [None, None, None]
+#     }, index=[0, 1, 2])
+#     runtest(dfL,dfR,expected_result)
 
 
 

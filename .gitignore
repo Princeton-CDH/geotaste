@@ -13,3 +13,8 @@ cache
 dev_*.txt
 *tiles*/*
 *.bak.py
+build
+dist
+_build
+docs/_build
+geckodriver.log

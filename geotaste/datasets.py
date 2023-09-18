@@ -1186,7 +1186,8 @@ class MiniDwellingsDataset(DwellingsDataset):
 
 
 class MiniCombinedDataset(Dataset):
-    path=PATHS.get('combinedmini')    
+    path=PATHS.get('combinedmini')
+    url=URLS.get('combinedmini')
     _cols_sep = [
         'member_membership', 
         'member_nationalities', 
@@ -1232,8 +1233,18 @@ class MiniCombinedDataset(Dataset):
     def data(self): 
         # need to gen?
         if not os.path.exists(self.path): 
-            with Logwatch('generating combined dataset'):
-                df=self.gen(save=True)
+            if self.url:
+                with Logwatch(f'downloading combined dataset from: {self.url}'):
+                    df=pd.read_pickle(self.url)
+            else:
+                with Logwatch('generating combined dataset'):
+                    df=self.gen(save=False)
+
+            # save
+            ensure_dir(self.path)
+            with Logwatch(f'saving combined dataset to: {self.path}'):
+                df.to_pickle(self.path)
+
         else:
             df=pd.read_pickle(self.path)
         
