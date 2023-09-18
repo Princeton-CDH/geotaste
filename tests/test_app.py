@@ -79,15 +79,43 @@ def test_showhide_components(dash_duo):
 
 
 
+def get_ids(els):
+    return [f'#{el.get_attribute("id")}' for el in els]
+
+
+def test_filtering(dash_duo):
+    app = get_app()
+    dash_duo.start_server(app.app)
 
 
 
-# def test_filtering(dash_duo):
-#     app = get_app()
-#     dash_duo.start_server(app.app)
+    # # working idiosyncratically ->
+
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    dash_duo.multiple_click('#button_showhide-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-AuthorGenderCard-BP-Filter_1', 1)
+
+    # els = dash_duo.find_elements('#graph-AuthorGenderCard-BP-Filter_1 text')
+    # print(els)
+
+    # dash_duo.multiple_click(els[0], 2)
+
+    dash_duo.click_at_coord_fractions('#graph-AuthorGenderCard-BP-Filter_1', .1, .7)
+    dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'Male')
 
 
-    ## working idiosyncratically ->
+    # # second
+    # dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    # dash_duo.multiple_click('#button_showhide-Filter_1', 1)
+    # dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
+    # dash_duo.multiple_click('#button_showhide-AuthorGenderCard-BP-Filter_1', 1)
+    # dash_duo.click_at_coord_fractions('#graph-AuthorGenderCard-BP-Filter_1', .7, click_y_US) # click US ?
+    # dash_duo.click_at_coord_fractions('#graph-AuthorGenderCard-BP-Filter_1', .7, click_y_US) # click US ?
+    # dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'Male')
+
+
+    # # working idiosyncratically ->
 
     # click_y_US = .2
     # click_y_FR = .22
