@@ -68,18 +68,15 @@ class BaseComponent(DashComponent, Logmaker):
     
     @cached_property
     def content(self,params=None):
-        return dbc.Container(
-            BLANK
-            if not self.subcomponents
-            else [
-                card.layout(params) 
-                for card in self.subcomponents
-            ]
-        )
+        return self.get_content()
     
     def get_content(self, params=None, **kwargs): 
-        return dbc.Container(BLANK)
-    
+        logger.debug(f'[{self.name}] component getting content')
+        return dbc.Container(
+            BLANK if not self.subcomponents else [
+            card.layout(params) 
+            for card in self.subcomponents
+        ])
         
     
     def layout(self, params=None): 
@@ -322,8 +319,9 @@ class FilterCard(FilterComponent):
             else:
                 # then we're going to open
                 logger.debug(f'[{self.name}] toggle_collapse: opening')
-                content_exists_already = bool(content_now)# and content_now.get('props',{}).get('children')
-                logger.debug(f'content currently exists? --> {content_exists_already}')
+                # logger.debug(content_now)
+                content_exists_already = bool(content_now)# and content_now[0].get('props',{}).get('children')
+                logger.debug(f'content currently exists? --> {content_exists_already}, {len(str(content_now))}')
 
 
                 return True, '[-]', content_now if content_exists_already else self.get_content(
@@ -409,27 +407,6 @@ class FilterPlotCard(FilterCard):
             logger.debug(f'[{self.name}) selection updated to {o}')
             return o
         
-        # @app.callback(
-        #     Output(self.graph, 'figure'),
-        #     Input(self.store, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # def store_data_updated(store_data):
-        #     # filter cleared?
-        #     if store_data: raise PreventUpdate
-        #     logger.debug(f'[{self.name}] {self.key} cleared...')
-        #     return self.plot()
-
-        # @app.callback(
-        #     Output(self.store_json, "data", allow_duplicate=True),
-        #     Input(self.button_clear, 'n_clicks'),
-        #     State(self.store_panel, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def clear_selection(clear_clicked, panel_data):
-        #     if not clear_clicked: raise PreventUpdate
-        #     return self.plot(panel_data)
         
         @app.callback(
             Output(self.store_json, "data", allow_duplicate=True),
@@ -627,7 +604,7 @@ class FilterInputCard(FilterCard):
     
     def get_content(self,**y): 
         logger.debug(f'[{self.name}] getting content for input card')
-        return self.input
+        return dbc.Container(self.input)
 
     @cached_property
     def input(self):
@@ -668,102 +645,6 @@ class FilterInputCard(FilterCard):
         def clear_selection_input(n_clicks):
             logger.debug('clear_selection as input')
             return []
-
-        
-                
-        # @app.callback(
-        #     Output(self.input, 'value'),
-        #     Input(self.store, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # def store_data_updated(store_data):
-        #     # filter cleared?
-        #     if store_data: raise PreventUpdate
-        #     logger.debug(f'[{self.name}] {self.key} cleared...')
-        #     return []
-
-        
-        # # ## CLEAR? -- OVERWRITTEN
-        # @app.callback(
-        #     [
-        #         Output(self.store, "data", allow_duplicate=True),
-        #         Output(self.input, "value", allow_duplicate=True),
-        #     ],
-        #     Input(self.button_clear, 'n_clicks'),
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def clear_selection(n_clicks):
-        #     logger.debug('clear_selection')
-        #     return {}, []
-
-        # @app.callback(
-        #     Output(self.graph, "figure", allow_duplicate=True),
-        #     [
-        #         Input(self.body, "is_open"),
-        #         Input(self.store_panel, 'data')
-        #     ],
-        #     [
-        #         # State(self.graph, 'figure'),
-        #         # State(self.store_selection, 'data')
-        #         State(self.store, 'data')
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def toggle_collapse(is_open, panel_filter_data, my_filter_data):
-        #     # logger.debug(f'{self.name} is now open? {is_open}')
-        #     if not is_open: return dash.no_update
-            
-        #     filter_data={
-        #         k:v 
-        #         for k,v in panel_filter_data.items() 
-        #         if k not in my_filter_data
-        #         and k != self.key
-        #     }
-        #     ff = self.ff(filter_data, selected=my_filter_data)
-        #     return ff.fig
-
-        # # ## CLEAR? -- OVERWRITTEN
-        # @app.callback(
-        #     [
-        #         Output(self.store, "data", allow_duplicate=True),
-        #         Output(self.input, "value", allow_duplicate=True),
-        #     ],
-        #     Input(self.button_clear, 'n_clicks'),
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def clear_selection(n_clicks):
-        #     logger.debug('clear_selection')
-        #     return {}, []
-
-
-    
-
-        # @app.callback(
-        #     Output(self.input, "options", allow_duplicate=True),
-        #     [
-        #         Input(self.body, "is_open"),
-        #         Input(self.store_panel, 'data')
-        #     ],
-        #     [
-        #         State(self.store, 'data')
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def update_input_vals(is_open, panel_filter_data, my_filter_data):
-        #     if not is_open: return dash.no_update            
-        #     filter_data={
-        #         k:v 
-        #         for k,v in panel_filter_data.items() 
-        #         if k not in my_filter_data
-        #         and k != self.key
-        #     }
-        #     ff = self.ff(filter_data)
-        #     return ff.unique(sort_by_count=self.sort_by_count)
-
 
 
 

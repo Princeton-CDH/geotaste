@@ -10,7 +10,7 @@ class GeotasteLayout(BaseComponent):
         """
         Initializes the GeotasteLayout class with a title.
         """
-        super().__init__(title="Shakespeare and Company Project Lab")
+        super().__init__(title=SITE_TITLE)
         
     @cached_property
     def comparison_panel(self):

@@ -1,7 +1,7 @@
 name: unit tests
 
 on:
-  push: # run on every push or PR to any branch
+  # push: # run on every push or PR to any branch
   pull_request:
 
 
@@ -44,7 +44,7 @@ jobs:
       - name: Run pytest
         run: py.test --cov=geotaste --cov-report=xml
 
-      # - name: Upload test coverage to Codecov
-      #   uses: codecov/codecov-action@v3
-      #   with:
-      #     flags: python
+      - name: Upload test coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          flags: python

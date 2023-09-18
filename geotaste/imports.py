@@ -133,7 +133,7 @@ WELOME_MSG_ON = True
 WELCOME_HEADER = 'Shakespeare and Company Project Lab'
 WELCOME_HEADER2 = 'Experiment 1: Geography and Taste'
 WELCOME_BODY = '''Use the filters to generate and compare maps showing where members of the Shakespeare and Company lending library lived and the books they borrowed.'''
-
+SITE_TITLE = "Shakespeare and Company Project Lab"
 # stats
 MIN_P=.05
 
