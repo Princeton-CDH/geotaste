@@ -678,7 +678,7 @@ class MemberNationalityCard(FilterPlotCard):
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Arrondissement'
-    figure_factory = MemberArrondMap
+    figure_factory = MemberArrondFigure
     # tooltip = 'Filter for members who ever lived in a given arrondissement'
 
 

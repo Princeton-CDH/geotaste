@@ -156,3 +156,55 @@ def test_geodist():
     # Test with invalid inputs (longitude > 180).
     assert np.isnan(geodist((50, 200), (50, 50))), "Test case 3 failed"
 
+import pandas as pd
+import numpy as np
+
+def test_get_distinctive_qual_vals():
+    '''
+    A simple test function for get_distinctive_qual_vals().
+    '''
+    # Prepare inputs
+    dfL = CombinedFigureFactory({'member_gender':['Female']}).data
+    dfR = CombinedFigureFactory({'member_gender':['Male']}).data
+
+    # Run the function
+    output = get_distinctive_qual_vals(dfL, dfR, cols=[
+            'member_title', 
+            'member_nationalities'
+        ])
+    print(output.columns)
+    print(output)
+
+    # Check the outputs
+    assert isinstance(output, pd.DataFrame), "Output is not a DataFrame."
+
+    columns = ['col','col_val','comparison_scale','odds_ratio','perc_L','perc_R','count_L','count_R']
+    assert all(col in output.columns for col in columns), "Output DataFrame is missing expected columns."
+
+    # Check the 'col' and 'col_val' column have expected values
+    assert output['col'].nunique() == 2, "'col' column does not have 2 unique values."
+
+    # Check the 'odds_ratio' column values
+    assert all(np.isnan(output['odds_ratio']) == False), "'odds_ratio' column contains NaN values."
+
+    # Check the 'perc_L' and 'perc_R' column values
+    assert all(output['perc_L'] != 0), "'perc_L' column values are all 0."
+    assert all(output['perc_R'] != 0), "'perc_R' column values are all 0."
+
+    # Check the 'count_L' and 'count_R' column values
+    assert all(output['count_L'] != 0.0), "'count_L' column values are all 0.0."
+    assert all(output['count_R'] != 0.0), "'count_R' column values are all 0.0."
+
+
+import pandas as pd
+
+
+def test_describe_comparison():
+    ff=ComparisonFigureFactory({'member_gender':['Male']}, {'member_gender':['Female']})
+    df=ff.compare(cols=['member_title'])
+    L,R=describe_comparison(df)
+    assert L and R, "no result"
+    assert '**M.**' in L[0], 'not expected result'
+    assert '**Mme**' in R[0], 'not expected result'
+
+

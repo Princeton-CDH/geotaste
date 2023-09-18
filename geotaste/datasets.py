@@ -1,12 +1,7 @@
 from .imports import *
 
 
-##################
-##### Dataset #####
-##### Dataset #####
-##################
-
-
+## base DATASET class
 class Dataset:
     id:str=''
     url:str = ''
@@ -108,6 +103,8 @@ class Dataset:
     
     
 
+### LANDMARKS
+
 class LandmarksDataset(Dataset):
     path = PATHS.get('landmarks')
     url = URLS.get('landmarks')
@@ -128,8 +125,12 @@ class LandmarksDataset(Dataset):
 
         return df
 
-    
+@cache
+def Landmarks(): return LandmarksDataset()
 
+
+
+### MEMBERS
 
 def get_member_id(uri):
     return uri.lower().split('/members/',1)[1][:-1] if '/members/' in uri else ''
@@ -181,7 +182,32 @@ class MembersDataset(Dataset):
         df['nice_name'] = df['sort_name'].apply(to_name_nice)
         return postproc_df(df,cols_pref=self.cols_pref)
 
+class MiniMembersDataset(MembersDataset):
+    _cols_rename = {
+        'member':'member',
+        'nice_name':'member_name',
+        'title':'member_title',
+        'gender':'member_gender',
+        'membership_years':'member_membership',
+        'birth_year':'member_dob',
+        'death_year':'member_dod',
+        'gender':'member_gender',
+        'nationalities':'member_nationalities',
+    }
 
+    @cached_property
+    def data(self):
+        odf=postproc_df(super().data, self._cols_rename)
+        for c in ['member_dob','member_dod']:
+            odf[c]=odf[c].apply(lambda x: int(x) if x else x)
+        return odf
+    
+@cache
+def Members(): return MiniMembersDataset()
+
+
+
+### DWELLINGS
 
 class DwellingsDataset(Dataset):
     url:str = URLS.get('dwellings')
@@ -247,42 +273,29 @@ class DwellingsDataset(Dataset):
     def get_member(self, member):
         return self.data[self.data['member'] == member]
     
+class MiniDwellingsDataset(DwellingsDataset):
+    _cols_rename = dict(
+        member='member',
+        dwelling='dwelling',
+        arrond_id='arrond_id',
+        start_date='dwelling_start',
+        end_date='dwelling_end',
+        street_address='dwelling_address',
+        city='dwelling_city',
+        latitude='lat',
+        longitude='lon',
+    )
+
+    @cached_property
+    def data(self):
+        return postproc_df(super().data, self._cols_rename)
+
+@cache
+def Dwellings(): return MiniDwellingsDataset()
 
 
 
-
-
-def get_dwelling_desc(row):
-    try:
-        member_name = Members().data.loc[row.member]['name']
-        o=f'{member_name} dwelt in {row.city}'
-        if row.arrond_id and is_valid_arrond(row.arrond_id): 
-            o+=f' in the {ordinal_str(int(row.arrond_id))}'
-        if row.street_address: o+=f' at {row.street_address}'
-        if row.start_date: o+=f' from {row.start_date}'
-        if row.end_date and row.end_date!=row.start_date: o+=f' until {row.end_date}'
-    except KeyError:
-        o='???'
-    return o
-
-
-
-
-
-
-
-#########
-# BOOKS
-
-
-
-
-
-
-
-
-
-
+### BOOKS
 
 def get_book_id(uri):
     return uri.split('/books/',1)[1][:-1] if '/books/' in uri else ''
@@ -334,10 +347,54 @@ class BooksDataset(Dataset):
         df['book']=df.uri.apply(lambda x: x.split('/books/',1)[1][:-1] if '/books/' in x else '')
         return postproc_df(df, cols_pref=self.cols_pref)
 
+class MiniBooksDataset(BooksDataset):
+    ## ONLY AUTHORS
+    _cols_rename={
+        'book':'book',
+        'author':'author',
+        'author_nice_name':'author_name',
+        'title':'book_title',
+        'year':'book_year',
+        'genre':'book_genre',
+        'format':'book_format',
+        'circulation_years':'book_circulated',
+        'borrow_count':'book_numborrow',
+        'author_birth_date':'author_dob',
+        'author_death_date':'author_dod',
+        'author_gender':'author_gender',
+        'author_nationalities':'author_nationalities',
+    }
+
+    @cached_property
+    def data(self):
+        df=super().data
+        dfau=CreatorsDataset().data.set_index('creator')
+        ld=[]
+        for i,row in df.iterrows():
+            for author in row.author if row.author else ['']:
+                d=dict(row)
+                aid=d['author']=to_name_id(author)
+                try:
+                    for k,v in dict(dfau.loc[aid]).items():
+                        d[f'author_{k}']=v
+                except KeyError:
+                    pass
+                ld.append(d)
+        odf=pd.DataFrame(ld)
+        odf=postproc_df(odf, cols=self._cols_rename, cols_q=['author_dob','book_year'])
+        odf['author_nationalities']=odf['author_nationalities'].apply(
+            lambda x: [] if x is np.nan else x
+        )
+        odf['author_gender']=odf['author_gender'].fillna('')
+        odf['author_name']=odf['author_name'].fillna('')
+        return odf
+
+@cache
+def Books(): return MiniBooksDataset()
 
 
 
-
+### AUTHORS
 
 class CreatorsDataset(Dataset):
     url:str = URLS.get('creators')
@@ -401,7 +458,6 @@ class CreatorsDataset(Dataset):
         odf=postproc_df(df, cols_pref=self.cols_pref)
         return odf.rename(columns={'nationality':'nationalities'})
 
-
 def to_name_id(x):
     x=''.join(y for y in x if y.isalpha() or y==' ')
     return x.strip().replace(' ','-').lower()
@@ -413,86 +469,9 @@ def to_name_nice(x):
     fn=b.split()[0].strip()
     return f'{fn} {ln}'
 
-class CreationsDataset(Dataset):
-    cols_creators = [
-        'author',
-        'editor',
-        'translator',
-        'introduction',
-        'illustrator',
-        'photographer'
-    ]
 
 
-    @cached_property
-    def data(self):
-        books_df = Books().data
-        creators_df = CreatorsDataset().data
-        creators_df = CreatorsDataset().data
-        creators = set(creators_df.index)
-
-        o=[]
-        for book_id,row in books_df.iterrows():
-            rowd=dict(row)
-            rowd_nocr = {k:v for k,v in rowd.items() if k not in set(self.cols_creators)}
-            cdone=0
-            for col_creator in self.cols_creators:
-                for creator in rowd[col_creator]:
-                    if creator.strip():
-                        odx={
-                            'book':book_id,
-                            'creator':creator,
-                            'creator_role':col_creator,
-                            **{f'creator_{k.lower()}':v for k,v in (creators_df.loc[creator] if creator in creators else {}).items()},
-                            **{f'creator_{k.lower()}':v for k,v in (creators_df.loc[creator] if creator in creators else {}).items()},
-                            **{f'book_{k}':v for k,v in rowd_nocr.items()},
-                        }
-                        o.append(odx)
-                        cdone+=1
-            if not cdone:
-                odx={
-                    'book':book_id,
-                    'creator':'?',
-                    'creator_role':'author',
-                    **{f'book_{k}':v for k,v in rowd_nocr.items()},
-                }
-                o.append(odx)
-
-        return pd.DataFrame(o).fillna(self.fillna).set_index('book')
-
-
-
-
-
-@cache
-def Books(): return MiniBooksDataset()
-
-
-
-
-
-
-
-
-
-
-##########
-# EVENTS
-
-
-
-
-
-
-
-##########
-# EVENTS
-
-
-
-
-
-
+### EVENTS
 
 class EventsDataset(Dataset):
     url:str = URLS.get('events')
@@ -548,586 +527,6 @@ class EventsDataset(Dataset):
         ], errors='coerce')
         return postproc_df(df,cols_pref=self.cols_pref)
 
-
-@cache
-def Events(): return MiniEventsDataset()
-
-
-
-
-
-
-
-def is_valid_arrond(x):
-    return bool(str(x).isdigit()) and bool(x!='99')
-
-def filter_valid_arrond(df):
-    return (df.index.str.isdigit()) & (df.index!='99')
-
-
-def find_dwelling_ids(event_row, sep=DWELLING_ID_SEP, verbose=True, dispreferred = DISPREFERRED_ADDRESSES, cache=True):
-    df = Dwellings().get_member(event_row.member)
-    
-    # if no dwelling at all?
-    if not len(df): 
-        return [''], '❓ No dwelling for member'
-    
-    # if only one?
-    elif len(df)==1: 
-        return list(df.index), '✅ Only one dwelling'
-    
-    
-    # ok, if multiple:
-    else:
-        # try dispreferred caveats
-        addresses = set(df.street_address)
-        bad_address = list(addresses & set(DISPREFERRED_ADDRESSES.keys()))
-        bad_address_str = ", ".join(bad_address)
-        bad_address_reason = dispreferred[bad_address_str] if bad_address else ''
-        df = df[~df.street_address.isin(dispreferred)]
-        if len(df)==0: 
-            return [''], f'❓ No dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
-        elif len(df)==1:
-            return list(df.index), f'✅ One dwelling after dispreferred filter ({bad_address_str} [{bad_address_reason}])'
-        else:
-            # if start date?
-            borrow_start = event_row.start_date
-            borrow_end = event_row.end_date
-
-            if borrow_start and borrow_end:
-                dfq=df
-                if borrow_start:
-                    # If we know when the borrow began, then exclude dwellings which end before that date
-                    dfq = dfq[dfq.end_date.apply(lambda x: not (x and x[:len(borrow_start)]<borrow_start))]
-                if borrow_end:
-                    # If we know when the borrow ended, then exclude dwellings which begin after that date
-                    dfq = dfq[dfq.start_date.apply(lambda x: not (x and x[:len(borrow_end)]>borrow_end))]
-                
-                # No longer ambiguous?
-                if len(dfq)==0: return list(df.index), '❓ No dwelling after time filter'
-                elif len(dfq)==1: return list(dfq.index), '✅ One dwelling time filter'
-                
-                
-            # Remove the non-Parisians?
-            dfq = df[pd.to_numeric(df.dist_from_SCO,errors='coerce') < 50]  # less than 50km
-            if len(dfq)==0: 
-                return list(df.index), f'❓ No dwelling after 50km filter'
-            elif len(dfq)==1:
-                return list(dfq.index), f'✅ One dwelling after 50km filter'
-                
-        return list(df.index), f'❌ {len(df)} dwellings after all filters'
-        
-
-
-
-
-
-
-
-
-
-class CombinedDataset(Dataset):
-    path=PATHS.get('combined')
-    fillna=''
-    cols_creations = {
-        # 'creator':'creator', 
-        # 'creator_sort_name':'creator_name',
-        # 'creator_role':'creator_role',
-        # 'creator_birth_date':'creator_dob',
-        # 'creator_death_date':'creator_dod',
-        # 'creator_gender':'creator_gender',
-        # 'creator_nationalities':'creator_nationalities',
-        
-        'creator':'author',
-        'creator_sort_name':'author_name',
-        'creator_role':'author_role',
-        'creator_birth_date':'author_dob',
-        'creator_death_date':'author_dod',
-        'creator_gender':'author_gender',
-        'creator_nationalities':'author_nationalities',
-    }
-    cols_books = {
-        'title':'book_title',
-        'year':'book_year',
-        'format':'book_format',
-        'genre':'book_genre',
-
-    }
-    cols_members_events = {
-        'member':'member',
-        'title':'member_title',
-        'sort_name':'member_name',
-        'name':'member_nicename',
-        'membership_years':'member_membership',
-        'birth_year':'member_dob',
-        'death_year':'member_dod',
-        'gender':'member_gender',
-        'nationalities':'member_nationalities',
-        'event':'event',
-        'book':'book',
-        'dwelling':'dwelling',
-        'dwelling_arrond_id':'arrond_id',
-        'event_type':'event_type',
-        'start_date':'event_start',
-        'end_date':'event_end',
-        'start_year':'event_year',
-        'start_month':'event_month',
-        'dwelling_desc':'dwelling_desc',
-        'dwelling_numposs':'dwelling_numposs',
-        'dwelling_reason':'dwelling_reason',
-        'dwelling_start_date':'dwelling_start',
-        'dwelling_end_date':'dwelling_end',
-        'dwelling_street_address':'dwelling_address',
-        'dwelling_city':'dwelling_city',
-        'dwelling_latitude':'lat',
-        'dwelling_longitude':'lon',
-        'dwelling_dist_from_SCO':'dwelling_distSCO',
-    }
-    coltype_sort = ['member', 'event', 'book', 'dwelling', 'arrond_id', 'creator']
-    cols_prefix = ['member', 'event', 'dwelling', 'lat', 'lon', 'arrond_id','book', 'creator']
-
-    cols_q = ['member_dob', 'member_dod', 'author_dob', 'author_dod', 'book_year', 'lat', 'lon', 'event_year', 'event_month', 'dwelling_distSCO']
-    cols_sep = ['member_nationalities', 'author_nationalities', 'member_membership', 'book_genre']
-
-    def gen(self, save=False):
-        # events and members (full outer join)
-        events_members = selectrename_df(
-            MemberEventDwellings().data,
-            self.cols_members_events
-        )
-
-        # only borrows!
-        events_members = events_members[
-            events_members.event_type.isin(
-                {'','Borrow'}
-            )
-        ]
-
-        # creations and books (left join)
-        crdf=CreationsDataset().data
-        crdf=crdf[crdf.creator_role.isin({'','author'})] # only authors!
-        creations = selectrename_df(crdf, self.cols_creations)
-
-        books = selectrename_df(BooksDataset().data, self.cols_books)
-        creations_books = creations.join(books, how='outer')  # big to small, same index
-
-        # all together (full outer join)
-        odf = events_members.merge(
-            creations_books, 
-            on='book', 
-            how='left'
-        )
-        for c in odf: 
-            if c in set(self.cols_q):
-                quant = True
-            elif c not in set(self.cols_sep):
-                quant = False
-            else:
-                quant = None
-            odf[c] = qualquant_series(odf[c], quant=quant)
-
-        odfx=odf.drop_duplicates('dwelling')
-        bdf=odf[odf.book_title!='']
-        tooltip_d = {
-            row.dwelling:hover_tooltip(row, bdf) 
-            for _,row in tqdm(
-                odfx.iterrows(), 
-                total=len(odfx), 
-                desc='Pre-calculating tooltips'
-            )
-            if row.dwelling
-        }
-
-        odf['member_nicename'] = odf['member_name'].apply(to_name_nice)
-        odf['hover_tooltip'] = [tooltip_d.get(dw,'') for dw in odf.dwelling]
-        if save: odf.to_pickle(self.path)
-        return odf
-
-    
-    def load(self, force=False, save=True):
-        # need to gen?
-        if force or not os.path.exists(self.path):
-            return self.gen(save=save)
-        return pd.read_pickle(self.path)
-        
-    @cached_property
-    def data(self): 
-        odf=self.load()
-        with Logwatch('postprocessing CombinedDataset.data'):
-            for c in self.cols_q: odf[c]=pd.to_numeric(odf[c], errors='coerce')
-            # final filters?
-            odf=odf.query('member!=""')  # ignore the 8 rows not assoc with members (books, in some cases empty events -- @TODO CHECK)
-            # odf=odf[odf.event_type.isin({'','Borrow'})]
-            # odf=odf[odf.creator_role.isin({'','author'})]
-            return odf
-    
-    def filter_query_str(self, filter_data={}):
-        return filter_query_str(
-            filter_data, 
-            multiline=False,
-            plural_cols=self.cols_sep
-        )
-
-
-
-
-
-
-
-
-def get_arrond_counts(df,key='arrond_id'):
-    arrond_counts = {n:0 for n in sorted(get_all_arrond_ids(), key=lambda x: int(x) if x.isdigit() else np.inf)}
-    for k,v in dict(df[key].value_counts()).items(): arrond_counts[k]=v    
-    arrond_df = pd.DataFrame([arrond_counts]).T.reset_index()
-    arrond_df.columns=[key, 'count']
-    arrond_df = arrond_df.set_index(key).loc[filter_valid_arrond]
-    arrond_df['perc']=arrond_df['count'] / sum(arrond_df['count']) * 100
-    return arrond_df
-    
-
-
-def get_geojson_arrondissement(force=False):
-    import os,json,requests
-    
-    # download if nec
-    url=URLS.get('geojson_arrond')
-    fn=os.path.join(PATH_DATA,'arrondissements.geojson')
-    if force or not os.path.exists(fn):
-        data = requests.get(url)
-        with open(fn,'wb') as of: 
-            of.write(data.content)
-
-    # load        
-    with open(fn) as f:
-        jsond=json.load(f)
-        
-    # anno
-    for d in jsond['features']:
-        d['id'] = str(d['properties']['c_ar'])
-        d['properties']['arrond_id'] = d['id']
-    
-    return jsond
-
-
-@cache
-def get_all_arrond_ids():
-    ids_in_geojson = {
-        d['id'] 
-        for d in get_geojson_arrondissement()['features']
-    }
-    return {n for n in ids_in_geojson if n and n.isdigit() and n!='99'}# | {'X','?','99'} # outside of paris + unkown
-@cache
-def get_all_arrond_ids():
-    ids_in_geojson = {
-        d['id'] 
-        for d in get_geojson_arrondissement()['features']
-    }
-    return {n for n in ids_in_geojson if n and n.isdigit() and n!='99'}# | {'X','?','99'} # outside of paris + unkown
-
-
-
-
-@cache
-def Members(): return MiniMembersDataset()
-@cache
-def Dwellings(): return MiniDwellingsDataset()
-@cache
-def Combined(): 
-    logger.debug('Combined()')
-    return MiniCombinedDataset()
-
-
-@cache
-def Landmarks(): return LandmarksDataset()
-
-
-
-
-
-#### other funcs
-
-def hover_tooltip(row):
-    return f"""
-<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_name} ({ifnanintstr(row.member_dob)} – {ifnanintstr(row.member_dod)})
-{row.dwelling_address}
-{row.dwelling_city} {row.arrond_id}ᵉ
-
-Member: {int(min(row.member_membership)) if row.member_membership else ''} – {int(max(row.member_membership)) if row.member_membership else ''}
-""".strip().replace('\n','<br>')
-
-
-
-def hover_tooltip_maximalist(row, bdf):
-    UNKNOWN = ''
-    def v(x): return x if x else UNKNOWN
-    
-    if not row.member_membership:
-        y1,y2 = UNKNOWN,UNKNOWN
-    else:
-        yl = sorted(list(row.member_membership))
-        y1,y2 = yl[0],yl[-1]
-
-    borrowdf_here = bdf[bdf.dwelling==row.dwelling].drop_duplicates('book')
-    borrowdf_member = bdf[bdf.member==row.member].drop_duplicates('book')
-    
-    numborrow_member_total = borrowdf_member.book.nunique()
-    numborrow_here = borrowdf_here.book.nunique()
-    pronouns = ('they','their') if row.member_gender == 'Nonbinary' else (
-        ('she','her') if row.member_gender=='Female' else (
-            ('he','his') if row.member_gender == 'Male' else ('they','their')
-        )
-    )
-    xn=50
-    def wrap(x,xn=xn): return wraphtml(x, xn)
-    
-    def bookdesc(r):
-        o=f'* {r.author}, <i>{r.book_title}</i> ({ensure_int(r.book_year)}), a {v(r.book_format.lower())}'
-        if r.book_genre: o+=f' of {"and ".join(x.lower() for x in r.book_genre)}'
-        o+=f' borrowed '
-        if r.event_year and r.member_dob and is_numberish(r.member_dob) and is_numberish(r.event_year): 
-            o+=f' when {int(float(r.event_year) - float(r.member_dob))}yo'
-        if r.event_start:
-            o+=f' {r.event_start}'
-        if r.event_end:
-            o+=f' and returned {r.event_end}'
-        return wrap(o)
-    
-    # borrowbooks = '<br><br>'.join(bookdesc(r) for i,r in borrowdf_here.fillna(UNKNOWN).iterrows())
-    gdist = f'{round(float(row.dwelling_distSCO),1)}' if row.dwelling_distSCO else UNKNOWN
-    nats=[x for x in row.member_nationalities if x.strip() and x!=UNKNOWN]
-    nats=f', from {oxfordcomma(nats, repr=lambda x: x)}, ' if nats else ''
-    # gstr=f', {row.member_gender.lower()}'
-    dob=ifnanintstr(row.member_dob,'')
-    dod=ifnanintstr(row.member_dod,'')
-    birthdeath=f'{dob} – {dod}'
-    arrond=f'{row.arrond_id}ᵉ' if row.arrond_id else ''
-    
-    # return wrap(f'''<b>{row.member_nicename}</b>  – {v(ifnanintstr(row.member_dod,'?'))}){nats} was a member of the library from {y1} to {y2}. {pronouns[0].title()} lived here, about {gdist}km from Shakespeare & Co, at {v(row.dwelling_address)} in {v(row.dwelling_city)}{", from "+row.dwelling_start if row.dwelling_start else ""}{" until "+row.dwelling_end if row.dwelling_end else ""}, where {pronouns[0]} borrowed {numborrow_here} of the {numborrow_member_total} books {pronouns[0]} borrowed during {pronouns[1]} membership.')''')
-
-    ostr = f"""
-<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_nicename} ({birthdeath})
-{row.dwelling_address}
-{row.dwelling_city} {arrond}
-
-Member: {y1} – {y2}
-""".strip().replace('\n','<br>')
-    return ostr
-
-
-
-
-
-
-
-def determine_arrond(lat, lon, default='NA'):
-    # use shapely code
-    import shapely.geometry as geo
-
-    # get geojson of Paris arrondissement
-    geojson = get_geojson_arrondissement()
-
-    # encode incoming point
-    point = geo.Point(lon, lat)
-    
-    # loop through features in geojson and find intersection
-    for feature in geojson['features']: 
-        polygon = geo.shape(feature['geometry'])
-        if polygon.contains(point):
-            return feature['properties']['arrond_id']
-    
-    # if none found, return default
-    return default
-
-
-
-
-
-
-
-
-
-#####
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class MiniMembersDataset(MembersDataset):
-    _cols_rename = {
-        'member':'member',
-        'nice_name':'member_name',
-        'title':'member_title',
-        'gender':'member_gender',
-        'membership_years':'member_membership',
-        'birth_year':'member_dob',
-        'death_year':'member_dod',
-        'gender':'member_gender',
-        'nationalities':'member_nationalities',
-    }
-
-    @cached_property
-    def data(self):
-        odf=postproc_df(super().data, self._cols_rename)
-        for c in ['member_dob','member_dod']:
-            odf[c]=odf[c].apply(lambda x: int(x) if x else x)
-        return odf
-    
-
-
-
-
-
-
-
-
-
-
-class MiniBooksDataset(BooksDataset):
-    ## ONLY AUTHORS
-    _cols_rename={
-        'book':'book',
-        'author':'author',
-        'author_nice_name':'author_name',
-        'title':'book_title',
-        'year':'book_year',
-        'genre':'book_genre',
-        'format':'book_format',
-        'circulation_years':'book_circulated',
-        'borrow_count':'book_numborrow',
-        'author_birth_date':'author_dob',
-        'author_death_date':'author_dod',
-        'author_gender':'author_gender',
-        'author_nationalities':'author_nationalities',
-    }
-
-    @cached_property
-    def data(self):
-        df=super().data
-        dfau=CreatorsDataset().data.set_index('creator')
-        ld=[]
-        for i,row in df.iterrows():
-            for author in row.author if row.author else ['']:
-                d=dict(row)
-                aid=d['author']=to_name_id(author)
-                try:
-                    for k,v in dict(dfau.loc[aid]).items():
-                        d[f'author_{k}']=v
-                except KeyError:
-                    pass
-                ld.append(d)
-        odf=pd.DataFrame(ld)
-        odf=postproc_df(odf, cols=self._cols_rename, cols_q=['author_dob','book_year'])
-        odf['author_nationalities']=odf['author_nationalities'].apply(
-            lambda x: [] if x is np.nan else x
-        )
-        odf['author_gender']=odf['author_gender'].fillna('')
-        odf['author_name']=odf['author_name'].fillna('')
-        return odf
-
-
-
-
-
-
-
-
-
-
 class MiniEventsDataset(Dataset):
     only_borrows = True
 
@@ -1152,40 +551,15 @@ class MiniEventsDataset(Dataset):
         dfevents = pd.DataFrame(ld)
         
         return dfevents
-    
+
+@cache
+def Events(): return MiniEventsDataset()
 
 
 
+### COMBINED
 
-
-
-class MiniDwellingsDataset(DwellingsDataset):
-    _cols_rename = dict(
-        member='member',
-        dwelling='dwelling',
-        arrond_id='arrond_id',
-        start_date='dwelling_start',
-        end_date='dwelling_end',
-        street_address='dwelling_address',
-        city='dwelling_city',
-        latitude='lat',
-        longitude='lon',
-    )
-
-    @cached_property
-    def data(self):
-        return postproc_df(super().data, self._cols_rename)
-
-
-
-
-
-
-
-
-
-
-class MiniCombinedDataset(Dataset):
+class CombinedDataset(Dataset):
     path=PATHS.get('combinedmini')
     url=URLS.get('combinedmini')
     _cols_sep = [
@@ -1199,7 +573,7 @@ class MiniCombinedDataset(Dataset):
     _cols_sep_nonan=['member_membership']
     _cols_pref=['member','event','dwelling','arrond_id','book','author']
 
-    def gen(self, save=True):
+    def gen(self, save=True, progress=True):
         dfmembers = Members().data
         dfbooks = Books().data
         dfevents = Events().data
@@ -1224,7 +598,7 @@ class MiniCombinedDataset(Dataset):
         
         
         odf['hover_tooltip'] = odf.apply(hover_tooltip,axis=1)
-        odf = prune_when_dwelling_matches(odf)
+        odf = prune_when_dwelling_matches(odf, progress=progress)
         if save: odf.to_pickle(self.path)
         return odf
 
@@ -1250,5 +624,198 @@ class MiniCombinedDataset(Dataset):
         
         return postproc_df(df, cols_pref=self._cols_pref)
     
+@cache
+def Combined(): 
+    logger.debug('Combined()')
+    return CombinedDataset()
+
+
+
+### OTHER
+
+def is_valid_arrond(x):
+    return bool(str(x).isdigit()) and bool(x!='99')
+
+def filter_valid_arrond(df):
+    return (df.index.str.isdigit()) & (df.index!='99')
+
+@cache
+def get_geojson_arrondissement(force=False):
+    import os,json,requests
+    
+    # download if nec
+    url=URLS.get('geojson_arrond')
+    fn=os.path.join(PATH_DATA,'arrondissements.geojson')
+    if force or not os.path.exists(fn):
+        data = requests.get(url)
+        with open(fn,'wb') as of: 
+            of.write(data.content)
+
+    # load        
+    with open(fn) as f:
+        jsond=json.load(f)
+        
+    # anno
+    for d in jsond['features']:
+        d['id'] = str(d['properties']['c_ar'])
+        d['properties']['arrond_id'] = d['id']
+    
+    return jsond
+
+def hover_tooltip(row):
+    return f"""
+<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_name} ({ifnanintstr(row.member_dob)} – {ifnanintstr(row.member_dod)})
+{row.dwelling_address}
+{row.dwelling_city} {row.arrond_id}ᵉ
+
+Member: {int(min(row.member_membership)) if row.member_membership else ''} – {int(max(row.member_membership)) if row.member_membership else ''}
+""".strip().replace('\n','<br>')
+
+def determine_arrond(lat, lon, default='NA'):
+    # use shapely code
+    import shapely.geometry as geo
+
+    # get geojson of Paris arrondissement
+    geojson = get_geojson_arrondissement()
+
+    # encode incoming point
+    point = geo.Point(lon, lat)
+    
+    # loop through features in geojson and find intersection
+    for feature in geojson['features']: 
+        polygon = geo.shape(feature['geometry'])
+        if polygon.contains(point):
+            return feature['properties']['arrond_id']
+    
+    # if none found, return default
+    return default
+
+def prune_when_dwelling_matches(df, progress=True):
+    """Prunes the dataframe based on dwelling matches for events.
+    
+    Args:
+        df (pandas.DataFrame): The input dataframe containing event and dwelling information.
+    
+    Returns:
+        pandas.DataFrame: The pruned dataframe with only the rows that have valid dwelling matches.
+    """
+    
+    df_nonevent, df_event=df[df.event==''],df[df.event!='']
+    
+    # anyone's ok if they're not an event
+    numpossd = {ii:np.nan for ii in df.index}
+    matchtyped={
+        **{ii:'NA' for ii in df_nonevent.index},
+        **{ii:'?' for ii in df_event.index}
+    }
+    matchfoundd={ii:None for ii in df.index}
+    excludedd={ii:False for ii in df.index}
+
+
+    def declare_impossible(xdf):
+        # but declare them impossible to match to a dwelling
+        for ii in xdf.index:
+            matchtyped[ii]='Impossible'
+            numpossd[ii]=0
+            matchfoundd[ii]=False
+            excludedd[ii]=True
+
+    def declare_exact_match(xdf):
+        for ii in xdf.index:
+            matchtyped[ii]='Exact'
+            matchfoundd[ii]=True
+            numpossd[ii]=len(xdf)
+
+    def declare_exact_miss(xdf):
+        logger.trace(f'for event {e}, a certain match was found, with {len(xdf)} possibilities')
+        for ii in xdf.index: 
+            matchtyped[ii]='Exact (excl.)'
+            excludedd[ii]=True
+            matchfoundd[ii]=False
+
+    def declare_ambiguous(xdf, caveats=[]):
+        for ii in xdf.index: 
+            probtype = 'Colens' if not len(xdf[xdf.dwelling_start!='']) else 'Raphael'
+            mt=f'Ambiguous ({probtype})' if len(xdf)>1 else 'Singular'
+            # if caveats: mt+=f' ({", ".join(caveats)})'
+            matchtyped[ii]=mt
+            matchfoundd[ii]=True
+            numpossd[ii]=len(xdf)
+
+    def find_exact_matches(xdf):
+        erow=xdf.iloc[0]
+        e1,e2=erow.event_start,erow.event_end
+        match = xdf[[
+            (is_fuzzy_date_seq(d1,e1,d2) or is_fuzzy_date_seq(d1,e2,d2))
+            for (d1,d2) in zip(xdf.dwelling_start, xdf.dwelling_end)
+        ]]
+        logger.trace(f'found {len(match)} exact matches for {(e1, e2)} with options {list(zip(xdf.dwelling_start, xdf.dwelling_end))}')
+        return match
+
+    def declare_heuristic_miss(xdf, htype=''):
+        for ii in xdf.index: 
+            matchtyped[ii]=f'Heuristic (excl.{" by "+htype if htype else ""})'
+            matchfoundd[ii]=False
+            excludedd[ii]=True
+
 
     
+    # for every event...
+    for e,edf in tqdm(df_event.groupby('event'), total=df_event.event.nunique(), desc='Locating events',disable=not progress):
+        logger.trace(f'event: {e}, with {len(edf)} dwelling possibilities')
+        ## if there are no dwellings at all...
+        nadf=edf[edf.dwelling=='']
+        declare_impossible(nadf)
+
+        edf=edf[edf.dwelling!=''].drop_duplicates('dwelling')
+        if not len(edf):
+            logger.trace(f'for event {e}, no dwelling possibilities because empty dwellings')
+            continue
+    
+        # if certainty is possible, i.e. we have dwelling records with start and end dates...
+        edf_certain = edf.query('dwelling_start!="" & dwelling_end!=""')
+        if len(edf_certain):
+            logger.trace(f'for event {e}, certainty is possible, with {len(edf_certain)} possibilities')
+            # is there a match? a point where start or end of event is within range of dwelling start or end?
+            edf_match = find_exact_matches(edf_certain)
+            # if so, then add indices only for the match, not the other rows
+            if len(edf_match):
+                logger.trace(f'for event {e}, a certain match was found, with {len(edf_match)} possibilities')
+                declare_exact_match(edf_match)
+                declare_exact_miss(edf[~edf.index.isin(edf_match.index)])
+                continue
+
+        # try dispreferred caveats
+        caveats=[]
+        edf0 = edf
+        edf = edf[~edf.dwelling_address.isin(DISPREFERRED_ADDRESSES)]
+        if not len(edf):
+            logger.trace(f'for event {e}, only a dispreferred address remained; allowing')
+            edf=edf0
+        elif len(edf)!=len(edf0):
+            declare_heuristic_miss(edf0[~edf0.index.isin(edf.index)], htype='dispref')
+            caveats.append('-dispref')
+
+        # try distance caveat
+        edf0 = edf
+        edf = edf[[get_dist_from_SCO(lat,lon)<50 for lat,lon in zip(edf.lat, edf.lon)]]
+        if not len(edf):
+            logger.trace(f'for event {e}, only non-Parisian places remaining; allowing')
+            edf=edf0
+        elif len(edf)!=len(edf0):
+            declare_heuristic_miss(edf0[~edf0.index.isin(edf.index)], htype='distance')
+            caveats.append('-distance')
+
+        # otherwise, declare ambiguous?
+        logger.trace(f'for event {e}, still no matches found. using all {len(edf)} possible indices')
+        declare_ambiguous(edf,caveats=caveats)
+        
+    # add to dataframe a few stats on the dwelling matches
+    df['dwelling_matchfound'] = matchfoundd
+    df['dwelling_matchtype'] = matchtyped
+    df['dwelling_numposs'] = numpossd
+    df['dwelling_excluded'] = excludedd
+    df['dwelling_likelihood'] = 1/df['dwelling_numposs']
+
+    # return only ok rows
+    return df.loc[~df.dwelling_excluded]

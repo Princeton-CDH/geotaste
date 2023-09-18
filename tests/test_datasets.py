@@ -49,3 +49,21 @@ def test_authors_dataset():
     df = obj.data
     assert 'joyce-james' in set(df['creator'])
 
+
+
+def test_prune_when_dwelling_matches():
+    with Logwatch('generating mini combined dataset'):
+        df = CombinedDataset().gen(progress=False)
+
+    dtypes = df.dwelling_matchtype.unique()
+    assert set(dtypes) == {
+        'NA', 'Singular', 'Ambiguous (Colens)', 'Exact', 'Ambiguous (Raphael)'
+    }
+
+
+    s=df.groupby('dwelling_matchtype').event.nunique().sort_values(ascending=False)
+    index=list(s.index)
+    assert index[-1] == 'NA'
+    assert index[0] == 'Singular'
+    assert s['Exact'] > 1000
+
