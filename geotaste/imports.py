@@ -244,14 +244,7 @@ LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
 from .utils import *
 from .queries import *
 from .statutils import *
-from .queries import *
-from .statutils import *
 from .datasets import *
-from .figs import *
-from .components import *
-from .panels import *
-from .layouts import *
-from .app import *
 from .figs import *
 from .components import *
 from .panels import *

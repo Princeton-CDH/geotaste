@@ -1,5 +1,4 @@
 from .imports import *
-from .views import *
 
 
 class FilterPanel(FilterCard):

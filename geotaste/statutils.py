@@ -95,6 +95,28 @@ def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterab
 
 
 def table_info(ctbl):
+    """Returns a dictionary containing information about a given table.
+    
+    Args:
+        ctbl (list): A 2D list representing the table.
+    
+    Returns:
+        dict: A dictionary containing the following information:
+            - count_sum (int): The sum of count1 and count2.
+            - count_min (int): The minimum value between count1 and count2.
+            - count_L (int): The value of count1.
+            - count_R (int): The value of count2.
+            - perc_L (float): The percentage of count1 relative to support1.
+            - perc_R (float): The percentage of count2 relative to support2.
+            - perc_L->R (float): The difference between perc_R and perc_L.
+    
+    Examples:
+        >>> table_info([[10, 20], [30, 40]])
+        {'count_sum': 100, 'count_min': 10, 'count_L': 10, 'count_R': 20, 'perc_L': 33.33333333333333, 'perc_R': 66.66666666666666, 'perc_L->R': 33.33333333333333}
+        >>> table_info([[0, 0], [0, 0]])
+        {'count_sum': 0, 'count_min': 0, 'count_L': 0, 'count_R': 0, 'perc_L': nan, 'perc_R': nan, 'perc_L->R': nan}
+    """
+    
     count1=ctbl[0][0]
     count2=ctbl[0][1]
     support1=ctbl[0][0] + ctbl[1][0]
@@ -114,57 +136,47 @@ def table_info(ctbl):
 
 
 
-def quicklook_diffs(sL, sR):    
-    df = pd.DataFrame([sL, sR], index=['L','R']).T
-    df['L->R'] = df['R'] - df['L']
-    df = df.round().astype(int)
-    df = df[df['L->R']!=0]
-    return df.T.rename_axis('LR')
-
-
-
-
-def zfy(series):
-    s=pd.Series(series).replace([np.inf, -np.inf], np.nan).dropna()
-    if not len(s): return np.nan
-    return (s - s.mean()) / s.std()
-
 
 def filter_signif(df, p_col=None, min_p=MIN_P):
+    """Filters a DataFrame based on the significance level of a specified column.
+    
+    Args:
+        df (pandas.DataFrame): The DataFrame to be filtered.
+        p_col (str, optional): The name of the column containing p-values. If not provided, the function will attempt to find a column named 'pvalue' or ending with '_p'. Defaults to None.
+        min_p (float, optional): The minimum p-value threshold for filtering. Rows with p-values greater than this threshold will be removed. Defaults to MIN_P.
+    
+    Returns:
+        pandas.DataFrame: The filtered DataFrame.
+    
+    Examples:
+        >>> df = pd.DataFrame({'A': [1, 2, 3], 'B': [0.05, 0.1, 0.2]})
+        >>> filter_signif(df, min_p=0.1)
+           A     B
+        0  1  0.05
+        1  2  0.10
+    """
+    
     if min_p is None: return df
-    if p_col is None: pcol=first([c for c in df if c=='pvalue' or c.endswith('_p')])
-    if not pcol: return df
-    return df[df[pcol] <= min_p]
-
-
-
-def measure_dists(
-        series1, 
-        series2, 
-        methods = [
-            'braycurtis', 
-            'canberra', 
-            'chebyshev', 
-            'cityblock', 
-            'correlation', 
-            'cosine', 
-            'euclidean', 
-            'jensenshannon', 
-            'minkowski', 
-        ],
-        series_name='dists',
-        calc = ['median']
-        ):
-    from scipy.spatial import distance
-    a=pd.Series(series1).values
-    b=pd.Series(series2).values
-    o=pd.Series({fname:getattr(distance,fname)(a,b) for fname in methods}, name=series_name)
-    for fname in calc: o[fname]=o.agg(fname)
-    return o
-
+    if p_col is None: p_col=first([c for c in df if c=='pvalue' or c.endswith('_p')])
+    if not p_col: return df
+    return df[df[p_col] <= min_p]
 
 
 def geodist(latlon1, latlon2, unit='km'):
+    """Calculates the geodesic distance between two points given their latitude and longitude coordinates.
+    
+    Args:
+        latlon1 (tuple): A tuple containing the latitude and longitude coordinates of the first point.
+        latlon2 (tuple): A tuple containing the latitude and longitude coordinates of the second point.
+        unit (str, optional): The unit of measurement for the distance. Defaults to 'km'.
+    
+    Returns:
+        float: The geodesic distance between the two points in the specified unit.
+    
+    Raises:
+        ValueError: If the latitude or longitude coordinates are invalid.
+    """
+    
     from geopy.distance import geodesic as distfunc
     import numpy as np
     try:
@@ -177,6 +189,15 @@ def geodist(latlon1, latlon2, unit='km'):
         return np.nan
     
 def get_dist_from_SCO(lat,lon):
+    """Calculate the distance from a given latitude and longitude to the coordinates of SCO.
+    
+    Args:
+        lat (float): The latitude of the location.
+        lon (float): The longitude of the location.
+    
+    Returns:
+        float: The distance in kilometers from the given location to SCO.
+    """    
     return geodist((lat,lon), LATLON_SCO)
 
 
