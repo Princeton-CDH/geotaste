@@ -109,3 +109,4 @@ def test_filtering(dash_duo):
     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
     dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'France')
+
