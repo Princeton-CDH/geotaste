@@ -52,18 +52,18 @@ def test_showhide_components(dash_duo):
     test_button_showhide_l(button_showhide_ids, close=True)
 
 
-
-def test_filtering(dash_duo):
-    # app = import_app('geotaste.app')
-    app = get_app()
-    dash_duo.start_server(app.app)
+## one function better for github?
+# def test_filtering(dash_duo):
+#     # app = import_app('geotaste.app')
+#     app = get_app()
+#     dash_duo.start_server(app.app)
 
     click_y_US = .2
     click_y_FR = .22
 
-    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
-    dash_duo.multiple_click('#button_showhide-Filter_1', 1)
-    dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
+#     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+#     dash_duo.multiple_click('#button_showhide-Filter_1', 1)
+#     dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
     dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
@@ -71,8 +71,8 @@ def test_filtering(dash_duo):
 
 
     # second
-    dash_duo.multiple_click('#button_showhide-Filter_2', 1)
-    dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
+    # dash_duo.multiple_click('#button_showhide-Filter_2', 1)
+    # dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
     dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_2', 1)
     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR) # click US ?
     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR) # click US ?
