@@ -87,53 +87,25 @@ def test_filtering(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
 
-
-
-    # # working idiosyncratically ->
+    click_y_US = .22
+    click_y_FR = .24
 
     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
     dash_duo.multiple_click('#button_showhide-Filter_1', 1)
-    dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
-    dash_duo.multiple_click('#button_showhide-AuthorGenderCard-BP-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
+    time.sleep(2)
+    dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
+    dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
+    dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'United States')
 
-    # els = dash_duo.find_elements('#graph-AuthorGenderCard-BP-Filter_1 text')
-    # print(els)
+    time.sleep(1)
 
-    # dash_duo.multiple_click(els[0], 2)
-
-    dash_duo.click_at_coord_fractions('#graph-AuthorGenderCard-BP-Filter_1', .1, .7)
-    dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'Male')
-
-
-    # # second
-    # dash_duo.multiple_click('#welcome-modal .btn-close', 1)
-    # dash_duo.multiple_click('#button_showhide-Filter_1', 1)
-    # dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
-    # dash_duo.multiple_click('#button_showhide-AuthorGenderCard-BP-Filter_1', 1)
-    # dash_duo.click_at_coord_fractions('#graph-AuthorGenderCard-BP-Filter_1', .7, click_y_US) # click US ?
-    # dash_duo.click_at_coord_fractions('#graph-AuthorGenderCard-BP-Filter_1', .7, click_y_US) # click US ?
-    # dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'Male')
-
-
-    # # working idiosyncratically ->
-
-    # click_y_US = .2
-    # click_y_FR = .22
-
-    # dash_duo.multiple_click('#welcome-modal .btn-close', 1)
-    # dash_duo.multiple_click('#button_showhide-Filter_1', 1)
-    # dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
-    # dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
-    # dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
-    # dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
-    # dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'United States')
-
-    # time.sleep(1)
-
-    # # second
-    # dash_duo.multiple_click('#button_showhide-Filter_2', 1)
-    # dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
-    # dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_2', 1)
-    # dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR) # click FR ?
-    # dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR) # click FR ?
-    # dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'France')
+    # second
+    dash_duo.multiple_click('#button_showhide-Filter_2', 1)
+    dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
+    dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_2', 1)
+    time.sleep(2)
+    dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
+    dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
+    dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'France')
