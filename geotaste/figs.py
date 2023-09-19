@@ -33,7 +33,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     quant = False
     opts_xaxis=dict()
     opts_yaxis=dict()
-    height=600
+    height=100
     min_series_val=None
     max_series_val=None
     color=None 
@@ -44,6 +44,14 @@ class FigureFactory(DashFigureFactory, Logmaker):
     text=None
     
     def __init__(self, filter_data={}, selected=[], name='FigureFactory', **kwargs):
+        """Initializes an instance of the FigureFactory class.
+        
+        Args:
+            filter_data (dict, optional): A dictionary containing filter data. Defaults to an empty dictionary.
+            selected (list or dict, optional): A list or dictionary containing selected data. Defaults to an empty list.
+            name (str, optional): The name of the FigureFactory instance. Defaults to 'FigureFactory'.
+            **kwargs: Additional keyword arguments that can be used to set attributes of the FigureFactory instance.
+        """
         self.name=name
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
@@ -59,29 +67,34 @@ class FigureFactory(DashFigureFactory, Logmaker):
         self.kwargs=kwargs
         for k,v in kwargs.items(): setattr(self,k,v)
 
-    def selected(self, selectedData):
-        if not selectedData: return {}
+    def has_selected(self):
+        """Check if there is any selected data.
         
-        points_data = selectedData.get('points',[])
-        if not points_data: return {}
+        Returns:
+            bool: True if there is selected data, False otherwise.
+        """
+        
+        return bool(self.selection_data and self.selected_values)
 
-        def get_record_id(d, keys=['label', 'location']):
-            if not d: return None
-            for k in keys:
-                if k in d:
-                    return d[k]
-            logger.exception('What is the record id here? --> '+pformat(d))
+    def get_selected(self, selectedData={}):
+        """The `get_selected` function returns a dictionary containing selected records based on the provided `selectedData` parameter. If `selectedData` is empty or not provided, an empty dictionary is returned.
         
-        selected_records = qualquant_series(
-            [x for x in [ get_record_id(d) for d in points_data ] if x], 
-            quant=self.quant
-        ).sort_values().tolist()
-        o={self.key:selected_records}
-        return o
-    
+        Parameters:
+        - `selectedData` (dict): A dictionary containing selected data. Default is an empty dictionary.
+        
+        Returns:
+        - dict: A dictionary with one key, `self.key`, and one value, the selected values [val1, val2, ...]
+        """
+        return {self.key:get_selected_records_from_figure_selected_data(selectedData)}    
 
     @cached_property
-    def dataset(self): 
+    def dataset(self):
+        """Returns the dataset if the dataset class is defined, otherwise returns None.
+        
+        Returns:
+            object: The dataset object if the dataset class is defined, otherwise None.
+        """
+        
         return (
             self.dataset_class.__func__() 
             if self.dataset_class is not None 
@@ -90,43 +103,64 @@ class FigureFactory(DashFigureFactory, Logmaker):
 
     @cached_property
     def data_orig(self):
+        """Returns the original data frame from the dataset class instance.
+
+        Returns:
+            pandas.DataFrame: The original data from the dataset.
+        """
+
         return (
             self.dataset.data 
             if self.dataset is not None and self.dataset.data is not None
             else pd.DataFrame()
         )
-
-    @cached_property
-    def data_all(self):
-        odf = self.data_orig
-        # if self.drop_duplicates and len(odf):
-        #     odf=odf.drop_duplicates(self.drop_duplicates)
-        return odf
     
-    @cached_property
-    def total_counts(self):
-        return self.dataset.data[self.key].value_counts()
     
     @cached_property
     def data(self):
-        odf = filter_df(self.data_all, self.filter_data)
+        """Returns a filtered dataframe based on the original data and filter criteria.
+        
+        Returns:
+            pandas.DataFrame: The filtered dataframe.
+        """
+        
+        # query
+        odf = filter_df(self.data_orig, self.filter_data, return_query=False)
+
+        # drop down to correct size
         if self.drop_duplicates and len(odf):
             odf=odf.drop_duplicates(self.drop_duplicates)
+
         return odf
     
     @cached_property
     def filter_desc(self):
-        return filter_query_str(
-            self.filter_data,
-            human=True
-        )
+        """Filters the description based on the filter data.
+
+        Returns:
+            str: The filtered query string, in human-readable format.
+        """
+        
+        return filter_query_str(self.filter_data,human=True)
     
-    def unique(
+    def get_unique_vals(
             self, 
             sort_by_count=True, 
             series_orig=True, 
-            series_all=False,
             **kwargs): 
+        """Return a pandas Series containing unique values from the specified series.
+        
+        Args:
+            sort_by_count (bool, optional): If True, sort the unique values by their count in descending order. 
+                If False, sort the unique values in ascending order. Defaults to True.
+            series_orig (bool, optional): If True, use the original series for counting. 
+                If False, use the deduplicated and filtered series. Defaults to True.
+            **kwargs: Additional keyword arguments to be passed to the `get_series` method.
+        
+        Returns:
+            pd.Series: A pandas Series containing the unique values.
+        """
+
         l = list(self.get_series(**kwargs).unique())
         if not sort_by_count:
             l.sort(key=lambda x: x)
@@ -134,9 +168,6 @@ class FigureFactory(DashFigureFactory, Logmaker):
             if series_orig:
                 # logger.debug('using original series')
                 series = self.series_orig
-            elif series_all:
-                # logger.debug('using dedup\'d series')
-                series = self.series_all
             else:
                 # logger.debug('using dedup\'d and filtered')
                 series = self.series
@@ -147,20 +178,64 @@ class FigureFactory(DashFigureFactory, Logmaker):
 
 
     @cached_property
-    def series(self): return self.get_series(df=self.data)
+    def series(self): 
+        """Returns the series from the given dataframe, stored under column `self.key`.
+        
+        Returns:
+            pandas.Series: The series extracted from the dataframe.
+        """
+        return self.get_series(df=self.data)
+    
     @cached_property
     def series_orig(self): 
+        """Returns the series from the original unfiltered dataframe, stored under column `self.key`.
+        
+        Returns:
+            pandas.Series: The series extracted from the dataframe.
+        """
+        
         return self.get_series(df=self.data_orig)
 
     
     @cached_property
-    def series_q(self): return self.get_series(df=self.data, quant=True)
-    @cached_property
-    def series_all(self): return self.get_series(df=self.data_all)
-    @cached_property
-    def series_all_q(self): return self.get_series(df=self.data_all, quant=True)
+    def series_q(self): 
+        """Returns the series from the given dataframe, stored under column `self.key`, in forced quantitative mode.
+        
+        Returns:
+            pandas.Series: The series extracted from the dataframe.
+        """
+        return self.get_series(df=self.data, quant=True)
     
-    def get_series(self, key=None, df=None, quant=None):
+    @cached_property
+    def series_all(self): 
+        """Returns the series from the original unfiltered dataframe, stored under column `self.key`.
+        
+        Returns:
+            pandas.Series: The series extracted from the dataframe.
+        """
+        return self.get_series(df=self.data_orig)
+    
+    @cached_property
+    def series_all_q(self): 
+        """Returns the series from the original unfiltered dataframe, stored under column `self.key`, in forced quantitative mode.
+        
+        Returns:
+            pandas.Series: The series extracted from the dataframe.
+        """
+        return self.get_series(df=self.data_orig, quant=True)
+    
+    def get_series(self, key:str=None, df:pd.DataFrame=None, quant:bool=None):
+        """Get a series from a DataFrame.
+        
+        Args:
+            key (str, optional): The column name of the series. If not provided, the default key will be used.
+            df (pd.DataFrame, optional): The DataFrame from which to extract the series. If not provided, the default DataFrame (`self.data`) will be used.
+            quant (bool, optional): Whether to apply quantization to the series. If not provided, the default quantization value will be used.
+        
+        Returns:
+            pd.Series: The extracted series.        
+        """
+        
         if key is None: key=self.key
         if not key: 
             return pd.Series(name=key)
@@ -180,45 +255,84 @@ class FigureFactory(DashFigureFactory, Logmaker):
     
         
     @cached_property
-    def minval(self): return self.series.min()
+    def minval(self): 
+        """Returns the minimum value in the series.
+        
+        Returns:
+            object: The minimum value in the series.
+        """
+        
+        return self.series.min() if len(self.series) else None
     
     @cached_property
-    def maxval(self): return self.series.max()
+    def maxval(self): 
+        """Returns the maximum value in the series.
+        
+        Returns:
+            object: The maximum value in the series.
+        """
+        
+        return self.series.max() if len(self.series) else None
+    
+    @cached_property
+    def minval_q(self): 
+        """Returns the minimum value in the quant series.
+        
+        Returns:
+            float: The minimum quant value in the series.
+        """
+        
+        return self.series_q.min() if len(self.series_q) else np.nan
+    
+    @cached_property
+    def maxval_q(self): 
+        """Returns the maximum value in the quant series.
+        
+        Returns:
+            float: The maximum quant value in the series.
+        """
+        
+        return self.series_q.max() if len(self.series_q) else np.nan
 
     @cached_property
-    def query_str(self) -> str:
-        return to_query_string(self.filter_data)
-    
-    @cached_property
-    def filtered(self): return bool(self.filter_data)
+    def filtered(self): 
+        """Check if the filter_data attribute is not empty.
+        
+        Returns:
+            bool: True if filter_data is not empty, False otherwise.
+        """
+        return bool(self.filter_data)
 
-    
-
     @cached_property
-    def df(self) -> pd.DataFrame:
-        return self.data
-    
-    @cached_property
-    def figdf(self) -> pd.DataFrame:
-        return self.df_counts
-    
-    @cached_property
-    def seldf(self) -> pd.DataFrame:
-        if self.selection_data and len(self.figdf):
-            return filter_df(self.figdf, self.selection_data)
+    def df_selections(self) -> pd.DataFrame:
+        """Filters the DataFrame based on the selection data.
+        
+            Returns:
+                pd.DataFrame: The filtered DataFrame.
+        """
+        
+        if self.selection_data and len(self.df_counts):
+            return filter_df(self.df_counts, self.selection_data)
         return pd.DataFrame()
     
     @cached_property
-    def sels(self) -> list:
-        return list(self.seldf.index) if len(self.seldf) else []
-    
-    @cached_property
-    def seldata(self) -> dict:
-        return {self.key:self.series.unique().tolist()}
-    
+    def selected_values(self) -> list:
+        """Returns a list of selected values from the dataframe.
+        
+        Returns:
+            list: A list of selected values from the dataframe.
+        """
+        
+        return list(self.df_selections.index) if len(self.df_selections) else []
     
     @cached_property
     def df_counts(self):
+        """Returns a DataFrame containing the value counts of the series in the filtered dataframe. If `self.keep_missing_types` is True, then value types not present in the filtered dataframe, but present in the original/unfiltered one, will be added to the returned data frame with a count of 0.
+        
+            Returns:
+                DataFrame: A DataFrame with at least two columns: `self.key` and 'count', where 'count' represents the number of instances of the value type in the filterd dataframe `self.data`.
+        """
+        
         valcounts = self.series.value_counts()
         if self.keep_missing_types:
             valtypes = self.series_all.unique()
@@ -226,24 +340,43 @@ class FigureFactory(DashFigureFactory, Logmaker):
                 valcounts[missing_val]=0
         return pd.DataFrame(valcounts).reset_index()
 
-    @cached_property
-    def fig(self): 
-        logger.debug(f'{self.__class__.__name__}.fig')
-        fig = self.plot()
-        return fig
-        
+
+
+
+
+
+    ## Plotting
 
     def plot(self, **kwargs):
+        """Plots, by default, a histogram via `self.plot_histogram`, and if selections exist, then these aree subsequently applied.
+        
+        Args:
+            **kwargs: Additional keyword arguments to customize the plot. These arguments will be merged with the existing arguments stored in `self.kwargs`.
+        
+        Returns:
+            fig: The resulting plot as a `plotly.graph_objects.Figure` object.
+        """
+        
         kwargs={**self.kwargs, **kwargs}
         
         fig = self.plot_histogram(**kwargs)
         
-        if self.sels:
-            fig.update_traces(selectedpoints=self.sels)
+        if self.has_selected():
+            fig.update_traces(selectedpoints=self.selected_values)
 
         return fig
         
     def plot_histogram(self, color=None, **kwargs):
+        """Plots a histogram using Plotly.
+        
+        Args:
+            color (str, optional): The color of the bars. If not provided, the default color will be used.
+            **kwargs: Additional keyword arguments that can be passed to the `px.bar` function.
+        
+        Returns:
+            fig: The Plotly figure object representing the histogram.
+        """
+        
         color = color if color else self.color
         category_orders = (
             {self.key:self.df_counts.index} 
@@ -288,42 +421,119 @@ class FigureFactory(DashFigureFactory, Logmaker):
 
         return fig
 
-class TypicalFigure(FigureFactory):
-    height = 100
-    # opts_xaxis=dict(title_text='')
-    # opts_yaxis=dict(visible=False)
 
-class MemberFigure(TypicalFigure):
+
+
+
+
+
+
+
+
+
+
+
+## Individual figures
+
+
+## MEMBER FIGURES ################################################################################
+
+
+class MemberFigure(FigureFactory):
+    """
+    A class that creates a figure factory for Members.
+    
+    Attributes:
+    records_name : (str) Indicates the type of member records.
+    drop_duplicates : (tuple) Specifies the field to consider for dropping duplicate records.
+    """
     records_name='members'
     drop_duplicates=('member',)
 
+
+
 class MemberDOBFigure(MemberFigure):
+    """
+    A child class of MemberFigure that creates a figure based on the member's date of birth.
+
+    Attributes:
+    key : (str) Key for the series in the members dataframe
+    quant : (bool) This is set to True indicating that the data is quantitative.
+    """
     key = 'member_dob'
     quant = True
 
 class MembershipYearFigure(MemberFigure):
+    """
+    A child class of MemberFigure that creates a figure based on the membership year.
+
+    Attributes:
+    records_name : (str) Convenient plural form for the type of data shown here
+    key : (str) Key for the series in the members dataframe
+    quant : (bool) This is set to True indicating that the data is quantitative.
+    """
     records_name='annual subscriptions'
     key='member_membership'
     quant = True
 
 class MemberGenderFigure(MemberFigure):
+    """
+    A child class of MemberFigure that creates a figure based on the member's gender.
+
+    Attributes:
+    key : (str) Key for the series in the members dataframe
+    quant : (bool) This is set to False indicating that the data is not quantitative.
+    vertical : (bool) Forces the graph to be a horizontal bar chart when set to False.
+    text : (str) Key in data frame to be displayed on the graph.
+    """
     key='member_gender'
     quant=False
     vertical = False
     text = 'count'
     
+
+
+
 class NationalityFigure(FigureFactory):
+    """
+    A class that creates a figure factory for nationality.
+
+    Attributes:
+    records_points_dim : (str) Dimension of selection of points set to 'y'.
+    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
+    log_x : (bool) Forces the 'x' axis to be logarithmic when set to True.
+    text : (str) Key in data frame to be displayed on the graph.
+    """
     records_points_dim='y'
     vertical = True
     log_x = True
     text = 'count'
 
 
+
+
 class MemberNationalityFigure(NationalityFigure, MemberFigure):
+    """
+    A child class of NationalityFigure and MemberFigure that creates a figure based on nationality.
+
+    Attributes:
+    records_name : (str) Convenient plural form for the type of data shown here
+    key : (str) Key for the series in the members dataframe
+    """
     records_name='member nationalities'
     key='member_nationalities'
 
 class MemberArrondFigure(MemberFigure):
+    """
+    A child class of MemberFigure that creates a figure based on 'arrond_id'.
+    
+    Attributes:
+    key : (str) Key for the series in the members dataframe
+    quant : (bool) This is set to False indicating that the data is not quantitative.
+    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
+    text : (str) Text to be displayed on the graph.
+    """
+
     key='arrond_id'
     quant=False
     vertical = True
@@ -331,6 +541,12 @@ class MemberArrondFigure(MemberFigure):
 
     @cached_property
     def df_counts(self):
+        """
+        A method that computes and returns a dataframe of counts after applying validation and sorting.
+        
+        Returns:
+        (DataFrame) A DataFrame sorted by 'arrond_i'.
+        """
         odf=super().df_counts
         series = odf[self.key]
         odf=odf[series.apply(is_valid_arrond)]
@@ -338,32 +554,116 @@ class MemberArrondFigure(MemberFigure):
         odf=odf.sort_values('arrond_i')
         odf.index = [x+1 for x in range(len(odf))]
         return odf
+
     
 
-class BookFigure(TypicalFigure):
+
+
+
+
+
+
+
+
+
+
+
+
+
+## BOOK FIGURES ################################################################################
+
+class MemberNameFigure(MemberFigure):
+    """
+    A child class of MemberFigure that creates a figure based on the member's name.
+
+    Attributes:
+    key : (str) Key for the series in the members dataframe.
+    drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.
+    """
+    key = 'member_name'
+    drop_duplicates=('member',)
+
+
+class BookFigure(FigureFactory):
+    """
+    A child class of FigureFactory that creates figures based on books.
+
+    Attributes:
+    records_name : (str) The name of the records.
+    drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.
+    """
     records_name='books'
     drop_duplicates=('book',)
 
+
 class BookTitleFigure(BookFigure):
+    """
+    A child class of BookFigure that creates a figure based on the book's title.
+
+    Attributes:
+    key : (str) The key representing the book's title.
+    """
     key = 'book_title'
 
+
 class BookGenreFigure(BookFigure):
+    """
+    A child class of BookFigure that creates a figure based on the book's genre.
+
+    Attributes:
+    key : (str) The key representing the book's genre.
+    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
+    text : (str) Key in data frame to be displayed on the graph.
+    """
     key = 'book_genre'
     vertical = True
     text = 'count'
-    
+
 
 class BookYearFigure(BookFigure):
+    """
+    A child class of BookFigure that creates a figure based on the book's publication year.
+
+    Attributes:
+    key : (str) The key representing the book's year.
+    quant : (bool) This is set to True indicating that the data is quantitative.
+    min_series_val : (int) The minimum year value for book publication.
+    max_series_val : (int) The maximum year value for book publication.
+    """
     key = 'book_year'
     quant = True
     min_series_val=1800
     max_series_val=1950
 
-class AuthorFigure(TypicalFigure):
+
+
+
+
+## AUTHOR FIGURES ################################################################################
+
+
+class AuthorFigure(FigureFactory):
+    """
+    A child class of FigureFactory that creates figures based on authors.
+
+    Attributes:
+    records_name:(str) The name of the records.
+    drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.
+    """
     records_name='authors'
     drop_duplicates=('author',)
 
+
 class AuthorGenderFigure(AuthorFigure):
+    """
+    A child class of AuthorFigure that creates a figure based on the author's gender.
+
+    Attributes:
+    key:(str) The key representing the author's gender.
+    quant:(bool) This is set to False indicating that the data is not quantitative.
+    vertical:(bool) Forces the graph to be a horizontal bar chart when set to False.
+    text:(str) Key in data frame to be displayed on the graph.
+    """
     key='author_gender'
     quant=False
     vertical = False
@@ -371,37 +671,86 @@ class AuthorGenderFigure(AuthorFigure):
 
 
 class AuthorNationalityFigure(NationalityFigure, AuthorFigure):
+    """
+    A child class of NationalityFigure and AuthorFigure that creates a figure based on the author's nationality.
+
+    Attributes:
+    key:(str) The key representing the author's nationality.
+    quant:(bool) This is set to False indicating that the data is not quantitative.
+    """
     key='author_nationalities'
     quant=False
 
+
 class AuthorDOBFigure(AuthorFigure):
+    """
+    A child class of AuthorFigure that creates a figure based on the author's date of birth.
+
+    Attributes:
+    key:(str) The key representing the author's date of birth.
+    quant:(bool) This is set to True indicating that the data is quantitative.
+    min_series_val:(int) The minimum year value for author's date of birth.
+    max_series_val:(int) The maximum year value for author's date of birth.
+    """
     key = 'author_dob'
     quant = True
     min_series_val=1800
     max_series_val=1950
 
-class MemberNameFigure(MemberFigure):
-    key = 'member_name'
-    drop_duplicates=('member',)
 
-class AuthorNameFigure(MemberFigure):
+class AuthorNameFigure(AuthorFigure):
+    """
+    A child class of AuthorFigure that creates a figure based on the author's name.
+
+    Attributes:
+    key:(str) The key representing the author's name.
+    """
     key = 'author_name'
 
 
+class EventFigure(FigureFactory):
+    """
+    A child class of FigureFactory that creates figures based on events.
 
-class EventFigure(TypicalFigure):
+    Attributes:
+    drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.
+    """
     drop_duplicates = ('event',)
 
+
 class EventYearFigure(EventFigure):
+    """
+    A child class of EventFigure that creates a figure based on the event's year.
+
+    Attributes:
+    key:(str) The key representing the event's year.
+    quant:(bool) This is set to True indicating that the data is quantitative.
+    """
     key = 'event_year'
     quant = True
 
+
 class EventMonthFigure(EventFigure):
+    """
+    A child class of EventFigure that creates a figure based on the event's month.
+
+    Attributes:
+    key:(str) The key representing the event's month.
+    quant:(bool) This is set to True indicating that the data is quantitative.
+    """
     key = 'event_month'
     quant = True
 
 
 class EventTypeFigure(EventFigure):
+    """
+    A child class of EventFigure that creates a figure based on the event's type.
+
+    Attributes:
+    key:(str) The key representing the event's type.
+    quant:(bool) This is set to False indicating that the data is not quantitative.
+    vertical:(bool) Forces the graph to be a vertical bar chart when set to True.
+    """
     key = 'event_type'
     quant = False
     vertical = True
@@ -410,27 +759,17 @@ class EventTypeFigure(EventFigure):
 
 
 
-### LANDMARKS
+
+## EVENT FIGURES ################################################################################
+
+
+
+
+
+## CUSTOM FIGURE FACTORIES ################################################################################
 
 class LandmarksFigureFactory(FigureFactory):
     dataset_class = Landmarks
-    # map_style = {
-    #     "version": 8,
-    #     "sources": {
-    #         "raster-tiles": {
-    #             "type": "raster",
-    #             "tiles": ["http://localhost:5000/{z}/{x}/{y}.png"],
-    #             "tileSize": 256
-    #         }
-    #     },
-    #     "layers": [{
-    #         "id": "simple-tiles",
-    #         "type": "raster",
-    #         "source": "raster-tiles",
-    #         "minzoom": 0,
-    #         "maxzoom": 18
-    #     }]
-    # }
 
     def plot_map(self, color='gray', **kwargs):
         figdf = self.data
@@ -562,23 +901,7 @@ class CombinedFigureFactory(FigureFactory):
         else:
             df = df.drop_duplicates(['dwelling','book'])
             cols = cols_members+cols_books
-
-
         return get_dash_table(df, cols=cols)
-
-        # df = (
-        #     df.drop_duplicates('member') 
-        #     if not self.book_filters_exist 
-        #     else df.drop_duplicates(['dwelling','book'])
-        # )
-        # return get_dash_table(
-        #     df,
-        #     cols=(
-        #         cols_members 
-        #         if not self.book_filters_exist 
-        #         else cols_members+cols_books
-        #     )
-        # )
 
     
     @cached_property
@@ -631,8 +954,6 @@ class CombinedFigureFactory(FigureFactory):
         fig.add_trace(trace)
         fig.update_layout(mapbox_accesstoken=mapbox_access_token)
         return fig
-        # basefig = LandmarksFigureFactory().plot_map() if basefig is None else basefig
-        # return go.Figure(data=fig.data, layout=basefig.layout)
 
 
 
@@ -775,17 +1096,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
         fig_choro.update_mapboxes(
             style='light',
-            # layers=[
-            #     {
-            #         "below":"traces",
-            #         "sourcetype": "raster",
-            #         "sourceattribution": "https://warper.wmflabs.org/maps/6050",
-            #         "source": [
-            #             "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
-            #         ],
-            #         "opacity":0.25
-            #     }
-            # ],
             accesstoken=mapbox_access_token,
         )
         
@@ -1065,3 +1375,37 @@ def from_json_gz_str(ojsongzstr):
     obj=pio.from_json(ojsonstr)
     return obj
 
+
+
+def get_selected_records_from_figure_selected_data(selectedData:dict={}):
+    """Get selected records from figure selected data.
+    
+    Args:
+        selectedData (dict, optional): The selected data from the figure. Defaults to {}.
+    
+    Returns:
+        list: The selected records.
+    
+    Examples:
+        >>> selectedData = {'points': [{'label': 'A', 'location': 'NY'}, {'label': 'B', 'location': 'LA'}]}
+        >>> get_selected_records_from_figure_selected_data(selectedData)
+        ['A', 'B']
+    """
+    
+    if not selectedData: return {}
+    
+    points_data = selectedData.get('points',[])
+    if not points_data: return {}
+
+    def get_record_id(d, keys=['label', 'location']):
+        if not d: return None
+        for k in keys:
+            if k in d:
+                return d[k]
+        logger.exception('What is the record id here? --> '+pformat(d))
+    
+    selected_records = qualquant_series(
+        [x for x in [ get_record_id(d) for d in points_data ] if x], 
+        quant=self.quant
+    ).sort_values().tolist()
+    return selected_records

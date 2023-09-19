@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geotaste.views &#8212; Shakespeare and Co Project Lab, Experiment 1: Geography and Taste 0.3.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for geotaste.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.imports</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1">### Views</span>
+
+<div class="viewcode-block" id="ArrondTableView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.ArrondTableView">[docs]</a>
+<span class="k">def</span> <span class="nf">ArrondTableView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">Lstr</span><span class="o">=</span><span class="s1">&#39;Filter 1&#39;</span><span class="p">,</span> <span class="n">Rstr</span><span class="o">=</span><span class="s1">&#39;Filter 2&#39;</span><span class="p">):</span>
+    <span class="n">desc_L</span><span class="p">,</span><span class="n">desc_R</span><span class="p">,</span><span class="n">desc_top</span> <span class="o">=</span> <span class="n">describe_arronds</span><span class="p">(</span><span class="n">ff</span><span class="o">.</span><span class="n">signif_arronds</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="s1">&#39;Data by arrondissement&#39;</span><span class="p">),</span> 
+            <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="n">desc_top</span><span class="p">),</span>
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">([</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="n">desc_L</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;left-color&#39;</span><span class="p">)),</span>
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="n">desc_R</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;right-color&#39;</span><span class="p">))</span>
+            <span class="p">]),</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">table_arrond</span><span class="p">()</span>
+        <span class="p">],</span> 
+        <span class="n">className</span><span class="o">=</span><span class="s1">&#39;graphtab padded&#39;</span><span class="p">,</span> 
+    <span class="p">)</span></div>
+
+
+    
+
+<div class="viewcode-block" id="AnalysisTableView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.AnalysisTableView">[docs]</a>
+<span class="k">def</span> <span class="nf">AnalysisTableView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="s1">&#39;returning view&#39;</span><span class="p">):</span>
+        <span class="n">odf</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">plot_oddsratio_map</span><span class="p">(</span><span class="n">odf</span><span class="p">)</span>
+        <span class="c1"># logger.debug(fig)</span>
+        <span class="n">odf</span><span class="p">[</span><span class="s1">&#39;colpref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">col</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">odf</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;colpref&#39;</span><span class="p">)))</span>
+        <span class="n">ins</span> <span class="o">+=</span> <span class="p">[(</span><span class="s1">&#39;all data&#39;</span><span class="p">,</span><span class="n">odf</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">colpref</span><span class="p">,</span> <span class="n">colpref_df</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ins</span><span class="p">):</span>
+            <span class="n">desc_L</span><span class="p">,</span><span class="n">desc_R</span> <span class="o">=</span> <span class="n">describe_comparison</span><span class="p">(</span><span class="n">colpref_df</span><span class="p">,</span> <span class="n">lim</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">out_col</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="c1"># dbc.Row(html.H4(f&#39;Most distinctive {colpref} features of Filter 1 vs. Filter 2&#39;)),</span>
+                
+                <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">([</span>
+                    <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                        <span class="n">html</span><span class="o">.</span><span class="n">H5</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;10 most distinctive </span><span class="si">{</span><span class="s2">&quot;features&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">colpref</span><span class="o">==</span><span class="s2">&quot;all data&quot;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">colpref</span><span class="o">+</span><span class="s2">&quot;s&quot;</span><span class="si">}</span><span class="s1"> for Filter 1 (&#39;</span><span class="p">,</span> <span class="n">ff</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">filter_desc</span><span class="p">,</span><span class="s1">&#39;)&#39;</span><span class="p">]),</span>
+                        <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc_L</span><span class="p">))</span>
+                    <span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;left-color&#39;</span><span class="p">),</span>
+
+                    <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                        <span class="n">html</span><span class="o">.</span><span class="n">H5</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;10 most distinctive </span><span class="si">{</span><span class="s2">&quot;features&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">colpref</span><span class="o">==</span><span class="s2">&quot;all data&quot;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">colpref</span><span class="o">+</span><span class="s2">&quot;s&quot;</span><span class="si">}</span><span class="s1"> for Filter 2 (&#39;</span><span class="p">,</span> <span class="n">ff</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">filter_desc</span><span class="p">,</span><span class="s1">&#39;)&#39;</span><span class="p">]),</span>
+                        <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc_R</span><span class="p">))</span>
+                    <span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;right-color&#39;</span><span class="p">),</span>
+                <span class="p">])</span>
+            <span class="p">]</span>
+
+            <span class="n">out_col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">get_dash_table</span><span class="p">(</span><span class="n">colpref_df</span><span class="p">)))</span>
+
+            <span class="n">out_tab</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span><span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="n">out_col</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">colpref</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_tab</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">([</span>
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Distinctive arrondissement map&#39;</span><span class="p">)),</span>
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;mini_arrond_analysis_map&#39;</span><span class="p">)),</span>
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Distinctive feature data&#39;</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;distinctive-feature-h4&#39;</span><span class="p">)),</span>
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">dbc</span><span class="o">.</span><span class="n">Tabs</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+        <span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="ArrondTableAndMapView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.ArrondTableAndMapView">[docs]</a>
+<span class="k">def</span> <span class="nf">ArrondTableAndMapView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">Lstr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">Rstr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="n">right_side</span><span class="o">=</span><span class="n">ArrondTableView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span><span class="n">Lstr</span><span class="o">=</span><span class="n">Lstr</span><span class="p">,</span><span class="n">Rstr</span><span class="o">=</span><span class="n">Rstr</span><span class="p">)</span>
+    <span class="n">left_side</span><span class="o">=</span><span class="n">MapView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span><span class="n">choro</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;comparison_map_graph comparison_map_graph_choro&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">([</span><span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">left_side</span><span class="p">),</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">(</span><span class="n">right_side</span><span class="p">)]))</span></div>
+
+
+
+
+
+
+<div class="viewcode-block" id="MemberTableView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.MemberTableView">[docs]</a>
+<span class="k">def</span> <span class="nf">MemberTableView</span><span class="p">(</span><span class="n">ff</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="s1">&#39;Data&#39;</span><span class="p">),</span> 
+                <span class="n">ff</span><span class="o">.</span><span class="n">table</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span><span class="s1">&#39;table&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">html</span><span class="o">.</span><span class="n">P</span><span class="p">(</span><span class="s1">&#39;??&#39;</span><span class="p">)</span>
+            <span class="p">],</span> 
+            <span class="n">className</span><span class="o">=</span><span class="s1">&#39;graphtab padded&#39;</span><span class="p">,</span> 
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="DifferenceDegreeView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.DifferenceDegreeView">[docs]</a>
+<span class="k">def</span> <span class="nf">DifferenceDegreeView</span><span class="p">(</span><span class="n">ff</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="s1">&#39;Degree of difference compared&#39;</span><span class="p">),</span>
+            <span class="n">html</span><span class="o">.</span><span class="n">P</span><span class="p">(</span>
+                <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span>
+                    <span class="n">ff</span><span class="o">.</span><span class="n">desc_table_diff</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">),</span> 
+            <span class="n">ff</span><span class="o">.</span><span class="n">table_diff</span><span class="p">()</span>
+        <span class="p">],</span> 
+        <span class="n">className</span><span class="o">=</span><span class="s1">&#39;graphtab padded&#39;</span><span class="p">,</span> 
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MapView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.MapView">[docs]</a>
+<span class="k">def</span> <span class="nf">MapView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">choro</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;comparison_map_graph&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">ofig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">choro</span><span class="o">=</span><span class="n">choro</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">ofig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">autosize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ograph</span> <span class="o">=</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span>
+        <span class="n">figure</span><span class="o">=</span><span class="n">ofig</span><span class="p">,</span> 
+        <span class="n">className</span><span class="o">=</span><span class="n">className</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;displayModeBar&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="n">ograph</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;graphtab&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;map_view&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TableView">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.TableView">[docs]</a>
+<span class="k">def</span> <span class="nf">TableView</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ff</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ComparisonFigureFactory</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">AnalysisTableView</span><span class="p">(</span><span class="n">ff</span><span class="p">)</span>
+    
+    <span class="c1"># otherwise</span>
+    <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="n">title</span><span class="p">),</span> 
+            <span class="n">html</span><span class="o">.</span><span class="n">P</span><span class="p">(</span><span class="n">desc</span><span class="p">),</span>
+            <span class="n">ff</span><span class="o">.</span><span class="n">table</span><span class="p">()</span>
+        <span class="p">],</span> 
+        <span class="n">className</span><span class="o">=</span><span class="s1">&#39;table_view_container&#39;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_ff_for_num_filters">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.get_ff_for_num_filters">[docs]</a>
+<span class="k">def</span> <span class="nf">get_ff_for_num_filters</span><span class="p">(</span><span class="n">fdL</span><span class="o">=</span><span class="p">{},</span> <span class="n">fdR</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># get figure factory</span>
+    <span class="n">num_filters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">])</span>
+    <span class="c1"># 3 cases</span>
+    <span class="k">if</span> <span class="n">num_filters</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">LandmarksFigureFactory</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">num_filters</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fdL</span><span class="p">:</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdL</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">LEFT_COLOR</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fdR</span><span class="p">:</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdR</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">RIGHT_COLOR</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">num_filters</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">ComparisonFigureFactory</span><span class="p">(</span><span class="n">fdL</span><span class="p">,</span> <span class="n">fdR</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ff</span></div>
+
+
+<div class="viewcode-block" id="get_mainmap_figdata">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.get_mainmap_figdata">[docs]</a>
+<span class="k">def</span> <span class="nf">get_mainmap_figdata</span><span class="p">(</span><span class="n">fdL</span><span class="o">=</span><span class="p">{},</span> <span class="n">fdR</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">if</span> <span class="n">fdL</span> <span class="ow">or</span> <span class="n">fdR</span><span class="p">:</span>
+        <span class="n">odata</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="n">fdL</span><span class="p">:</span> <span class="n">odata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdL</span><span class="p">)</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">LEFT_COLOR</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fdR</span><span class="p">:</span> <span class="n">odata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdR</span><span class="p">)</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">RIGHT_COLOR</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">odata</span> <span class="o">=</span> <span class="n">LandmarksFigureFactory</span><span class="p">()</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">return</span> <span class="n">odata</span></div>
+
+
+
+<div class="viewcode-block" id="get_cached_fig_or_table">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.get_cached_fig_or_table">[docs]</a>
+<span class="nd">@cache_obj</span><span class="o">.</span><span class="n">memoize</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">get_cached_fig_or_table</span><span class="p">(</span><span class="n">args_id</span><span class="p">):</span>
+    <span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">,</span><span class="n">active_tab</span><span class="p">,</span><span class="n">analysis_tab</span><span class="o">=</span><span class="n">unserialize</span><span class="p">(</span><span class="n">args_id</span><span class="p">)</span>
+    <span class="n">ff</span><span class="o">=</span><span class="n">get_ff_for_num_filters</span><span class="p">(</span><span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">([</span><span class="n">args_id</span><span class="p">,</span><span class="n">ff</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">active_tab</span><span class="o">==</span><span class="s1">&#39;map&#39;</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">ff</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pcols</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">PREDICT_COLS</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">analysis_tab</span><span class="p">)]</span> <span class="k">if</span> <span class="n">analysis_tab</span> <span class="k">else</span> <span class="n">PREDICT_COLS</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">ff</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="n">pcols</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">to_json_gz_str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_json_gz_str">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.to_json_gz_str">[docs]</a>
+<span class="k">def</span> <span class="nf">to_json_gz_str</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+    <span class="n">ojson</span><span class="o">=</span><span class="n">pio</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">ojsongz</span><span class="o">=</span><span class="n">b64encode</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">ojson</span><span class="o">.</span><span class="n">encode</span><span class="p">()))</span>
+    <span class="n">ojsongzstr</span><span class="o">=</span><span class="n">ojsongz</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ojsongzstr</span></div>
+
+
+<div class="viewcode-block" id="from_json_gz_str">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.views.from_json_gz_str">[docs]</a>
+<span class="k">def</span> <span class="nf">from_json_gz_str</span><span class="p">(</span><span class="n">ojsongzstr</span><span class="p">):</span>
+    <span class="n">ojsongz</span><span class="o">=</span><span class="n">b64decode</span><span class="p">(</span><span class="n">ojsongzstr</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+    <span class="n">ojson</span><span class="o">=</span><span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">ojsongz</span><span class="p">)</span>
+    <span class="n">ojsonstr</span><span class="o">=</span><span class="n">ojson</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="n">obj</span><span class="o">=</span><span class="n">pio</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">ojsonstr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<span class="c1"># @cache</span>
+<span class="c1"># def get_server_cached_view(args_id):</span>
+<span class="c1">#     fdL,fdR,active_tab=unserialize(args_id)</span>
+<span class="c1">#     ff = get_ff_for_num_filters(fdL,fdR)</span>
+<span class="c1">#     if active_tab==&#39;map&#39;:</span>
+<span class="c1">#         return MapView(ff)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         return TableView(ff)</span>
+    
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Shakespeare and Co Project Lab, Experiment 1: Geography and Taste</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Ryan Heuser and Josh Kotin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

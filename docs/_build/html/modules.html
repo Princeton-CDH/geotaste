@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>geotaste &#8212; Shakespeare and Co Project Lab 0.3.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <script src="_static/documentation_options.js?v=ba50482b"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="geotaste package" href="geotaste.html" />
+    <link rel="prev" title="Welcome to geotaste’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="geotaste">
+<h1>geotaste<a class="headerlink" href="#geotaste" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="geotaste.html">geotaste package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.app">geotaste.app module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.app.get_app"><code class="docutils literal notranslate"><span class="pre">get_app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.app.get_server"><code class="docutils literal notranslate"><span class="pre">get_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.app.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.app.run_debug"><code class="docutils literal notranslate"><span class="pre">run_debug()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.app.run_safe"><code class="docutils literal notranslate"><span class="pre">run_safe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.components">geotaste.components module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorGenderCard"><code class="docutils literal notranslate"><span class="pre">AuthorGenderCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorGenderCard.desc"><code class="docutils literal notranslate"><span class="pre">AuthorGenderCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorGenderCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">AuthorGenderCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNameCard"><code class="docutils literal notranslate"><span class="pre">AuthorNameCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNameCard.desc"><code class="docutils literal notranslate"><span class="pre">AuthorNameCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNameCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">AuthorNameCard.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNameCard.placeholder"><code class="docutils literal notranslate"><span class="pre">AuthorNameCard.placeholder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNationalityCard"><code class="docutils literal notranslate"><span class="pre">AuthorNationalityCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNationalityCard.desc"><code class="docutils literal notranslate"><span class="pre">AuthorNationalityCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.AuthorNationalityCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">AuthorNationalityCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent"><code class="docutils literal notranslate"><span class="pre">BaseComponent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.cards_with_attr"><code class="docutils literal notranslate"><span class="pre">BaseComponent.cards_with_attr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.content"><code class="docutils literal notranslate"><span class="pre">BaseComponent.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.get_content"><code class="docutils literal notranslate"><span class="pre">BaseComponent.get_content()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.graph_subcomponents"><code class="docutils literal notranslate"><span class="pre">BaseComponent.graph_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.layout"><code class="docutils literal notranslate"><span class="pre">BaseComponent.layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.name"><code class="docutils literal notranslate"><span class="pre">BaseComponent.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.store_panel_subcomponents"><code class="docutils literal notranslate"><span class="pre">BaseComponent.store_panel_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.store_subcomponents"><code class="docutils literal notranslate"><span class="pre">BaseComponent.store_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BaseComponent.subcomponents"><code class="docutils literal notranslate"><span class="pre">BaseComponent.subcomponents</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.BookGenreCard"><code class="docutils literal notranslate"><span class="pre">BookGenreCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookGenreCard.desc"><code class="docutils literal notranslate"><span class="pre">BookGenreCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookGenreCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">BookGenreCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.BookTitleCard"><code class="docutils literal notranslate"><span class="pre">BookTitleCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookTitleCard.desc"><code class="docutils literal notranslate"><span class="pre">BookTitleCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookTitleCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">BookTitleCard.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookTitleCard.multi"><code class="docutils literal notranslate"><span class="pre">BookTitleCard.multi</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookTitleCard.placeholder"><code class="docutils literal notranslate"><span class="pre">BookTitleCard.placeholder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.BookYearCard"><code class="docutils literal notranslate"><span class="pre">BookYearCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookYearCard.desc"><code class="docutils literal notranslate"><span class="pre">BookYearCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.BookYearCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">BookYearCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.EventMonthCard"><code class="docutils literal notranslate"><span class="pre">EventMonthCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.EventMonthCard.desc"><code class="docutils literal notranslate"><span class="pre">EventMonthCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.EventMonthCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">EventMonthCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.EventTypeCard"><code class="docutils literal notranslate"><span class="pre">EventTypeCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.EventTypeCard.desc"><code class="docutils literal notranslate"><span class="pre">EventTypeCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.EventTypeCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">EventTypeCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.EventYearCard"><code class="docutils literal notranslate"><span class="pre">EventYearCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.EventYearCard.desc"><code class="docutils literal notranslate"><span class="pre">EventYearCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.EventYearCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">EventYearCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard"><code class="docutils literal notranslate"><span class="pre">FilterCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.body"><code class="docutils literal notranslate"><span class="pre">FilterCard.body</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.body_is_open"><code class="docutils literal notranslate"><span class="pre">FilterCard.body_is_open</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.button_clear"><code class="docutils literal notranslate"><span class="pre">FilterCard.button_clear</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.className"><code class="docutils literal notranslate"><span class="pre">FilterCard.className</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.component_callbacks"><code class="docutils literal notranslate"><span class="pre">FilterCard.component_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.describe_filters"><code class="docutils literal notranslate"><span class="pre">FilterCard.describe_filters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.footer"><code class="docutils literal notranslate"><span class="pre">FilterCard.footer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.header"><code class="docutils literal notranslate"><span class="pre">FilterCard.header</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.header_btn"><code class="docutils literal notranslate"><span class="pre">FilterCard.header_btn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.layout"><code class="docutils literal notranslate"><span class="pre">FilterCard.layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.showhide_btn"><code class="docutils literal notranslate"><span class="pre">FilterCard.showhide_btn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.store_desc"><code class="docutils literal notranslate"><span class="pre">FilterCard.store_desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterCard.tooltip"><code class="docutils literal notranslate"><span class="pre">FilterCard.tooltip</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent"><code class="docutils literal notranslate"><span class="pre">FilterComponent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.desc"><code class="docutils literal notranslate"><span class="pre">FilterComponent.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.ff"><code class="docutils literal notranslate"><span class="pre">FilterComponent.ff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.figure_factory"><code class="docutils literal notranslate"><span class="pre">FilterComponent.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.intersect_filters"><code class="docutils literal notranslate"><span class="pre">FilterComponent.intersect_filters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.key"><code class="docutils literal notranslate"><span class="pre">FilterComponent.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.plot"><code class="docutils literal notranslate"><span class="pre">FilterComponent.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.records_name"><code class="docutils literal notranslate"><span class="pre">FilterComponent.records_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.series"><code class="docutils literal notranslate"><span class="pre">FilterComponent.series</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.store"><code class="docutils literal notranslate"><span class="pre">FilterComponent.store</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.store_desc"><code class="docutils literal notranslate"><span class="pre">FilterComponent.store_desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.store_json"><code class="docutils literal notranslate"><span class="pre">FilterComponent.store_json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.store_panel"><code class="docutils literal notranslate"><span class="pre">FilterComponent.store_panel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterComponent.unfiltered"><code class="docutils literal notranslate"><span class="pre">FilterComponent.unfiltered</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard"><code class="docutils literal notranslate"><span class="pre">FilterInputCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.component_callbacks"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.component_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.desc"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.get_content"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.get_content()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.input"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.input</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.multi"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.multi</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.placeholder"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.placeholder</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterInputCard.sort_by_count"><code class="docutils literal notranslate"><span class="pre">FilterInputCard.sort_by_count</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.FilterPlotCard"><code class="docutils literal notranslate"><span class="pre">FilterPlotCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterPlotCard.body_is_open"><code class="docutils literal notranslate"><span class="pre">FilterPlotCard.body_is_open</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterPlotCard.component_callbacks"><code class="docutils literal notranslate"><span class="pre">FilterPlotCard.component_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterPlotCard.content"><code class="docutils literal notranslate"><span class="pre">FilterPlotCard.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterPlotCard.graph"><code class="docutils literal notranslate"><span class="pre">FilterPlotCard.graph</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterPlotCard.plot"><code class="docutils literal notranslate"><span class="pre">FilterPlotCard.plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.body_is_open"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.body_is_open</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.component_callbacks"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.component_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.content"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.describe_filters"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.describe_filters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.graph"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.graph</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.input_btn"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.input_btn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.input_end"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.input_end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.input_start"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.input_start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.maxval"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.maxval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.minval"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.minval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.unfiltered"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.unfiltered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.FilterSliderCard.value"><code class="docutils literal notranslate"><span class="pre">FilterSliderCard.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.MemberArrondCard"><code class="docutils literal notranslate"><span class="pre">MemberArrondCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberArrondCard.desc"><code class="docutils literal notranslate"><span class="pre">MemberArrondCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberArrondCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">MemberArrondCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.MemberDOBCard"><code class="docutils literal notranslate"><span class="pre">MemberDOBCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberDOBCard.desc"><code class="docutils literal notranslate"><span class="pre">MemberDOBCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberDOBCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">MemberDOBCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.MemberGenderCard"><code class="docutils literal notranslate"><span class="pre">MemberGenderCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberGenderCard.desc"><code class="docutils literal notranslate"><span class="pre">MemberGenderCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberGenderCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">MemberGenderCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNameCard"><code class="docutils literal notranslate"><span class="pre">MemberNameCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNameCard.desc"><code class="docutils literal notranslate"><span class="pre">MemberNameCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNameCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">MemberNameCard.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNameCard.placeholder"><code class="docutils literal notranslate"><span class="pre">MemberNameCard.placeholder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNationalityCard"><code class="docutils literal notranslate"><span class="pre">MemberNationalityCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNationalityCard.desc"><code class="docutils literal notranslate"><span class="pre">MemberNationalityCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MemberNationalityCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">MemberNationalityCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.MembershipYearCard"><code class="docutils literal notranslate"><span class="pre">MembershipYearCard</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MembershipYearCard.desc"><code class="docutils literal notranslate"><span class="pre">MembershipYearCard.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.components.MembershipYearCard.figure_factory"><code class="docutils literal notranslate"><span class="pre">MembershipYearCard.figure_factory</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.get_tabs"><code class="docutils literal notranslate"><span class="pre">get_tabs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.get_welcome_modal"><code class="docutils literal notranslate"><span class="pre">get_welcome_modal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.components.tooltip"><code class="docutils literal notranslate"><span class="pre">tooltip()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.datasets">geotaste.datasets module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Books"><code class="docutils literal notranslate"><span class="pre">Books()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset"><code class="docutils literal notranslate"><span class="pre">BooksDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.cols"><code class="docutils literal notranslate"><span class="pre">BooksDataset.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">BooksDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.cols_q"><code class="docutils literal notranslate"><span class="pre">BooksDataset.cols_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.cols_sep"><code class="docutils literal notranslate"><span class="pre">BooksDataset.cols_sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.data"><code class="docutils literal notranslate"><span class="pre">BooksDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.path"><code class="docutils literal notranslate"><span class="pre">BooksDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.BooksDataset.url"><code class="docutils literal notranslate"><span class="pre">BooksDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Combined"><code class="docutils literal notranslate"><span class="pre">Combined()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.CombinedDataset"><code class="docutils literal notranslate"><span class="pre">CombinedDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CombinedDataset.data"><code class="docutils literal notranslate"><span class="pre">CombinedDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CombinedDataset.gen"><code class="docutils literal notranslate"><span class="pre">CombinedDataset.gen()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CombinedDataset.path"><code class="docutils literal notranslate"><span class="pre">CombinedDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CombinedDataset.url"><code class="docutils literal notranslate"><span class="pre">CombinedDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset.cols"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset.cols_sep"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset.cols_sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset.data"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset.path"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.CreatorsDataset.url"><code class="docutils literal notranslate"><span class="pre">CreatorsDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.cols"><code class="docutils literal notranslate"><span class="pre">Dataset.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">Dataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.cols_q"><code class="docutils literal notranslate"><span class="pre">Dataset.cols_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.cols_rename"><code class="docutils literal notranslate"><span class="pre">Dataset.cols_rename</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.cols_sep"><code class="docutils literal notranslate"><span class="pre">Dataset.cols_sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.data"><code class="docutils literal notranslate"><span class="pre">Dataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.fillna"><code class="docutils literal notranslate"><span class="pre">Dataset.fillna</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.filter"><code class="docutils literal notranslate"><span class="pre">Dataset.filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.filter_data"><code class="docutils literal notranslate"><span class="pre">Dataset.filter_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.filter_desc"><code class="docutils literal notranslate"><span class="pre">Dataset.filter_desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.filter_df"><code class="docutils literal notranslate"><span class="pre">Dataset.filter_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.filter_series"><code class="docutils literal notranslate"><span class="pre">Dataset.filter_series()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.id"><code class="docutils literal notranslate"><span class="pre">Dataset.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.path"><code class="docutils literal notranslate"><span class="pre">Dataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.postproc_df"><code class="docutils literal notranslate"><span class="pre">Dataset.postproc_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.read_df"><code class="docutils literal notranslate"><span class="pre">Dataset.read_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.sep"><code class="docutils literal notranslate"><span class="pre">Dataset.sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.series"><code class="docutils literal notranslate"><span class="pre">Dataset.series()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dataset.url"><code class="docutils literal notranslate"><span class="pre">Dataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Dwellings"><code class="docutils literal notranslate"><span class="pre">Dwellings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.cols"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.cols_id"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.cols_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.cols_q"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.cols_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.data"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.get_member"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.get_member()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.path"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.DwellingsDataset.url"><code class="docutils literal notranslate"><span class="pre">DwellingsDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Events"><code class="docutils literal notranslate"><span class="pre">Events()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset"><code class="docutils literal notranslate"><span class="pre">EventsDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset.cols"><code class="docutils literal notranslate"><span class="pre">EventsDataset.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">EventsDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset.cols_sep"><code class="docutils literal notranslate"><span class="pre">EventsDataset.cols_sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset.data"><code class="docutils literal notranslate"><span class="pre">EventsDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset.path"><code class="docutils literal notranslate"><span class="pre">EventsDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.EventsDataset.url"><code class="docutils literal notranslate"><span class="pre">EventsDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Landmarks"><code class="docutils literal notranslate"><span class="pre">Landmarks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.LandmarksDataset"><code class="docutils literal notranslate"><span class="pre">LandmarksDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.LandmarksDataset.cols_q"><code class="docutils literal notranslate"><span class="pre">LandmarksDataset.cols_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.LandmarksDataset.data"><code class="docutils literal notranslate"><span class="pre">LandmarksDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.LandmarksDataset.path"><code class="docutils literal notranslate"><span class="pre">LandmarksDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.LandmarksDataset.url"><code class="docutils literal notranslate"><span class="pre">LandmarksDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.Members"><code class="docutils literal notranslate"><span class="pre">Members()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset"><code class="docutils literal notranslate"><span class="pre">MembersDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.cols"><code class="docutils literal notranslate"><span class="pre">MembersDataset.cols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">MembersDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.cols_q"><code class="docutils literal notranslate"><span class="pre">MembersDataset.cols_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.cols_sep"><code class="docutils literal notranslate"><span class="pre">MembersDataset.cols_sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.data"><code class="docutils literal notranslate"><span class="pre">MembersDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.path"><code class="docutils literal notranslate"><span class="pre">MembersDataset.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.sep"><code class="docutils literal notranslate"><span class="pre">MembersDataset.sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MembersDataset.url"><code class="docutils literal notranslate"><span class="pre">MembersDataset.url</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniBooksDataset"><code class="docutils literal notranslate"><span class="pre">MiniBooksDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniBooksDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">MiniBooksDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniBooksDataset.cols_sep"><code class="docutils literal notranslate"><span class="pre">MiniBooksDataset.cols_sep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniBooksDataset.data"><code class="docutils literal notranslate"><span class="pre">MiniBooksDataset.data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniDwellingsDataset"><code class="docutils literal notranslate"><span class="pre">MiniDwellingsDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniDwellingsDataset.data"><code class="docutils literal notranslate"><span class="pre">MiniDwellingsDataset.data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniEventsDataset"><code class="docutils literal notranslate"><span class="pre">MiniEventsDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniEventsDataset.data"><code class="docutils literal notranslate"><span class="pre">MiniEventsDataset.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniEventsDataset.only_borrows"><code class="docutils literal notranslate"><span class="pre">MiniEventsDataset.only_borrows</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniMembersDataset"><code class="docutils literal notranslate"><span class="pre">MiniMembersDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniMembersDataset.cols_pref"><code class="docutils literal notranslate"><span class="pre">MiniMembersDataset.cols_pref</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.datasets.MiniMembersDataset.data"><code class="docutils literal notranslate"><span class="pre">MiniMembersDataset.data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.determine_arrond"><code class="docutils literal notranslate"><span class="pre">determine_arrond()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.filter_valid_arrond"><code class="docutils literal notranslate"><span class="pre">filter_valid_arrond()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.get_book_id"><code class="docutils literal notranslate"><span class="pre">get_book_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.get_geojson_arrondissement"><code class="docutils literal notranslate"><span class="pre">get_geojson_arrondissement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.get_member_id"><code class="docutils literal notranslate"><span class="pre">get_member_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.hover_tooltip"><code class="docutils literal notranslate"><span class="pre">hover_tooltip()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.is_valid_arrond"><code class="docutils literal notranslate"><span class="pre">is_valid_arrond()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.prune_when_dwelling_matches"><code class="docutils literal notranslate"><span class="pre">prune_when_dwelling_matches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.to_name_id"><code class="docutils literal notranslate"><span class="pre">to_name_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.datasets.to_name_nice"><code class="docutils literal notranslate"><span class="pre">to_name_nice()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.figs">geotaste.figs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorDOBFigure"><code class="docutils literal notranslate"><span class="pre">AuthorDOBFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorDOBFigure.key"><code class="docutils literal notranslate"><span class="pre">AuthorDOBFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorDOBFigure.max_series_val"><code class="docutils literal notranslate"><span class="pre">AuthorDOBFigure.max_series_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorDOBFigure.min_series_val"><code class="docutils literal notranslate"><span class="pre">AuthorDOBFigure.min_series_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorDOBFigure.quant"><code class="docutils literal notranslate"><span class="pre">AuthorDOBFigure.quant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorFigure"><code class="docutils literal notranslate"><span class="pre">AuthorFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorFigure.drop_duplicates"><code class="docutils literal notranslate"><span class="pre">AuthorFigure.drop_duplicates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorFigure.records_name"><code class="docutils literal notranslate"><span class="pre">AuthorFigure.records_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorGenderFigure"><code class="docutils literal notranslate"><span class="pre">AuthorGenderFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorGenderFigure.key"><code class="docutils literal notranslate"><span class="pre">AuthorGenderFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorGenderFigure.quant"><code class="docutils literal notranslate"><span class="pre">AuthorGenderFigure.quant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorGenderFigure.text"><code class="docutils literal notranslate"><span class="pre">AuthorGenderFigure.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorGenderFigure.vertical"><code class="docutils literal notranslate"><span class="pre">AuthorGenderFigure.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorNameFigure"><code class="docutils literal notranslate"><span class="pre">AuthorNameFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorNameFigure.key"><code class="docutils literal notranslate"><span class="pre">AuthorNameFigure.key</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorNationalityFigure"><code class="docutils literal notranslate"><span class="pre">AuthorNationalityFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorNationalityFigure.key"><code class="docutils literal notranslate"><span class="pre">AuthorNationalityFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.AuthorNationalityFigure.quant"><code class="docutils literal notranslate"><span class="pre">AuthorNationalityFigure.quant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.BookFigure"><code class="docutils literal notranslate"><span class="pre">BookFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookFigure.drop_duplicates"><code class="docutils literal notranslate"><span class="pre">BookFigure.drop_duplicates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookFigure.records_name"><code class="docutils literal notranslate"><span class="pre">BookFigure.records_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.BookGenreFigure"><code class="docutils literal notranslate"><span class="pre">BookGenreFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookGenreFigure.key"><code class="docutils literal notranslate"><span class="pre">BookGenreFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookGenreFigure.text"><code class="docutils literal notranslate"><span class="pre">BookGenreFigure.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookGenreFigure.vertical"><code class="docutils literal notranslate"><span class="pre">BookGenreFigure.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.BookTitleFigure"><code class="docutils literal notranslate"><span class="pre">BookTitleFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookTitleFigure.key"><code class="docutils literal notranslate"><span class="pre">BookTitleFigure.key</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.BookYearFigure"><code class="docutils literal notranslate"><span class="pre">BookYearFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookYearFigure.key"><code class="docutils literal notranslate"><span class="pre">BookYearFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookYearFigure.max_series_val"><code class="docutils literal notranslate"><span class="pre">BookYearFigure.max_series_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookYearFigure.min_series_val"><code class="docutils literal notranslate"><span class="pre">BookYearFigure.min_series_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.BookYearFigure.quant"><code class="docutils literal notranslate"><span class="pre">BookYearFigure.quant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.arrond_counts"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.arrond_counts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.arrond_percs"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.arrond_percs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.arronds"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.arronds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.book_filters_exist"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.book_filters_exist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.cols_table"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.cols_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.df_dwellings"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.df_dwellings</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.df_members"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.df_members</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.plot_map"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.plot_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.table"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.table_members"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.table_members()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.CombinedFigureFactory.valid_arronds"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory.valid_arronds</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.cols_table"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.cols_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.compare"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.compare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.desc_table_diff"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.desc_table_diff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.describe_comparison"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.describe_comparison()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.df_arronds"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.df_arronds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.df_dwellings"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.df_dwellings</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.df_members"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.df_members</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.diffdb"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.diffdb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.diffkeys"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.diffkeys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.get_diffs"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.get_diffs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.indiv_ff"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.indiv_ff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.measure_diff"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.measure_diff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.plot_oddsratio_map"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.plot_oddsratio_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.rank_diff"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.rank_diff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.table"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.table_arrond"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.table_arrond()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.table_content"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.table_content()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.table_diff"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.table_diff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.ComparisonFigureFactory.table_members"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory.table_members()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.EventFigure"><code class="docutils literal notranslate"><span class="pre">EventFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventFigure.drop_duplicates"><code class="docutils literal notranslate"><span class="pre">EventFigure.drop_duplicates</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.EventMonthFigure"><code class="docutils literal notranslate"><span class="pre">EventMonthFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventMonthFigure.key"><code class="docutils literal notranslate"><span class="pre">EventMonthFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventMonthFigure.quant"><code class="docutils literal notranslate"><span class="pre">EventMonthFigure.quant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.EventTypeFigure"><code class="docutils literal notranslate"><span class="pre">EventTypeFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventTypeFigure.key"><code class="docutils literal notranslate"><span class="pre">EventTypeFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventTypeFigure.quant"><code class="docutils literal notranslate"><span class="pre">EventTypeFigure.quant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventTypeFigure.vertical"><code class="docutils literal notranslate"><span class="pre">EventTypeFigure.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.EventYearFigure"><code class="docutils literal notranslate"><span class="pre">EventYearFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventYearFigure.key"><code class="docutils literal notranslate"><span class="pre">EventYearFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.EventYearFigure.quant"><code class="docutils literal notranslate"><span class="pre">EventYearFigure.quant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory"><code class="docutils literal notranslate"><span class="pre">FigureFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.color"><code class="docutils literal notranslate"><span class="pre">FigureFactory.color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.data"><code class="docutils literal notranslate"><span class="pre">FigureFactory.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.data_orig"><code class="docutils literal notranslate"><span class="pre">FigureFactory.data_orig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.dataset"><code class="docutils literal notranslate"><span class="pre">FigureFactory.dataset</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.dataset_class"><code class="docutils literal notranslate"><span class="pre">FigureFactory.dataset_class()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.df_counts"><code class="docutils literal notranslate"><span class="pre">FigureFactory.df_counts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.df_selections"><code class="docutils literal notranslate"><span class="pre">FigureFactory.df_selections</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.drop_duplicates"><code class="docutils literal notranslate"><span class="pre">FigureFactory.drop_duplicates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.filter_desc"><code class="docutils literal notranslate"><span class="pre">FigureFactory.filter_desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.filtered"><code class="docutils literal notranslate"><span class="pre">FigureFactory.filtered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.get_selected"><code class="docutils literal notranslate"><span class="pre">FigureFactory.get_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.get_series"><code class="docutils literal notranslate"><span class="pre">FigureFactory.get_series()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.get_unique_vals"><code class="docutils literal notranslate"><span class="pre">FigureFactory.get_unique_vals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.has_selected"><code class="docutils literal notranslate"><span class="pre">FigureFactory.has_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.height"><code class="docutils literal notranslate"><span class="pre">FigureFactory.height</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.keep_missing_types"><code class="docutils literal notranslate"><span class="pre">FigureFactory.keep_missing_types</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.key"><code class="docutils literal notranslate"><span class="pre">FigureFactory.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.log_x"><code class="docutils literal notranslate"><span class="pre">FigureFactory.log_x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.log_y"><code class="docutils literal notranslate"><span class="pre">FigureFactory.log_y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.max_series_val"><code class="docutils literal notranslate"><span class="pre">FigureFactory.max_series_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.maxval"><code class="docutils literal notranslate"><span class="pre">FigureFactory.maxval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.maxval_q"><code class="docutils literal notranslate"><span class="pre">FigureFactory.maxval_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.min_series_val"><code class="docutils literal notranslate"><span class="pre">FigureFactory.min_series_val</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.minval"><code class="docutils literal notranslate"><span class="pre">FigureFactory.minval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.minval_q"><code class="docutils literal notranslate"><span class="pre">FigureFactory.minval_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.opts_xaxis"><code class="docutils literal notranslate"><span class="pre">FigureFactory.opts_xaxis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.opts_yaxis"><code class="docutils literal notranslate"><span class="pre">FigureFactory.opts_yaxis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.plot"><code class="docutils literal notranslate"><span class="pre">FigureFactory.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.plot_histogram"><code class="docutils literal notranslate"><span class="pre">FigureFactory.plot_histogram()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.quant"><code class="docutils literal notranslate"><span class="pre">FigureFactory.quant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.records_name"><code class="docutils literal notranslate"><span class="pre">FigureFactory.records_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.records_points_dim"><code class="docutils literal notranslate"><span class="pre">FigureFactory.records_points_dim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.selected_values"><code class="docutils literal notranslate"><span class="pre">FigureFactory.selected_values</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.series"><code class="docutils literal notranslate"><span class="pre">FigureFactory.series</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.series_all"><code class="docutils literal notranslate"><span class="pre">FigureFactory.series_all</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.series_all_q"><code class="docutils literal notranslate"><span class="pre">FigureFactory.series_all_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.series_orig"><code class="docutils literal notranslate"><span class="pre">FigureFactory.series_orig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.series_q"><code class="docutils literal notranslate"><span class="pre">FigureFactory.series_q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.text"><code class="docutils literal notranslate"><span class="pre">FigureFactory.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.FigureFactory.vertical"><code class="docutils literal notranslate"><span class="pre">FigureFactory.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.LandmarksFigureFactory"><code class="docutils literal notranslate"><span class="pre">LandmarksFigureFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.LandmarksFigureFactory.dataset_class"><code class="docutils literal notranslate"><span class="pre">LandmarksFigureFactory.dataset_class()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.LandmarksFigureFactory.plot_map"><code class="docutils literal notranslate"><span class="pre">LandmarksFigureFactory.plot_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.LandmarksFigureFactory.table"><code class="docutils literal notranslate"><span class="pre">LandmarksFigureFactory.table()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberArrondFigure"><code class="docutils literal notranslate"><span class="pre">MemberArrondFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberArrondFigure.df_counts"><code class="docutils literal notranslate"><span class="pre">MemberArrondFigure.df_counts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberArrondFigure.key"><code class="docutils literal notranslate"><span class="pre">MemberArrondFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberArrondFigure.quant"><code class="docutils literal notranslate"><span class="pre">MemberArrondFigure.quant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberArrondFigure.text"><code class="docutils literal notranslate"><span class="pre">MemberArrondFigure.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberArrondFigure.vertical"><code class="docutils literal notranslate"><span class="pre">MemberArrondFigure.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberDOBFigure"><code class="docutils literal notranslate"><span class="pre">MemberDOBFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberDOBFigure.key"><code class="docutils literal notranslate"><span class="pre">MemberDOBFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberDOBFigure.quant"><code class="docutils literal notranslate"><span class="pre">MemberDOBFigure.quant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberFigure"><code class="docutils literal notranslate"><span class="pre">MemberFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberFigure.drop_duplicates"><code class="docutils literal notranslate"><span class="pre">MemberFigure.drop_duplicates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberFigure.records_name"><code class="docutils literal notranslate"><span class="pre">MemberFigure.records_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberGenderFigure"><code class="docutils literal notranslate"><span class="pre">MemberGenderFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberGenderFigure.key"><code class="docutils literal notranslate"><span class="pre">MemberGenderFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberGenderFigure.quant"><code class="docutils literal notranslate"><span class="pre">MemberGenderFigure.quant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberGenderFigure.text"><code class="docutils literal notranslate"><span class="pre">MemberGenderFigure.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberGenderFigure.vertical"><code class="docutils literal notranslate"><span class="pre">MemberGenderFigure.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberNameFigure"><code class="docutils literal notranslate"><span class="pre">MemberNameFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberNameFigure.drop_duplicates"><code class="docutils literal notranslate"><span class="pre">MemberNameFigure.drop_duplicates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberNameFigure.key"><code class="docutils literal notranslate"><span class="pre">MemberNameFigure.key</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberNationalityFigure"><code class="docutils literal notranslate"><span class="pre">MemberNationalityFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberNationalityFigure.key"><code class="docutils literal notranslate"><span class="pre">MemberNationalityFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MemberNationalityFigure.records_name"><code class="docutils literal notranslate"><span class="pre">MemberNationalityFigure.records_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.MembershipYearFigure"><code class="docutils literal notranslate"><span class="pre">MembershipYearFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MembershipYearFigure.key"><code class="docutils literal notranslate"><span class="pre">MembershipYearFigure.key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MembershipYearFigure.quant"><code class="docutils literal notranslate"><span class="pre">MembershipYearFigure.quant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.MembershipYearFigure.records_name"><code class="docutils literal notranslate"><span class="pre">MembershipYearFigure.records_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.NationalityFigure"><code class="docutils literal notranslate"><span class="pre">NationalityFigure</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.NationalityFigure.log_x"><code class="docutils literal notranslate"><span class="pre">NationalityFigure.log_x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.NationalityFigure.records_points_dim"><code class="docutils literal notranslate"><span class="pre">NationalityFigure.records_points_dim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.NationalityFigure.text"><code class="docutils literal notranslate"><span class="pre">NationalityFigure.text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.figs.NationalityFigure.vertical"><code class="docutils literal notranslate"><span class="pre">NationalityFigure.vertical</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.combine_figs"><code class="docutils literal notranslate"><span class="pre">combine_figs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.from_json_gz_str"><code class="docutils literal notranslate"><span class="pre">from_json_gz_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_cached_fig_or_table"><code class="docutils literal notranslate"><span class="pre">get_cached_fig_or_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_color"><code class="docutils literal notranslate"><span class="pre">get_color()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_dash_table"><code class="docutils literal notranslate"><span class="pre">get_dash_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_empty_fig"><code class="docutils literal notranslate"><span class="pre">get_empty_fig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_ff_for_num_filters"><code class="docutils literal notranslate"><span class="pre">get_ff_for_num_filters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_mainmap_figdata"><code class="docutils literal notranslate"><span class="pre">get_mainmap_figdata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.get_selected_records_from_figure_selected_data"><code class="docutils literal notranslate"><span class="pre">get_selected_records_from_figure_selected_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.plot_cache"><code class="docutils literal notranslate"><span class="pre">plot_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.to_json_gz_str"><code class="docutils literal notranslate"><span class="pre">to_json_gz_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.figs.update_fig_mapbox_background"><code class="docutils literal notranslate"><span class="pre">update_fig_mapbox_background()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.geotaste">geotaste.geotaste module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.gui">geotaste.gui module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.gui.browse"><code class="docutils literal notranslate"><span class="pre">browse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.gui.get_app_global"><code class="docutils literal notranslate"><span class="pre">get_app_global()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.gui.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.gui.mainview"><code class="docutils literal notranslate"><span class="pre">mainview()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.gui.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.imports">geotaste.imports module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.imports.read_config_json"><code class="docutils literal notranslate"><span class="pre">read_config_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.layouts">geotaste.layouts module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.layouts.GeotasteLayout"><code class="docutils literal notranslate"><span class="pre">GeotasteLayout</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.layouts.GeotasteLayout.comparison_panel"><code class="docutils literal notranslate"><span class="pre">GeotasteLayout.comparison_panel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.layouts.GeotasteLayout.layout"><code class="docutils literal notranslate"><span class="pre">GeotasteLayout.layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.layouts.GeotasteLayout.logo"><code class="docutils literal notranslate"><span class="pre">GeotasteLayout.logo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.layouts.GeotasteLayout.logo_popup"><code class="docutils literal notranslate"><span class="pre">GeotasteLayout.logo_popup</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.panels">geotaste.panels module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel"><code class="docutils literal notranslate"><span class="pre">BookPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.author_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.author_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.author_gender_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.author_gender_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.author_nationality_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.author_nationality_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.desc"><code class="docutils literal notranslate"><span class="pre">BookPanel.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.event_month_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.event_month_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.event_year_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.event_year_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.figure_factory"><code class="docutils literal notranslate"><span class="pre">BookPanel.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.genre_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.genre_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.graph_subcomponents"><code class="docutils literal notranslate"><span class="pre">BookPanel.graph_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.name"><code class="docutils literal notranslate"><span class="pre">BookPanel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.records_name"><code class="docutils literal notranslate"><span class="pre">BookPanel.records_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.store_subcomponents"><code class="docutils literal notranslate"><span class="pre">BookPanel.store_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.subcomponents"><code class="docutils literal notranslate"><span class="pre">BookPanel.subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.title_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.title_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.BookPanel.year_card"><code class="docutils literal notranslate"><span class="pre">BookPanel.year_card</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel"><code class="docutils literal notranslate"><span class="pre">CombinedPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel.book_panel"><code class="docutils literal notranslate"><span class="pre">CombinedPanel.book_panel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel.cards_with_attr"><code class="docutils literal notranslate"><span class="pre">CombinedPanel.cards_with_attr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel.desc"><code class="docutils literal notranslate"><span class="pre">CombinedPanel.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel.member_panel"><code class="docutils literal notranslate"><span class="pre">CombinedPanel.member_panel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel.name"><code class="docutils literal notranslate"><span class="pre">CombinedPanel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.CombinedPanel.subcomponents"><code class="docutils literal notranslate"><span class="pre">CombinedPanel.subcomponents</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.L"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.L</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.R"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.R</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.component_callbacks"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.component_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.ff"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.ff()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.figure_factory"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.get_mainmap"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.get_mainmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.layout"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.mainmap"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.mainmap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.maintbl"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.maintbl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.maintbl_preface_analysis"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.maintbl_preface_analysis</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.maintbl_preface_analysis_tabs"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.maintbl_preface_analysis_tabs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.maintbl_preface_landmarks"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.maintbl_preface_landmarks</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.maintbl_preface_members"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.maintbl_preface_members</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.mainview"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.mainview</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.mainview_tabs"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.mainview_tabs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.mapview"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.mapview</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.panel_L_col"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.panel_L_col</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.panel_R_col"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.panel_R_col</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.store"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.store</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.store_json"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.store_json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.subcomponents"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.table_json"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.table_json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.ComparisonPanel.tblview"><code class="docutils literal notranslate"><span class="pre">ComparisonPanel.tblview</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.FilterPanel"><code class="docutils literal notranslate"><span class="pre">FilterPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.FilterPanel.component_callbacks"><code class="docutils literal notranslate"><span class="pre">FilterPanel.component_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.FilterPanel.describe_filters"><code class="docutils literal notranslate"><span class="pre">FilterPanel.describe_filters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.FilterPanel.unfiltered"><code class="docutils literal notranslate"><span class="pre">FilterPanel.unfiltered</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.LeftPanel"><code class="docutils literal notranslate"><span class="pre">LeftPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.LeftPanel.L_or_R"><code class="docutils literal notranslate"><span class="pre">LeftPanel.L_or_R</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.LeftPanel.color"><code class="docutils literal notranslate"><span class="pre">LeftPanel.color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.LeftPanel.desc"><code class="docutils literal notranslate"><span class="pre">LeftPanel.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.LeftPanel.name"><code class="docutils literal notranslate"><span class="pre">LeftPanel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.LeftPanel.unfiltered"><code class="docutils literal notranslate"><span class="pre">LeftPanel.unfiltered</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel"><code class="docutils literal notranslate"><span class="pre">MemberPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.arrond_card"><code class="docutils literal notranslate"><span class="pre">MemberPanel.arrond_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.desc"><code class="docutils literal notranslate"><span class="pre">MemberPanel.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.dob_card"><code class="docutils literal notranslate"><span class="pre">MemberPanel.dob_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.figure_factory"><code class="docutils literal notranslate"><span class="pre">MemberPanel.figure_factory</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.gender_card"><code class="docutils literal notranslate"><span class="pre">MemberPanel.gender_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.graph_subcomponents"><code class="docutils literal notranslate"><span class="pre">MemberPanel.graph_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.membership_year_card"><code class="docutils literal notranslate"><span class="pre">MemberPanel.membership_year_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.name"><code class="docutils literal notranslate"><span class="pre">MemberPanel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.name_card"><code class="docutils literal notranslate"><span class="pre">MemberPanel.name_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.nation_card"><code class="docutils literal notranslate"><span class="pre">MemberPanel.nation_card</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.records_name"><code class="docutils literal notranslate"><span class="pre">MemberPanel.records_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.store_subcomponents"><code class="docutils literal notranslate"><span class="pre">MemberPanel.store_subcomponents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.MemberPanel.subcomponents"><code class="docutils literal notranslate"><span class="pre">MemberPanel.subcomponents</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.panels.RightPanel"><code class="docutils literal notranslate"><span class="pre">RightPanel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.RightPanel.L_or_R"><code class="docutils literal notranslate"><span class="pre">RightPanel.L_or_R</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.RightPanel.color"><code class="docutils literal notranslate"><span class="pre">RightPanel.color</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.RightPanel.desc"><code class="docutils literal notranslate"><span class="pre">RightPanel.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.RightPanel.name"><code class="docutils literal notranslate"><span class="pre">RightPanel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.panels.RightPanel.unfiltered"><code class="docutils literal notranslate"><span class="pre">RightPanel.unfiltered</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.queries">geotaste.queries module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.queries.filter_df"><code class="docutils literal notranslate"><span class="pre">filter_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.queries.filter_query_str"><code class="docutils literal notranslate"><span class="pre">filter_query_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.queries.filter_query_str_series"><code class="docutils literal notranslate"><span class="pre">filter_query_str_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.queries.filter_series"><code class="docutils literal notranslate"><span class="pre">filter_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.queries.humancol"><code class="docutils literal notranslate"><span class="pre">humancol()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.statutils">geotaste.statutils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.analyze_contingency_tables"><code class="docutils literal notranslate"><span class="pre">analyze_contingency_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.describe_comparison"><code class="docutils literal notranslate"><span class="pre">describe_comparison()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.filter_signif"><code class="docutils literal notranslate"><span class="pre">filter_signif()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.geodist"><code class="docutils literal notranslate"><span class="pre">geodist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.get_dist_from_SCO"><code class="docutils literal notranslate"><span class="pre">get_dist_from_SCO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.get_distinctive_qual_vals"><code class="docutils literal notranslate"><span class="pre">get_distinctive_qual_vals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.iter_contingency_tables"><code class="docutils literal notranslate"><span class="pre">iter_contingency_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.statutils.table_info"><code class="docutils literal notranslate"><span class="pre">table_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste.utils">geotaste.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.CachedData"><code class="docutils literal notranslate"><span class="pre">CachedData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.utils.CachedData.cache"><code class="docutils literal notranslate"><span class="pre">CachedData.cache()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.Logmaker"><code class="docutils literal notranslate"><span class="pre">Logmaker</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.utils.Logmaker.log"><code class="docutils literal notranslate"><span class="pre">Logmaker.log()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.Logwatch"><code class="docutils literal notranslate"><span class="pre">Logwatch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.utils.Logwatch.desc"><code class="docutils literal notranslate"><span class="pre">Logwatch.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.utils.Logwatch.duration"><code class="docutils literal notranslate"><span class="pre">Logwatch.duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="geotaste.html#geotaste.utils.Logwatch.tdesc"><code class="docutils literal notranslate"><span class="pre">Logwatch.tdesc</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.combine_LR_df"><code class="docutils literal notranslate"><span class="pre">combine_LR_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.concat_LR_df"><code class="docutils literal notranslate"><span class="pre">concat_LR_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.date_fuzzily_follows"><code class="docutils literal notranslate"><span class="pre">date_fuzzily_follows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.date_fuzzily_precedes"><code class="docutils literal notranslate"><span class="pre">date_fuzzily_precedes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.delist_df"><code class="docutils literal notranslate"><span class="pre">delist_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.ensure_dict"><code class="docutils literal notranslate"><span class="pre">ensure_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.ensure_dir"><code class="docutils literal notranslate"><span class="pre">ensure_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.ensure_int"><code class="docutils literal notranslate"><span class="pre">ensure_int()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.find_plural_cols"><code class="docutils literal notranslate"><span class="pre">find_plural_cols()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.first"><code class="docutils literal notranslate"><span class="pre">first()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.flatten_list"><code class="docutils literal notranslate"><span class="pre">flatten_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.flatten_series"><code class="docutils literal notranslate"><span class="pre">flatten_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.force_int"><code class="docutils literal notranslate"><span class="pre">force_int()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.get_date_cmp"><code class="docutils literal notranslate"><span class="pre">get_date_cmp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.hasone"><code class="docutils literal notranslate"><span class="pre">hasone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.ifnanintstr"><code class="docutils literal notranslate"><span class="pre">ifnanintstr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.intersect_filters"><code class="docutils literal notranslate"><span class="pre">intersect_filters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.is_fuzzy_date_seq"><code class="docutils literal notranslate"><span class="pre">is_fuzzy_date_seq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.is_listy"><code class="docutils literal notranslate"><span class="pre">is_listy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.is_numberish"><code class="docutils literal notranslate"><span class="pre">is_numberish()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.is_numeric"><code class="docutils literal notranslate"><span class="pre">is_numeric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.is_range_of_ints"><code class="docutils literal notranslate"><span class="pre">is_range_of_ints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.isin"><code class="docutils literal notranslate"><span class="pre">isin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.isin_or_hasone"><code class="docutils literal notranslate"><span class="pre">isin_or_hasone()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.make_counts_df"><code class="docutils literal notranslate"><span class="pre">make_counts_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.nowstr"><code class="docutils literal notranslate"><span class="pre">nowstr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.ordinal_str"><code class="docutils literal notranslate"><span class="pre">ordinal_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.overlaps"><code class="docutils literal notranslate"><span class="pre">overlaps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.oxfordcomma"><code class="docutils literal notranslate"><span class="pre">oxfordcomma()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.postproc_df"><code class="docutils literal notranslate"><span class="pre">postproc_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.qualquant_series"><code class="docutils literal notranslate"><span class="pre">qualquant_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.selectrename_df"><code class="docutils literal notranslate"><span class="pre">selectrename_df()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.serialize"><code class="docutils literal notranslate"><span class="pre">serialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.to_set"><code class="docutils literal notranslate"><span class="pre">to_set()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.uid"><code class="docutils literal notranslate"><span class="pre">uid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.unserialize"><code class="docutils literal notranslate"><span class="pre">unserialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.wraphtml"><code class="docutils literal notranslate"><span class="pre">wraphtml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geotaste.html#geotaste.utils.wraptxt"><code class="docutils literal notranslate"><span class="pre">wraptxt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#geotaste-views-module">geotaste.views module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html#module-geotaste">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Shakespeare and Co Project Lab</a></h1>
+
+
+
+<p class="blurb">Analytic dashboard application for the Shakespare and Co CDH project</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Princeton-CDH&repo=geotaste&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">geotaste</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geotaste.html">geotaste package</a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div class="powered_by">
+<p>Powered by:</p>
+<a href="http://cdh.princeton.edu/">
+<img src="https://cdh.princeton.edu/static/img/CDH_logo.svg"
+    alt="Center for Digital Humanities @ Princeton" />
+</a>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, CDH @ Princeton University.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

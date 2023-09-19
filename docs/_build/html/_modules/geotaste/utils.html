@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geotaste.utils &#8212; Shakespeare and Co Project Lab 0.3.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for geotaste.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.imports</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="hasone">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.hasone">[docs]</a>
+<span class="k">def</span> <span class="nf">hasone</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if there is at least one common element between two lists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (list): The first list.</span>
+<span class="sd">        y (list): The second list.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if there is at least one common element between the two lists, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&amp;</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="isin">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.isin">[docs]</a>
+<span class="k">def</span> <span class="nf">isin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if an object is present in a given list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): The object to be checked.</span>
+<span class="sd">        y (list): The list in which the object is checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the object is present in the list, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="isin_or_hasone">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.isin_or_hasone">[docs]</a>
+<span class="k">def</span> <span class="nf">isin_or_hasone</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if an object is in a list or has at least one element in a list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): The object to check.</span>
+<span class="sd">        y (list): The list to check against.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the object is in the list or has at least one element in the list, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">y</span><span class="p">):</span> 
+        <span class="n">y</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">list</span><span class="p">,</span><span class="nb">set</span><span class="p">,</span><span class="nb">tuple</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="n">hasone</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">isin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="to_set">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.to_set">[docs]</a>
+<span class="k">def</span> <span class="nf">to_set</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a value to a set.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The value to be converted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A set containing the value `x` if `x` is not a list-like object, otherwise a set containing all the elements of `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">x</span><span class="p">}</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="nb">set</span><span class="p">(</span><span class="n">flatten_list</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+    
+<div class="viewcode-block" id="overlaps">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.overlaps">[docs]</a>
+<span class="k">def</span> <span class="nf">overlaps</span><span class="p">(</span><span class="n">series</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">vals</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if any element in the given series overlaps with the values in</span>
+<span class="sd">    the given list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        series (pandas.Series): The series to check for overlaps.</span>
+<span class="sd">        vals (list): The list of values to check for overlaps with the series.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.Series: A boolean series indicating if each element in the series overlaps with any value in the list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vals_set</span> <span class="o">=</span> <span class="n">to_set</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+    <span class="n">series_set</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">to_set</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">series_set</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">xset</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">xset</span> <span class="o">&amp;</span> <span class="n">vals_set</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="is_numeric">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.is_numeric">[docs]</a>
+<span class="k">def</span> <span class="nf">is_numeric</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if the given object is a numeric value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): The object to be checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the object is a numeric value, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_numberish">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.is_numberish">[docs]</a>
+<span class="k">def</span> <span class="nf">is_numberish</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">is_numeric</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">==</span><span class="nb">str</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="is_listy">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.is_listy">[docs]</a>
+<span class="k">def</span> <span class="nf">is_listy</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if the input object is a list-like object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): The object to be checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the object is a tuple, list, or pandas Series; False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">,</span><span class="nb">list</span><span class="p">,</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ensure_int">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.ensure_int">[docs]</a>
+<span class="k">def</span> <span class="nf">ensure_int</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">Number</span><span class="p">,</span> <span class="n">return_orig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">return_orig</span> <span class="k">else</span> <span class="n">default</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ensure_dict">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.ensure_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">ensure_dict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensures that the input is a dictionary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): The input object to be checked.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The input object as a dictionary, or an empty dictionary if the input is None.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; ensure_dict(None)</span>
+<span class="sd">        {}</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; ensure_dict({&#39;a&#39;: 1, &#39;b&#39;: 2})</span>
+<span class="sd">        {&#39;a&#39;: 1, &#39;b&#39;: 2}</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; ensure_dict([(&#39;a&#39;, 1), (&#39;b&#39;, 2)])</span>
+<span class="sd">        {&#39;a&#39;: 1, &#39;b&#39;: 2}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span> <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_plural_cols">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.find_plural_cols">[docs]</a>
+<span class="k">def</span> <span class="nf">find_plural_cols</span><span class="p">(</span><span class="n">df</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the columns in a pandas DataFrame that contain lists.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): The DataFrame to search for columns with lists.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of column names that contain lists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()])</span></div>
+
+
+<div class="viewcode-block" id="first">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.first">[docs]</a>
+<span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">l</span><span class="p">:</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span><span class="nb">object</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the first element of an iterable object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        l (Iterable): The iterable object, e.g. a list.</span>
+<span class="sd">        default (object, optional): The default value to return if the iterable is empty. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        object: The first element of the iterable, or the default value if the iterable is empty.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span> <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+
+<div class="viewcode-block" id="flatten_list">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.flatten_list">[docs]</a>
+<span class="k">def</span> <span class="nf">flatten_list</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flattens a nested list into a single list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s (Iterable): The input iterable containing nested lists.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A flattened list containing all elements from the input iterable.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; flatten_list([1, 2, [3, 4], [5, [6, 7]]])</span>
+<span class="sd">        [1, 2, 3, 4, 5, 6, 7]</span>
+<span class="sd">    </span>
+<span class="sd">        &gt;&gt;&gt; flatten_list([[1, 2], [3, 4], [5, 6]])</span>
+<span class="sd">        [1, 2, 3, 4, 5, 6]</span>
+<span class="sd">    </span>
+<span class="sd">        &gt;&gt;&gt; flatten_list([1, [2, [3, [4, [5]]]]])</span>
+<span class="sd">        [1, 2, 3, 4, 5]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">l</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">+=</span><span class="n">flatten_list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">l</span><span class="o">+=</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">l</span></div>
+
+
+<div class="viewcode-block" id="flatten_series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.flatten_series">[docs]</a>
+<span class="k">def</span> <span class="nf">flatten_series</span><span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flattens a pandas Series object by converting any nested lists into</span>
+<span class="sd">    individual elements.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s (pd.Series): The pandas Series object to be flattened.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.Series: The flattened pandas Series object.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; s = pd.Series([1, [2, 3], 4])</span>
+<span class="sd">        &gt;&gt;&gt; flatten_series(s)</span>
+<span class="sd">        0    1</span>
+<span class="sd">        1    2</span>
+<span class="sd">        2    3</span>
+<span class="sd">        3    4</span>
+<span class="sd">        dtype: object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">iname</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">s</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">l</span><span class="o">+=</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">xx</span><span class="p">)</span> <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">flatten_list</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">l</span><span class="o">+=</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">x</span><span class="p">)]</span>
+    <span class="n">il</span><span class="p">,</span><span class="n">xl</span><span class="o">=</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">l</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="n">il</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">iname</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_counts_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.make_counts_df">[docs]</a>
+<span class="k">def</span> <span class="nf">make_counts_df</span><span class="p">(</span><span class="n">series</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function takes a pandas Series as input and returns a DataFrame</span>
+<span class="sd">    containing the counts of each unique value in the Series.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - series (pandas Series): </span>
+<span class="sd">        The input Series containing the values to be counted.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - counts_df (pandas DataFrame): </span>
+<span class="sd">        A DataFrame with two columns - `series.name` and &#39;count&#39;. </span>
+<span class="sd">        The `series.name` column contains the unique values from the input Series and bears its name,</span>
+<span class="sd">        and the &#39;count&#39; column contains the corresponding counts.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; series = pd.Series([&#39;apple&#39;, &#39;banana&#39;, &#39;apple&#39;, &#39;orange&#39;, &#39;banana&#39;], name=&#39;fruits&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; make_counts_df(series)</span>
+<span class="sd">         fruits       count</span>
+<span class="sd">    0    apple            2</span>
+<span class="sd">    1   banana            2</span>
+<span class="sd">    2   orange            1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="n">flatten_list</span><span class="p">(</span><span class="n">series</span><span class="p">),</span> 
+            <span class="n">name</span><span class="o">=</span><span class="n">series</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ordinal_str">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.ordinal_str">[docs]</a>
+<span class="k">def</span> <span class="nf">ordinal_str</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive the ordinal numeral string for a given number n.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">d</span><span class="si">}{</span><span class="s1">&#39;tsnrhtdd&#39;</span><span class="p">[(</span><span class="n">n</span><span class="o">//</span><span class="mi">10</span><span class="o">%</span><span class="mi">10</span><span class="o">!=</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">10</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="o">%</span><span class="mi">10</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="force_int">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.force_int">[docs]</a>
+<span class="k">def</span> <span class="nf">force_int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts the input to an integer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: The input value to be converted to an integer.</span>
+<span class="sd">        errors: The value to be returned in case of an error. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The input value converted to an integer if successful, otherwise the specified error value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">errors</span></div>
+
+    
+
+<div class="viewcode-block" id="CachedData">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.CachedData">[docs]</a>
+<span class="k">class</span> <span class="nc">CachedData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for caching data using SqliteDict.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        path_cache (str): The path to the cache file. If not an absolute path, join the path to `PATH_DATA` constant defined elsewhere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">path_cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_DATA</span><span class="p">,</span> <span class="n">path_cache</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="n">path_cache</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path_cache</span><span class="p">)</span> 
+            <span class="k">else</span> <span class="n">path_cache</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="CachedData.cache">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.CachedData.cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tablename</span><span class="o">=</span><span class="s1">&#39;unnamed&#39;</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">autocommit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SqliteDict&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Caches data using SqliteDict.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tablename (str): The name of the table in the cache.</span>
+<span class="sd">            flag (str): The flag indicating the mode of the cache.</span>
+<span class="sd">            autocommit (bool): Whether to automatically commit changes to the cache.</span>
+<span class="sd">            **kwargs: Additional keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            SqliteDict: The SqliteDict object representing the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">SqliteDict</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path_cache</span><span class="p">,</span> 
+            <span class="n">tablename</span><span class="o">=</span><span class="n">tablename</span><span class="p">,</span> 
+            <span class="n">flag</span><span class="o">=</span><span class="n">flag</span><span class="p">,</span>
+            <span class="n">autocommit</span><span class="o">=</span><span class="n">autocommit</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+</div>
+
+    
+<div class="viewcode-block" id="concat_LR_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.concat_LR_df">[docs]</a>
+<span class="k">def</span> <span class="nf">concat_LR_df</span><span class="p">(</span><span class="n">dfL</span><span class="p">,</span> <span class="n">dfR</span><span class="p">,</span> <span class="n">colname</span> <span class="o">=</span> <span class="s1">&#39;L_or_R&#39;</span><span class="p">,</span> <span class="n">colval_L</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">colval_R</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">colval_LR</span><span class="o">=</span><span class="s1">&#39;LR&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+        <span class="n">dfL</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">colname</span><span class="p">:</span><span class="n">colval_L</span><span class="p">}),</span>
+        <span class="n">dfR</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">colname</span><span class="p">:</span><span class="n">colval_R</span><span class="p">})</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="combine_LR_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.combine_LR_df">[docs]</a>
+<span class="k">def</span> <span class="nf">combine_LR_df</span><span class="p">(</span><span class="n">dfL</span><span class="p">,</span> <span class="n">dfR</span><span class="p">,</span> <span class="n">colname</span> <span class="o">=</span> <span class="s1">&#39;L_or_R&#39;</span><span class="p">,</span> <span class="n">colval_L</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">colval_R</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">colval_LR</span><span class="o">=</span><span class="s1">&#39;LR&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dfL (pandas.DataFrame): The left dataframe.</span>
+<span class="sd">        dfR (pandas.DataFrame): The right dataframe.</span>
+<span class="sd">        colname (str, optional): The name of the new column that indicates whether a row belongs to the left dataframe, the right dataframe, or both. Default is &#39;L_or_R&#39;.</span>
+<span class="sd">        colval_L (str, optional): The value in the new column for rows that belong only to the left dataframe. Default is &#39;L&#39;.</span>
+<span class="sd">        colval_R (str, optional): The value in the new column for rows that belong only to the right dataframe. Default is &#39;R&#39;.</span>
+<span class="sd">        colval_LR (str, optional): The value in the new column for rows that belong to both dataframes. Default is &#39;LR&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: The combined dataframe.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># logger.debug([dfL.columns, &#39;dfL cols&#39;])</span>
+    <span class="c1"># logger.debug([dfR.columns, &#39;dfR cols&#39;])</span>
+    <span class="k">assert</span> <span class="n">dfL</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">dfR</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">allL</span><span class="p">,</span> <span class="n">allR</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dfL</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="nb">set</span><span class="p">(</span><span class="n">dfR</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">allR</span><span class="p">)</span>
+    <span class="p">(</span>
+        <span class="n">onlyL</span><span class="p">,</span> 
+        <span class="n">onlyR</span><span class="p">,</span> 
+        <span class="n">both</span><span class="p">,</span>
+        <span class="n">either</span>
+     <span class="p">)</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">allL</span> <span class="o">-</span> <span class="n">allR</span><span class="p">,</span> 
+        <span class="n">allR</span> <span class="o">-</span> <span class="n">allL</span><span class="p">,</span> 
+        <span class="n">allR</span> <span class="o">&amp;</span> <span class="n">allL</span><span class="p">,</span>
+        <span class="n">allR</span> <span class="o">|</span> <span class="n">allL</span>
+     <span class="p">)</span>
+    
+    
+    <span class="c1"># logger.debug([len(allL), len(allR), len(both), len(either), &#39;lens&#39;])</span>
+
+    <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">underdog</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">onlyL</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">onlyR</span><span class="p">:</span> <span class="c1"># nothing distinct</span>
+            <span class="n">o</span><span class="o">=</span><span class="n">colval_LR</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># L is underdog, prefer that</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">allL</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">allR</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">allL</span><span class="p">:</span>
+                    <span class="n">o</span><span class="o">=</span><span class="n">colval_L</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">o</span><span class="o">=</span><span class="n">colval_R</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># R is dog</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">allR</span><span class="p">:</span>
+                    <span class="n">o</span><span class="o">=</span><span class="n">colval_R</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">o</span><span class="o">=</span><span class="n">colval_L</span>
+        
+        <span class="k">return</span> <span class="n">o</span>
+
+    <span class="n">odf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">dfL</span><span class="p">,</span> <span class="n">dfR</span><span class="p">])</span>
+    <span class="n">odf</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">assign</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">odf</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">([</span><span class="n">odf</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s1">&#39;combo cols&#39;</span><span class="p">])</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">([</span><span class="n">odf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;combo index name&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">odf</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="serialize">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.serialize">[docs]</a>
+<span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="n">d</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serializes an object into a JSON-encoded string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        d (dict): The object to be serialized.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A JSON-encoded string that represents the serialized object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="n">orjson</span><span class="o">.</span><span class="n">OPT_SORT_KEYS</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="unserialize">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.unserialize">[docs]</a>
+<span class="k">def</span> <span class="nf">unserialize</span><span class="p">(</span><span class="n">dstr</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deserializes a JSON-encoded string into a python object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dstr (str): The JSON-encoded string to be deserialized.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A object representing the deserialized JSON.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">orjson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">dstr</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="nowstr">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.nowstr">[docs]</a>
+<span class="k">def</span> <span class="nf">nowstr</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the current date and time as a formatted string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A string representing the current date and time in the format &quot;YYYY-MM-DD HH:MM:SS.SSS&quot;.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; nowstr()</span>
+<span class="sd">        &#39;2022-01-01 12:30:45.123&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+    <span class="n">current_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">friendly_string</span> <span class="o">=</span> <span class="n">current_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">friendly_string</span></div>
+
+
+<div class="viewcode-block" id="selectrename_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.selectrename_df">[docs]</a>
+<span class="k">def</span> <span class="nf">selectrename_df</span><span class="p">(</span><span class="n">df</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">col2col</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selects and renames columns in a DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): The DataFrame to select and rename columns from.</span>
+<span class="sd">        col2col (dict): A dictionary mapping old column names to new column names. The keys of the dictionary are the old column names, and the values are the new column names.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: A new DataFrame with selected and renamed columns.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; df = pd.DataFrame({&#39;A&#39;: [1, 2, 3], &#39;B&#39;: [4, 5, 6], &#39;C&#39;: [7, 8, 9]})</span>
+<span class="sd">        &gt;&gt;&gt; col2col = {&#39;A&#39;: &#39;X&#39;, &#39;B&#39;: &#39;Y&#39;}</span>
+<span class="sd">        &gt;&gt;&gt; selectrename_df(df, col2col)</span>
+<span class="sd">           X  Y</span>
+<span class="sd">        0  1  4</span>
+<span class="sd">        1  2  5</span>
+<span class="sd">        2  3  6</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        - If a column in col2col is not present in the DataFrame, it will be ignored.</span>
+<span class="sd">        - If a column in col2col is present in the DataFrame but not specified in col2col, it will be dropped from the resulting DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c2c</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">col2col</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">c2c</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">c2c</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="qualquant_series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.qualquant_series">[docs]</a>
+<span class="k">def</span> <span class="nf">qualquant_series</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">quant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function takes a series as input and converts it into a pandas</span>
+<span class="sd">    Series object if it is not already. If the &#39;quant&#39; parameter is set to</span>
+<span class="sd">    True, it converts the series into numeric values using the &#39;pd.to_numeric&#39;</span>
+<span class="sd">    function with &#39;coerce&#39; error handling. If &#39;quant&#39; is set to False, it fills</span>
+<span class="sd">    any missing values with an empty string and converts the series into a</span>
+<span class="sd">    string representation using the &#39;apply&#39; and &#39;replace&#39; functions.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - series: The input series to be converted. It can be either a pandas Series object or a list-like object.</span>
+<span class="sd">    - quant: A boolean parameter indicating whether to convert the series into numeric values (True) or string representation (False). Default is False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - A pandas Series object with the converted values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">series</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">!=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="k">else</span> <span class="n">series</span>
+    <span class="k">if</span> <span class="n">quant</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span> 
+        <span class="n">series</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">drop_na</span><span class="p">:</span> <span class="n">series</span><span class="o">=</span><span class="n">series</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">quant</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">series</span><span class="o">=</span><span class="n">series</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">drop_empty</span><span class="p">:</span> <span class="n">series</span><span class="o">=</span><span class="n">series</span><span class="p">[</span><span class="n">series</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">series</span></div>
+
+
+<div class="viewcode-block" id="uid">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.uid">[docs]</a>
+<span class="k">def</span> <span class="nf">uid</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a unique identifier (UID) using the shortuuid library.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length (int, optional): The length of the UID to be generated. Defaults to 10.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: A randomly generated unique identifier of the specified length.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; uid()</span>
+<span class="sd">        &#39;2bXw7n3e9R&#39;</span>
+<span class="sd">        &gt;&gt;&gt; uid(8)</span>
+<span class="sd">        &#39;1A7b9C5d&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">shortuuid</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">shortuuid</span><span class="o">.</span><span class="n">ShortUUID</span><span class="p">()</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Logwatch">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.Logwatch">[docs]</a>
+<span class="k">class</span> <span class="nc">Logwatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for monitoring and logging the duration of tasks.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        started (float): The timestamp when the task started.</span>
+<span class="sd">        ended (float): The timestamp when the task ended.</span>
+<span class="sd">        level (str): The logging level for the task. Default is &#39;DEBUG&#39;.</span>
+<span class="sd">        log (Logger): The logger object for logging the task status.</span>
+<span class="sd">        task_name (str): The name of the task being monitored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;DEBUG&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ended</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">=</span><span class="n">level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tdesc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the formatted timespan of the duration.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The formatted timespan of the duration.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; t = tdesc(self)</span>
+<span class="sd">            &gt;&gt;&gt; print(t)</span>
+<span class="sd">            &#39;2 hours 30 minutes&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">format_timespan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the duration of an event.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The duration of the event in seconds.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ended</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a description of the task.</span>
+<span class="sd">        </span>
+<span class="sd">        If the task has both a start time and an end time, it returns a string</span>
+<span class="sd">        indicating the task name and the time it took to complete the task.</span>
+<span class="sd">        </span>
+<span class="sd">        If the task is currently running, it returns a string indicating that</span>
+<span class="sd">        the task is still running.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: A description of the task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ended</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_name</span><span class="si">}</span><span class="s1"> ... </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tdesc</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Task running ...&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_name</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_name</span><span class="si">}</span><span class="s1"> ...&#39;</span>
+        
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Context manager method that is called when entering a &#39;with&#39; statement.</span>
+<span class="sd">        </span>
+<span class="sd">        This method logs the description of the context manager and starts the timer.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+<span class="sd">            with Logwatch():</span>
+<span class="sd">                # code to be executed within the context manager</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Logs the resulting time.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">ended</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Logmaker">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.Logmaker">[docs]</a>
+<span class="k">class</span> <span class="nc">Logmaker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class that provides logging functionality.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        log(*x, level=&#39;debug&#39;, **y): Logs the given message with the specified level.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Logmaker.log">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.Logmaker.log">[docs]</a>
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;debug&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Logs the given message with the specified level.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *x: Variable length argument list of values to be logged.</span>
+<span class="sd">            level (str): The log level to be used. Default is &#39;debug&#39;.</span>
+<span class="sd">            **y: Variable length keyword argument list of additional values to be logged.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">o</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">):</span> <span class="n">name</span><span class="o">+=</span><span class="sa">f</span><span class="s1">&#39; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">nowstr</span><span class="p">()</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">o</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">f</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span><span class="n">level</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">o</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="is_range_of_ints">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.is_range_of_ints">[docs]</a>
+<span class="k">def</span> <span class="nf">is_range_of_ints</span><span class="p">(</span><span class="n">numbers</span><span class="p">:</span><span class="s1">&#39;Iterable&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the given numbers form a range of integers.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        numbers (Iterable): A collection of numbers.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the numbers form a range of integers, False otherwise.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; is_range_of_ints([1, 2, 3, 4, 5])</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; is_range_of_ints([1, 2, 4, 5])</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; is_range_of_ints([1, 2, 3, 3, 4, 5])</span>
+<span class="sd">        False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">l</span> <span class="o">=</span> <span class="n">numbers</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">!=</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">l</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+
+
+<div class="viewcode-block" id="delist_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.delist_df">[docs]</a>
+<span class="k">def</span> <span class="nf">delist_df</span><span class="p">(</span><span class="n">df</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">sep</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a pandas DataFrame (df), iterates through each column, </span>
+<span class="sd">    and applies the function fix to each value in each column. The function </span>
+<span class="sd">    fix turns list-like objects into strings, rounds numeric objects to </span>
+<span class="sd">    two decimal places, and leaves all other types of objects unchanged. </span>
+
+<span class="sd">    If an item in a column is a list-like object, it joins the items in the list</span>
+<span class="sd">    into a string, separated by the provided separator (default is a space). If an </span>
+<span class="sd">    item is a numeric value, it rounds the number to two decimal places.</span>
+<span class="sd">    The function returns a new DataFrame. The original DataFrame remains unchanged.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The DataFrame to process.</span>
+<span class="sd">        sep (str, optional): The separator to use when joining list-like objects into strings.</span>
+<span class="sd">                             Default is a space.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: The processed DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">fix</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">y</span><span class="p">):</span> <span class="k">return</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_numeric</span><span class="p">(</span><span class="n">y</span><span class="p">):</span> <span class="n">y</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+
+<div class="viewcode-block" id="oxfordcomma">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.oxfordcomma">[docs]</a>
+<span class="k">def</span> <span class="nf">oxfordcomma</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="nb">repr</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="s1">&#39;and&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">l</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+    
+
+
+<div class="viewcode-block" id="wraptxt">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.wraptxt">[docs]</a>
+<span class="k">def</span> <span class="nf">wraptxt</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">newline_char</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">    s (str): String to be wrapped.</span>
+<span class="sd">    n (int): Number of characters after which the string should be wrapped.</span>
+<span class="sd">    newline_char (str): The character to be inserted at the end of each wrapped line. Default is &#39;\n&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    str: The wrapped string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_line</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_line</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">current_line</span> <span class="o">=</span> <span class="n">word</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_line</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">word</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">newline_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wraphtml">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.wraphtml">[docs]</a>
+<span class="k">def</span> <span class="nf">wraphtml</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">xn</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span> <span class="k">return</span> <span class="n">wraptxt</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ensure_int</span><span class="p">(</span><span class="n">xn</span><span class="p">),</span> <span class="s1">&#39;&lt;br&gt;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="ifnanintstr">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.ifnanintstr">[docs]</a>
+<span class="k">def</span> <span class="nf">ifnanintstr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ensure_int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">y</span></div>
+
+
+
+
+<div class="viewcode-block" id="intersect_filters">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.intersect_filters">[docs]</a>
+<span class="k">def</span> <span class="nf">intersect_filters</span><span class="p">(</span><span class="n">filters_d</span><span class="p">):</span>
+    <span class="c1"># logger.trace(f&#39;intersecting {len(filters_d)} filters&#39;)</span>
+    <span class="n">filters_d</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">filters_d</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span><span class="n">v</span> 
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">filters_d</span> 
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="postproc_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.postproc_df">[docs]</a>
+<span class="k">def</span> <span class="nf">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> 
+        <span class="n">cols</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># or dict to rename</span>
+        <span class="n">cols_sep</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">cols_q</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">cols_pref</span><span class="o">=</span><span class="p">[],</span> 
+        <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span>
+        <span class="n">fillna</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+        
+    <span class="c1"># sep?</span>
+    <span class="n">cols_qset</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">cols_q</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols_sep</span><span class="p">:</span> 
+        <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="n">y</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cols_qset</span>
+                    <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span>
+                        <span class="n">y</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                        <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+    
+    <span class="c1"># rename?</span>
+    <span class="k">if</span> <span class="n">cols</span><span class="p">:</span> 
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span> <span class="k">if</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="k">else</span> <span class="n">selectrename_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span>
+    
+    <span class="c1"># quantize?</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols_q</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols_sep</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+
+    <span class="c1"># prefcols</span>
+    <span class="k">if</span> <span class="n">cols_pref</span><span class="p">:</span>
+        <span class="n">cl1</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols_pref</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span> 
+        <span class="n">cl2</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols_pref</span><span class="p">)]</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">cl1</span><span class="o">+</span><span class="n">cl2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">fillna</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">fillna</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="get_date_cmp">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.get_date_cmp">[docs]</a>
+<span class="k">def</span> <span class="nf">get_date_cmp</span><span class="p">(</span><span class="o">*</span><span class="n">l</span><span class="p">):</span>
+    <span class="n">l</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
+    <span class="n">minlen</span><span class="o">=</span><span class="nb">min</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">[:</span><span class="n">minlen</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="date_fuzzily_precedes">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.date_fuzzily_precedes">[docs]</a>
+<span class="k">def</span> <span class="nf">date_fuzzily_precedes</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="n">x2</span><span class="p">,</span><span class="n">y2</span><span class="o">=</span><span class="n">get_date_cmp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x2</span><span class="o">&lt;</span><span class="n">y2</span></div>
+
+
+<div class="viewcode-block" id="date_fuzzily_follows">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.date_fuzzily_follows">[docs]</a>
+<span class="k">def</span> <span class="nf">date_fuzzily_follows</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="n">x2</span><span class="p">,</span><span class="n">y2</span><span class="o">=</span><span class="n">get_date_cmp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>    
+    <span class="k">return</span> <span class="n">x2</span><span class="o">&gt;</span><span class="n">y2</span></div>
+
+
+
+
+<div class="viewcode-block" id="is_fuzzy_date_seq">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.is_fuzzy_date_seq">[docs]</a>
+<span class="k">def</span> <span class="nf">is_fuzzy_date_seq</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">_</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]):</span> <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="o">=</span><span class="n">get_date_cmp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">&lt;=</span><span class="n">y</span><span class="o">&lt;=</span><span class="n">z</span></div>
+
+
+
+<div class="viewcode-block" id="ensure_dir">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.utils.ensure_dir">[docs]</a>
+<span class="k">def</span> <span class="nf">ensure_dir</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="n">dirname</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Shakespeare and Co Project Lab</a></h1>
+
+
+
+<p class="blurb">Analytic dashboard application for the Shakespare and Co CDH project</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Princeton-CDH&repo=geotaste&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div class="powered_by">
+<p>Powered by:</p>
+<a href="http://cdh.princeton.edu/">
+<img src="https://cdh.princeton.edu/static/img/CDH_logo.svg"
+    alt="Center for Digital Humanities @ Princeton" />
+</a>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, CDH @ Princeton University.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geotaste.datasets &#8212; Shakespeare and Co Project Lab 0.3.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for geotaste.datasets</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.imports</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1">## base DATASET class</span>
+<div class="viewcode-block" id="Dataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset">[docs]</a>
+<span class="k">class</span> <span class="nc">Dataset</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">path</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">cols</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cols_sep</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cols_rename</span><span class="p">:</span><span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">sep</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;;&#39;</span>
+    <span class="n">fillna</span><span class="p">:</span><span class="nb">object</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">cols_q</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">filter_data</span><span class="p">:</span><span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">cols_pref</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">path</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">=</span><span class="n">path</span>
+        <span class="k">if</span> <span class="n">cols</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="o">=</span><span class="n">cols</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Dataset.read_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset.read_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="c1"># assert path string exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+                <span class="c1"># download and save</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+                <span class="c1"># make dir if not exists</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+                <span class="c1"># save csv</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># return loaded df</span>
+                <span class="k">return</span> <span class="n">df</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Neither URL nor path&#39;</span><span class="p">)</span>
+        <span class="c1"># read from saved file</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">on_bad_lines</span><span class="o">=</span><span class="s1">&#39;warn&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+    
+<div class="viewcode-block" id="Dataset.postproc_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset.postproc_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">postproc_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">df</span> <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">,</span>    
+            <span class="n">cols_rename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_rename</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+        <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">read_df</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_rename</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols_rename</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span>
+            <span class="n">cols_sep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_sep</span><span class="p">,</span>
+            <span class="n">cols_q</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_q</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span>
+            <span class="n">fillna</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fillna</span>
+        <span class="p">)</span>
+    
+<div class="viewcode-block" id="Dataset.filter">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset.filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_data</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">other_filter_data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">intersect_filters</span><span class="p">(</span><span class="o">*</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_series</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">vals</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">vals</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">filter_data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">other_filter_data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="p">])</span></div>
+
+    
+<div class="viewcode-block" id="Dataset.filter_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset.filter_df">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_data</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="c1"># if not filter_data: filter_data=self.filter_data</span>
+        <span class="k">return</span> <span class="n">filter_df</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">filter_data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dataset.series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset.series">[docs]</a>
+    <span class="k">def</span> <span class="nf">series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_orig</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Dataset.filter_series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dataset.filter_series">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_series</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">key</span><span class="p">,</span> 
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">[],</span> 
+            <span class="n">test_func</span> <span class="o">=</span> <span class="n">isin_or_hasone</span><span class="p">,</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="p">):</span>
+        
+        <span class="k">return</span> <span class="n">filter_series</span><span class="p">(</span>
+            <span class="n">series</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">key</span><span class="p">),</span>
+            <span class="n">vals</span><span class="o">=</span><span class="n">vals</span><span class="p">,</span>
+            <span class="n">test_func</span><span class="o">=</span><span class="n">test_func</span><span class="p">,</span>
+            <span class="n">series_name</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">matches</span>
+        <span class="p">)</span></div>
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">filter_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">filter_query_str</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span><span class="p">,</span>
+            <span class="n">human</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+    
+    
+
+<span class="c1">### LANDMARKS</span>
+
+<div class="viewcode-block" id="LandmarksDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.LandmarksDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">LandmarksDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;landmarks&#39;</span><span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;landmarks&#39;</span><span class="p">)</span>
+    <span class="n">cols_q</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">]</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">determine_arrond</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">lat</span><span class="p">,</span><span class="n">lon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">lon</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">landmark</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">address</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;Paris &#39;</span><span class="o">+</span><span class="n">row</span><span class="o">.</span><span class="n">arrond_id</span><span class="o">+</span><span class="s1">&#39;ᵉ&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">row</span><span class="o">.</span><span class="n">arrond_id</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;br&gt;&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="Landmarks">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Landmarks">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">Landmarks</span><span class="p">():</span> <span class="k">return</span> <span class="n">LandmarksDataset</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">### MEMBERS</span>
+
+<div class="viewcode-block" id="get_member_id">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.get_member_id">[docs]</a>
+<span class="k">def</span> <span class="nf">get_member_id</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">uri</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/members/&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;/members/&#39;</span> <span class="ow">in</span> <span class="n">uri</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="MembersDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.MembersDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">MembersDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;members&#39;</span><span class="p">)</span>
+    <span class="n">path</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;members&#39;</span><span class="p">)</span>
+    <span class="n">sep</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;;&#39;</span>
+    <span class="n">cols</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;uri&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sort_name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gender&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;is_organization&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;has_card&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;birth_year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;death_year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;membership_years&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;viaf_url&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;wikipedia_url&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nationalities&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;addresses&#39;,</span>
+        <span class="c1"># &#39;postal_codes&#39;,</span>
+        <span class="c1"># &#39;arrondissements&#39;,</span>
+        <span class="c1"># &#39;coordinates&#39;,</span>
+        <span class="s1">&#39;notes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;updated&#39;</span>
+    <span class="p">]</span>
+    <span class="n">cols_sep</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;nationalities&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;membership_years&#39;</span>
+    <span class="p">]</span>
+    <span class="n">cols_q</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;birth_year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;death_year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;membership_years&#39;</span>
+    <span class="p">]</span>
+    <span class="n">cols_pref</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;member&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;member_nicename&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;member&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;uri&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_member_id</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;nice_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;sort_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">to_name_nice</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MiniMembersDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.MiniMembersDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">MiniMembersDataset</span><span class="p">(</span><span class="n">MembersDataset</span><span class="p">):</span>
+    <span class="n">_cols_rename</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;member&#39;</span><span class="p">:</span><span class="s1">&#39;member&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nice_name&#39;</span><span class="p">:</span><span class="s1">&#39;member_name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span><span class="s1">&#39;member_title&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gender&#39;</span><span class="p">:</span><span class="s1">&#39;member_gender&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;membership_years&#39;</span><span class="p">:</span><span class="s1">&#39;member_membership&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;birth_year&#39;</span><span class="p">:</span><span class="s1">&#39;member_dob&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;death_year&#39;</span><span class="p">:</span><span class="s1">&#39;member_dod&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gender&#39;</span><span class="p">:</span><span class="s1">&#39;member_gender&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;nationalities&#39;</span><span class="p">:</span><span class="s1">&#39;member_nationalities&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">cols_pref</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;member&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;member_name&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">odf</span><span class="o">=</span><span class="n">postproc_df</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cols_rename</span><span class="p">,</span> <span class="n">cols_q</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;member_dob&#39;</span><span class="p">,</span> <span class="s1">&#39;member_dod&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">odf</span></div>
+
+    
+<div class="viewcode-block" id="Members">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Members">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">Members</span><span class="p">():</span> <span class="k">return</span> <span class="n">MiniMembersDataset</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">### DWELLINGS   </span>
+
+<div class="viewcode-block" id="DwellingsDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.DwellingsDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">DwellingsDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dwellings&#39;</span><span class="p">)</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dwellings&#39;</span><span class="p">)</span>
+    <span class="n">path</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dwellings&#39;</span><span class="p">)</span>
+    <span class="n">cols</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;member_uri&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;person_id&#39;,</span>
+        <span class="c1"># &#39;account_id&#39;,</span>
+        <span class="c1"># &#39;address_id&#39;,</span>
+        <span class="c1"># &#39;location_id&#39;,</span>
+        <span class="s1">&#39;start_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;end_date&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;start_date_precision&#39;,</span>
+        <span class="c1"># &#39;end_date_precision&#39;,</span>
+        <span class="c1"># &#39;care_of_person_id&#39;,</span>
+        <span class="s1">&#39;street_address&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;city&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;postal_code&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;latitude&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;longitude&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;country_id&#39;,</span>
+        <span class="s1">&#39;arrrondissement&#39;</span>
+    <span class="p">]</span>
+    <span class="c1"># cols_rename:dict = {</span>
+    <span class="c1">#     &#39;start_date&#39;:&#39;dwelling_start_date&#39;,</span>
+    <span class="c1">#     &#39;end_date&#39;:&#39;dwelling_end_date&#39;,</span>
+    <span class="c1"># }</span>
+    <span class="c1"># cols_rename:dict = {</span>
+    <span class="c1">#     &#39;start_date&#39;:&#39;dwelling_start_date&#39;,</span>
+    <span class="c1">#     &#39;end_date&#39;:&#39;dwelling_end_date&#39;,</span>
+    <span class="c1"># }</span>
+    <span class="n">cols_q</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;latitude&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;longitude&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="c1"># cols_id=[&#39;member&#39;,&#39;street_address&#39;,&#39;city&#39;,&#39;postal_code&#39;,&#39;start_date&#39;,&#39;end_date&#39;]</span>
+    <span class="n">cols_id</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;member&#39;</span><span class="p">,</span> <span class="s1">&#39;latitude&#39;</span><span class="p">,</span> <span class="s1">&#39;longitude&#39;</span><span class="p">,</span><span class="s1">&#39;start_date&#39;</span><span class="p">,</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span>
+
+    <span class="n">cols_pref</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;dwelling&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;member&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;arrond_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;street_address&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;city&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;postal_code&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;latitude&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;longitude&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;start_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;end_date&#39;</span>
+    <span class="p">]</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;member&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;member_uri&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_member_id</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_id</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;arrrondissement&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">)</span>
+        
+        
+
+<div class="viewcode-block" id="DwellingsDataset.get_member">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.DwellingsDataset.get_member">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">member</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;member&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">member</span><span class="p">]</span></div>
+</div>
+
+    
+<div class="viewcode-block" id="MiniDwellingsDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.MiniDwellingsDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">MiniDwellingsDataset</span><span class="p">(</span><span class="n">DwellingsDataset</span><span class="p">):</span>
+    <span class="n">_cols_rename</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">member</span><span class="o">=</span><span class="s1">&#39;member&#39;</span><span class="p">,</span>
+        <span class="n">dwelling</span><span class="o">=</span><span class="s1">&#39;dwelling&#39;</span><span class="p">,</span>
+        <span class="n">arrond_id</span><span class="o">=</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="s1">&#39;dwelling_start&#39;</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="s1">&#39;dwelling_end&#39;</span><span class="p">,</span>
+        <span class="n">street_address</span><span class="o">=</span><span class="s1">&#39;dwelling_address&#39;</span><span class="p">,</span>
+        <span class="n">city</span><span class="o">=</span><span class="s1">&#39;dwelling_city&#39;</span><span class="p">,</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cols_rename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Dwellings">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Dwellings">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">Dwellings</span><span class="p">():</span> <span class="k">return</span> <span class="n">MiniDwellingsDataset</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">### BOOKS</span>
+
+<div class="viewcode-block" id="get_book_id">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.get_book_id">[docs]</a>
+<span class="k">def</span> <span class="nf">get_book_id</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">uri</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/books/&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;/books/&#39;</span> <span class="ow">in</span> <span class="n">uri</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="BooksDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.BooksDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">BooksDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;books&#39;</span><span class="p">)</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;books&#39;</span><span class="p">)</span>
+    <span class="n">path</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;books&#39;</span><span class="p">)</span>
+    <span class="n">cols</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;uri&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;genre&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;editor&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;translator&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;introduction&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;illustrator&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;photographer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;format&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;uncertain&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ebook_url&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;volumes_issues&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;notes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;event_count&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;borrow_count&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;purchase_count&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;circulation_years&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;updated&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">cols_sep</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;author&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;editor&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;translator&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;introduction&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;illustrator&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;photographer&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;circulation_years&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;genre&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">cols_q</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;borrow_count&#39;</span><span class="p">,</span> <span class="s1">&#39;purchase_count&#39;</span><span class="p">,</span><span class="s1">&#39;circulation_years&#39;</span><span class="p">]</span>
+    <span class="n">cols_pref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;book&#39;</span><span class="p">,</span><span class="s1">&#39;title&#39;</span><span class="p">,</span><span class="s1">&#39;author&#39;</span><span class="p">,</span><span class="s1">&#39;year&#39;</span><span class="p">,</span><span class="s1">&#39;genre&#39;</span><span class="p">]</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;book&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">uri</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/books/&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;/books/&#39;</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MiniBooksDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.MiniBooksDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">MiniBooksDataset</span><span class="p">(</span><span class="n">BooksDataset</span><span class="p">):</span>
+    <span class="c1">## ONLY AUTHORS</span>
+    <span class="n">_cols_rename</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;book&#39;</span><span class="p">:</span><span class="s1">&#39;book&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author&#39;</span><span class="p">:</span><span class="s1">&#39;author&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author_nice_name&#39;</span><span class="p">:</span><span class="s1">&#39;author_name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span><span class="s1">&#39;book_title&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;year&#39;</span><span class="p">:</span><span class="s1">&#39;book_year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;genre&#39;</span><span class="p">:</span><span class="s1">&#39;book_genre&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;format&#39;</span><span class="p">:</span><span class="s1">&#39;book_format&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;circulation_years&#39;</span><span class="p">:</span><span class="s1">&#39;book_circulated&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;borrow_count&#39;</span><span class="p">:</span><span class="s1">&#39;book_numborrow&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author_birth_date&#39;</span><span class="p">:</span><span class="s1">&#39;author_dob&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author_death_date&#39;</span><span class="p">:</span><span class="s1">&#39;author_dod&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author_gender&#39;</span><span class="p">:</span><span class="s1">&#39;author_gender&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;author_nationalities&#39;</span><span class="p">:</span><span class="s1">&#39;author_nationalities&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">cols_sep</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cols_pref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;book&#39;</span><span class="p">,</span><span class="s1">&#39;author&#39;</span><span class="p">,</span><span class="s1">&#39;author_name&#39;</span><span class="p">,</span><span class="s1">&#39;book_title&#39;</span><span class="p">,</span><span class="s1">&#39;book_year&#39;</span><span class="p">]</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">dfau</span><span class="o">=</span><span class="n">CreatorsDataset</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;creator&#39;</span><span class="p">)</span>
+        <span class="n">ld</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">author</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">author</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">author</span> <span class="k">else</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
+                <span class="n">d</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">aid</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">to_name_id</span><span class="p">(</span><span class="n">author</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dfau</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">aid</span><span class="p">])</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">d</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;author_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">v</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="n">ld</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">odf</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ld</span><span class="p">)</span>
+        <span class="n">odf</span><span class="o">=</span><span class="n">postproc_df</span><span class="p">(</span><span class="n">odf</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cols_rename</span><span class="p">,</span> <span class="n">cols_q</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;author_dob&#39;</span><span class="p">,</span><span class="s1">&#39;author_dod&#39;</span><span class="p">,</span><span class="s1">&#39;book_year&#39;</span><span class="p">,</span><span class="s1">&#39;book_circulated&#39;</span><span class="p">],</span> <span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">)</span>
+        <span class="n">odf</span><span class="p">[</span><span class="s1">&#39;author_nationalities&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">odf</span><span class="p">[</span><span class="s1">&#39;author_nationalities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">else</span> <span class="n">x</span>
+        <span class="p">)</span>
+        <span class="n">odf</span><span class="p">[</span><span class="s1">&#39;author_gender&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">odf</span><span class="p">[</span><span class="s1">&#39;author_gender&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">odf</span><span class="p">[</span><span class="s1">&#39;author_name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">odf</span><span class="p">[</span><span class="s1">&#39;author_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">odf</span></div>
+
+
+<div class="viewcode-block" id="Books">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Books">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">Books</span><span class="p">():</span> <span class="k">return</span> <span class="n">MiniBooksDataset</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">### AUTHORS</span>
+
+<div class="viewcode-block" id="CreatorsDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.CreatorsDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">CreatorsDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;creators&#39;</span><span class="p">)</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;creators&#39;</span><span class="p">)</span>
+    <span class="n">path</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;creators&#39;</span><span class="p">)</span>
+    <span class="n">cols</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># &#39;ID&#39;,</span>
+        <span class="c1"># &#39;name&#39;,</span>
+        <span class="s1">&#39;sort name&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;MEP id&#39;,</span>
+        <span class="c1"># &#39;Account Id&#39;,</span>
+        <span class="c1"># &#39;birth year&#39;,</span>
+        <span class="c1"># &#39;death year&#39;,</span>
+        <span class="c1"># &#39;gender&#39;,</span>
+        <span class="c1"># &#39;title&#39;,</span>
+        <span class="c1"># &#39;profession&#39;,</span>
+        <span class="c1"># &#39;is organization&#39;,</span>
+        <span class="c1"># &#39;Is Creator&#39;,</span>
+        <span class="c1"># &#39;Has Account&#39;,</span>
+        <span class="c1"># &#39;In Logbooks&#39;,</span>
+        <span class="c1"># &#39;Has Card&#39;,</span>
+        <span class="c1"># &#39;Subscription Dates&#39;,</span>
+        <span class="c1"># &#39;verified&#39;,</span>
+        <span class="c1"># &#39;updated at&#39;,</span>
+        <span class="c1"># &#39;Admin Link&#39;,</span>
+        <span class="s1">&#39;VIAF id&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;Key&#39;,</span>
+        <span class="s1">&#39;Gender&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Nationality&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;Language&#39;,</span>
+        <span class="s1">&#39;Birth Date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Death Date&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;LoC Name&#39;,</span>
+        <span class="c1"># &#39;LoC ID&#39;,</span>
+        <span class="c1"># &#39;LoC Source: URL&#39;,</span>
+        <span class="c1"># &#39;LofC URI: URL&#39;,</span>
+        <span class="c1"># &#39;VIAF Source: URL&#39;,</span>
+        <span class="c1"># &#39;BNE Name&#39;,</span>
+        <span class="c1"># &#39;BNE URL&#39;,</span>
+        <span class="c1"># &#39;BNF Name&#39;,</span>
+        <span class="c1"># &#39;BNF URL&#39;,</span>
+        <span class="c1"># &#39;DNB Name&#39;,</span>
+        <span class="c1"># &#39;DNB URL&#39;,</span>
+        <span class="c1"># &#39;ICCU Name&#39;,</span>
+        <span class="c1"># &#39;ICCU URL&#39;,</span>
+        <span class="c1"># &#39;ISNI Name&#39;,</span>
+        <span class="c1"># &#39;ISNI URL&#39;,</span>
+        <span class="s1">&#39;Wikidata URL&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;Wikipedia URL&#39;,</span>
+        <span class="c1"># &#39;WorldCat Identity URL&#39;</span>
+    <span class="p">]</span>
+    <span class="n">cols_pref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;creator&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">,</span><span class="s1">&#39;nationality&#39;</span><span class="p">,</span><span class="s1">&#39;birth_date&#39;</span><span class="p">,</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span>
+    <span class="n">cols_sep</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Nationality&#39;</span><span class="p">]</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;creator&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sort_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">to_name_id</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;nice_name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sort_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">to_name_nice</span><span class="p">)</span>
+        <span class="n">odf</span><span class="o">=</span><span class="n">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">odf</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nationality&#39;</span><span class="p">:</span><span class="s1">&#39;nationalities&#39;</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="to_name_id">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.to_name_id">[docs]</a>
+<span class="k">def</span> <span class="nf">to_name_id</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">x</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">y</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">or</span> <span class="n">y</span><span class="o">==</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="to_name_nice">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.to_name_nice">[docs]</a>
+<span class="k">def</span> <span class="nf">to_name_nice</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span> <span class="k">return</span> <span class="n">x</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ln</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">fn</span><span class="o">=</span><span class="n">b</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">ln</span><span class="si">}</span><span class="s1">&#39;</span></div>
+
+
+
+
+<span class="c1">### EVENTS</span>
+
+<div class="viewcode-block" id="EventsDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.EventsDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">EventsDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;events&#39;</span><span class="p">)</span>
+    <span class="n">url</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;events&#39;</span><span class="p">)</span>
+    <span class="n">path</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;events&#39;</span><span class="p">)</span>
+    <span class="n">cols</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;event_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;start_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;end_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;member_uris&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;member_names&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;member_sort_names&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_price_paid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_deposit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_duration&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_duration_days&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_volumes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_category&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subscription_purchase_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;reimbursement_refund&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;borrow_status&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;borrow_duration_days&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;purchase_price&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;currency&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;item_uri&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;item_title&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;item_volume&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;item_authors&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;item_year&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;item_notes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;source_type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;source_citation&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;source_manifest&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;source_image&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">cols_sep</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;member_uris&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;member_names&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;member_sort_names&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">cols_pref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;E</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">:</span><span class="s1">05</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;start_year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">([</span><span class="n">estr</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span> <span class="k">for</span> <span class="n">estr</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">str</span><span class="p">)],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;start_month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">([</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">7</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;-&#39;</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_pref</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MiniEventsDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.MiniEventsDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">MiniEventsDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">only_borrows</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># disaggregate EventsDataset by member_uris and get books too</span>
+        <span class="n">ld</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">row</span> <span class="ow">in</span> <span class="n">EventsDataset</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">only_borrows</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">event_type</span><span class="o">!=</span><span class="s1">&#39;Borrow&#39;</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">member_uri</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;member_uris&#39;</span><span class="p">]):</span>
+                <span class="n">d</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;event&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">event</span><span class="p">,</span>
+                    <span class="s1">&#39;event_type&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">event_type</span><span class="p">,</span>
+                    <span class="s1">&#39;member&#39;</span><span class="p">:</span><span class="n">get_member_id</span><span class="p">(</span><span class="n">member_uri</span><span class="p">),</span>
+                    <span class="s1">&#39;book&#39;</span><span class="p">:</span><span class="n">get_book_id</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">item_uri</span><span class="p">),</span>
+                    <span class="s1">&#39;event_start&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span>
+                    <span class="s1">&#39;event_end&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span>
+                    <span class="s1">&#39;event_year&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">ifnanintstr</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">start_year</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)),</span>
+                    <span class="s1">&#39;event_month&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">ifnanintstr</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">start_month</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)),</span>
+                <span class="p">}</span>
+                <span class="n">ld</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">dfevents</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ld</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">dfevents</span></div>
+
+
+<div class="viewcode-block" id="Events">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Events">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">Events</span><span class="p">():</span> <span class="k">return</span> <span class="n">MiniEventsDataset</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">### COMBINED</span>
+
+<div class="viewcode-block" id="CombinedDataset">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.CombinedDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">CombinedDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="n">path</span><span class="o">=</span><span class="n">PATHS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;combinedmini&#39;</span><span class="p">)</span>
+    <span class="n">url</span><span class="o">=</span><span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;combinedmini&#39;</span><span class="p">)</span>
+    <span class="n">_cols_sep</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;member_membership&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;member_nationalities&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;book_genre&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;book_circulated&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;author_nationalities&#39;</span>
+    <span class="p">]</span>
+    <span class="n">_cols_q</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;member_dob&#39;</span><span class="p">,</span><span class="s1">&#39;member_dod&#39;</span><span class="p">,</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span><span class="s1">&#39;book_year&#39;</span><span class="p">,</span><span class="s1">&#39;author_dob&#39;</span><span class="p">,</span><span class="s1">&#39;author_dod&#39;</span><span class="p">]</span>
+    <span class="n">_cols_sep_nonan</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;member_membership&#39;</span><span class="p">]</span>
+    <span class="n">_cols_pref</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;member&#39;</span><span class="p">,</span><span class="s1">&#39;event&#39;</span><span class="p">,</span><span class="s1">&#39;dwelling&#39;</span><span class="p">,</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">,</span><span class="s1">&#39;book&#39;</span><span class="p">,</span><span class="s1">&#39;author&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="CombinedDataset.gen">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.CombinedDataset.gen">[docs]</a>
+    <span class="k">def</span> <span class="nf">gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">dfmembers</span> <span class="o">=</span> <span class="n">Members</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">dfbooks</span> <span class="o">=</span> <span class="n">Books</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">dfevents</span> <span class="o">=</span> <span class="n">Events</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">dfdwellings</span> <span class="o">=</span> <span class="n">Dwellings</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+        
+        <span class="c1">## merge!</span>
+        <span class="n">bookevents</span> <span class="o">=</span> <span class="n">dfevents</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dfbooks</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;book&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">)</span>
+        <span class="n">memberdwellings</span> <span class="o">=</span> <span class="n">dfmembers</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dfdwellings</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;member&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">)</span>
+        <span class="n">odf</span> <span class="o">=</span> <span class="n">memberdwellings</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">bookevents</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;member&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># drop dups</span>
+        <span class="n">odf</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">([</span><span class="s1">&#39;member&#39;</span><span class="p">,</span><span class="s1">&#39;event&#39;</span><span class="p">,</span><span class="s1">&#39;book&#39;</span><span class="p">,</span><span class="s1">&#39;dwelling&#39;</span><span class="p">])</span>
+
+        <span class="c1">## clean up</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cols_sep</span><span class="p">:</span> 
+            <span class="n">odf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">=</span><span class="p">[[]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">odf</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cols_q</span><span class="p">:</span>
+            <span class="n">odf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">odf</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cols_sep_nonan</span><span class="p">:</span>
+            <span class="n">odf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">=</span><span class="p">[[</span><span class="n">y</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="ow">and</span> <span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">odf</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+
+        
+        
+        <span class="n">odf</span><span class="p">[</span><span class="s1">&#39;hover_tooltip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">odf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">hover_tooltip</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">odf</span> <span class="o">=</span> <span class="n">prune_when_dwelling_matches</span><span class="p">(</span><span class="n">odf</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span> <span class="n">odf</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">odf</span></div>
+
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="c1"># need to gen?</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;downloading combined dataset from: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+                    <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="s1">&#39;generating combined dataset&#39;</span><span class="p">):</span>
+                    <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gen</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># save</span>
+            <span class="n">ensure_dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;saving combined dataset to: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">postproc_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cols_pref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cols_pref</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="Combined">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.Combined">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">Combined</span><span class="p">():</span> 
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Combined()&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CombinedDataset</span><span class="p">()</span></div>
+
+
+
+
+<span class="c1">### OTHER</span>
+
+<div class="viewcode-block" id="is_valid_arrond">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.is_valid_arrond">[docs]</a>
+<span class="k">def</span> <span class="nf">is_valid_arrond</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">())</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="n">x</span><span class="o">!=</span><span class="s1">&#39;99&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="filter_valid_arrond">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.filter_valid_arrond">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_valid_arrond</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">())</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">!=</span><span class="s1">&#39;99&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_geojson_arrondissement">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.get_geojson_arrondissement">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">get_geojson_arrondissement</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">json</span><span class="o">,</span><span class="nn">requests</span>
+    
+    <span class="c1"># download if nec</span>
+    <span class="n">url</span><span class="o">=</span><span class="n">URLS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;geojson_arrond&#39;</span><span class="p">)</span>
+    <span class="n">fn</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_DATA</span><span class="p">,</span><span class="s1">&#39;arrondissements.geojson&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">force</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span> 
+            <span class="n">of</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="c1"># load        </span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">jsond</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        
+    <span class="c1"># anno</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">jsond</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">]:</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;c_ar&#39;</span><span class="p">])</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">jsond</span></div>
+
+
+<div class="viewcode-block" id="hover_tooltip">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.hover_tooltip">[docs]</a>
+<span class="k">def</span> <span class="nf">hover_tooltip</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;a href=&quot;https://shakespeareandco.princeton.edu/members/</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">member</span><span class="si">}</span><span class="s2">/&quot;&gt;</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">member_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">ifnanintstr</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">member_dob</span><span class="p">)</span><span class="si">}</span><span class="s2"> – </span><span class="si">{</span><span class="n">ifnanintstr</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">member_dod</span><span class="p">)</span><span class="si">}</span><span class="s2">)</span>
+<span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">dwelling_address</span><span class="si">}</span>
+<span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">dwelling_city</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">arrond_id</span><span class="si">}</span><span class="s2">ᵉ</span>
+
+<span class="s2">Member: </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">member_membership</span><span class="p">))</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">row</span><span class="o">.</span><span class="n">member_membership</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2"> – </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">member_membership</span><span class="p">))</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">row</span><span class="o">.</span><span class="n">member_membership</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;br&gt;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="determine_arrond">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.determine_arrond">[docs]</a>
+<span class="k">def</span> <span class="nf">determine_arrond</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">):</span>
+    <span class="c1"># use shapely code</span>
+    <span class="kn">import</span> <span class="nn">shapely.geometry</span> <span class="k">as</span> <span class="nn">geo</span>
+
+    <span class="c1"># get geojson of Paris arrondissement</span>
+    <span class="n">geojson</span> <span class="o">=</span> <span class="n">get_geojson_arrondissement</span><span class="p">()</span>
+
+    <span class="c1"># encode incoming point</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">Point</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+    
+    <span class="c1"># loop through features in geojson and find intersection</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">geojson</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">]:</span> 
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">polygon</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">point</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">feature</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># if none found, return default</span>
+    <span class="k">return</span> <span class="n">default</span></div>
+
+
+<div class="viewcode-block" id="prune_when_dwelling_matches">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.datasets.prune_when_dwelling_matches">[docs]</a>
+<span class="k">def</span> <span class="nf">prune_when_dwelling_matches</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prunes the dataframe based on dwelling matches for events.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): The input dataframe containing event and dwelling information.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: The pruned dataframe with only the rows that have valid dwelling matches.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">df_nonevent</span><span class="p">,</span> <span class="n">df_event</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">event</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">],</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">event</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># anyone&#39;s ok if they&#39;re not an event</span>
+    <span class="n">numpossd</span> <span class="o">=</span> <span class="p">{</span><span class="n">ii</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">}</span>
+    <span class="n">matchtyped</span><span class="o">=</span><span class="p">{</span>
+        <span class="o">**</span><span class="p">{</span><span class="n">ii</span><span class="p">:</span><span class="s1">&#39;NA&#39;</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">df_nonevent</span><span class="o">.</span><span class="n">index</span><span class="p">},</span>
+        <span class="o">**</span><span class="p">{</span><span class="n">ii</span><span class="p">:</span><span class="s1">&#39;?&#39;</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">df_event</span><span class="o">.</span><span class="n">index</span><span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">matchfoundd</span><span class="o">=</span><span class="p">{</span><span class="n">ii</span><span class="p">:</span><span class="kc">None</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">}</span>
+    <span class="n">excludedd</span><span class="o">=</span><span class="p">{</span><span class="n">ii</span><span class="p">:</span><span class="kc">False</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">}</span>
+
+
+    <span class="k">def</span> <span class="nf">declare_impossible</span><span class="p">(</span><span class="n">xdf</span><span class="p">):</span>
+        <span class="c1"># but declare them impossible to match to a dwelling</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">xdf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">matchtyped</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Impossible&#39;</span>
+            <span class="n">numpossd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">matchfoundd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+            <span class="n">excludedd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">declare_exact_match</span><span class="p">(</span><span class="n">xdf</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">xdf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">matchtyped</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Exact&#39;</span>
+            <span class="n">matchfoundd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+            <span class="n">numpossd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">xdf</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">declare_exact_miss</span><span class="p">(</span><span class="n">xdf</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, a certain match was found, with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">xdf</span><span class="p">)</span><span class="si">}</span><span class="s1"> possibilities&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">xdf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> 
+            <span class="n">matchtyped</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Exact (excl.)&#39;</span>
+            <span class="n">excludedd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+            <span class="n">matchfoundd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">declare_ambiguous</span><span class="p">(</span><span class="n">xdf</span><span class="p">,</span> <span class="n">caveats</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">xdf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> 
+            <span class="n">probtype</span> <span class="o">=</span> <span class="s1">&#39;Colens&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">xdf</span><span class="p">[</span><span class="n">xdf</span><span class="o">.</span><span class="n">dwelling_start</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">])</span> <span class="k">else</span> <span class="s1">&#39;Raphael&#39;</span>
+            <span class="n">mt</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Ambiguous (</span><span class="si">{</span><span class="n">probtype</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xdf</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;Singular&#39;</span>
+            <span class="c1"># if caveats: mt+=f&#39; ({&quot;, &quot;.join(caveats)})&#39;</span>
+            <span class="n">matchtyped</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="n">mt</span>
+            <span class="n">matchfoundd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+            <span class="n">numpossd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">xdf</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">find_exact_matches</span><span class="p">(</span><span class="n">xdf</span><span class="p">):</span>
+        <span class="n">erow</span><span class="o">=</span><span class="n">xdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">e1</span><span class="p">,</span><span class="n">e2</span><span class="o">=</span><span class="n">erow</span><span class="o">.</span><span class="n">event_start</span><span class="p">,</span><span class="n">erow</span><span class="o">.</span><span class="n">event_end</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">xdf</span><span class="p">[[</span>
+            <span class="p">(</span><span class="n">is_fuzzy_date_seq</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">e1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_fuzzy_date_seq</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">e2</span><span class="p">,</span><span class="n">d2</span><span class="p">))</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xdf</span><span class="o">.</span><span class="n">dwelling_start</span><span class="p">,</span> <span class="n">xdf</span><span class="o">.</span><span class="n">dwelling_end</span><span class="p">)</span>
+        <span class="p">]]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="p">)</span><span class="si">}</span><span class="s1"> exact matches for </span><span class="si">{</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span><span class="w"> </span><span class="n">e2</span><span class="p">)</span><span class="si">}</span><span class="s1"> with options </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xdf</span><span class="o">.</span><span class="n">dwelling_start</span><span class="p">,</span><span class="w"> </span><span class="n">xdf</span><span class="o">.</span><span class="n">dwelling_end</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">match</span>
+
+    <span class="k">def</span> <span class="nf">declare_heuristic_miss</span><span class="p">(</span><span class="n">xdf</span><span class="p">,</span> <span class="n">htype</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">xdf</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> 
+            <span class="n">matchtyped</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Heuristic (excl.</span><span class="si">{</span><span class="s2">&quot; by &quot;</span><span class="o">+</span><span class="n">htype</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">htype</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="n">matchfoundd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+            <span class="n">excludedd</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+
+
+    
+    <span class="c1"># for every event...</span>
+    <span class="k">for</span> <span class="n">e</span><span class="p">,</span><span class="n">edf</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">df_event</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;event&#39;</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="n">df_event</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Locating events&#39;</span><span class="p">,</span><span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">progress</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;event: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">)</span><span class="si">}</span><span class="s1"> dwelling possibilities&#39;</span><span class="p">)</span>
+        <span class="c1">## if there are no dwellings at all...</span>
+        <span class="n">nadf</span><span class="o">=</span><span class="n">edf</span><span class="p">[</span><span class="n">edf</span><span class="o">.</span><span class="n">dwelling</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="n">declare_impossible</span><span class="p">(</span><span class="n">nadf</span><span class="p">)</span>
+
+        <span class="n">edf</span><span class="o">=</span><span class="n">edf</span><span class="p">[</span><span class="n">edf</span><span class="o">.</span><span class="n">dwelling</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s1">&#39;dwelling&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, no dwelling possibilities because empty dwellings&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+    
+        <span class="c1"># if certainty is possible, i.e. we have dwelling records with start and end dates...</span>
+        <span class="n">edf_certain</span> <span class="o">=</span> <span class="n">edf</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;dwelling_start!=&quot;&quot; &amp; dwelling_end!=&quot;&quot;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf_certain</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, certainty is possible, with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">edf_certain</span><span class="p">)</span><span class="si">}</span><span class="s1"> possibilities&#39;</span><span class="p">)</span>
+            <span class="c1"># is there a match? a point where start or end of event is within range of dwelling start or end?</span>
+            <span class="n">edf_match</span> <span class="o">=</span> <span class="n">find_exact_matches</span><span class="p">(</span><span class="n">edf_certain</span><span class="p">)</span>
+            <span class="c1"># if so, then add indices only for the match, not the other rows</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf_match</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, a certain match was found, with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">edf_match</span><span class="p">)</span><span class="si">}</span><span class="s1"> possibilities&#39;</span><span class="p">)</span>
+                <span class="n">declare_exact_match</span><span class="p">(</span><span class="n">edf_match</span><span class="p">)</span>
+                <span class="n">declare_exact_miss</span><span class="p">(</span><span class="n">edf</span><span class="p">[</span><span class="o">~</span><span class="n">edf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">edf_match</span><span class="o">.</span><span class="n">index</span><span class="p">)])</span>
+                <span class="k">continue</span>
+
+        <span class="c1"># try dispreferred caveats</span>
+        <span class="n">caveats</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">edf0</span> <span class="o">=</span> <span class="n">edf</span>
+        <span class="n">edf</span> <span class="o">=</span> <span class="n">edf</span><span class="p">[</span><span class="o">~</span><span class="n">edf</span><span class="o">.</span><span class="n">dwelling_address</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">DISPREFERRED_ADDRESSES</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, only a dispreferred address remained; allowing&#39;</span><span class="p">)</span>
+            <span class="n">edf</span><span class="o">=</span><span class="n">edf0</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">)</span><span class="o">!=</span><span class="nb">len</span><span class="p">(</span><span class="n">edf0</span><span class="p">):</span>
+            <span class="n">declare_heuristic_miss</span><span class="p">(</span><span class="n">edf0</span><span class="p">[</span><span class="o">~</span><span class="n">edf0</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">edf</span><span class="o">.</span><span class="n">index</span><span class="p">)],</span> <span class="n">htype</span><span class="o">=</span><span class="s1">&#39;dispref&#39;</span><span class="p">)</span>
+            <span class="n">caveats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-dispref&#39;</span><span class="p">)</span>
+
+        <span class="c1"># try distance caveat</span>
+        <span class="n">edf0</span> <span class="o">=</span> <span class="n">edf</span>
+        <span class="n">edf</span> <span class="o">=</span> <span class="n">edf</span><span class="p">[[</span><span class="n">get_dist_from_SCO</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">50</span> <span class="k">for</span> <span class="n">lat</span><span class="p">,</span><span class="n">lon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">edf</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">edf</span><span class="o">.</span><span class="n">lon</span><span class="p">)]]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, only non-Parisian places remaining; allowing&#39;</span><span class="p">)</span>
+            <span class="n">edf</span><span class="o">=</span><span class="n">edf0</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">)</span><span class="o">!=</span><span class="nb">len</span><span class="p">(</span><span class="n">edf0</span><span class="p">):</span>
+            <span class="n">declare_heuristic_miss</span><span class="p">(</span><span class="n">edf0</span><span class="p">[</span><span class="o">~</span><span class="n">edf0</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">edf</span><span class="o">.</span><span class="n">index</span><span class="p">)],</span> <span class="n">htype</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">)</span>
+            <span class="n">caveats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-distance&#39;</span><span class="p">)</span>
+
+        <span class="c1"># otherwise, declare ambiguous?</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;for event </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">, still no matches found. using all </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">edf</span><span class="p">)</span><span class="si">}</span><span class="s1"> possible indices&#39;</span><span class="p">)</span>
+        <span class="n">declare_ambiguous</span><span class="p">(</span><span class="n">edf</span><span class="p">,</span><span class="n">caveats</span><span class="o">=</span><span class="n">caveats</span><span class="p">)</span>
+        
+    <span class="c1"># add to dataframe a few stats on the dwelling matches</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling_matchfound&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matchfoundd</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling_matchtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matchtyped</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling_numposs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpossd</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling_excluded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">excludedd</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling_likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;dwelling_numposs&#39;</span><span class="p">]</span>
+
+    <span class="c1"># return only ok rows</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">dwelling_excluded</span><span class="p">]</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Shakespeare and Co Project Lab</a></h1>
+
+
+
+<p class="blurb">Analytic dashboard application for the Shakespare and Co CDH project</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Princeton-CDH&repo=geotaste&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div class="powered_by">
+<p>Powered by:</p>
+<a href="http://cdh.princeton.edu/">
+<img src="https://cdh.princeton.edu/static/img/CDH_logo.svg"
+    alt="Center for Digital Humanities @ Princeton" />
+</a>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, CDH @ Princeton University.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

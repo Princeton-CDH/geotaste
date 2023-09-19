@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geotaste.figs &#8212; Shakespeare and Co Project Lab 0.3.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for geotaste.figs</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.imports</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">cols_members</span><span class="o">=</span><span class="p">[</span>
+    <span class="s1">&#39;member_name&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;member_dob&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;member_dod&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;member_nationalities&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;member_gender&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;num_borrows&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;dwelling_address&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;member_url&#39;</span>
+<span class="p">]</span>
+
+<span class="n">cols_books</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;author_name&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;book_title&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;book_year&#39;</span><span class="p">,</span>
+    <span class="c1"># &#39;num_borrows_overall&#39;,</span>
+    <span class="c1"># &#39;book_url&#39;</span>
+<span class="p">]</span>
+
+
+<span class="c1">###########</span>
+<span class="c1"># Figures #</span>
+<span class="c1">###########</span>
+
+<div class="viewcode-block" id="FigureFactory">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory">[docs]</a>
+<span class="k">class</span> <span class="nc">FigureFactory</span><span class="p">(</span><span class="n">DashFigureFactory</span><span class="p">,</span> <span class="n">Logmaker</span><span class="p">):</span>
+    <span class="n">records_name</span> <span class="o">=</span> <span class="s1">&#39;records&#39;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">records_points_dim</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
+    <span class="n">dataset_class</span> <span class="o">=</span> <span class="n">Combined</span>
+    <span class="n">drop_duplicates</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">opts_xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">opts_yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">100</span>
+    <span class="n">min_series_val</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">max_series_val</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">color</span><span class="o">=</span><span class="kc">None</span> 
+    <span class="n">keep_missing_types</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">vertical</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">log_x</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">log_y</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">text</span><span class="o">=</span><span class="kc">None</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_data</span><span class="o">=</span><span class="p">{},</span> <span class="n">selected</span><span class="o">=</span><span class="p">[],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;FigureFactory&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an instance of the FigureFactory class.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            filter_data (dict, optional): A dictionary containing filter data. Defaults to an empty dictionary.</span>
+<span class="sd">            selected (list or dict, optional): A list or dictionary containing selected data. Defaults to an empty list.</span>
+<span class="sd">            name (str, optional): The name of the FigureFactory instance. Defaults to &#39;FigureFactory&#39;.</span>
+<span class="sd">            **kwargs: Additional keyword arguments that can be used to set attributes of the FigureFactory instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">filter_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">filter_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span> <span class="o">=</span> <span class="n">filter_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selection_data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">selected</span> 
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span>
+            <span class="k">else</span> <span class="p">(</span>
+                <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="n">selected</span><span class="p">}</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+                <span class="k">else</span> <span class="p">{}</span>
+            <span class="p">)</span> 
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FigureFactory.has_selected">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory.has_selected">[docs]</a>
+    <span class="k">def</span> <span class="nf">has_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if there is any selected data.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if there is selected data, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selection_data</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_values</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FigureFactory.get_selected">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory.get_selected">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selectedData</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The `get_selected` function returns a dictionary containing selected records based on the provided `selectedData` parameter. If `selectedData` is empty or not provided, an empty dictionary is returned.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        - `selectedData` (dict): A dictionary containing selected data. Default is an empty dictionary.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        - dict: A dictionary with one key, `self.key`, and one value, the selected values [val1, val2, ...]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="n">get_selected_records_from_figure_selected_data</span><span class="p">(</span><span class="n">selectedData</span><span class="p">)}</span>    </div>
+
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the dataset if the dataset class is defined, otherwise returns None.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The dataset object if the dataset class is defined, otherwise None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset_class</span><span class="o">.</span><span class="vm">__func__</span><span class="p">()</span> 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> 
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data_orig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the original data frame from the dataset class instance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The original data from the dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span> 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="p">)</span>
+    
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a filtered dataframe based on the original data and filter criteria.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The filtered dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># query</span>
+        <span class="n">odf</span> <span class="o">=</span> <span class="n">filter_df</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_orig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span><span class="p">,</span> <span class="n">return_query</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># drop down to correct size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_duplicates</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">odf</span><span class="p">):</span>
+            <span class="n">odf</span><span class="o">=</span><span class="n">odf</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">odf</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">filter_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filters the description based on the filter data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The filtered query string, in human-readable format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="n">filter_query_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span><span class="p">,</span><span class="n">human</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="FigureFactory.get_unique_vals">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory.get_unique_vals">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_unique_vals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">sort_by_count</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+            <span class="n">series_orig</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a pandas Series containing unique values from the specified series.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            sort_by_count (bool, optional): If True, sort the unique values by their count in descending order. </span>
+<span class="sd">                If False, sort the unique values in ascending order. Defaults to True.</span>
+<span class="sd">            series_orig (bool, optional): If True, use the original series for counting. </span>
+<span class="sd">                If False, use the deduplicated and filtered series. Defaults to True.</span>
+<span class="sd">            **kwargs: Additional keyword arguments to be passed to the `get_series` method.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: A pandas Series containing the unique values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sort_by_count</span><span class="p">:</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">series_orig</span><span class="p">:</span>
+                <span class="c1"># logger.debug(&#39;using original series&#39;)</span>
+                <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">series_orig</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># logger.debug(&#39;using dedup\&#39;d and filtered&#39;)</span>
+                <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">series</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">counts</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span></div>
+
+
+
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">series</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the series from the given dataframe, stored under column `self.key`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Series: The series extracted from the dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">series_orig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the series from the original unfiltered dataframe, stored under column `self.key`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Series: The series extracted from the dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_orig</span><span class="p">)</span>
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">series_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the series from the given dataframe, stored under column `self.key`, in forced quantitative mode.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Series: The series extracted from the dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">quant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">series_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the series from the original unfiltered dataframe, stored under column `self.key`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Series: The series extracted from the dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_orig</span><span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">series_all_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the series from the original unfiltered dataframe, stored under column `self.key`, in forced quantitative mode.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Series: The series extracted from the dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_series</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_orig</span><span class="p">,</span> <span class="n">quant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="FigureFactory.get_series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory.get_series">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quant</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a series from a DataFrame.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            key (str, optional): The column name of the series. If not provided, the default key will be used.</span>
+<span class="sd">            df (pd.DataFrame, optional): The DataFrame from which to extract the series. If not provided, the default DataFrame (`self.data`) will be used.</span>
+<span class="sd">            quant (bool, optional): Whether to apply quantization to the series. If not provided, the default quantization value will be used.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: The extracted series.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span> 
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="n">qualquant_series</span><span class="p">(</span>
+                <span class="n">flatten_series</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span>
+                <span class="n">quant</span><span class="o">=</span><span class="n">quant</span> <span class="k">if</span> <span class="n">quant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">quant</span>
+            <span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s1">&#39;&#39;</span><span class="p">:</span><span class="n">UNKNOWN</span><span class="p">})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_series_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="n">s</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_series_val</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_series_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="n">s</span><span class="o">&lt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_series_val</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+    
+        
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">minval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the minimum value in the series.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The minimum value in the series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">maxval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the maximum value in the series.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The maximum value in the series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">minval_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the minimum value in the quant series.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The minimum quant value in the series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">series_q</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series_q</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">maxval_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the maximum value in the quant series.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The maximum quant value in the series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">series_q</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series_q</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">filtered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the filter_data attribute is not empty.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if filter_data is not empty, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_selections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filters the DataFrame based on the selection data.</span>
+<span class="sd">        </span>
+<span class="sd">            Returns:</span>
+<span class="sd">                pd.DataFrame: The filtered DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection_data</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_counts</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">filter_df</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_counts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selection_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">selected_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a list of selected values from the dataframe.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of selected values from the dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_selections</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_selections</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a DataFrame containing the value counts of the series in the filtered dataframe. If `self.keep_missing_types` is True, then value types not present in the filtered dataframe, but present in the original/unfiltered one, will be added to the returned data frame with a count of 0.</span>
+<span class="sd">        </span>
+<span class="sd">            Returns:</span>
+<span class="sd">                DataFrame: A DataFrame with at least two columns: `self.key` and &#39;count&#39;, where &#39;count&#39; represents the number of instances of the value type in the filterd dataframe `self.data`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">valcounts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_missing_types</span><span class="p">:</span>
+            <span class="n">valtypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">series_all</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">missing_val</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">valtypes</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="n">valcounts</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+                <span class="n">valcounts</span><span class="p">[</span><span class="n">missing_val</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">valcounts</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+
+
+
+
+
+    <span class="c1">## Plotting</span>
+
+<div class="viewcode-block" id="FigureFactory.plot">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots, by default, a histogram via `self.plot_histogram`, and if selections exist, then these aree subsequently applied.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: Additional keyword arguments to customize the plot. These arguments will be merged with the existing arguments stored in `self.kwargs`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            fig: The resulting plot as a `plotly.graph_objects.Figure` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        
+        <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_histogram</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_selected</span><span class="p">():</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">selectedpoints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_values</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+        
+<div class="viewcode-block" id="FigureFactory.plot_histogram">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.FigureFactory.plot_histogram">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots a histogram using Plotly.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            color (str, optional): The color of the bars. If not provided, the default color will be used.</span>
+<span class="sd">            **kwargs: Additional keyword arguments that can be passed to the `px.bar` function.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            fig: The Plotly figure object representing the histogram.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">color</span> <span class="o">=</span> <span class="n">color</span> <span class="k">if</span> <span class="n">color</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span>
+        <span class="n">category_orders</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">df_counts</span><span class="o">.</span><span class="n">index</span><span class="p">}</span> 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quant</span> <span class="ow">is</span> <span class="kc">False</span> 
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        
+        <span class="n">fig</span><span class="o">=</span><span class="n">px</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df_counts</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical</span> <span class="k">else</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="s1">&#39;count&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> 
+            <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_counts</span><span class="p">)</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">color_discrete_sequence</span><span class="o">=</span><span class="p">[</span><span class="n">color</span><span class="p">]</span> <span class="k">if</span> <span class="n">color</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">category_orders</span><span class="o">=</span><span class="n">category_orders</span><span class="p">,</span>
+            <span class="n">log_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_x</span><span class="p">,</span>
+            <span class="n">log_y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_y</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="n">template</span><span class="o">=</span><span class="n">PLOTLY_TEMPLATE</span><span class="p">,</span>
+            <span class="n">hover_data</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">},</span>
+            <span class="c1"># **kwargs</span>
+        <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">textposition</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">textfont_size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+
+        <span class="c1"># cats=list(reversed(self.df_counts[self.key].index))        </span>
+        <span class="n">cats</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_counts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">categoryorder</span><span class="o">=</span><span class="s1">&#39;array&#39;</span><span class="p">,</span> <span class="n">categoryarray</span><span class="o">=</span><span class="n">cats</span><span class="p">,</span> <span class="n">title_text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">tickangle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">autorange</span><span class="o">=</span><span class="s1">&#39;reversed&#39;</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Number of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">records_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">categoryorder</span><span class="o">=</span><span class="s1">&#39;array&#39;</span><span class="p">,</span> <span class="n">categoryarray</span><span class="o">=</span><span class="n">cats</span><span class="p">,</span> <span class="n">title_text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Number of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">records_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">uniformtext_minsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">clickmode</span><span class="o">=</span><span class="s1">&#39;event+select&#39;</span><span class="p">,</span> 
+            <span class="n">dragmode</span><span class="o">=</span><span class="s1">&#39;select&#39;</span><span class="p">,</span>
+            <span class="n">selectdirection</span><span class="o">=</span><span class="s1">&#39;h&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical</span> <span class="k">else</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span>
+            <span class="n">margin</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;t&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;l&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts_xaxis</span><span class="p">:</span> <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">opts_xaxis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opts_yaxis</span><span class="p">:</span> <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">opts_yaxis</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="c1">## Individual figures</span>
+
+
+<span class="c1">## MEMBER FIGURES ################################################################################</span>
+
+
+<div class="viewcode-block" id="MemberFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MemberFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MemberFigure</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that creates a figure factory for Members.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">    records_name : (str) Indicates the type of member records.</span>
+<span class="sd">    drop_duplicates : (tuple) Specifies the field to consider for dropping duplicate records.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records_name</span><span class="o">=</span><span class="s1">&#39;members&#39;</span>
+    <span class="n">drop_duplicates</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;member&#39;</span><span class="p">,)</span></div>
+
+
+
+
+<div class="viewcode-block" id="MemberDOBFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MemberDOBFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MemberDOBFigure</span><span class="p">(</span><span class="n">MemberFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of MemberFigure that creates a figure based on the member&#39;s date of birth.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) Key for the series in the members dataframe</span>
+<span class="sd">    quant : (bool) This is set to True indicating that the data is quantitative.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;member_dob&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="MembershipYearFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MembershipYearFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MembershipYearFigure</span><span class="p">(</span><span class="n">MemberFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of MemberFigure that creates a figure based on the membership year.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    records_name : (str) Convenient plural form for the type of data shown here</span>
+<span class="sd">    key : (str) Key for the series in the members dataframe</span>
+<span class="sd">    quant : (bool) This is set to True indicating that the data is quantitative.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records_name</span><span class="o">=</span><span class="s1">&#39;annual subscriptions&#39;</span>
+    <span class="n">key</span><span class="o">=</span><span class="s1">&#39;member_membership&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="MemberGenderFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MemberGenderFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MemberGenderFigure</span><span class="p">(</span><span class="n">MemberFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of MemberFigure that creates a figure based on the member&#39;s gender.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) Key for the series in the members dataframe</span>
+<span class="sd">    quant : (bool) This is set to False indicating that the data is not quantitative.</span>
+<span class="sd">    vertical : (bool) Forces the graph to be a horizontal bar chart when set to False.</span>
+<span class="sd">    text : (str) Key in data frame to be displayed on the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span><span class="o">=</span><span class="s1">&#39;member_gender&#39;</span>
+    <span class="n">quant</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;count&#39;</span></div>
+
+    
+
+
+
+<div class="viewcode-block" id="NationalityFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.NationalityFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">NationalityFigure</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that creates a figure factory for nationality.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    records_points_dim : (str) Dimension of selection of points set to &#39;y&#39;.</span>
+<span class="sd">    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.</span>
+<span class="sd">    log_x : (bool) Forces the &#39;x&#39; axis to be logarithmic when set to True.</span>
+<span class="sd">    text : (str) Key in data frame to be displayed on the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records_points_dim</span><span class="o">=</span><span class="s1">&#39;y&#39;</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">log_x</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;count&#39;</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="MemberNationalityFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MemberNationalityFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MemberNationalityFigure</span><span class="p">(</span><span class="n">NationalityFigure</span><span class="p">,</span> <span class="n">MemberFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of NationalityFigure and MemberFigure that creates a figure based on nationality.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    records_name : (str) Convenient plural form for the type of data shown here</span>
+<span class="sd">    key : (str) Key for the series in the members dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records_name</span><span class="o">=</span><span class="s1">&#39;member nationalities&#39;</span>
+    <span class="n">key</span><span class="o">=</span><span class="s1">&#39;member_nationalities&#39;</span></div>
+
+
+<div class="viewcode-block" id="MemberArrondFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MemberArrondFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MemberArrondFigure</span><span class="p">(</span><span class="n">MemberFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of MemberFigure that creates a figure based on &#39;arrond_id&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) Key for the series in the members dataframe</span>
+<span class="sd">    quant : (bool) This is set to False indicating that the data is not quantitative.</span>
+<span class="sd">    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.</span>
+<span class="sd">    text : (str) Text to be displayed on the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key</span><span class="o">=</span><span class="s1">&#39;arrond_id&#39;</span>
+    <span class="n">quant</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;count&#39;</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method that computes and returns a dataframe of counts after applying validation and sorting.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        (DataFrame) A DataFrame sorted by &#39;arrond_i&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">odf</span><span class="o">=</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">df_counts</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">odf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">odf</span><span class="o">=</span><span class="n">odf</span><span class="p">[</span><span class="n">series</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">is_valid_arrond</span><span class="p">)]</span>
+        <span class="n">odf</span><span class="p">[</span><span class="s1">&#39;arrond_i&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">odf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">odf</span><span class="o">=</span><span class="n">odf</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;arrond_i&#39;</span><span class="p">)</span>
+        <span class="n">odf</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">odf</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="n">odf</span></div>
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="c1">## BOOK FIGURES ################################################################################</span>
+
+<div class="viewcode-block" id="MemberNameFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.MemberNameFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">MemberNameFigure</span><span class="p">(</span><span class="n">MemberFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of MemberFigure that creates a figure based on the member&#39;s name.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) Key for the series in the members dataframe.</span>
+<span class="sd">    drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;member_name&#39;</span>
+    <span class="n">drop_duplicates</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;member&#39;</span><span class="p">,)</span></div>
+
+
+
+<div class="viewcode-block" id="BookFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.BookFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">BookFigure</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of FigureFactory that creates figures based on books.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    records_name : (str) The name of the records.</span>
+<span class="sd">    drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records_name</span><span class="o">=</span><span class="s1">&#39;books&#39;</span>
+    <span class="n">drop_duplicates</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">,)</span></div>
+
+
+
+<div class="viewcode-block" id="BookTitleFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.BookTitleFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">BookTitleFigure</span><span class="p">(</span><span class="n">BookFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of BookFigure that creates a figure based on the book&#39;s title.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) The key representing the book&#39;s title.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;book_title&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="BookGenreFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.BookGenreFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">BookGenreFigure</span><span class="p">(</span><span class="n">BookFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of BookFigure that creates a figure based on the book&#39;s genre.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) The key representing the book&#39;s genre.</span>
+<span class="sd">    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.</span>
+<span class="sd">    text : (str) Key in data frame to be displayed on the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;book_genre&#39;</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;count&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="BookYearFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.BookYearFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">BookYearFigure</span><span class="p">(</span><span class="n">BookFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of BookFigure that creates a figure based on the book&#39;s publication year.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key : (str) The key representing the book&#39;s year.</span>
+<span class="sd">    quant : (bool) This is set to True indicating that the data is quantitative.</span>
+<span class="sd">    min_series_val : (int) The minimum year value for book publication.</span>
+<span class="sd">    max_series_val : (int) The maximum year value for book publication.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;book_year&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">min_series_val</span><span class="o">=</span><span class="mi">1800</span>
+    <span class="n">max_series_val</span><span class="o">=</span><span class="mi">1950</span></div>
+
+
+
+
+
+
+<span class="c1">## AUTHOR FIGURES ################################################################################</span>
+
+
+<div class="viewcode-block" id="AuthorFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.AuthorFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthorFigure</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of FigureFactory that creates figures based on authors.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    records_name:(str) The name of the records.</span>
+<span class="sd">    drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records_name</span><span class="o">=</span><span class="s1">&#39;authors&#39;</span>
+    <span class="n">drop_duplicates</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;author&#39;</span><span class="p">,)</span></div>
+
+
+
+<div class="viewcode-block" id="AuthorGenderFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.AuthorGenderFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthorGenderFigure</span><span class="p">(</span><span class="n">AuthorFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of AuthorFigure that creates a figure based on the author&#39;s gender.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the author&#39;s gender.</span>
+<span class="sd">    quant:(bool) This is set to False indicating that the data is not quantitative.</span>
+<span class="sd">    vertical:(bool) Forces the graph to be a horizontal bar chart when set to False.</span>
+<span class="sd">    text:(str) Key in data frame to be displayed on the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span><span class="o">=</span><span class="s1">&#39;author_gender&#39;</span>
+    <span class="n">quant</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">text</span><span class="o">=</span><span class="s1">&#39;count&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="AuthorNationalityFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.AuthorNationalityFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthorNationalityFigure</span><span class="p">(</span><span class="n">NationalityFigure</span><span class="p">,</span> <span class="n">AuthorFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of NationalityFigure and AuthorFigure that creates a figure based on the author&#39;s nationality.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the author&#39;s nationality.</span>
+<span class="sd">    quant:(bool) This is set to False indicating that the data is not quantitative.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span><span class="o">=</span><span class="s1">&#39;author_nationalities&#39;</span>
+    <span class="n">quant</span><span class="o">=</span><span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="AuthorDOBFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.AuthorDOBFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthorDOBFigure</span><span class="p">(</span><span class="n">AuthorFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of AuthorFigure that creates a figure based on the author&#39;s date of birth.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the author&#39;s date of birth.</span>
+<span class="sd">    quant:(bool) This is set to True indicating that the data is quantitative.</span>
+<span class="sd">    min_series_val:(int) The minimum year value for author&#39;s date of birth.</span>
+<span class="sd">    max_series_val:(int) The maximum year value for author&#39;s date of birth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;author_dob&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">min_series_val</span><span class="o">=</span><span class="mi">1800</span>
+    <span class="n">max_series_val</span><span class="o">=</span><span class="mi">1950</span></div>
+
+
+
+<div class="viewcode-block" id="AuthorNameFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.AuthorNameFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">AuthorNameFigure</span><span class="p">(</span><span class="n">AuthorFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of AuthorFigure that creates a figure based on the author&#39;s name.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the author&#39;s name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;author_name&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="EventFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.EventFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">EventFigure</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of FigureFactory that creates figures based on events.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">drop_duplicates</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;event&#39;</span><span class="p">,)</span></div>
+
+
+
+<div class="viewcode-block" id="EventYearFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.EventYearFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">EventYearFigure</span><span class="p">(</span><span class="n">EventFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of EventFigure that creates a figure based on the event&#39;s year.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the event&#39;s year.</span>
+<span class="sd">    quant:(bool) This is set to True indicating that the data is quantitative.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;event_year&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="EventMonthFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.EventMonthFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">EventMonthFigure</span><span class="p">(</span><span class="n">EventFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of EventFigure that creates a figure based on the event&#39;s month.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the event&#39;s month.</span>
+<span class="sd">    quant:(bool) This is set to True indicating that the data is quantitative.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;event_month&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="EventTypeFigure">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.EventTypeFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">EventTypeFigure</span><span class="p">(</span><span class="n">EventFigure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A child class of EventFigure that creates a figure based on the event&#39;s type.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    key:(str) The key representing the event&#39;s type.</span>
+<span class="sd">    quant:(bool) This is set to False indicating that the data is not quantitative.</span>
+<span class="sd">    vertical:(bool) Forces the graph to be a vertical bar chart when set to True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;event_type&#39;</span>
+    <span class="n">quant</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+
+
+
+
+<span class="c1">## EVENT FIGURES ################################################################################</span>
+
+
+
+
+
+<span class="c1">## CUSTOM FIGURE FACTORIES ################################################################################</span>
+
+<div class="viewcode-block" id="LandmarksFigureFactory">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.LandmarksFigureFactory">[docs]</a>
+<span class="k">class</span> <span class="nc">LandmarksFigureFactory</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+    <span class="n">dataset_class</span> <span class="o">=</span> <span class="n">Landmarks</span>
+
+<div class="viewcode-block" id="LandmarksFigureFactory.plot_map">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.LandmarksFigureFactory.plot_map">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">figdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;tooltip&#39;</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">figdf</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span> <span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Scattermapbox</span><span class="p">(</span>
+                <span class="n">below</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Landmarks&#39;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
+                <span class="n">lat</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span>
+                <span class="n">lon</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span>
+                <span class="n">marker</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scattermapbox</span><span class="o">.</span><span class="n">Marker</span><span class="p">(</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                    <span class="c1"># symbol=&#39;square&#39;,</span>
+                    <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                    <span class="c1"># opacity=1</span>
+                    <span class="n">opacity</span><span class="o">=</span><span class="mf">0.4</span>
+                <span class="p">),</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;landmark&#39;</span><span class="p">],</span>
+                <span class="n">customdata</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;tooltip&#39;</span><span class="p">],</span>
+                <span class="n">hovertemplate</span><span class="o">=</span><span class="s1">&#39;%</span><span class="si">{customdata}</span><span class="s1">&lt;extra&gt;&lt;/extra&gt;&#39;</span><span class="p">,</span>
+                <span class="n">textfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">size</span><span class="o">=</span><span class="n">TEXTFONT_SIZE</span><span class="p">,</span>
+                    <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Louize, Recursive, Tahoma, Verdana, Times New Roman&#39;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span>
+                <span class="p">),</span>
+                <span class="n">textposition</span><span class="o">=</span><span class="s1">&#39;bottom center&#39;</span><span class="p">,</span>
+                <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                        <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Louize, Recursive, Tahoma, Verdana, Times New Roman&#39;</span><span class="p">,</span>
+                        <span class="c1"># color=&#39;black&#39;</span>
+                    <span class="p">),</span>
+                    <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)</span>
+        <span class="n">update_fig_mapbox_background</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">margin</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;t&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;l&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span>
+            <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+                <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="mf">0.99</span>
+            <span class="p">),</span>
+            <span class="n">autosize</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">mapbox_accesstoken</span><span class="o">=</span><span class="n">mapbox_access_token</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;responsive&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;scrollZoom&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">}</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+    
+<div class="viewcode-block" id="LandmarksFigureFactory.table">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.LandmarksFigureFactory.table">[docs]</a>
+    <span class="k">def</span> <span class="nf">table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_dash_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;landmark&#39;</span><span class="p">,</span><span class="s1">&#39;address&#39;</span><span class="p">,</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">,</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;lon&#39;</span><span class="p">])</span></div>
+</div>
+
+
+
+
+
+<div class="viewcode-block" id="update_fig_mapbox_background">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.update_fig_mapbox_background">[docs]</a>
+<span class="k">def</span> <span class="nf">update_fig_mapbox_background</span><span class="p">(</span><span class="n">fig</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_mapboxes</span><span class="p">(</span>
+        <span class="c1"># style=&#39;mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8&#39;,</span>
+        <span class="c1"># style=&#39;stamen-toner&#39;,</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">&quot;streets&quot;</span><span class="p">,</span>
+        <span class="n">layers</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;below&quot;</span><span class="p">:</span> <span class="s1">&#39;traces&#39;</span><span class="p">,</span>
+                <span class="s2">&quot;sourcetype&quot;</span><span class="p">:</span> <span class="s2">&quot;raster&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sourceattribution&quot;</span><span class="p">:</span> <span class="s2">&quot;paris1937&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">BASEMAP_SOURCES</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="c1"># style=&#39;mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug&#39;,</span>
+        <span class="n">accesstoken</span><span class="o">=</span><span class="n">mapbox_access_token</span><span class="p">,</span>
+        <span class="n">bearing</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">center</span><span class="o">=</span><span class="n">MAP_CENTER</span><span class="p">,</span>
+        <span class="n">pitch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+
+        <span class="n">zoom</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+
+
+
+<span class="c1">### COMBINED?</span>
+
+<div class="viewcode-block" id="CombinedFigureFactory">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.CombinedFigureFactory">[docs]</a>
+<span class="k">class</span> <span class="nc">CombinedFigureFactory</span><span class="p">(</span><span class="n">FigureFactory</span><span class="p">):</span>
+    <span class="n">cols_table</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;member_name&#39;</span><span class="p">,</span><span class="s1">&#39;memer_membership&#39;</span><span class="p">,</span><span class="s1">&#39;member_dob&#39;</span><span class="p">,</span><span class="s1">&#39;member_gender&#39;</span><span class="p">,</span><span class="s1">&#39;member_nationalities&#39;</span><span class="p">,</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">]</span>
+
+    <span class="c1">## calcs</span>
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">arrond_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_arronds</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">arrond_percs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">arrond_counts</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">s</span><span class="o">/</span><span class="n">s</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_dwellings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">assert</span> <span class="s1">&#39;dwelling&#39;</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s1">&#39;dwelling&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;dwelling&#39;</span><span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_members</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s1">&#39;member&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;member&#39;</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="CombinedFigureFactory.table_members">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.CombinedFigureFactory.table_members">[docs]</a>
+    <span class="k">def</span> <span class="nf">table_members</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_dash_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_members</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_table</span><span class="p">)</span></div>
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">book_filters_exist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;book_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;author_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;event_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;author_&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="CombinedFigureFactory.table">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.CombinedFigureFactory.table">[docs]</a>
+    <span class="k">def</span> <span class="nf">table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dwellings</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">dwelling_address</span><span class="o">!=</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># if only members filtered...</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">book_filters_exist</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="s1">&#39;dwelling&#39;</span><span class="p">)</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">cols_members</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">([</span><span class="s1">&#39;dwelling&#39;</span><span class="p">,</span><span class="s1">&#39;book&#39;</span><span class="p">])</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">cols_members</span><span class="o">+</span><span class="n">cols_books</span>
+        <span class="k">return</span> <span class="n">get_dash_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span></div>
+
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">arronds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="k">return</span> <span class="n">qualquant_series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_dwellings</span><span class="o">.</span><span class="n">arrond_id</span><span class="p">,</span> <span class="n">quant</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">valid_arronds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">arronds</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">v</span><span class="o">!=</span><span class="s1">&#39;99&#39;</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="CombinedFigureFactory.plot_map">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.CombinedFigureFactory.plot_map">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_text</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">basefig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_trace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">color</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">:</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">color</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">color</span><span class="p">:</span> <span class="n">color</span><span class="o">=</span><span class="n">DEFAULT_COLOR</span>
+        <span class="n">figdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dwellings</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;(lat!=&quot;&quot;) &amp; (lon!=&quot;&quot;)&#39;</span><span class="p">)</span>
+        <span class="c1"># figdf[&#39;hovertext&#39;]=[x[:100] for x in figdf[&#39;hover_tooltip&#39;]]</span>
+
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scattermapbox</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Member dwelling (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
+            <span class="n">lat</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span>
+            <span class="n">lon</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span>
+            <span class="n">customdata</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;hover_tooltip&#39;</span><span class="p">],</span>
+            <span class="n">hovertemplate</span><span class="o">=</span><span class="s1">&#39;%</span><span class="si">{customdata}</span><span class="s1">&lt;extra&gt;&lt;/extra&gt;&#39;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scattermapbox</span><span class="o">.</span><span class="n">Marker</span><span class="p">(</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;circle&#39;</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                <span class="c1"># size=(figdf[&#39;num_borrows&#39;] / 20)+5,</span>
+                <span class="n">opacity</span><span class="o">=</span><span class="mf">0.4</span>
+            <span class="p">),</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">figdf</span><span class="p">[</span><span class="s1">&#39;member_name&#39;</span><span class="p">],</span>
+            <span class="n">textfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">TEXTFONT_SIZE</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">color_text</span><span class="p">,</span>
+                <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Louize, Recursive, Tahoma, Verdana, Times New Roman&#39;</span>
+            <span class="p">),</span>
+            <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                    <span class="n">family</span><span class="o">=</span><span class="s1">&#39;Louize, Recursive, Tahoma, Verdana, Times New Roman&#39;</span><span class="p">,</span>
+                    <span class="c1"># color=&#39;black&#39;</span>
+                <span class="p">),</span>
+                <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">textposition</span><span class="o">=</span><span class="s1">&#39;bottom center&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_trace</span><span class="p">:</span> <span class="k">return</span> <span class="n">trace</span>
+
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">mapbox_accesstoken</span><span class="o">=</span><span class="n">mapbox_access_token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+</div>
+
+
+
+
+
+<div class="viewcode-block" id="ComparisonFigureFactory">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory">[docs]</a>
+<span class="k">class</span> <span class="nc">ComparisonFigureFactory</span><span class="p">(</span><span class="n">CombinedFigureFactory</span><span class="p">):</span>
+    <span class="n">cols_table</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L_or_R&#39;</span><span class="p">,</span><span class="s1">&#39;member_name&#39;</span><span class="p">,</span><span class="s1">&#39;memer_membership&#39;</span><span class="p">,</span><span class="s1">&#39;member_dob&#39;</span><span class="p">,</span><span class="s1">&#39;member_gender&#39;</span><span class="p">,</span><span class="s1">&#39;member_nationalities&#39;</span><span class="p">,</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">]</span>
+    <span class="n">indiv_ff</span> <span class="o">=</span> <span class="n">CombinedFigureFactory</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ff1</span><span class="o">=</span><span class="p">{},</span> <span class="n">ff2</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">ff1</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ff2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ff1</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">ff1</span><span class="p">,</span><span class="n">ff2</span> <span class="o">=</span> <span class="n">ff1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ff1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indiv_ff</span><span class="p">(</span><span class="n">ff1</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Filter 1&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ff1</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">dict</span><span class="p">,</span><span class="nb">str</span><span class="p">}</span> <span class="k">else</span> <span class="n">ff1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ff2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indiv_ff</span><span class="p">(</span><span class="n">ff2</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Filter 2&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ff2</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">dict</span><span class="p">,</span><span class="nb">str</span><span class="p">}</span> <span class="k">else</span> <span class="n">ff2</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_arronds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="n">analyze_contingency_tables</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">valid_arronds</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">valid_arronds</span><span class="p">,</span>
+        <span class="p">)</span>
+    
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.compare">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.compare">[docs]</a>
+    <span class="k">def</span> <span class="nf">compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+            <span class="n">maxcats</span><span class="o">=</span><span class="n">COMPARISON_MAXCATS</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">=</span><span class="n">PREDICT_COLS</span><span class="p">,</span>
+            <span class="n">only_signif</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="nb">round</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">min_count</span><span class="o">=</span><span class="n">PREDICT_MIN_COUNT</span><span class="p">,</span>
+            <span class="n">min_sum</span><span class="o">=</span><span class="n">PREDICT_MIN_SUM</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="k">return</span> <span class="n">get_distinctive_qual_vals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">maxcats</span><span class="o">=</span><span class="n">maxcats</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+            <span class="n">only_signif</span><span class="o">=</span><span class="n">only_signif</span><span class="p">,</span>
+            <span class="nb">round</span><span class="o">=</span><span class="nb">round</span><span class="p">,</span>
+            <span class="n">min_count</span><span class="o">=</span><span class="n">min_count</span><span class="p">,</span>
+            <span class="n">min_sum</span><span class="o">=</span><span class="n">min_sum</span><span class="p">,</span>
+            <span class="n">drop_duplicates</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;member&#39;</span><span class="p">:[</span><span class="s1">&#39;member&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;author&#39;</span><span class="p">:[</span><span class="s1">&#39;author&#39;</span><span class="p">,</span><span class="s1">&#39;event&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;book&#39;</span><span class="p">:[</span><span class="s1">&#39;book&#39;</span><span class="p">,</span><span class="s1">&#39;event&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;arrond_id&#39;</span><span class="p">:[</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">,</span><span class="s1">&#39;member&#39;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.describe_comparison">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.describe_comparison">[docs]</a>
+    <span class="k">def</span> <span class="nf">describe_comparison</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comparison_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">describe_comparison</span><span class="p">(</span>
+            <span class="n">comparison_df</span>
+            <span class="k">if</span> <span class="n">comparison_df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.table">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.table">[docs]</a>
+    <span class="k">def</span> <span class="nf">table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># return get_dash_table(self.compare(**kwargs))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_content</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.table_content">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.table_content">[docs]</a>
+    <span class="k">def</span> <span class="nf">table_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;arrond_id&#39;</span><span class="p">],</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">odf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">odf</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="s1">&#39;Analysis failed, likely because one or both groups returns no data, or because both groups are identical.&#39;</span><span class="p">)</span>
+        
+        <span class="n">fig</span><span class="o">=</span><span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;arrond_id&#39;</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_oddsratio_map</span><span class="p">(</span><span class="n">odf</span><span class="p">)</span>
+        <span class="n">desc_L</span><span class="p">,</span><span class="n">desc_R</span> <span class="o">=</span> <span class="n">describe_comparison</span><span class="p">(</span><span class="n">odf</span><span class="p">,</span> <span class="n">lim</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">summary_row</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">([</span>
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">H5</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;10 most distinctive features for Filter 1 (&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">filter_desc</span><span class="p">,</span><span class="s1">&#39;)&#39;</span><span class="p">]),</span>
+                <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc_L</span><span class="p">))</span>
+            <span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;left-color&#39;</span><span class="p">),</span>
+
+            <span class="n">dbc</span><span class="o">.</span><span class="n">Col</span><span class="p">([</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">H5</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;10 most distinctive features for Filter 2 (&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">filter_desc</span><span class="p">,</span><span class="s1">&#39;)&#39;</span><span class="p">]),</span>
+                <span class="n">dcc</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc_R</span><span class="p">))</span>
+            <span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;right-color&#39;</span><span class="p">),</span>
+        <span class="p">])</span>
+        
+        <span class="n">table_row</span> <span class="o">=</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">get_dash_table</span><span class="p">(</span><span class="n">odf</span><span class="p">))</span>
+
+        <span class="n">fig_row_l</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">fig</span> <span class="k">else</span> <span class="p">[</span><span class="n">dbc</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span><span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">))]</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">fig_row_l</span> <span class="o">+</span> <span class="p">[</span><span class="n">summary_row</span><span class="p">,</span><span class="n">table_row</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;table_content&#39;</span><span class="p">)</span></div>
+
+
+        
+        
+        
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_dwellings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="c1"># return combine_LR_df(</span>
+        <span class="c1">#     self.ff1.df_dwellings, </span>
+        <span class="c1">#     self.ff2.df_dwellings</span>
+        <span class="c1"># )</span>
+        <span class="k">return</span> <span class="n">combine_LR_df</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">df_dwellings</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">df_dwellings</span><span class="p">,</span> 
+            <span class="n">colval_L</span><span class="o">=</span><span class="s1">&#39;Filter 1&#39;</span><span class="p">,</span>
+            <span class="n">colval_R</span><span class="o">=</span><span class="s1">&#39;Filter 2&#39;</span><span class="p">,</span>
+            <span class="n">colval_LR</span><span class="o">=</span><span class="s1">&#39;Both Groups&#39;</span>
+        <span class="p">)</span>
+
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">df_members</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="n">combine_LR_df</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">df_members</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">df_members</span><span class="p">)</span>
+        <span class="c1"># return combine_LR_df(self.L.df_members, self.R.df_members)</span>
+    
+
+<div class="viewcode-block" id="ComparisonFigureFactory.plot_oddsratio_map">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.plot_oddsratio_map">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_oddsratio_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figdf</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s1">&#39;odds_ratio_log&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">figdf</span><span class="o">=</span><span class="n">figdf</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;col==&quot;arrond_id&quot;&#39;</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">colour</span> <span class="kn">import</span> <span class="n">Color</span>
+        <span class="n">Lcolor</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">RIGHT_COLOR</span><span class="p">)</span>
+        <span class="n">Rcolor</span> <span class="o">=</span> <span class="n">Color</span><span class="p">(</span><span class="n">LEFT_COLOR</span><span class="p">)</span>
+        <span class="n">midpoint</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Lcolor</span><span class="o">.</span><span class="n">range_to</span><span class="p">(</span><span class="n">Rcolor</span><span class="p">,</span> <span class="mi">3</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">midpoint</span><span class="o">.</span><span class="n">set_luminance</span><span class="p">(</span><span class="mf">.95</span><span class="p">)</span>
+
+        <span class="n">fig_choro</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">choropleth_mapbox</span><span class="p">(</span>
+            <span class="n">figdf</span><span class="p">,</span>
+            <span class="n">geojson</span><span class="o">=</span><span class="n">get_geojson_arrondissement</span><span class="p">(),</span>
+            <span class="n">locations</span><span class="o">=</span><span class="s1">&#39;col_val&#39;</span><span class="p">,</span> 
+            <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+            <span class="n">center</span><span class="o">=</span><span class="n">MAP_CENTER</span><span class="p">,</span>
+            <span class="n">zoom</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+            <span class="c1"># hover_data=[],</span>
+            <span class="n">hover_data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;col_val&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="kc">False</span><span class="p">},</span>
+            <span class="n">color_continuous_scale</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">Lcolor</span><span class="o">.</span><span class="n">hex</span><span class="p">,</span>
+                <span class="n">midpoint</span><span class="o">.</span><span class="n">hex</span><span class="p">,</span>
+                <span class="n">Rcolor</span><span class="o">.</span><span class="n">hex</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">.5</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig_choro</span><span class="o">.</span><span class="n">update_mapboxes</span><span class="p">(</span>
+            <span class="n">style</span><span class="o">=</span><span class="s1">&#39;light&#39;</span><span class="p">,</span>
+            <span class="n">accesstoken</span><span class="o">=</span><span class="n">mapbox_access_token</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+        <span class="n">ofig</span> <span class="o">=</span> <span class="n">fig_choro</span>
+
+        <span class="n">ofig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">margin</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;t&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;l&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">},</span>
+            <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+                <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="mf">0.99</span>
+            <span class="p">),</span>
+            <span class="n">coloraxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">colorbar</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> 
+                    <span class="n">y</span><span class="o">=</span><span class="mf">.01</span><span class="p">,</span>
+                    <span class="n">lenmode</span><span class="o">=</span><span class="s1">&#39;fraction&#39;</span><span class="p">,</span>
+                    <span class="nb">len</span><span class="o">=</span><span class="mf">.5</span><span class="p">,</span>
+                    <span class="n">thickness</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                    <span class="n">xanchor</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
+                    <span class="n">x</span><span class="o">=</span><span class="mf">.99</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ofig</span></div>
+
+
+<div class="viewcode-block" id="ComparisonFigureFactory.table_members">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.table_members">[docs]</a>
+    <span class="k">def</span> <span class="nf">table_members</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_dash_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_members</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols_table</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.table_arrond">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.table_arrond">[docs]</a>
+    <span class="k">def</span> <span class="nf">table_arrond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># cols = [&#39;arrond_id&#39;, &#39;count_L&#39;, &#39;count_R&#39;, &#39;perc_L&#39;, &#39;perc_R&#39;, &#39;perc_L-&gt;R&#39;]</span>
+        <span class="k">return</span> <span class="n">get_dash_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_arronds</span><span class="o">.</span><span class="n">reset_index</span><span class="p">())</span></div>
+
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.table_diff">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.table_diff">[docs]</a>
+    <span class="k">def</span> <span class="nf">table_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">odf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank_diff</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;rank_diff!=0&#39;</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rank_diff&#39;</span><span class="p">,</span><span class="s1">&#39;group1_desc&#39;</span><span class="p">,</span><span class="s1">&#39;group2_desc&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">odf</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_p&#39;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">get_dash_table</span><span class="p">(</span><span class="n">odf</span><span class="p">,</span><span class="n">cols</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="ComparisonFigureFactory.desc_table_diff">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.desc_table_diff">[docs]</a>
+    <span class="k">def</span> <span class="nf">desc_table_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank_diff</span><span class="p">()</span>
+        <span class="n">dfq</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_self</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">dfq</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="n">row</span><span class="o">=</span><span class="n">dfq</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diffkeys</span><span class="p">()</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;??&#39;</span><span class="c1">#Statistically, the spatial difference (difference in distribution across arrondissement) of the members is the ***{ordinal_str(row.rank_diff)}*** largest noted thus far. It ***{&quot;is&quot; if row.pvalue&lt;=0.05 else &quot;is not&quot;}*** statistically significant, with a pvalue of ***{row.pvalue:.02}*** and a Mann-Whitney U test statistic of ***{row.statistic}***.&#39;</span></div>
+
+            
+
+            
+<div class="viewcode-block" id="ComparisonFigureFactory.diffdb">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.diffdb">[docs]</a>
+    <span class="k">def</span> <span class="nf">diffdb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">sqlitedict</span> <span class="kn">import</span> <span class="n">SqliteDict</span>
+        <span class="k">return</span> <span class="n">SqliteDict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_DATA</span><span class="p">,</span> <span class="s1">&#39;diffdb.sqlitedict&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ComparisonFigureFactory.diffkeys">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.diffkeys">[docs]</a>
+    <span class="k">def</span> <span class="nf">diffkeys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">INTENSION_KEY</span><span class="p">,({},{})))))</span></div>
+
+
+<div class="viewcode-block" id="ComparisonFigureFactory.measure_diff">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.measure_diff">[docs]</a>
+    <span class="k">def</span> <span class="nf">measure_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">name_L</span><span class="p">,</span><span class="n">name_R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffkeys</span><span class="p">()</span>
+        <span class="c1"># if name_L == name_R: return {}</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="n">name_L</span><span class="p">,</span> <span class="n">name_R</span><span class="p">])</span>
+        
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffdb</span><span class="p">()</span> <span class="k">as</span> <span class="n">cache</span><span class="p">:</span>    
+            <span class="k">if</span> <span class="n">force</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">kstest</span><span class="p">,</span> <span class="n">mannwhitneyu</span><span class="p">,</span> <span class="n">pearsonr</span>
+                <span class="n">statd</span><span class="o">=</span><span class="p">{}</span>
+                <span class="n">lvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_arronds</span><span class="o">.</span><span class="n">count_L</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">rvals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_arronds</span><span class="o">.</span><span class="n">count_R</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">statname</span><span class="p">,</span><span class="n">statf</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;kstest&#39;</span><span class="p">,</span><span class="n">kstest</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;mannwhitneyu&#39;</span><span class="p">,</span><span class="n">mannwhitneyu</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pearsonr&#39;</span><span class="p">,</span><span class="n">pearsonr</span><span class="p">)]:</span>
+                    <span class="n">stat</span> <span class="o">=</span> <span class="n">statf</span><span class="p">(</span><span class="n">lvals</span><span class="p">,</span><span class="n">rvals</span><span class="p">)</span>
+                    <span class="n">statd</span><span class="p">[</span><span class="n">statname</span><span class="p">]</span><span class="o">=</span><span class="n">stat</span><span class="o">.</span><span class="n">statistic</span>
+                    <span class="n">statd</span><span class="p">[</span><span class="n">statname</span><span class="o">+</span><span class="s1">&#39;_p&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">stat</span><span class="o">.</span><span class="n">pvalue</span>
+                <span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">statd</span>
+                <span class="n">cache</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="ComparisonFigureFactory.get_diffs">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.get_diffs">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_diffs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ld</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffdb</span><span class="p">()</span> <span class="k">as</span> <span class="n">cache</span><span class="p">:</span> 
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">cache</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">k1</span><span class="p">,</span><span class="n">k2</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">ld</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">group1</span><span class="o">=</span><span class="n">k1</span><span class="p">,</span> 
+                    <span class="n">group2</span><span class="o">=</span><span class="n">k2</span><span class="p">,</span> 
+                    <span class="n">group1_desc</span><span class="o">=</span><span class="n">format_intension</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">k1</span><span class="p">)),</span> 
+                    <span class="n">group2_desc</span><span class="o">=</span><span class="n">format_intension</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">k2</span><span class="p">)),</span> 
+                    <span class="o">**</span><span class="p">{</span><span class="n">kx</span><span class="p">:(</span><span class="nb">float</span><span class="p">(</span><span class="n">kv</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">kv</span><span class="p">)</span> <span class="k">else</span> <span class="n">kv</span><span class="p">)</span> <span class="k">for</span> <span class="n">kx</span><span class="p">,</span><span class="n">kv</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}))</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ld</span><span class="p">)</span><span class="c1">#.set_index([&#39;group1&#39;,&#39;group2&#39;])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;is_self&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[((</span><span class="n">k1</span><span class="p">,</span><span class="n">k2</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffkeys</span><span class="p">())</span> <span class="k">for</span> <span class="n">k1</span><span class="p">,</span><span class="n">k2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">group1</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">group2</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+        
+        
+
+<div class="viewcode-block" id="ComparisonFigureFactory.rank_diff">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.ComparisonFigureFactory.rank_diff">[docs]</a>
+    <span class="k">def</span> <span class="nf">rank_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measure_diff</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_diffs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span> <span class="k">return</span> <span class="n">df</span>
+        <span class="n">pcols</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_p&#39;</span><span class="p">)]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;median_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">pcols</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;median_p&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">force_int</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+</div>
+
+
+
+
+
+
+
+
+<div class="viewcode-block" id="combine_figs">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.combine_figs">[docs]</a>
+<span class="k">def</span> <span class="nf">combine_figs</span><span class="p">(</span><span class="n">fig_new</span><span class="p">,</span> <span class="n">fig_old</span><span class="p">):</span>
+    <span class="n">fig_old</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig_old</span><span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fig_old</span><span class="p">)</span><span class="o">!=</span><span class="n">go</span><span class="o">.</span><span class="n">Figure</span> <span class="k">else</span> <span class="n">fig_old</span>
+    <span class="k">return</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span>
+        <span class="n">layout</span><span class="o">=</span><span class="n">fig_old</span><span class="o">.</span><span class="n">layout</span> <span class="k">if</span> <span class="n">fig_old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fig_old</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fig_old</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="n">fig_new</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">fig_new</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_dash_table">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_dash_table">[docs]</a>
+<span class="k">def</span> <span class="nf">get_dash_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="p">[],</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height_table</span><span class="o">=</span><span class="s1">&#39;80vh&#39;</span><span class="p">,</span> <span class="n">height_cell</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+    <span class="n">cols</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">cols</span> <span class="k">else</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
+    <span class="n">dff</span> <span class="o">=</span> <span class="n">delist_df</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">])</span>
+    <span class="n">cols_l</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">col</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()}</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dash_table</span><span class="o">.</span><span class="n">DataTable</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">dff</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s1">&#39;records&#39;</span><span class="p">),</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">cols_l</span><span class="p">,</span>
+        <span class="n">sort_action</span><span class="o">=</span><span class="s2">&quot;native&quot;</span><span class="p">,</span>
+        <span class="n">sort_mode</span><span class="o">=</span><span class="s2">&quot;multi&quot;</span><span class="p">,</span>
+        <span class="n">filter_action</span><span class="o">=</span><span class="s2">&quot;native&quot;</span><span class="p">,</span>
+        <span class="n">page_action</span><span class="o">=</span><span class="s2">&quot;native&quot;</span><span class="p">,</span>
+        <span class="c1"># page_action=&quot;none&quot;,</span>
+        <span class="n">export_format</span><span class="o">=</span><span class="s1">&#39;csv&#39;</span><span class="p">,</span>
+        <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
+        <span class="n">fixed_rows</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;headers&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="n">style_cell</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;minWidth&#39;</span><span class="p">:</span> <span class="mi">95</span><span class="p">,</span> <span class="s1">&#39;maxWidth&#39;</span><span class="p">:</span> <span class="mi">95</span><span class="p">,</span> <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">95</span><span class="p">,</span>
+        <span class="p">},</span>
+
+        <span class="n">style_data</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;minHeight&#39;</span><span class="p">:</span> <span class="n">height_cell</span><span class="p">,</span> <span class="s1">&#39;maxHeight&#39;</span><span class="p">:</span> <span class="n">height_cell</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="n">height_cell</span><span class="p">,</span>
+            <span class="s1">&#39;whiteSpace&#39;</span><span class="p">:</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">style_table</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;height&#39;</span><span class="p">:</span><span class="mi">400</span><span class="p">,</span> 
+            <span class="s1">&#39;overflowY&#39;</span><span class="p">:</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+            <span class="c1"># &#39;display&#39;:&#39;block&#39;,</span>
+            <span class="c1"># &#39;flex-didrection&#39;:&#39;column&#39;,</span>
+            <span class="c1"># &#39;flex-grow&#39;:1,</span>
+            <span class="c1"># &#39;width&#39;:&#39;100%&#39;,</span>
+            <span class="c1"># &#39;border&#39;:&#39;1px solid #eeeee&#39;</span>
+            <span class="c1"># &#39;padding-bottom&#39;:&#39;100px&#39;</span>
+        <span class="p">},</span>
+    <span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="get_empty_fig">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_empty_fig">[docs]</a>
+<span class="k">def</span> <span class="nf">get_empty_fig</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="o">**</span><span class="n">layout_kwargs</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="o">**</span><span class="n">layout_kwargs</span><span class="p">))</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s1">&#39;simple_white&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+
+<div class="viewcode-block" id="get_color">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_color">[docs]</a>
+<span class="k">def</span> <span class="nf">get_color</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">==</span><span class="s1">&#39;L&#39;</span> <span class="ow">or</span> <span class="s1">&#39;Left&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span> <span class="k">return</span> <span class="n">LEFT_COLOR</span>
+    <span class="k">if</span> <span class="n">x</span><span class="o">==</span><span class="s1">&#39;R&#39;</span> <span class="ow">or</span> <span class="s1">&#39;Right&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span> <span class="k">return</span> <span class="n">RIGHT_COLOR</span>
+    <span class="k">return</span> <span class="n">BOTH_COLOR</span></div>
+
+
+
+
+
+
+
+
+
+
+
+<span class="c1"># # @cache</span>
+<span class="c1"># @cache_obj.memoize()</span>
+<span class="c1"># def ff_cache(figure_class, serialized_data):</span>
+<span class="c1">#     logger.debug(f&#39;ff_cache({figure_class.__name__}, {serialized_data})&#39;)</span>
+<span class="c1">#     filter_data,selected,kwargs = unserialize(serialized_data)</span>
+<span class="c1">#     return figure_class(filter_data, selected, **kwargs)</span>
+
+
+<span class="c1"># # @cache</span>
+<span class="c1"># @cache_obj.memoize()</span>
+<span class="c1"># def plot_cache(figure_class, serialized_data):</span>
+<span class="c1">#     logger.debug(f&#39;plot_cache({figure_class.__name__}, {serialized_data})&#39;)</span>
+<span class="c1">#     filter_data,existing_fig,kwargs = (</span>
+<span class="c1">#         unserialize(serialized_data) </span>
+<span class="c1">#         if serialized_data </span>
+<span class="c1">#         else ({},None,{})</span>
+<span class="c1">#     )</span>
+<span class="c1">#     ff = figure_class(filter_data)</span>
+<span class="c1">#     fig = ff.plot(**kwargs)</span>
+<span class="c1">#     if existing_fig: </span>
+<span class="c1">#         fig = combine_figs(fig, existing_fig)</span>
+<span class="c1">#     return fig</span>
+
+
+
+
+<span class="c1"># @cache</span>
+<div class="viewcode-block" id="plot_cache">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.plot_cache">[docs]</a>
+<span class="nd">@cache_obj</span><span class="o">.</span><span class="n">memoize</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">plot_cache</span><span class="p">(</span><span class="n">figure_class</span><span class="p">,</span> <span class="n">serialized_data</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;plot_cache(</span><span class="si">{</span><span class="n">figure_class</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">serialized_data</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">filter_data</span><span class="p">,</span><span class="n">selected</span><span class="p">,</span><span class="n">kwargs</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">unserialize</span><span class="p">(</span><span class="n">serialized_data</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">serialized_data</span> 
+        <span class="k">else</span> <span class="p">({},</span><span class="kc">None</span><span class="p">,{})</span>
+    <span class="p">)</span>
+    <span class="n">ff</span> <span class="o">=</span> <span class="n">figure_class</span><span class="p">(</span><span class="n">filter_data</span><span class="o">=</span><span class="n">filter_data</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="n">selected</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">fig_json_gz_str</span> <span class="o">=</span> <span class="n">b64encode</span><span class="p">(</span>
+        <span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span>
+            <span class="n">pio</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig_json_gz_str</span></div>
+
+
+
+
+<div class="viewcode-block" id="get_ff_for_num_filters">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_ff_for_num_filters">[docs]</a>
+<span class="k">def</span> <span class="nf">get_ff_for_num_filters</span><span class="p">(</span><span class="n">fdL</span><span class="o">=</span><span class="p">{},</span> <span class="n">fdR</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># get figure factory</span>
+    <span class="n">num_filters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">])</span>
+    <span class="c1"># 3 cases</span>
+    <span class="k">if</span> <span class="n">num_filters</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">LandmarksFigureFactory</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">num_filters</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fdL</span><span class="p">:</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdL</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">LEFT_COLOR</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fdR</span><span class="p">:</span>
+            <span class="n">ff</span> <span class="o">=</span> <span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdR</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">RIGHT_COLOR</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">num_filters</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ff</span> <span class="o">=</span> <span class="n">ComparisonFigureFactory</span><span class="p">(</span><span class="n">fdL</span><span class="p">,</span> <span class="n">fdR</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ff</span></div>
+
+
+<div class="viewcode-block" id="get_mainmap_figdata">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_mainmap_figdata">[docs]</a>
+<span class="k">def</span> <span class="nf">get_mainmap_figdata</span><span class="p">(</span><span class="n">fdL</span><span class="o">=</span><span class="p">{},</span> <span class="n">fdR</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">if</span> <span class="n">fdL</span> <span class="ow">or</span> <span class="n">fdR</span><span class="p">:</span>
+        <span class="n">odata</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span> <span class="n">fdL</span><span class="p">:</span> <span class="n">odata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdL</span><span class="p">)</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">LEFT_COLOR</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fdR</span><span class="p">:</span> <span class="n">odata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">CombinedFigureFactory</span><span class="p">(</span><span class="n">fdR</span><span class="p">)</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">RIGHT_COLOR</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">odata</span> <span class="o">=</span> <span class="n">LandmarksFigureFactory</span><span class="p">()</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">return</span> <span class="n">odata</span></div>
+
+
+
+<div class="viewcode-block" id="get_cached_fig_or_table">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_cached_fig_or_table">[docs]</a>
+<span class="nd">@cache_obj</span><span class="o">.</span><span class="n">memoize</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">get_cached_fig_or_table</span><span class="p">(</span><span class="n">args_id</span><span class="p">):</span>
+    <span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">,</span><span class="n">active_tab</span><span class="p">,</span><span class="n">analysis_tab</span><span class="o">=</span><span class="n">unserialize</span><span class="p">(</span><span class="n">args_id</span><span class="p">)</span>
+    <span class="n">ff</span><span class="o">=</span><span class="n">get_ff_for_num_filters</span><span class="p">(</span><span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">([</span><span class="n">args_id</span><span class="p">,</span><span class="n">ff</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">active_tab</span><span class="o">==</span><span class="s1">&#39;map&#39;</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">ff</span><span class="o">.</span><span class="n">plot_map</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pcols</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">PREDICT_COLS</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">analysis_tab</span><span class="p">)]</span> <span class="k">if</span> <span class="n">analysis_tab</span> <span class="k">else</span> <span class="n">PREDICT_COLS</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">ff</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="n">pcols</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">to_json_gz_str</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_json_gz_str">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.to_json_gz_str">[docs]</a>
+<span class="k">def</span> <span class="nf">to_json_gz_str</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+    <span class="n">ojson</span><span class="o">=</span><span class="n">pio</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">ojsongz</span><span class="o">=</span><span class="n">b64encode</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">ojson</span><span class="o">.</span><span class="n">encode</span><span class="p">()))</span>
+    <span class="n">ojsongzstr</span><span class="o">=</span><span class="n">ojsongz</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ojsongzstr</span></div>
+
+
+<div class="viewcode-block" id="from_json_gz_str">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.from_json_gz_str">[docs]</a>
+<span class="k">def</span> <span class="nf">from_json_gz_str</span><span class="p">(</span><span class="n">ojsongzstr</span><span class="p">):</span>
+    <span class="n">ojsongz</span><span class="o">=</span><span class="n">b64decode</span><span class="p">(</span><span class="n">ojsongzstr</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+    <span class="n">ojson</span><span class="o">=</span><span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">ojsongz</span><span class="p">)</span>
+    <span class="n">ojsonstr</span><span class="o">=</span><span class="n">ojson</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="n">obj</span><span class="o">=</span><span class="n">pio</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">ojsonstr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+
+<div class="viewcode-block" id="get_selected_records_from_figure_selected_data">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.components.get_selected_records_from_figure_selected_data">[docs]</a>
+<span class="k">def</span> <span class="nf">get_selected_records_from_figure_selected_data</span><span class="p">(</span><span class="n">selectedData</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get selected records from figure selected data.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        selectedData (dict, optional): The selected data from the figure. Defaults to {}.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: The selected records.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; selectedData = {&#39;points&#39;: [{&#39;label&#39;: &#39;A&#39;, &#39;location&#39;: &#39;NY&#39;}, {&#39;label&#39;: &#39;B&#39;, &#39;location&#39;: &#39;LA&#39;}]}</span>
+<span class="sd">        &gt;&gt;&gt; get_selected_records_from_figure_selected_data(selectedData)</span>
+<span class="sd">        [&#39;A&#39;, &#39;B&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">selectedData</span><span class="p">:</span> <span class="k">return</span> <span class="p">{}</span>
+    
+    <span class="n">points_data</span> <span class="o">=</span> <span class="n">selectedData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;points&#39;</span><span class="p">,[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">points_data</span><span class="p">:</span> <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">get_record_id</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s1">&#39;What is the record id here? --&gt; &#39;</span><span class="o">+</span><span class="n">pformat</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+    
+    <span class="n">selected_records</span> <span class="o">=</span> <span class="n">qualquant_series</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span> <span class="n">get_record_id</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">points_data</span> <span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">],</span> 
+        <span class="n">quant</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">quant</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">selected_records</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Shakespeare and Co Project Lab</a></h1>
+
+
+
+<p class="blurb">Analytic dashboard application for the Shakespare and Co CDH project</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Princeton-CDH&repo=geotaste&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div class="powered_by">
+<p>Powered by:</p>
+<a href="http://cdh.princeton.edu/">
+<img src="https://cdh.princeton.edu/static/img/CDH_logo.svg"
+    alt="Center for Digital Humanities @ Princeton" />
+</a>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, CDH @ Princeton University.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

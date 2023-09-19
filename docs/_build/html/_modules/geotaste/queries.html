@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geotaste.queries &#8212; Shakespeare and Co Project Lab 0.3.5 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../_static/documentation_options.js?v=ba50482b"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for geotaste.queries</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.imports</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="humancol">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.queries.humancol">[docs]</a>
+<span class="k">def</span> <span class="nf">humancol</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;_&#39;</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span> <span class="k">return</span> <span class="n">col</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="k">if</span> <span class="n">b</span><span class="o">!=</span><span class="s1">&#39;dob&#39;</span> <span class="k">else</span> <span class="s1">&#39;DOB&#39;</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="s1">&#39;Membership&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">b</span></div>
+
+
+
+<div class="viewcode-block" id="filter_query_str_series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.queries.filter_query_str_series">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_query_str_series</span><span class="p">(</span>
+        <span class="n">sname</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> 
+        <span class="n">svals</span><span class="p">:</span><span class="s1">&#39;Iterable&#39;</span><span class="p">,</span> 
+        <span class="n">op</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;or&#39;</span><span class="p">,</span> 
+        <span class="n">maxlen</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">plural_cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;overlaps&#39;</span><span class="p">,</span>
+        <span class="n">human</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a query string for filtering a series based on a given column name and values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sname (str): The name of the column to filter on.</span>
+<span class="sd">        svals (Iterable): The values to filter on.</span>
+<span class="sd">        op (str, optional): The operator to use for combining multiple values. Defaults to &#39;or&#39;.</span>
+<span class="sd">        maxlen (int, optional): The maximum number of values allowed before using a plural representation. Defaults to 1.</span>
+<span class="sd">        plural_cols (list, optional): A list of column names that should use a plural representation. Defaults to None.</span>
+<span class="sd">        fname (str, optional): The function name to use in the plural representation. Defaults to &#39;overlaps&#39;.</span>
+<span class="sd">        human (bool, optional): Whether to generate a human-readable representation. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The generated query string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># make sure input is listlike</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_listy</span><span class="p">(</span><span class="n">svals</span><span class="p">):</span> <span class="n">svals</span><span class="o">=</span><span class="p">[</span><span class="n">svals</span><span class="p">]</span>
+
+    <span class="c1"># stringifying</span>
+    <span class="k">def</span> <span class="nf">repr</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getplural</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">human</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;@</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">svals</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">humancol</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span><span class="si">}</span><span class="s1"> is either </span><span class="si">{</span><span class="n">oxfordcomma</span><span class="p">(</span><span class="n">svals</span><span class="p">,</span><span class="w"> </span><span class="nb">repr</span><span class="o">=</span><span class="nb">repr</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="o">=</span><span class="s2">&quot;or&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+        
+    <span class="k">def</span> <span class="nf">getrange</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">human</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">svals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> &lt;= </span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s1"> &lt;= </span><span class="si">{</span><span class="n">svals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">humancol</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span><span class="si">}</span><span class="s1"> ranges from </span><span class="si">{</span><span class="n">svals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> through </span><span class="si">{</span><span class="n">svals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">getsinglequerygroup</span><span class="p">():</span>
+        <span class="n">strs</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s1"> == </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span> 
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">human</span>
+                <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">humancol</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span><span class="si">}</span><span class="s1"> is </span><span class="si">{</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">svals</span>
+        <span class="p">]</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">o</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="n">o</span>
+
+    <span class="c1"># return function if this is a list-containing col</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">plural_cols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sname</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">plural_cols</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">getplural</span><span class="p">()</span>
+    
+    <span class="c1"># if a range of ints, use a less/greater than syntax</span>
+    <span class="c1"># elif is_range_of_ints(svals):</span>
+    <span class="k">elif</span> <span class="nb">int</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">type</span><span class="p">(</span><span class="n">svx</span><span class="p">)</span> <span class="k">for</span> <span class="n">svx</span> <span class="ow">in</span> <span class="n">svals</span><span class="p">}:</span>
+        <span class="k">return</span> <span class="n">getrange</span><span class="p">()</span>
+
+    <span class="c1"># if simply too many vals</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">svals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxlen</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">getplural</span><span class="p">()</span>
+
+    <span class="c1"># otherwise, compound</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">getsinglequerygroup</span><span class="p">()</span></div>
+
+        
+
+<div class="viewcode-block" id="filter_query_str">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.queries.filter_query_str">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_query_str</span><span class="p">(</span><span class="n">filter_data</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">test_func</span><span class="p">:</span><span class="s1">&#39;function&#39;</span><span class="o">=</span><span class="n">overlaps</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">operator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;and&#39;</span><span class="p">,</span> <span class="n">plural_cols</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">human</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter a query string based on the given filter data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filter_data (dict): A dictionary containing the filter data. The keys represent the column names, and the values represent the filter values.</span>
+<span class="sd">        test_func (function or str, optional): The function or name of the function to use for testing the filter values. Defaults to overlaps.</span>
+<span class="sd">        operator (str, optional): The operator to use for combining multiple filter conditions. Defaults to &#39;and&#39;.</span>
+<span class="sd">        plural_cols (list, optional): A list of column names that should be treated as plural. Defaults to None.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The filtered query string.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; filter_data = {&#39;name&#39;: [&#39;John&#39;, &#39;Jane&#39;], &#39;age&#39;: [25, 30]}</span>
+<span class="sd">        &gt;&gt;&gt; filter_query_str(filter_data)</span>
+<span class="sd">        &quot;(name==&#39;John&#39; or name==&#39;Jane&#39;) and (age==25 or age==30)&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filter_data</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">fname</span><span class="o">=</span><span class="n">test_func</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">test_func</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span> <span class="k">else</span> <span class="n">test_func</span>
+    
+    <span class="n">sep</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s1"> &#39;</span>
+    <span class="k">return</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+        <span class="n">filter_query_str_series</span><span class="p">(</span><span class="n">sname</span><span class="p">,</span><span class="n">svals</span><span class="p">,</span><span class="n">op</span><span class="o">=</span><span class="s1">&#39;or&#39;</span><span class="p">,</span><span class="n">maxlen</span><span class="o">=</span><span class="n">maxlen</span><span class="p">,</span><span class="n">plural_cols</span><span class="o">=</span><span class="n">plural_cols</span><span class="p">,</span><span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span><span class="n">human</span><span class="o">=</span><span class="n">human</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sname</span><span class="p">,</span><span class="n">svals</span> <span class="ow">in</span> <span class="n">filter_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">svals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="filter_df">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.queries.filter_df">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_df</span><span class="p">(</span><span class="n">df</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">filter_data</span><span class="o">=</span><span class="p">{},</span> <span class="n">test_func</span><span class="p">:</span><span class="s1">&#39;function&#39;</span><span class="o">=</span><span class="n">overlaps</span><span class="p">,</span> <span class="n">operator</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;and&#39;</span><span class="p">,</span> <span class="n">plural_cols</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_query</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter a pandas DataFrame based on the provided filter data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The DataFrame to be filtered.</span>
+<span class="sd">        filter_data (dict, optional): The filter data to be applied. Defaults to an empty dictionary.</span>
+<span class="sd">        test_func (function, optional): The function used to test the filter conditions. Defaults to overlaps.</span>
+<span class="sd">        operator (str, optional): The operator used to combine multiple filter conditions. Defaults to &#39;and&#39;.</span>
+<span class="sd">        plural_cols (list or None, optional): The list of columns that contain lists. Defaults to None.</span>
+<span class="sd">        return_query (bool, optional): Whether to return the filter query string along with the filtered DataFrame. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame or tuple: The filtered DataFrame or a tuple containing the filter query string and the original DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># determine which cols are plural (have lists in them)</span>
+    <span class="k">if</span> <span class="n">plural_cols</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">plural_cols</span> <span class="o">=</span> <span class="n">find_plural_cols</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        
+    <span class="c1"># get query string</span>
+    <span class="n">qstr</span><span class="o">=</span><span class="n">filter_query_str</span><span class="p">(</span>
+        <span class="n">filter_data</span><span class="p">,</span>
+        <span class="n">test_func</span><span class="o">=</span><span class="n">test_func</span><span class="p">,</span>
+        <span class="n">operator</span><span class="o">=</span><span class="n">operator</span><span class="p">,</span> 
+        <span class="n">plural_cols</span><span class="o">=</span><span class="n">plural_cols</span>
+    <span class="p">)</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">filter_data</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span> <span class="k">else</span> <span class="n">filter_data</span>
+
+    <span class="c1"># query and return</span>
+    <span class="n">odf</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">qstr</span><span class="p">)</span> <span class="k">if</span> <span class="n">qstr</span> <span class="k">else</span> <span class="n">df</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">qstr</span><span class="p">,</span><span class="n">df</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_query</span> <span class="k">else</span> <span class="n">odf</span></div>
+
+
+<div class="viewcode-block" id="filter_series">
+<a class="viewcode-back" href="../../geotaste.html#geotaste.queries.filter_series">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_series</span><span class="p">(</span><span class="n">series</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">vals</span><span class="p">:</span><span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">test_func</span><span class="p">:</span><span class="s1">&#39;function&#39;</span> <span class="o">=</span> <span class="n">isin_or_hasone</span><span class="p">,</span> <span class="n">matches</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="p">[])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter a pandas Series based on specified values or a custom test function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        series (pd.Series): The pandas Series to be filtered.</span>
+<span class="sd">        vals (list, optional): A list of values to filter the Series by. Defaults to an empty list.</span>
+<span class="sd">        test_func (function, optional): A custom test function to filter the Series by. Defaults to isin_or_hasone.</span>
+<span class="sd">        matches (list, optional): A list of index labels to filter the Series by. Defaults to an empty list.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.Series: The filtered pandas Series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">matches</span><span class="p">:</span> <span class="n">series_matching</span> <span class="o">=</span> <span class="n">series</span><span class="p">[[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">index</span><span class="p">)]]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">vals</span><span class="p">:</span> <span class="n">series_matching</span> <span class="o">=</span> <span class="n">series</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">series_matching</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="n">series</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">test_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">vals</span><span class="p">))]</span>    
+    <span class="k">return</span> <span class="n">series_matching</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Shakespeare and Co Project Lab</a></h1>
+
+
+
+<p class="blurb">Analytic dashboard application for the Shakespare and Co CDH project</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=Princeton-CDH&repo=geotaste&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script><div class="powered_by">
+<p>Powered by:</p>
+<a href="http://cdh.princeton.edu/">
+<img src="https://cdh.princeton.edu/static/img/CDH_logo.svg"
+    alt="Center for Digital Humanities @ Princeton" />
+</a>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, CDH @ Princeton University.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
