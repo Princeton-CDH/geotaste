@@ -112,7 +112,7 @@ def test_combined_dataset():
 
 def test_gen_combined_dataset():
     with Logwatch('generating mini combined dataset'):
-        df = CombinedDataset().gen(progress=False,frac=.1)
+        df = CombinedDataset().gen(progress=False,frac=.1,save=False)
 
     dtypes = df.dwelling_matchtype.unique()
     assert set(dtypes) == {
