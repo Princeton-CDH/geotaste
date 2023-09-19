@@ -100,14 +100,6 @@ geotaste.utils module
    :undoc-members:
    :show-inheritance:
 
-geotaste.views module
----------------------
-
-.. automodule:: geotaste.views
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
