@@ -29,11 +29,24 @@
           <div class="body" role="main">
             
   <h1>Source code for geotaste.app</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">geotaste.imports</span> <span class="kn">import</span> <span class="o">*</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains the few functions we need to start and run the Dash app. </span>
+
+<span class="sd">Note: Because we&#39;re using Dash OOP components, we instantiate a `DashApp` object, whose `app` attribute is the `dash.Dash` app object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">geotaste.imports</span> <span class="kn">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="get_app">
 <a class="viewcode-back" href="../../geotaste.html#geotaste.app.get_app">[docs]</a>
 <span class="k">def</span> <span class="nf">get_app</span><span class="p">(</span><span class="n">url_base_pathname</span><span class="o">=</span><span class="n">ROOT_URL</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a DashApp object with specified configurations.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        url_base_pathname (str): The base URL pathname for the app. Defaults to ROOT_URL. Could be &quot;/sco/1&quot; for instance. This can be set in ~/geotaste_data/config.json under ROOT_URL.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        app (DashApp): The DashApp object with specified configurations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">url_base_pathname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
         <span class="n">url_base_pathname</span><span class="o">+=</span><span class="s1">&#39;/&#39;</span>
     <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;booting geotaste&#39;</span><span class="p">):</span>
@@ -56,6 +69,11 @@
 <div class="viewcode-block" id="get_server">
 <a class="viewcode-back" href="../../geotaste.html#geotaste.app.get_server">[docs]</a>
 <span class="k">def</span> <span class="nf">get_server</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the server object from the Flask app.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        server (object): The server object from the Flask app.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">get_app</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">server</span></div>
 
@@ -63,6 +81,29 @@
 <div class="viewcode-block" id="run">
 <a class="viewcode-back" href="../../geotaste.html#geotaste.app.run">[docs]</a>
 <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">url_base_pathname</span><span class="o">=</span><span class="n">ROOT_URL</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runs the geotaste app on the specified host and port. The constants mentioned below can be overwritten/set in ~/geotaste_data/config.json.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        host (str): The host address to run the app on. Defaults to HOST.</span>
+<span class="sd">        port (int): The port number to run the app on. Defaults to PORT.</span>
+<span class="sd">        debug (bool): Whether to run the app in debug mode. Defaults to DEBUG.</span>
+<span class="sd">        url_base_pathname (str): The base URL pathname for the app. Defaults to ROOT_URL.</span>
+<span class="sd">        **kwargs: Additional keyword arguments to be passed to the app.run() method.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        flask.Flask: The Flask app server object.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples:</span>
+<span class="sd">        # Run the app on the default host and port</span>
+<span class="sd">        run()</span>
+<span class="sd">    </span>
+<span class="sd">        # Run the app on a specific host and port</span>
+<span class="sd">        run(host=&#39;0.0.0.0&#39;, port=8080)</span>
+<span class="sd">    </span>
+<span class="sd">        # Run the app in debug mode</span>
+<span class="sd">        run(debug=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">app</span> <span class="o">=</span> <span class="n">get_app</span><span class="p">(</span><span class="n">url_base_pathname</span><span class="o">=</span><span class="n">url_base_pathname</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="s1">&#39;running app&#39;</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;geotaste running at http://</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -77,14 +118,38 @@
 
 <div class="viewcode-block" id="run_debug">
 <a class="viewcode-back" href="../../geotaste.html#geotaste.app.run_debug">[docs]</a>
-<span class="k">def</span> <span class="nf">run_debug</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+<span class="k">def</span> <span class="nf">run_debug</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runs the application in debug mode.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        host (str, optional): The host IP address. Defaults to HOST.</span>
+<span class="sd">        port (int, optional): The port number. Defaults to PORT.</span>
+<span class="sd">        **kwargs: Additional keyword arguments.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        The result of the `run` function, a Flask app server object.    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;debug&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+    <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="run_safe">
 <a class="viewcode-back" href="../../geotaste.html#geotaste.app.run_safe">[docs]</a>
-<span class="k">def</span> <span class="nf">run_safe</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+<span class="k">def</span> <span class="nf">run_safe</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runs the application NOT in debug mode / in production mode.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        host (str, optional): The host IP address. Defaults to HOST.</span>
+<span class="sd">        port (int, optional): The port number. Defaults to PORT.</span>
+<span class="sd">        **kwargs: Additional keyword arguments.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        The result of the `run` function, a Flask app server object.    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;debug&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+    <span class="k">return</span> <span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s1">&#39;__main__&#39;</span><span class="p">:</span> <span class="n">run</span><span class="p">()</span>
