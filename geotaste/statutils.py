@@ -98,7 +98,11 @@ def table_info(ctbl):
     """Returns a dictionary containing information about a given table.
     
     Args:
-        ctbl (list): A 2D list representing the table.
+        ctbl (list): A 2D list representing the table:
+            [
+                [count_L, count_R],
+                [total_L, total_R]
+            ]
     
     Returns:
         dict: A dictionary containing the following information:
@@ -112,7 +116,7 @@ def table_info(ctbl):
     
     Examples:
         >>> table_info([[10, 20], [30, 40]])
-        {'count_sum': 100, 'count_min': 10, 'count_L': 10, 'count_R': 20, 'perc_L': 33.33333333333333, 'perc_R': 66.66666666666666, 'perc_L->R': 33.33333333333333}
+        {'count_sum': 30, 'count_min': 10, 'count_L': 10, 'count_R': 20, 'perc_L': 25.0, 'perc_R': 33.33333333333333, 'perc_L->R': 8.333333333333329}
         >>> table_info([[0, 0], [0, 0]])
         {'count_sum': 0, 'count_min': 0, 'count_L': 0, 'count_R': 0, 'perc_L': nan, 'perc_R': nan, 'perc_L->R': nan}
     """

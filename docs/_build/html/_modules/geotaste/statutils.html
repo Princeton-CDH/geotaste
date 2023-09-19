@@ -137,7 +137,11 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing information about a given table.</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
-<span class="sd">        ctbl (list): A 2D list representing the table.</span>
+<span class="sd">        ctbl (list): A 2D list representing the table:</span>
+<span class="sd">            [</span>
+<span class="sd">                [count_L, count_R],</span>
+<span class="sd">                [total_L, total_R]</span>
+<span class="sd">            ]</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: A dictionary containing the following information:</span>
@@ -151,7 +155,7 @@
 <span class="sd">    </span>
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; table_info([[10, 20], [30, 40]])</span>
-<span class="sd">        {&#39;count_sum&#39;: 100, &#39;count_min&#39;: 10, &#39;count_L&#39;: 10, &#39;count_R&#39;: 20, &#39;perc_L&#39;: 33.33333333333333, &#39;perc_R&#39;: 66.66666666666666, &#39;perc_L-&gt;R&#39;: 33.33333333333333}</span>
+<span class="sd">        {&#39;count_sum&#39;: 30, &#39;count_min&#39;: 10, &#39;count_L&#39;: 10, &#39;count_R&#39;: 20, &#39;perc_L&#39;: 25.0, &#39;perc_R&#39;: 33.33333333333333, &#39;perc_L-&gt;R&#39;: 8.333333333333329}</span>
 <span class="sd">        &gt;&gt;&gt; table_info([[0, 0], [0, 0]])</span>
 <span class="sd">        {&#39;count_sum&#39;: 0, &#39;count_min&#39;: 0, &#39;count_L&#39;: 0, &#39;count_R&#39;: 0, &#39;perc_L&#39;: nan, &#39;perc_R&#39;: nan, &#39;perc_L-&gt;R&#39;: nan}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
