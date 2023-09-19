@@ -25,6 +25,49 @@ cols_books = [
 ###########
 
 class FigureFactory(DashFigureFactory, Logmaker):
+    """
+    A class used to represent a factory for generating figures.
+
+    ...
+
+    Attributes
+    ----------
+    records_name : str
+        A string indicating the name of the records (default is 'records')
+    key : str
+        A string to be used as a key to access elements in a record.
+    records_points_dim : str 
+        A string indicating the dimensionality of the records points (default is 'xy')
+    dataset_class : class
+        The class of the dataset to be used by the factory (default is Combined)
+    drop_duplicates : tuple
+        A tuple defining the criteria for dropping duplicate records (default is an empty tuple)
+    quant : bool
+        A boolean indicating whether or not to perform quantization (default is False)
+    opts_xaxis : dict
+        A dictionary of options for x-axis (default is an empty dict)
+    opts_yaxis : dict
+        A dictionary of options for y-axis (default is an empty dict)
+    height : int
+        An integer indicating the height of the figure (default is 100)
+    min_series_val : object
+        Minimum value for the series of data (default is None)
+    max_series_val : object
+        Maximum value for the series of data (default is None)
+    color: object
+        The color used for the figure (default is None)
+    keep_missing_types : bool
+        A boolean indicating whether to keep missing types in the data (default is True)
+    vertical : bool
+        A boolean indicating whether to plot vertical bars (default is False)
+    log_x : bool
+        A boolean indicating whether to use log scale on x-axis (default is False)
+    log_y : bool
+        A boolean indicating whether to use log scale on y-axis (default is False)
+    text : str
+        Key in data frame to be displayed on the graph.
+    """
+
     records_name = 'records'
     key = ''
     records_points_dim = 'xy'
@@ -79,8 +122,8 @@ class FigureFactory(DashFigureFactory, Logmaker):
     def get_selected(self, selectedData={}):
         """The `get_selected` function returns a dictionary containing selected records based on the provided `selectedData` parameter. If `selectedData` is empty or not provided, an empty dictionary is returned.
         
-        Parameters:
-        - `selectedData` (dict): A dictionary containing selected data. Default is an empty dictionary.
+        Args:
+            selectedData (dict): A dictionary containing selected data. Default is an empty dictionary.
         
         Returns:
         - dict: A dictionary with one key, `self.key`, and one value, the selected values [val1, val2, ...]
@@ -442,10 +485,6 @@ class FigureFactory(DashFigureFactory, Logmaker):
 class MemberFigure(FigureFactory):
     """
     A class that creates a figure factory for Members.
-    
-    Attributes:
-    records_name : (str) Indicates the type of member records.
-    drop_duplicates : (tuple) Specifies the field to consider for dropping duplicate records.
     """
     records_name='members'
     drop_duplicates=('member',)
@@ -455,10 +494,6 @@ class MemberFigure(FigureFactory):
 class MemberDOBFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the member's date of birth.
-
-    Attributes:
-    key : (str) Key for the series in the members dataframe
-    quant : (bool) This is set to True indicating that the data is quantitative.
     """
     key = 'member_dob'
     quant = True
@@ -466,11 +501,6 @@ class MemberDOBFigure(MemberFigure):
 class MembershipYearFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the membership year.
-
-    Attributes:
-    records_name : (str) Convenient plural form for the type of data shown here
-    key : (str) Key for the series in the members dataframe
-    quant : (bool) This is set to True indicating that the data is quantitative.
     """
     records_name='annual subscriptions'
     key='member_membership'
@@ -479,12 +509,6 @@ class MembershipYearFigure(MemberFigure):
 class MemberGenderFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the member's gender.
-
-    Attributes:
-    key : (str) Key for the series in the members dataframe
-    quant : (bool) This is set to False indicating that the data is not quantitative.
-    vertical : (bool) Forces the graph to be a horizontal bar chart when set to False.
-    text : (str) Key in data frame to be displayed on the graph.
     """
     key='member_gender'
     quant=False
@@ -497,12 +521,6 @@ class MemberGenderFigure(MemberFigure):
 class NationalityFigure(FigureFactory):
     """
     A class that creates a figure factory for nationality.
-
-    Attributes:
-    records_points_dim : (str) Dimension of selection of points set to 'y'.
-    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
-    log_x : (bool) Forces the 'x' axis to be logarithmic when set to True.
-    text : (str) Key in data frame to be displayed on the graph.
     """
     records_points_dim='y'
     vertical = True
@@ -515,10 +533,6 @@ class NationalityFigure(FigureFactory):
 class MemberNationalityFigure(NationalityFigure, MemberFigure):
     """
     A child class of NationalityFigure and MemberFigure that creates a figure based on nationality.
-
-    Attributes:
-    records_name : (str) Convenient plural form for the type of data shown here
-    key : (str) Key for the series in the members dataframe
     """
     records_name='member nationalities'
     key='member_nationalities'
@@ -526,12 +540,6 @@ class MemberNationalityFigure(NationalityFigure, MemberFigure):
 class MemberArrondFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on 'arrond_id'.
-    
-    Attributes:
-    key : (str) Key for the series in the members dataframe
-    quant : (bool) This is set to False indicating that the data is not quantitative.
-    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
-    text : (str) Text to be displayed on the graph.
     """
 
     key='arrond_id'
@@ -545,7 +553,7 @@ class MemberArrondFigure(MemberFigure):
         A method that computes and returns a dataframe of counts after applying validation and sorting.
         
         Returns:
-        (DataFrame) A DataFrame sorted by 'arrond_i'.
+            (DataFrame) A DataFrame sorted by 'arrond_i'.
         """
         odf=super().df_counts
         series = odf[self.key]
@@ -575,10 +583,6 @@ class MemberArrondFigure(MemberFigure):
 class MemberNameFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the member's name.
-
-    Attributes:
-    key : (str) Key for the series in the members dataframe.
-    drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.
     """
     key = 'member_name'
     drop_duplicates=('member',)
@@ -587,10 +591,6 @@ class MemberNameFigure(MemberFigure):
 class BookFigure(FigureFactory):
     """
     A child class of FigureFactory that creates figures based on books.
-
-    Attributes:
-    records_name : (str) The name of the records.
-    drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.
     """
     records_name='books'
     drop_duplicates=('book',)
@@ -599,9 +599,6 @@ class BookFigure(FigureFactory):
 class BookTitleFigure(BookFigure):
     """
     A child class of BookFigure that creates a figure based on the book's title.
-
-    Attributes:
-    key : (str) The key representing the book's title.
     """
     key = 'book_title'
 
@@ -609,11 +606,6 @@ class BookTitleFigure(BookFigure):
 class BookGenreFigure(BookFigure):
     """
     A child class of BookFigure that creates a figure based on the book's genre.
-
-    Attributes:
-    key : (str) The key representing the book's genre.
-    vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
-    text : (str) Key in data frame to be displayed on the graph.
     """
     key = 'book_genre'
     vertical = True
@@ -623,12 +615,6 @@ class BookGenreFigure(BookFigure):
 class BookYearFigure(BookFigure):
     """
     A child class of BookFigure that creates a figure based on the book's publication year.
-
-    Attributes:
-    key : (str) The key representing the book's year.
-    quant : (bool) This is set to True indicating that the data is quantitative.
-    min_series_val : (int) The minimum year value for book publication.
-    max_series_val : (int) The maximum year value for book publication.
     """
     key = 'book_year'
     quant = True
@@ -645,10 +631,6 @@ class BookYearFigure(BookFigure):
 class AuthorFigure(FigureFactory):
     """
     A child class of FigureFactory that creates figures based on authors.
-
-    Attributes:
-    records_name:(str) The name of the records.
-    drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.
     """
     records_name='authors'
     drop_duplicates=('author',)
@@ -657,12 +639,6 @@ class AuthorFigure(FigureFactory):
 class AuthorGenderFigure(AuthorFigure):
     """
     A child class of AuthorFigure that creates a figure based on the author's gender.
-
-    Attributes:
-    key:(str) The key representing the author's gender.
-    quant:(bool) This is set to False indicating that the data is not quantitative.
-    vertical:(bool) Forces the graph to be a horizontal bar chart when set to False.
-    text:(str) Key in data frame to be displayed on the graph.
     """
     key='author_gender'
     quant=False
@@ -673,10 +649,6 @@ class AuthorGenderFigure(AuthorFigure):
 class AuthorNationalityFigure(NationalityFigure, AuthorFigure):
     """
     A child class of NationalityFigure and AuthorFigure that creates a figure based on the author's nationality.
-
-    Attributes:
-    key:(str) The key representing the author's nationality.
-    quant:(bool) This is set to False indicating that the data is not quantitative.
     """
     key='author_nationalities'
     quant=False
@@ -685,12 +657,6 @@ class AuthorNationalityFigure(NationalityFigure, AuthorFigure):
 class AuthorDOBFigure(AuthorFigure):
     """
     A child class of AuthorFigure that creates a figure based on the author's date of birth.
-
-    Attributes:
-    key:(str) The key representing the author's date of birth.
-    quant:(bool) This is set to True indicating that the data is quantitative.
-    min_series_val:(int) The minimum year value for author's date of birth.
-    max_series_val:(int) The maximum year value for author's date of birth.
     """
     key = 'author_dob'
     quant = True
@@ -701,9 +667,6 @@ class AuthorDOBFigure(AuthorFigure):
 class AuthorNameFigure(AuthorFigure):
     """
     A child class of AuthorFigure that creates a figure based on the author's name.
-
-    Attributes:
-    key:(str) The key representing the author's name.
     """
     key = 'author_name'
 
@@ -711,9 +674,6 @@ class AuthorNameFigure(AuthorFigure):
 class EventFigure(FigureFactory):
     """
     A child class of FigureFactory that creates figures based on events.
-
-    Attributes:
-    drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.
     """
     drop_duplicates = ('event',)
 
@@ -721,10 +681,6 @@ class EventFigure(FigureFactory):
 class EventYearFigure(EventFigure):
     """
     A child class of EventFigure that creates a figure based on the event's year.
-
-    Attributes:
-    key:(str) The key representing the event's year.
-    quant:(bool) This is set to True indicating that the data is quantitative.
     """
     key = 'event_year'
     quant = True
@@ -733,10 +689,6 @@ class EventYearFigure(EventFigure):
 class EventMonthFigure(EventFigure):
     """
     A child class of EventFigure that creates a figure based on the event's month.
-
-    Attributes:
-    key:(str) The key representing the event's month.
-    quant:(bool) This is set to True indicating that the data is quantitative.
     """
     key = 'event_month'
     quant = True
@@ -745,11 +697,6 @@ class EventMonthFigure(EventFigure):
 class EventTypeFigure(EventFigure):
     """
     A child class of EventFigure that creates a figure based on the event's type.
-
-    Attributes:
-    key:(str) The key representing the event's type.
-    quant:(bool) This is set to False indicating that the data is not quantitative.
-    vertical:(bool) Forces the graph to be a vertical bar chart when set to True.
     """
     key = 'event_type'
     quant = False

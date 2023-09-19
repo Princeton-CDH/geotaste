@@ -1540,11 +1540,6 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">AuthorDOBFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#AuthorDOBFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.AuthorDOBFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.AuthorFigure" title="geotaste.figs.AuthorFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthorFigure</span></code></a></p>
 <p>A child class of AuthorFigure that creates a figure based on the author’s date of birth.</p>
-<p>Attributes:
-key:(str) The key representing the author’s date of birth.
-quant:(bool) This is set to True indicating that the data is quantitative.
-min_series_val:(int) The minimum year value for author’s date of birth.
-max_series_val:(int) The maximum year value for author’s date of birth.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.AuthorDOBFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'author_dob'</span></em><a class="headerlink" href="#geotaste.figs.AuthorDOBFigure.key" title="Link to this definition"></a></dt>
@@ -1572,9 +1567,6 @@ max_series_val:(int) The maximum year value for author’s date of birth.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">AuthorFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#AuthorFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.AuthorFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.FigureFactory" title="geotaste.figs.FigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">FigureFactory</span></code></a></p>
 <p>A child class of FigureFactory that creates figures based on authors.</p>
-<p>Attributes:
-records_name:(str) The name of the records.
-drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.AuthorFigure.drop_duplicates">
 <span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('author',)</span></em><a class="headerlink" href="#geotaste.figs.AuthorFigure.drop_duplicates" title="Link to this definition"></a></dt>
@@ -1592,11 +1584,6 @@ drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates f
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">AuthorGenderFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#AuthorGenderFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.AuthorGenderFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.AuthorFigure" title="geotaste.figs.AuthorFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthorFigure</span></code></a></p>
 <p>A child class of AuthorFigure that creates a figure based on the author’s gender.</p>
-<p>Attributes:
-key:(str) The key representing the author’s gender.
-quant:(bool) This is set to False indicating that the data is not quantitative.
-vertical:(bool) Forces the graph to be a horizontal bar chart when set to False.
-text:(str) Key in data frame to be displayed on the graph.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.AuthorGenderFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'author_gender'</span></em><a class="headerlink" href="#geotaste.figs.AuthorGenderFigure.key" title="Link to this definition"></a></dt>
@@ -1624,8 +1611,6 @@ text:(str) Key in data frame to be displayed on the graph.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">AuthorNameFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#AuthorNameFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.AuthorNameFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.AuthorFigure" title="geotaste.figs.AuthorFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthorFigure</span></code></a></p>
 <p>A child class of AuthorFigure that creates a figure based on the author’s name.</p>
-<p>Attributes:
-key:(str) The key representing the author’s name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.AuthorNameFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'author_name'</span></em><a class="headerlink" href="#geotaste.figs.AuthorNameFigure.key" title="Link to this definition"></a></dt>
@@ -1638,9 +1623,6 @@ key:(str) The key representing the author’s name.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">AuthorNationalityFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#AuthorNationalityFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.AuthorNationalityFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.NationalityFigure" title="geotaste.figs.NationalityFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">NationalityFigure</span></code></a>, <a class="reference internal" href="#geotaste.figs.AuthorFigure" title="geotaste.figs.AuthorFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthorFigure</span></code></a></p>
 <p>A child class of NationalityFigure and AuthorFigure that creates a figure based on the author’s nationality.</p>
-<p>Attributes:
-key:(str) The key representing the author’s nationality.
-quant:(bool) This is set to False indicating that the data is not quantitative.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.AuthorNationalityFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'author_nationalities'</span></em><a class="headerlink" href="#geotaste.figs.AuthorNationalityFigure.key" title="Link to this definition"></a></dt>
@@ -1658,9 +1640,6 @@ quant:(bool) This is set to False indicating that the data is not quantitative.<
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">BookFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#BookFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.BookFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.FigureFactory" title="geotaste.figs.FigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">FigureFactory</span></code></a></p>
 <p>A child class of FigureFactory that creates figures based on books.</p>
-<p>Attributes:
-records_name : (str) The name of the records.
-drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.BookFigure.drop_duplicates">
 <span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('book',)</span></em><a class="headerlink" href="#geotaste.figs.BookFigure.drop_duplicates" title="Link to this definition"></a></dt>
@@ -1678,10 +1657,6 @@ drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">BookGenreFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#BookGenreFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.BookGenreFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.BookFigure" title="geotaste.figs.BookFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">BookFigure</span></code></a></p>
 <p>A child class of BookFigure that creates a figure based on the book’s genre.</p>
-<p>Attributes:
-key : (str) The key representing the book’s genre.
-vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
-text : (str) Key in data frame to be displayed on the graph.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.BookGenreFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'book_genre'</span></em><a class="headerlink" href="#geotaste.figs.BookGenreFigure.key" title="Link to this definition"></a></dt>
@@ -1704,8 +1679,6 @@ text : (str) Key in data frame to be displayed on the graph.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">BookTitleFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#BookTitleFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.BookTitleFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.BookFigure" title="geotaste.figs.BookFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">BookFigure</span></code></a></p>
 <p>A child class of BookFigure that creates a figure based on the book’s title.</p>
-<p>Attributes:
-key : (str) The key representing the book’s title.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.BookTitleFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'book_title'</span></em><a class="headerlink" href="#geotaste.figs.BookTitleFigure.key" title="Link to this definition"></a></dt>
@@ -1718,11 +1691,6 @@ key : (str) The key representing the book’s title.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">BookYearFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#BookYearFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.BookYearFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.BookFigure" title="geotaste.figs.BookFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">BookFigure</span></code></a></p>
 <p>A child class of BookFigure that creates a figure based on the book’s publication year.</p>
-<p>Attributes:
-key : (str) The key representing the book’s year.
-quant : (bool) This is set to True indicating that the data is quantitative.
-min_series_val : (int) The minimum year value for book publication.
-max_series_val : (int) The maximum year value for book publication.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.BookYearFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'book_year'</span></em><a class="headerlink" href="#geotaste.figs.BookYearFigure.key" title="Link to this definition"></a></dt>
@@ -1913,8 +1881,6 @@ max_series_val : (int) The maximum year value for book publication.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">EventFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#EventFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.EventFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.FigureFactory" title="geotaste.figs.FigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">FigureFactory</span></code></a></p>
 <p>A child class of FigureFactory that creates figures based on events.</p>
-<p>Attributes:
-drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates from.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.EventFigure.drop_duplicates">
 <span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('event',)</span></em><a class="headerlink" href="#geotaste.figs.EventFigure.drop_duplicates" title="Link to this definition"></a></dt>
@@ -1927,9 +1893,6 @@ drop_duplicates:(tuple) Tuple consisting of the column name to drop duplicates f
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">EventMonthFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#EventMonthFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.EventMonthFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.EventFigure" title="geotaste.figs.EventFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventFigure</span></code></a></p>
 <p>A child class of EventFigure that creates a figure based on the event’s month.</p>
-<p>Attributes:
-key:(str) The key representing the event’s month.
-quant:(bool) This is set to True indicating that the data is quantitative.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.EventMonthFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'event_month'</span></em><a class="headerlink" href="#geotaste.figs.EventMonthFigure.key" title="Link to this definition"></a></dt>
@@ -1947,10 +1910,6 @@ quant:(bool) This is set to True indicating that the data is quantitative.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">EventTypeFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#EventTypeFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.EventTypeFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.EventFigure" title="geotaste.figs.EventFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventFigure</span></code></a></p>
 <p>A child class of EventFigure that creates a figure based on the event’s type.</p>
-<p>Attributes:
-key:(str) The key representing the event’s type.
-quant:(bool) This is set to False indicating that the data is not quantitative.
-vertical:(bool) Forces the graph to be a vertical bar chart when set to True.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.EventTypeFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'event_type'</span></em><a class="headerlink" href="#geotaste.figs.EventTypeFigure.key" title="Link to this definition"></a></dt>
@@ -1973,9 +1932,6 @@ vertical:(bool) Forces the graph to be a vertical bar chart when set to True.</p
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">EventYearFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#EventYearFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.EventYearFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.EventFigure" title="geotaste.figs.EventFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventFigure</span></code></a></p>
 <p>A child class of EventFigure that creates a figure based on the event’s year.</p>
-<p>Attributes:
-key:(str) The key representing the event’s year.
-quant:(bool) This is set to True indicating that the data is quantitative.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.EventYearFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'event_year'</span></em><a class="headerlink" href="#geotaste.figs.EventYearFigure.key" title="Link to this definition"></a></dt>
@@ -1992,9 +1948,198 @@ quant:(bool) This is set to True indicating that the data is quantitative.</p>
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">FigureFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#FigureFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.FigureFactory" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DashFigureFactory</span></code>, <a class="reference internal" href="#geotaste.utils.Logmaker" title="geotaste.utils.Logmaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logmaker</span></code></a></p>
+<p>A class used to represent a factory for generating figures.</p>
+<p>…</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.records_name">
+<span class="sig-name descname"><span class="pre">records_name</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.records_name" title="Link to this definition"></a></dt>
+<dd><p>A string indicating the name of the records (default is ‘records’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.key">
+<span class="sig-name descname"><span class="pre">key</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.key" title="Link to this definition"></a></dt>
+<dd><p>A string to be used as a key to access elements in a record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.records_points_dim">
+<span class="sig-name descname"><span class="pre">records_points_dim</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.records_points_dim" title="Link to this definition"></a></dt>
+<dd><p>A string indicating the dimensionality of the records points (default is ‘xy’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.dataset_class">
+<span class="sig-name descname"><span class="pre">dataset_class</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.dataset_class" title="Link to this definition"></a></dt>
+<dd><p>The class of the dataset to be used by the factory (default is Combined)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.drop_duplicates">
+<span class="sig-name descname"><span class="pre">drop_duplicates</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.drop_duplicates" title="Link to this definition"></a></dt>
+<dd><p>A tuple defining the criteria for dropping duplicate records (default is an empty tuple)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.quant">
+<span class="sig-name descname"><span class="pre">quant</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.quant" title="Link to this definition"></a></dt>
+<dd><p>A boolean indicating whether or not to perform quantization (default is False)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.opts_xaxis">
+<span class="sig-name descname"><span class="pre">opts_xaxis</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.opts_xaxis" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of options for x-axis (default is an empty dict)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.opts_yaxis">
+<span class="sig-name descname"><span class="pre">opts_yaxis</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.opts_yaxis" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of options for y-axis (default is an empty dict)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.height">
+<span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.height" title="Link to this definition"></a></dt>
+<dd><p>An integer indicating the height of the figure (default is 100)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.min_series_val">
+<span class="sig-name descname"><span class="pre">min_series_val</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.min_series_val" title="Link to this definition"></a></dt>
+<dd><p>Minimum value for the series of data (default is None)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.max_series_val">
+<span class="sig-name descname"><span class="pre">max_series_val</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.max_series_val" title="Link to this definition"></a></dt>
+<dd><p>Maximum value for the series of data (default is None)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory.color">
-<span class="sig-name descname"><span class="pre">color</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.color" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">color</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.color" title="Link to this definition"></a></dt>
+<dd><p>The color used for the figure (default is None)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.keep_missing_types">
+<span class="sig-name descname"><span class="pre">keep_missing_types</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.keep_missing_types" title="Link to this definition"></a></dt>
+<dd><p>A boolean indicating whether to keep missing types in the data (default is True)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.vertical">
+<span class="sig-name descname"><span class="pre">vertical</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.vertical" title="Link to this definition"></a></dt>
+<dd><p>A boolean indicating whether to plot vertical bars (default is False)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.log_x">
+<span class="sig-name descname"><span class="pre">log_x</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.log_x" title="Link to this definition"></a></dt>
+<dd><p>A boolean indicating whether to use log scale on x-axis (default is False)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.log_y">
+<span class="sig-name descname"><span class="pre">log_y</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.log_y" title="Link to this definition"></a></dt>
+<dd><p>A boolean indicating whether to use log scale on y-axis (default is False)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.text">
+<span class="sig-name descname"><span class="pre">text</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.text" title="Link to this definition"></a></dt>
+<dd><p>Key in data frame to be displayed on the graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">color</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -2040,8 +2185,8 @@ quant:(bool) This is set to True indicating that the data is quantitative.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.dataset_class">
-<span class="sig-name descname"><span class="pre">dataset_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geotaste.figs.FigureFactory.dataset_class" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">dataset_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -2073,8 +2218,8 @@ quant:(bool) This is set to True indicating that the data is quantitative.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.drop_duplicates">
-<span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.drop_duplicates" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -2109,8 +2254,11 @@ quant:(bool) This is set to True indicating that the data is quantitative.</p>
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory.get_selected">
 <span class="sig-name descname"><span class="pre">get_selected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selectedData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#FigureFactory.get_selected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.FigureFactory.get_selected" title="Link to this definition"></a></dt>
 <dd><p>The <cite>get_selected</cite> function returns a dictionary containing selected records based on the provided <cite>selectedData</cite> parameter. If <cite>selectedData</cite> is empty or not provided, an empty dictionary is returned.</p>
-<p>Parameters:
-- <cite>selectedData</cite> (dict): A dictionary containing selected data. Default is an empty dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>selectedData</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – A dictionary containing selected data. Default is an empty dictionary.</p>
+</dd>
+</dl>
 <p>Returns:
 - dict: A dictionary with one key, <cite>self.key</cite>, and one value, the selected values [val1, val2, …]</p>
 </dd></dl>
@@ -2174,33 +2322,33 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.height">
-<span class="sig-name descname"><span class="pre">height</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.height" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">height</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.keep_missing_types">
-<span class="sig-name descname"><span class="pre">keep_missing_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.keep_missing_types" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">keep_missing_types</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.key">
-<span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.key" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.log_x">
-<span class="sig-name descname"><span class="pre">log_x</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.log_x" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">log_x</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.log_y">
-<span class="sig-name descname"><span class="pre">log_y</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.log_y" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">log_y</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.max_series_val">
-<span class="sig-name descname"><span class="pre">max_series_val</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.max_series_val" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">max_series_val</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -2232,8 +2380,8 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.min_series_val">
-<span class="sig-name descname"><span class="pre">min_series_val</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.min_series_val" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">min_series_val</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -2265,13 +2413,13 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.opts_xaxis">
-<span class="sig-name descname"><span class="pre">opts_xaxis</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.opts_xaxis" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">opts_xaxis</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.opts_yaxis">
-<span class="sig-name descname"><span class="pre">opts_yaxis</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.opts_yaxis" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">opts_yaxis</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -2312,18 +2460,18 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.quant">
-<span class="sig-name descname"><span class="pre">quant</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.quant" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">quant</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.records_name">
-<span class="sig-name descname"><span class="pre">records_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'records'</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.records_name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">records_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'records'</span></em><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.records_points_dim">
-<span class="sig-name descname"><span class="pre">records_points_dim</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'xy'</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.records_points_dim" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">records_points_dim</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'xy'</span></em><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -2411,13 +2559,13 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.text">
-<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.text" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.vertical">
-<span class="sig-name descname"><span class="pre">vertical</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.vertical" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">vertical</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2448,17 +2596,15 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MemberArrondFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MemberArrondFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MemberArrondFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.MemberFigure" title="geotaste.figs.MemberFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemberFigure</span></code></a></p>
 <p>A child class of MemberFigure that creates a figure based on ‘arrond_id’.</p>
-<p>Attributes:
-key : (str) Key for the series in the members dataframe
-quant : (bool) This is set to False indicating that the data is not quantitative.
-vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
-text : (str) Text to be displayed on the graph.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="geotaste.figs.MemberArrondFigure.df_counts">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">df_counts</span></span><a class="headerlink" href="#geotaste.figs.MemberArrondFigure.df_counts" title="Link to this definition"></a></dt>
 <dd><p>A method that computes and returns a dataframe of counts after applying validation and sorting.</p>
-<p>Returns:
-(DataFrame) A DataFrame sorted by ‘arrond_i’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(DataFrame) A DataFrame sorted by ‘arrond_i’.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2488,9 +2634,6 @@ text : (str) Text to be displayed on the graph.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MemberDOBFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MemberDOBFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MemberDOBFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.MemberFigure" title="geotaste.figs.MemberFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemberFigure</span></code></a></p>
 <p>A child class of MemberFigure that creates a figure based on the member’s date of birth.</p>
-<p>Attributes:
-key : (str) Key for the series in the members dataframe
-quant : (bool) This is set to True indicating that the data is quantitative.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.MemberDOBFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'member_dob'</span></em><a class="headerlink" href="#geotaste.figs.MemberDOBFigure.key" title="Link to this definition"></a></dt>
@@ -2508,9 +2651,6 @@ quant : (bool) This is set to True indicating that the data is quantitative.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MemberFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MemberFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MemberFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.FigureFactory" title="geotaste.figs.FigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">FigureFactory</span></code></a></p>
 <p>A class that creates a figure factory for Members.</p>
-<p>Attributes:
-records_name : (str) Indicates the type of member records.
-drop_duplicates : (tuple) Specifies the field to consider for dropping duplicate records.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.MemberFigure.drop_duplicates">
 <span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('member',)</span></em><a class="headerlink" href="#geotaste.figs.MemberFigure.drop_duplicates" title="Link to this definition"></a></dt>
@@ -2528,11 +2668,6 @@ drop_duplicates : (tuple) Specifies the field to consider for dropping duplicate
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MemberGenderFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MemberGenderFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MemberGenderFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.MemberFigure" title="geotaste.figs.MemberFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemberFigure</span></code></a></p>
 <p>A child class of MemberFigure that creates a figure based on the member’s gender.</p>
-<p>Attributes:
-key : (str) Key for the series in the members dataframe
-quant : (bool) This is set to False indicating that the data is not quantitative.
-vertical : (bool) Forces the graph to be a horizontal bar chart when set to False.
-text : (str) Key in data frame to be displayed on the graph.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.MemberGenderFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'member_gender'</span></em><a class="headerlink" href="#geotaste.figs.MemberGenderFigure.key" title="Link to this definition"></a></dt>
@@ -2560,9 +2695,6 @@ text : (str) Key in data frame to be displayed on the graph.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MemberNameFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MemberNameFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MemberNameFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.MemberFigure" title="geotaste.figs.MemberFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemberFigure</span></code></a></p>
 <p>A child class of MemberFigure that creates a figure based on the member’s name.</p>
-<p>Attributes:
-key : (str) Key for the series in the members dataframe.
-drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates from.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.MemberNameFigure.drop_duplicates">
 <span class="sig-name descname"><span class="pre">drop_duplicates</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('member',)</span></em><a class="headerlink" href="#geotaste.figs.MemberNameFigure.drop_duplicates" title="Link to this definition"></a></dt>
@@ -2580,9 +2712,6 @@ drop_duplicates : (tuple) Tuple consisting of the column name to drop duplicates
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MemberNationalityFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MemberNationalityFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MemberNationalityFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.NationalityFigure" title="geotaste.figs.NationalityFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">NationalityFigure</span></code></a>, <a class="reference internal" href="#geotaste.figs.MemberFigure" title="geotaste.figs.MemberFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemberFigure</span></code></a></p>
 <p>A child class of NationalityFigure and MemberFigure that creates a figure based on nationality.</p>
-<p>Attributes:
-records_name : (str) Convenient plural form for the type of data shown here
-key : (str) Key for the series in the members dataframe</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.MemberNationalityFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'member_nationalities'</span></em><a class="headerlink" href="#geotaste.figs.MemberNationalityFigure.key" title="Link to this definition"></a></dt>
@@ -2600,10 +2729,6 @@ key : (str) Key for the series in the members dataframe</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">MembershipYearFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#MembershipYearFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.MembershipYearFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.MemberFigure" title="geotaste.figs.MemberFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemberFigure</span></code></a></p>
 <p>A child class of MemberFigure that creates a figure based on the membership year.</p>
-<p>Attributes:
-records_name : (str) Convenient plural form for the type of data shown here
-key : (str) Key for the series in the members dataframe
-quant : (bool) This is set to True indicating that the data is quantitative.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.MembershipYearFigure.key">
 <span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'member_membership'</span></em><a class="headerlink" href="#geotaste.figs.MembershipYearFigure.key" title="Link to this definition"></a></dt>
@@ -2626,11 +2751,6 @@ quant : (bool) This is set to True indicating that the data is quantitative.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">NationalityFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#NationalityFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.NationalityFigure" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.FigureFactory" title="geotaste.figs.FigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">FigureFactory</span></code></a></p>
 <p>A class that creates a figure factory for nationality.</p>
-<p>Attributes:
-records_points_dim : (str) Dimension of selection of points set to ‘y’.
-vertical : (bool) Forces the graph to be a vertical bar chart when set to True.
-log_x : (bool) Forces the ‘x’ axis to be logarithmic when set to True.
-text : (str) Key in data frame to be displayed on the graph.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.NationalityFigure.log_x">
 <span class="sig-name descname"><span class="pre">log_x</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#geotaste.figs.NationalityFigure.log_x" title="Link to this definition"></a></dt>
@@ -3839,8 +3959,8 @@ All element id’s should append +self.name to make sure they are unique.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
 <dd><p>Logs the given message with the specified level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
