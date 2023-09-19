@@ -15,6 +15,5 @@ dev_*.txt
 *.bak.py
 build
 dist
-_build
-docs/_build
 geckodriver.log
+.coverage*

@@ -402,7 +402,7 @@ class FilterPlotCard(FilterCard):
         #@logger.catch
         def graph_selection_updated(selected_data, old_data={}):
             if selected_data is None: raise PreventUpdate
-            o=self.ff().selected(selected_data)
+            o=self.ff().get_selected(selected_data)
             if not o or o==old_data: raise PreventUpdate
             logger.debug(f'[{self.name}) selection updated to {o}')
             return o
@@ -562,7 +562,7 @@ class FilterSliderCard(FilterPlotCard):
         )
         def graph_selection_updated2(graph_selected_data, btn_clk, start_value, end_value, panel_data):
             if ctx.triggered_id == self.graph.id:
-                seldata=self.ff().selected(graph_selected_data)
+                seldata=self.ff().get_selected(graph_selected_data)
                 if not seldata: raise PreventUpdate
 
                 vals=list(seldata.values())
@@ -608,7 +608,7 @@ class FilterInputCard(FilterCard):
 
     @cached_property
     def input(self):
-        l=self.ff().unique(sort_by_count=self.sort_by_count)
+        l=self.ff().get_unique_vals(sort_by_count=self.sort_by_count)
         return dcc.Dropdown(
             options = [dict(value=lbl, label=lbl)  for lbl in l],
             value = [] if self.multi else '',
@@ -678,7 +678,7 @@ class MemberNationalityCard(FilterPlotCard):
 
 class MemberArrondCard(FilterPlotCard):
     desc = 'Arrondissement'
-    figure_factory = MemberArrondMap
+    figure_factory = MemberArrondFigure
     # tooltip = 'Filter for members who ever lived in a given arrondissement'
 
 
