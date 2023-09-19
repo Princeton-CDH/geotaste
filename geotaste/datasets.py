@@ -577,7 +577,7 @@ class CombinedDataset(Dataset):
     _cols_sep_nonan=['member_membership']
     _cols_pref=['member','event','dwelling','arrond_id','book','author']
 
-    def gen(self, save=True, progress=True):
+    def gen(self, save=True, progress=True, frac=None):
         dfmembers = Members().data
         dfbooks = Books().data
         dfevents = Events().data
@@ -600,7 +600,7 @@ class CombinedDataset(Dataset):
             odf[c]=[[y for y in x if not np.isnan(y) and y] for x in odf[c]]
 
         
-        
+        if frac is not None: odf=odf.sample(frac=frac)
         odf['hover_tooltip'] = odf.apply(hover_tooltip,axis=1)
         odf = prune_when_dwelling_matches(odf, progress=progress)
         if save: odf.to_pickle(self.path)

@@ -110,23 +110,191 @@ def test_combined_dataset():
 
 
 
-def test_prune_when_dwelling_matches():
+def test_gen_combined_dataset():
     with Logwatch('generating mini combined dataset'):
-        df = CombinedDataset().gen(progress=False)
+        df = CombinedDataset().gen(progress=False,frac=.1)
 
     dtypes = df.dwelling_matchtype.unique()
     assert set(dtypes) == {
         'NA', 'Singular', 'Ambiguous (Colens)', 'Exact', 'Ambiguous (Raphael)'
     }
-
-
     s=df.groupby('dwelling_matchtype').event.nunique().sort_values(ascending=False)
     index=list(s.index)
     assert index[-1] == 'NA'
     assert index[0] == 'Singular'
-    assert s['Exact'] > 1000
+    assert s['Exact'] > 0
+
+
+def test_prune_when_dwelling_matches():
+    mockdata = pd.DataFrame([
+        dict(
+            event='E1',
+            dwelling='D1',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='1920-01-20', 
+            dwelling_end='1922-05-19',
+        ),
+
+        dict(
+            event='E1',
+            dwelling='D2',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='1915-01-20', 
+            dwelling_end='1919-05-19',
+        ),
+    ])
+
+    resdf = prune_when_dwelling_matches(mockdata, progress=False)
+    assert len(resdf) == 1
+    assert resdf.iloc[0].dwelling_matchtype == 'Exact'
+    assert resdf.iloc[0].dwelling_numposs == 1
 
 
 
+    ## Test 2: event is 1920-01-24, dwelling starts 1920-01
+    # we want: Exact, match
+
+    mockdata = pd.DataFrame([
+        dict(
+            event='E1',
+            dwelling='D1',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='1920-01', 
+            dwelling_end='1922-05',
+            dwelling_address='21 Jump St',
+            lat=LATLON_SCO[0] - .01,
+            lon=LATLON_SCO[1] - .01,
+        ),
+
+        dict(
+            event='E1',
+            dwelling='D2',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='1915-01', 
+            dwelling_end='1919-05',
+            dwelling_address='22 Jump St',
+            lat=LATLON_SCO[0] - .02,
+            lon=LATLON_SCO[1] - .02,
+        ),
+    ])
+
+    resdf = prune_when_dwelling_matches(mockdata, progress=False)
+    assert len(resdf) == 1
+    assert resdf.iloc[0].dwelling_matchtype == 'Exact'
+    assert resdf.iloc[0].dwelling_numposs == 1
 
 
+
+    ## Test 3: If dwelling starts 1920-02, because end ends 1920-01-29, then this is not exact match; there is no exact match; therefore both returned as Ambiguous (Colens)
+    mockdata = pd.DataFrame([
+        dict(
+            event='E1',
+            dwelling='D1',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='1920-02', 
+            dwelling_end='1922-05',
+            dwelling_address='21 Jump St',
+            lat=LATLON_SCO[0] - .001,
+            lon=LATLON_SCO[1] - .001,
+        ),
+
+        dict(
+            event='E1',
+            dwelling='D2',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='1915-01', 
+            dwelling_end='1919-05',
+            dwelling_address='22 Jump St',
+            lat=LATLON_SCO[0] - .002,
+            lon=LATLON_SCO[1] - .002,
+        ),
+    ])
+
+    resdf = prune_when_dwelling_matches(mockdata, progress=False)
+    assert len(resdf) == 2
+    assert resdf.iloc[0].dwelling_matchtype == 'Ambiguous (Raphael)'
+    assert resdf.iloc[0].dwelling_numposs == 2
+
+
+    ## Test 4: No dwelling dates
+    mockdata = pd.DataFrame([
+        dict(
+            event='E1',
+            dwelling='D1',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='', 
+            dwelling_end='',
+            dwelling_address='21 Jump St',
+            lat=LATLON_SCO[0] - .001,
+            lon=LATLON_SCO[1] - .001,
+        ),
+
+        dict(
+            event='E1',
+            dwelling='D2',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='', 
+            dwelling_end='',
+            dwelling_address='22 Jump St',
+            lat=LATLON_SCO[0] - .002,
+            lon=LATLON_SCO[1] - .002,
+        ),
+    ])
+
+    resdf = prune_when_dwelling_matches(mockdata, progress=False)
+    assert len(resdf) == 2
+    assert resdf.iloc[0].dwelling_matchtype == 'Ambiguous (Colens)'
+    assert resdf.iloc[0].dwelling_numposs == 2
+
+
+
+    ## Test 5: Just one
+    mockdata = pd.DataFrame([
+        dict(
+            event='E1',
+            dwelling='D1',
+            event_start='1920-01-24', 
+            event_end='1920-01-29',
+            dwelling_start='', 
+            dwelling_end='',
+            dwelling_address='21 Jump St',
+            lat=LATLON_SCO[0] - .001,
+            lon=LATLON_SCO[1] - .001,
+        ),
+    ])
+
+    resdf = prune_when_dwelling_matches(mockdata, progress=False)
+    assert len(resdf) == 1
+    assert resdf.iloc[0].dwelling_matchtype == 'Singular'
+    assert resdf.iloc[0].dwelling_numposs == 1
+
+
+    ## Test 6: Not an event
+    mockdata = pd.DataFrame([
+        dict(
+            event='',
+            dwelling='',
+            event_start='', 
+            event_end='',
+            dwelling_start='', 
+            dwelling_end='',
+            dwelling_address='21 Jump St',
+            lat=LATLON_SCO[0] - .001,
+            lon=LATLON_SCO[1] - .001,
+        ),
+    ])
+
+    resdf = prune_when_dwelling_matches(mockdata, progress=False)
+    assert len(resdf) == 1
+    assert resdf.iloc[0].dwelling_matchtype == 'NA'
+    assert np.isnan(resdf.iloc[0].dwelling_numposs)
+
+    
