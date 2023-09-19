@@ -1,23 +1,10 @@
+"""
+All the classes and functions for drawing figures. These classes do not know about dash components, beyond the `dash_table.DataTable` component returned by `FigureFactory.table`. They rely on the `Dataset` classes in dataset.py and use plotly to plot figures. 
+
+The base class is in `FigureFactory`, which defines the default behavior sufficient for most figures, e.g. `MemberDOBFigure`, etc. There are also `LandmarksFigureFactory`, `CombinedFigureFactory`, and `ComparisonFigureFactory` which contain the code for drawing maps and more complex figures.
+"""
+
 from .imports import *
-
-cols_members=[
-    'member_name',
-    'member_dob',
-    'member_dod',
-    'member_nationalities',
-    'member_gender',
-    'num_borrows',
-    'dwelling_address',
-    'member_url'
-]
-
-cols_books = [
-    'author_name',
-    'book_title',
-    'book_year',
-    # 'num_borrows_overall',
-    # 'book_url'
-]
 
 
 ###########
@@ -27,8 +14,6 @@ cols_books = [
 class FigureFactory(DashFigureFactory, Logmaker):
     """
     A class used to represent a factory for generating figures.
-
-    ...
 
     Attributes
     ----------
@@ -66,6 +51,8 @@ class FigureFactory(DashFigureFactory, Logmaker):
         A boolean indicating whether to use log scale on y-axis (default is False)
     text : str
         Key in data frame to be displayed on the graph.
+    cols_table : list
+        Columns to be shown in self.table()
     """
 
     records_name = 'records'
@@ -85,6 +72,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     log_x=False
     log_y=False
     text=None
+    cols_table=[]
     
     def __init__(self, filter_data={}, selected=[], name='FigureFactory', **kwargs):
         """Initializes an instance of the FigureFactory class.
@@ -466,7 +454,23 @@ class FigureFactory(DashFigureFactory, Logmaker):
 
 
 
-
+    ## Tables
+    def table(self, cols=[], **kwargs):
+        """Generate a dash_table.DataTable table using the provided data and columns.
+        
+        Args:
+            cols (list, optional): A list of column names to include in the table. If not provided, all columns in `self.cols_table` will be included. Defaults to an empty list.
+            **kwargs: Additional keyword arguments to pass to the `get_dash_table` function.
+        
+        Returns:
+            dash_table.DataTable: The generated table as a dash table component.
+        """
+        
+        return get_dash_table(
+            self.data, 
+            cols=self.cols_table if not cols else cols, 
+            **kwargs
+        )
 
 
 
@@ -716,9 +720,23 @@ class EventTypeFigure(EventFigure):
 ## CUSTOM FIGURE FACTORIES ################################################################################
 
 class LandmarksFigureFactory(FigureFactory):
+    """
+    Figure factory for landmarks data. Dataset class is set to LandmarksDataset.
+    """
     dataset_class = Landmarks
+    cols_table = ['landmark','address','arrond_id','lat','lon']
 
     def plot_map(self, color='gray', **kwargs):
+        """Plot a scattermapbox with landmarks.
+        
+        Args:
+            color (str, optional): The color of the markers. Defaults to 'gray'.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            go.Figure: The scattermapbox figure.
+        """
+        
         figdf = self.data
         if not 'tooltip' in set(figdf.columns): figdf['tooltip']=''
         fig = go.Figure()
@@ -772,35 +790,6 @@ class LandmarksFigureFactory(FigureFactory):
         fig.layout._config = {'responsive':True, 'scrollZoom':True}
         fig.layout.update(showlegend=False)
         return fig
-    
-    def table(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.data, cols=['landmark','address','arrond_id','lat','lon'])
-
-
-
-
-def update_fig_mapbox_background(fig):
-    fig.update_mapboxes(
-        # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
-        # style='stamen-toner',
-        style="streets",
-        layers=[
-            {
-                "below": 'traces',
-                "sourcetype": "raster",
-                "sourceattribution": "paris1937",
-                "source": BASEMAP_SOURCES,
-            }
-        ],
-        # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
-        accesstoken=mapbox_access_token,
-        bearing=0,
-        center=MAP_CENTER,
-        pitch=0,
-
-        zoom=14,
-    )
-    return fig
 
 
 
@@ -808,56 +797,120 @@ def update_fig_mapbox_background(fig):
 ### COMBINED?
 
 class CombinedFigureFactory(FigureFactory):
-    cols_table = ['member_name','memer_membership','member_dob','member_gender','member_nationalities','arrond_id']
+    """
+    FigureFactory corresponding to CombinedDataset.
+    """
 
-    ## calcs
-    @cached_property
-    def arrond_counts(self): return self.valid_arronds.value_counts()
-    @cached_property
-    def arrond_percs(self):
-        s=self.arrond_counts
-        return (s/s.sum()) * 100
+    dataset_class = Combined
+    cols_table_members=[
+        'member_name',
+        'member_dob',
+        'member_dod',
+        'member_nationalities',
+        'member_gender',
+        'num_borrows',
+        'dwelling_address',
+        'member_url'
+    ]
+
+    cols_table_books = [
+        'author_name',
+        'book_title',
+        'book_year',
+        # 'num_borrows_overall',
+        # 'book_url'
+    ]
+    cols_table = ['member_name','memer_membership','member_dob','member_gender','member_nationalities','arrond_id']
     
     @cached_property
     def df_dwellings(self): 
+        """Returns a DataFrame with unique dwellings as the index. This function drops duplicate rows based on the 'dwelling' column and sets the 'dwelling' column as the index of the resulting DataFrame.
+
+        Returns:
+            pandas.DataFrame: A dataframe with dwelling as index
+        """
         assert 'dwelling' in set(self.data.columns)
         return self.data.drop_duplicates('dwelling').set_index('dwelling')
     
     @cached_property
     def df_members(self): 
+        """Returns a DataFrame with unique members as the index. This function drops duplicate rows based on the 'member' column and sets the 'member' column as the index of the resulting DataFrame.
+
+        Returns:
+            pandas.DataFrame: A dataframe with member as index
+        """
         return self.data.drop_duplicates('member').set_index('member')
     
-    def table_members(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.df_members.reset_index(), cols=self.cols_table)
     
     @cached_property
     def book_filters_exist(self):
+        """Check if any book filters are active.
+        
+        Returns:
+            bool: True if any book filters exist, False otherwise.
+        """
         return any(
             fn.startswith('book_') or fn.startswith('author_') or fn.startswith('event_') or fn.startswith('author_')
             for fn in self.filter_data
         )
 
-    def table(self, cols=[], sep=' ', **kwargs):
+    def table(self, **kwargs):
+        """Generate a dash_table.DataTable table using the provided data and columns. Cols will be st to to `self.cols_table_members` if `self.book_filters_exist`; otherwise, both `self.cols_table_members` and `self.cols_table_books` will be used.
+        
+        Args:
+            **kwargs: Additional keyword arguments to pass to the `get_dash_table` function.
+        
+        Returns:
+            dash_table.DataTable: The generated table as a dash table component.
+        """
+        
         df = self.df_dwellings.reset_index()
         df=df[df.dwelling_address!='']
         
         # if only members filtered...
         if not self.book_filters_exist:
             df = df.drop_duplicates('dwelling')
-            cols = cols_members
+            cols = self.cols_table_members
         else:
             df = df.drop_duplicates(['dwelling','book'])
-            cols = cols_members+cols_books
+            cols = self.cols_table_members+self.cols_table_books
         return get_dash_table(df, cols=cols)
 
     
     @cached_property
-    def arronds(self):return qualquant_series(self.df_dwellings.arrond_id, quant=False)
+    def arronds(self):
+        """Returns a series containing the unique arrondissement IDs from the 'df_dwellings' DataFrame.
+        
+        Returns:
+            pandas.Series: A series containing the unique arrondissement IDs.
+        """
+        return qualquant_series(self.df_dwellings.arrond_id, quant=False)
+
     @cached_property
     def valid_arronds(self): 
-        return self.arronds.loc[lambda v: v.str.isdigit() & (v!='99')]
+        """Returns a filtered DataFrame of valid arronds.
+        
+        This method filters the DataFrame `arronds` by applying the function `is_valid_arrond` to each row. The resulting DataFrame contains only the rows where `is_valid_arrond` returns True.
+        
+        Returns:
+            pandas.DataFrame: A filtered DataFrame of valid arronds.
+        """
+        
+        return self.arronds.loc[lambda v: is_valid_arrond(v)]
 
-    def plot_map(self, color=None, color_text='black', basefig=None, return_trace=False, **kwargs):
+    def plot_map(self, color=None, color_text='black', return_trace=False, **kwargs):
+        """Plot a map with member dwellings from the currently filtered data.
+        
+        Args:
+            color (str, optional): The color of the markers. Defaults to None.
+            color_text (str, optional): The color of the text. Defaults to 'black'.
+            return_trace (bool, optional): Whether to return only the trace. Defaults to False.
+            **kwargs: Additional keyword arguments to pass to the function.
+        
+        Returns:
+            go.Figure: The figure object with the map.
+        """
+        
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
         figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
@@ -1070,9 +1123,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
         return ofig
 
-    def table_members(self, cols=[], sep=' ', **kwargs):
-        return get_dash_table(self.df_members.reset_index(), cols=self.cols_table)
-    
     def table_arrond(self, cols=[], **kwargs):
         # cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
         return get_dash_table(self.df_arronds.reset_index())
@@ -1217,36 +1267,6 @@ def get_color(x):
 
 
 
-
-
-
-
-# # @cache
-# @cache_obj.memoize()
-# def ff_cache(figure_class, serialized_data):
-#     logger.debug(f'ff_cache({figure_class.__name__}, {serialized_data})')
-#     filter_data,selected,kwargs = unserialize(serialized_data)
-#     return figure_class(filter_data, selected, **kwargs)
-
-
-# # @cache
-# @cache_obj.memoize()
-# def plot_cache(figure_class, serialized_data):
-#     logger.debug(f'plot_cache({figure_class.__name__}, {serialized_data})')
-#     filter_data,existing_fig,kwargs = (
-#         unserialize(serialized_data) 
-#         if serialized_data 
-#         else ({},None,{})
-#     )
-#     ff = figure_class(filter_data)
-#     fig = ff.plot(**kwargs)
-#     if existing_fig: 
-#         fig = combine_figs(fig, existing_fig)
-#     return fig
-
-
-
-
 # @cache
 @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
@@ -1321,6 +1341,43 @@ def from_json_gz_str(ojsongzstr):
     ojsonstr=ojson.decode('utf-8')
     obj=pio.from_json(ojsonstr)
     return obj
+
+
+
+
+def update_fig_mapbox_background(fig):
+    """Updates the background of a Mapbox figure.
+    
+    Args:
+        fig (plotly.graph_objs._figure.Figure): The figure to update.
+    
+    Returns:
+        plotly.graph_objs._figure.Figure: The updated figure.
+    """
+    
+    fig.update_mapboxes(
+        # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
+        # style='stamen-toner',
+        style="streets",
+        layers=[
+            {
+                "below": 'traces',
+                "sourcetype": "raster",
+                "sourceattribution": "paris1937",
+                "source": BASEMAP_SOURCES,
+            }
+        ],
+        # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
+        accesstoken=mapbox_access_token,
+        bearing=0,
+        center=MAP_CENTER,
+        pitch=0,
+
+        zoom=14,
+    )
+    return fig
+
+
 
 
 
