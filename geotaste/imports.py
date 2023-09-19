@@ -55,6 +55,8 @@ import plotly.graph_objects as go
 from humanfriendly import format_timespan
 import zlib
 from base64 import b64decode,b64encode
+from colour import Color
+
 
 # setup logs
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'

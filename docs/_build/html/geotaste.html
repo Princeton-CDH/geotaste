@@ -141,13 +141,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.LandmarksFigureFactory"><code class="docutils literal notranslate"><span class="pre">LandmarksFigureFactory</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.CombinedFigureFactory"><code class="docutils literal notranslate"><span class="pre">CombinedFigureFactory</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.ComparisonFigureFactory"><code class="docutils literal notranslate"><span class="pre">ComparisonFigureFactory</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.combine_figs"><code class="docutils literal notranslate"><span class="pre">combine_figs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.get_dash_table"><code class="docutils literal notranslate"><span class="pre">get_dash_table()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.get_empty_fig"><code class="docutils literal notranslate"><span class="pre">get_empty_fig()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.get_color"><code class="docutils literal notranslate"><span class="pre">get_color()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.plot_cache"><code class="docutils literal notranslate"><span class="pre">plot_cache()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.get_ff_for_num_filters"><code class="docutils literal notranslate"><span class="pre">get_ff_for_num_filters()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.get_mainmap_figdata"><code class="docutils literal notranslate"><span class="pre">get_mainmap_figdata()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.get_cached_fig_or_table"><code class="docutils literal notranslate"><span class="pre">get_cached_fig_or_table()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.to_json_gz_str"><code class="docutils literal notranslate"><span class="pre">to_json_gz_str()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.figs.from_json_gz_str"><code class="docutils literal notranslate"><span class="pre">from_json_gz_str()</span></code></a></li>
@@ -1536,13 +1533,12 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <section id="module-geotaste.figs">
 <span id="geotaste-figs-module"></span><h2>geotaste.figs module<a class="headerlink" href="#module-geotaste.figs" title="Link to this heading"></a></h2>
 <p>All the classes and functions for drawing figures. These classes do not know about dash components, beyond the <cite>dash_table.DataTable</cite> component returned by <cite>FigureFactory.table</cite>. They rely on the <cite>Dataset</cite> classes in dataset.py and use plotly to plot figures.</p>
-<p>The base class is in <cite>FigureFactory</cite>, which defines the default behavior sufficient for most figures, e.g. <cite>MemberDOBFigure</cite>, etc. There are also <cite>LandmarkFigureFactory</cite>, <cite>CombinedFigureFactory</cite>, and <cite>ComparisonFigureFactory</cite> which contain the code for drawing maps and more complex figures.</p>
+<p>The base class is in <cite>FigureFactory</cite>, which defines the default behavior sufficient for most figures, e.g. <cite>MemberDOBFigure</cite>, etc. There are also <cite>LandmarksFigureFactory</cite>, <cite>CombinedFigureFactory</cite>, and <cite>ComparisonFigureFactory</cite> which contain the code for drawing maps and more complex figures.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">FigureFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#FigureFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.FigureFactory" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DashFigureFactory</span></code>, <a class="reference internal" href="#geotaste.utils.Logmaker" title="geotaste.utils.Logmaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logmaker</span></code></a></p>
 <p>A class used to represent a factory for generating figures.</p>
-<p>…</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory.records_name">
 <span class="sig-name descname"><span class="pre">records_name</span></span><a class="headerlink" href="#geotaste.figs.FigureFactory.records_name" title="Link to this definition"></a></dt>
@@ -2805,6 +2801,7 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">ComparisonFigureFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ff1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ff2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.figs.CombinedFigureFactory" title="geotaste.figs.CombinedFigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">CombinedFigureFactory</span></code></a></p>
+<p>A figure factory comparing two CombinedFigureFactories.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.cols_table">
 <span class="sig-name descname"><span class="pre">cols_table</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['L_or_R',</span> <span class="pre">'member_name',</span> <span class="pre">'memer_membership',</span> <span class="pre">'member_dob',</span> <span class="pre">'member_gender',</span> <span class="pre">'member_nationalities',</span> <span class="pre">'arrond_id']</span></em><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.cols_table" title="Link to this definition"></a></dt>
@@ -2816,53 +2813,79 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 <dd><p>alias of <a class="reference internal" href="#geotaste.figs.CombinedFigureFactory" title="geotaste.figs.CombinedFigureFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">CombinedFigureFactory</span></code></a></p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.df_arronds">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">df_arronds</span></span><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.df_arronds" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.compare">
-<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxcats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['member_title',</span> <span class="pre">'member_gender',</span> <span class="pre">'member_nationalities',</span> <span class="pre">'author_gender',</span> <span class="pre">'author_nationalities',</span> <span class="pre">'book_format',</span> <span class="pre">'book_genre',</span> <span class="pre">'arrond_id']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_signif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.compare" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.describe_comparison">
-<span class="sig-name descname"><span class="pre">describe_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.describe_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.describe_comparison" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.table">
-<span class="sig-name descname"><span class="pre">table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.table" title="Link to this definition"></a></dt>
-<dd><p>Generate a dash_table.DataTable table using the provided data and columns. Cols will be st to to <cite>self.cols_table_members</cite> if <cite>self.book_filters_exist</cite>; otherwise, both <cite>self.cols_table_members</cite> and <cite>self.cols_table_books</cite> will be used.</p>
+<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxcats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['member_title',</span> <span class="pre">'member_gender',</span> <span class="pre">'member_nationalities',</span> <span class="pre">'author_gender',</span> <span class="pre">'author_nationalities',</span> <span class="pre">'book_format',</span> <span class="pre">'book_genre',</span> <span class="pre">'arrond_id']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_signif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.compare" title="Link to this definition"></a></dt>
+<dd><p>Compare the dataframes of two objects and return a dataframe of distinctive qualitative values. Overwrite any of these constants in ~/geotaste_data/config.json.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the <cite>get_dash_table</cite> function.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxcats</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The maximum number of categories to consider (i.e. how ‘controlled’ the vocabulary is). Defaults to COMPARISON_MAXCATS.</p></li>
+<li><p><strong>cols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – The columns to compare. Defaults to PREDICT_COLS.</p></li>
+<li><p><strong>only_signif</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Whether to return only statistically significant values. Defaults to False.</p></li>
+<li><p><strong>round</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The number of decimal places to round the returned values. Defaults to 4.</p></li>
+<li><p><strong>min_count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The minimum count of values to consider. Defaults to PREDICT_MIN_COUNT.</p></li>
+<li><p><strong>min_sum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The minimum sum of values to consider. Defaults to PREDICT_MIN_SUM.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The generated table as a dash table component.</p>
+<dd class="field-even"><p>A dataframe of distinctive qualitative values.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dash_table.DataTable</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.table_content">
-<span class="sig-name descname"><span class="pre">table_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['arrond_id']</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.table_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.table_content" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.describe_comparison">
+<span class="sig-name descname"><span class="pre">describe_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.describe_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.describe_comparison" title="Link to this definition"></a></dt>
+<dd><p>Describes the comparison between two dataframes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comparison_df</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – The dataframe containing the comparison results as the result of self.compare().
+If not provided, the function will call self.compare(<a href="#id18"><span class="problematic" id="id19">**</span></a>kwargs) to generate the comparison dataframe.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to be passed to self.compare() if comparison_df is not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing two lists of descriptions. The first list describes the comparison for group L, and the second list describes the comparison for group R.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.table">
+<span class="sig-name descname"><span class="pre">table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['arrond_id']</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.table" title="Link to this definition"></a></dt>
+<dd><p>Returns the content of a table based on the provided keyword arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Additional keyword arguments to be passed to the <cite>table_content</cite> method.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The content of the table as well as its prefatory description.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dbc.Container</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.df_dwellings">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">df_dwellings</span></span><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.df_dwellings" title="Link to this definition"></a></dt>
-<dd><p>Returns a DataFrame with unique dwellings as the index. This function drops duplicate rows based on the ‘dwelling’ column and sets the ‘dwelling’ column as the index of the resulting DataFrame.</p>
+<dd><p>Combines the ‘df_dwellings’ dataframes from the left and right datasets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dataframe with dwelling as index</p>
+<dd class="field-odd"><p>The combined dataframe of ‘df_dwellings’ from the left and right datasets.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas.DataFrame</p>
+<dd class="field-even"><p>DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2870,113 +2893,192 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.df_members">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">df_members</span></span><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.df_members" title="Link to this definition"></a></dt>
-<dd><p>Returns a DataFrame with unique members as the index. This function drops duplicate rows based on the ‘member’ column and sets the ‘member’ column as the index of the resulting DataFrame.</p>
+<dd><p>Combines the ‘df_dwellings’ dataframes from the left and right datasets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A dataframe with member as index</p>
+<dd class="field-odd"><p>The combined dataframe of ‘df_dwellings’ from the left and right datasets.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas.DataFrame</p>
+<dd class="field-even"><p>DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.plot_oddsratio_map">
-<span class="sig-name descname"><span class="pre">plot_oddsratio_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'odds_ratio_log'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.plot_oddsratio_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.plot_oddsratio_map" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.table_arrond">
-<span class="sig-name descname"><span class="pre">table_arrond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.table_arrond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.table_arrond" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.table_diff">
-<span class="sig-name descname"><span class="pre">table_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.table_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.table_diff" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.desc_table_diff">
-<span class="sig-name descname"><span class="pre">desc_table_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.desc_table_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.desc_table_diff" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.diffdb">
-<span class="sig-name descname"><span class="pre">diffdb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.diffdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.diffdb" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.diffkeys">
-<span class="sig-name descname"><span class="pre">diffkeys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.diffkeys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.diffkeys" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.measure_diff">
-<span class="sig-name descname"><span class="pre">measure_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.measure_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.measure_diff" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.get_diffs">
-<span class="sig-name descname"><span class="pre">get_diffs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.get_diffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.get_diffs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.rank_diff">
-<span class="sig-name descname"><span class="pre">rank_diff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.rank_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.rank_diff" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">plot_oddsratio_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'odds_ratio_log'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.plot_oddsratio_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.plot_oddsratio_map" title="Link to this definition"></a></dt>
+<dd><p>Plots an odds ratio map using a choropleth mapbox.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comparison_df</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame containing the data for comparison. If not provided, the function will call the <cite>compare</cite> method of the class. Defaults to None.</p></li>
+<li><p><strong>col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – Column name to use for coloring the map. Defaults to ‘odds_ratio_log’.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the <cite>compare</cite> method if <cite>comparison_df</cite> is not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plotted odds ratio map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geotaste.figs.combine_figs">
-<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">combine_figs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig_new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_old</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#combine_figs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.combine_figs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.get_dash_table">
-<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_dash_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'80vh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_dash_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_dash_table" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_dash_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_dash_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_dash_table" title="Link to this definition"></a></dt>
+<dd><p>Returns a Dash DataTable object with specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input DataFrame.</p></li>
+<li><p><strong>cols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>, </em><em>optional</em>) – The list of columns to include in the DataTable. If not provided, all columns from the DataFrame will be included. Defaults to [].</p></li>
+<li><p><strong>page_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The number of rows to display per page. Defaults to 5.</p></li>
+<li><p><strong>height_cell</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The height of each cell in pixels. Defaults to 60.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Dash DataTable object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dash_table.DataTable</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.get_empty_fig">
 <span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_empty_fig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">250</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">layout_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_empty_fig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_empty_fig" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.figs.get_color">
-<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_color" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Create an empty plot figure with specified height and width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The height of the plot figure. Defaults to 100.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The width of the plot figure. Defaults to 250.</p></li>
+<li><p><strong>**layout_kwargs</strong> – Additional keyword arguments to be passed to the layout dictionary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An empty plot figure with the specified height, width, and layout.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>go.Figure</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.plot_cache">
 <span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">plot_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialized_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#plot_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.plot_cache" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Plots the FIGURE using the specified figure class and serialized data. This function output is memoized so that future calls with the same arguments return cached results. This cache is stored in <cite>PATH_CACHE</cite> constant/config flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figure_class</strong> (<em>class</em>) – The figure class to use for plotting.</p></li>
+<li><p><strong>serialized_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The serialized data to be used for plotting, which should be unpackable to (filter_data,selected,kwargs). If <cite>serialized_data</cite> is empty, an empty filter data, None for selected, and an empty dictionary for kwargs will be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The zlib-compressed and base64 encoded JSON string representation of the plotted figure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.get_ff_for_num_filters">
 <span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_ff_for_num_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fdR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_ff_for_num_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_ff_for_num_filters" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.figs.get_mainmap_figdata">
-<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_mainmap_figdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdL</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fdR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_mainmap_figdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_mainmap_figdata" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Returns a figure factory based on the number of filters provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fdL</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – A dictionary representing the left filter.</p></li>
+<li><p><strong>fdR</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – A dictionary representing the right filter.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to be passed to the figure factory constructors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A figure factory object based on the number of filters provided.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geotaste.figs.FigureFactory" title="geotaste.figs.FigureFactory">FigureFactory</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p># Example 1: No filters provided
+ff = get_ff_for_num_filters()
+# Returns a LandmarksFigureFactory object</p>
+<p># Example 2: Only left filter provided
+fdL = {‘filter_param’: ‘value’}
+ff = get_ff_for_num_filters(fdL=fdL)
+# Returns a CombinedFigureFactory object with the left filter</p>
+<p># Example 3: Only right filter provided
+fdR = {‘filter_param’: ‘value’}
+ff = get_ff_for_num_filters(fdR=fdR)
+# Returns a CombinedFigureFactory object with the right filter</p>
+<p># Example 4: Both left and right filters provided
+fdL = {‘filter_param’: ‘value’}
+fdR = {‘filter_param’: ‘value’}
+ff = get_ff_for_num_filters(fdL=fdL, fdR=fdR)
+# Returns a ComparisonFigureFactory object</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.get_cached_fig_or_table">
 <span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">get_cached_fig_or_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#get_cached_fig_or_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.get_cached_fig_or_table" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Produce or retrieve memoized/cached figure or table based on the given serialized arguments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The JSON, zlib-compressed string representation of the figure or table.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.to_json_gz_str">
 <span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">to_json_gz_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#to_json_gz_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.to_json_gz_str" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Converts the given object to a JSON string, compresses it using zlib, and returns the compressed string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – The object to be converted to JSON.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The compressed JSON string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.from_json_gz_str">
 <span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">from_json_gz_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ojsongzstr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#from_json_gz_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.from_json_gz_str" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>This function takes a base64 encoded zlib compressed JSON string as input and
+decompresses and decodes it back to the original JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ojsongzstr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The input string which is a base64 encoded and zlib compressed JSON string.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The original JSON object obtained after decompressing and decoding the input string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.update_fig_mapbox_background">
@@ -4714,8 +4816,8 @@ the task is still running.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id18">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id20" title="Link to this definition"></a></dt>
 <dd><p>Logs the given message with the specified level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

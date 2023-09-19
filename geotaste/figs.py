@@ -959,10 +959,21 @@ class CombinedFigureFactory(FigureFactory):
 
 
 class ComparisonFigureFactory(CombinedFigureFactory):
+    """
+    A figure factory comparing two CombinedFigureFactories.
+    """
     cols_table = ['L_or_R','member_name','memer_membership','member_dob','member_gender','member_nationalities','arrond_id']
     indiv_ff = CombinedFigureFactory
 
     def __init__(self, ff1={}, ff2={}, **kwargs):
+        """Initializes the object with two filter dictionaries or strings.
+        
+        Args:
+            ff1 (dict or str): The first filter dictionary. If a list is provided and `ff2` is not specified, it will be unpacked into `ff1` and `ff2`.
+            ff2 (dict or str): The second filter dictionary.
+            **kwargs: Additional keyword arguments to be passed to the parent class constructor.
+        """
+        
         super().__init__(**kwargs)
 
         if is_listy(ff1) and not ff2 and len(ff1)==2:
@@ -970,13 +981,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
 
         self.ff1 = self.L = self.indiv_ff(ff1,name='Filter 1') if type(ff1) in {dict,str} else ff1
         self.ff2 = self.R = self.indiv_ff(ff2,name='Filter 2') if type(ff2) in {dict,str} else ff2
-    
-    @cached_property
-    def df_arronds(self): 
-        return analyze_contingency_tables(
-            self.L.valid_arronds,
-            self.R.valid_arronds,
-        )
     
     
     def compare(self, 
@@ -986,11 +990,25 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             round=4,
             min_count=PREDICT_MIN_COUNT,
             min_sum=PREDICT_MIN_SUM,
-            **kwargs):
+            **kwargs) -> pd.DataFrame:
+        """Compare the dataframes of two objects and return a dataframe of distinctive qualitative values. Overwrite any of these constants in ~/geotaste_data/config.json.
+        
+        Args:
+            maxcats (int): The maximum number of categories to consider (i.e. how 'controlled' the vocabulary is). Defaults to COMPARISON_MAXCATS.
+            cols (list): The columns to compare. Defaults to PREDICT_COLS.
+            only_signif (bool): Whether to return only statistically significant values. Defaults to False.
+            round (int): The number of decimal places to round the returned values. Defaults to 4.
+            min_count (int): The minimum count of values to consider. Defaults to PREDICT_MIN_COUNT.
+            min_sum (int): The minimum sum of values to consider. Defaults to PREDICT_MIN_SUM.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            pd.DataFrame: A dataframe of distinctive qualitative values.
+        """
         
         return get_distinctive_qual_vals(
-            self.L.df,
-            self.R.df,
+            self.L.data,
+            self.R.data,
             maxcats=maxcats,
             cols=cols,
             only_signif=only_signif,
@@ -1006,17 +1024,32 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
     
     def describe_comparison(self, comparison_df=None, **kwargs):
+        """Describes the comparison between two dataframes.
+        
+        Args:
+            comparison_df (pandas.DataFrame, optional): The dataframe containing the comparison results as the result of self.compare().
+                If not provided, the function will call self.compare(**kwargs) to generate the comparison dataframe.
+            **kwargs: Additional keyword arguments to be passed to self.compare() if comparison_df is not provided.
+        
+        Returns:
+            tuple: A tuple containing two lists of descriptions. The first list describes the comparison for group L, and the second list describes the comparison for group R.
+        """
+        
         return describe_comparison(
             comparison_df
             if comparison_df is not None
             else self.compare(**kwargs)
         )
     
-    def table(self, **kwargs):
-        # return get_dash_table(self.compare(**kwargs))
-        return self.table_content(**kwargs)
-    
-    def table_content(self,cols=['arrond_id'],**kwargs):
+    def table(self, cols=['arrond_id'], **kwargs):
+        """Returns the content of a table based on the provided keyword arguments.
+        
+        Args:
+            **kwargs: Additional keyword arguments to be passed to the `table_content` method.
+        
+        Returns:
+            dbc.Container: The content of the table as well as its prefatory description.
+        """
         odf = self.compare(cols=cols, **kwargs)
         if not len(odf):
             return dbc.Container('Analysis failed, likely because one or both groups returns no data, or because both groups are identical.')
@@ -1024,7 +1057,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         fig=None
         if 'arrond_id' in set(cols):
             fig = self.plot_oddsratio_map(odf)
-        desc_L,desc_R = describe_comparison(odf, lim=10)
+        desc_L,desc_R = self.describe_comparison(odf, lim=10)
         summary_row = dbc.Row([
             dbc.Col([
                 html.H5([f'10 most distinctive features for Filter 1 (', self.L.filter_desc,')']),
@@ -1051,10 +1084,12 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     
     @cached_property
     def df_dwellings(self): 
-        # return combine_LR_df(
-        #     self.ff1.df_dwellings, 
-        #     self.ff2.df_dwellings
-        # )
+        """Combines the 'df_dwellings' dataframes from the left and right datasets.
+            
+        Returns:
+            DataFrame: The combined dataframe of 'df_dwellings' from the left and right datasets.
+        """
+        
         return combine_LR_df(
             self.L.df_dwellings,
             self.R.df_dwellings, 
@@ -1066,13 +1101,35 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     
     @cached_property
     def df_members(self): 
-        return combine_LR_df(self.L.df_members, self.R.df_members)
-        # return combine_LR_df(self.L.df_members, self.R.df_members)
+        """Combines the 'df_dwellings' dataframes from the left and right datasets.
+            
+        Returns:
+            DataFrame: The combined dataframe of 'df_dwellings' from the left and right datasets.
+        """
+
+        return combine_LR_df(
+            self.L.df_members,
+            self.R.df_members, 
+            colval_L='Filter 1',
+            colval_R='Filter 2',
+            colval_LR='Both Groups'
+        )
     
 
-    def plot_oddsratio_map(self, figdf, col='odds_ratio_log', **kwargs):
+    def plot_oddsratio_map(self, comparison_df=None, col='odds_ratio_log', **kwargs):
+        """Plots an odds ratio map using a choropleth mapbox.
+        
+        Args:
+            comparison_df (pd.DataFrame, optional): DataFrame containing the data for comparison. If not provided, the function will call the `compare` method of the class. Defaults to None.
+            col (str, optional): Column name to use for coloring the map. Defaults to 'odds_ratio_log'.
+            **kwargs: Additional keyword arguments to pass to the `compare` method if `comparison_df` is not provided.
+        
+        Returns:
+            plotly.graph_objects.Figure: The plotted odds ratio map.
+        """
+        
+        figdf = comparison_df if comparison_df is not None else self.compare(**kwargs)
         figdf=figdf.query('col=="arrond_id"')
-        from colour import Color
         Lcolor = Color(RIGHT_COLOR)
         Rcolor = Color(LEFT_COLOR)
         midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
@@ -1123,96 +1180,25 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
         return ofig
 
-    def table_arrond(self, cols=[], **kwargs):
-        # cols = ['arrond_id', 'count_L', 'count_R', 'perc_L', 'perc_R', 'perc_L->R']
-        return get_dash_table(self.df_arronds.reset_index())
+
+
+
+
+
+
+def get_dash_table(df, cols=[], page_size=5, height_cell=60):
+    """Returns a Dash DataTable object with specified parameters.
     
-    def table_diff(self, cols=[], **kwargs):
-        odf=self.rank_diff().query('rank_diff!=0')
-        cols = ['rank_diff','group1_desc','group2_desc'] + [c for c in odf if c.endswith('_p')]
-        return get_dash_table(odf,cols)
+    Args:
+        df (pandas.DataFrame): The input DataFrame.
+        cols (list, optional): The list of columns to include in the DataTable. If not provided, all columns from the DataFrame will be included. Defaults to [].
+        page_size (int, optional): The number of rows to display per page. Defaults to 5.
+        height_cell (int, optional): The height of each cell in pixels. Defaults to 60.
     
-    def desc_table_diff(self, **kwargs):
-        df=self.rank_diff()
-        dfq=df[df.is_self==1]
-        if not len(dfq): return ''
-
-        row=dfq.iloc[0]
-        n1,n2=self.diffkeys()
-        return f'??'#Statistically, the spatial difference (difference in distribution across arrondissement) of the members is the ***{ordinal_str(row.rank_diff)}*** largest noted thus far. It ***{"is" if row.pvalue<=0.05 else "is not"}*** statistically significant, with a pvalue of ***{row.pvalue:.02}*** and a Mann-Whitney U test statistic of ***{row.statistic}***.'
-            
-
-            
-    def diffdb(self):
-        from sqlitedict import SqliteDict
-        return SqliteDict(os.path.join(PATH_DATA, 'diffdb.sqlitedict'))
-
-    def diffkeys(self):
-        return tuple(sorted(list(json.dumps(d, sort_keys=True) for d in self.filter_data.get(INTENSION_KEY,({},{})))))
-
-    def measure_diff(self, force=False):
-        name_L,name_R = self.diffkeys()
-        # if name_L == name_R: return {}
-        key = json.dumps([name_L, name_R])
-        
-        with self.diffdb() as cache:    
-            if force or not key in cache:
-                from scipy.stats import kstest, mannwhitneyu, pearsonr
-                statd={}
-                lvals = self.df_arronds.count_L.fillna(0)
-                rvals = self.df_arronds.count_R.fillna(0)
-
-                for statname,statf in [('kstest',kstest), ('mannwhitneyu',mannwhitneyu), ('pearsonr',pearsonr)]:
-                    stat = statf(lvals,rvals)
-                    statd[statname]=stat.statistic
-                    statd[statname+'_p']=stat.pvalue
-                cache[key]=statd
-                cache.commit()
-            return cache[key]
-
-
-    def get_diffs(self):
-        ld=[]
-        with self.diffdb() as cache: 
-            for key,val in cache.items():
-                k1,k2=json.loads(key)
-                ld.append(
-                    dict(
-                    group1=k1, 
-                    group2=k2, 
-                    group1_desc=format_intension(json.loads(k1)), 
-                    group2_desc=format_intension(json.loads(k2)), 
-                    **{kx:(float(kv) if is_numeric_dtype(kv) else kv) for kx,kv in dict(val).items()}))
-        df=pd.DataFrame(ld)#.set_index(['group1','group2'])
-        if len(df): df['is_self']=[((k1,k2) == self.diffkeys()) for k1,k2 in zip(df.group1, df.group2)]
-        return df
-        
-        
-
-    def rank_diff(self):
-        self.measure_diff()
-        df = self.get_diffs()
-        if not len(df): return df
-        pcols=[c for c in df if c.endswith('_p')]
-        df['median_p'] = df[pcols].median(axis=1)
-        df['rank_diff'] = df['median_p'].rank(ascending=True, method='first').apply(force_int)
-        return df
-
-
-
-
-
-
-
-def combine_figs(fig_new, fig_old):
-    fig_old = go.Figure(fig_old) if type(fig_old)!=go.Figure else fig_old
-    return go.Figure(
-        layout=fig_old.layout if fig_old is not None and hasattr(fig_old,'data') and fig_old.data else fig_new.layout,
-        data=fig_new.data
-    )
-
-
-def get_dash_table(df, cols=[], page_size=5, height_table='80vh', height_cell=60):
+    Returns:
+        dash_table.DataTable: The Dash DataTable object.
+    """
+    
     cols=list(df.columns) if not cols else [col for col in cols if col in set(df.columns)]
     dff = delist_df(df[cols])
     cols_l = [{'id':col, 'name':col.replace('_',' ').title()} for col in cols]
@@ -1250,6 +1236,16 @@ def get_dash_table(df, cols=[], page_size=5, height_table='80vh', height_cell=60
 
 
 def get_empty_fig(height=100, width=250, **layout_kwargs):
+    """Create an empty plot figure with specified height and width.
+    
+    Args:
+        height (int, optional): The height of the plot figure. Defaults to 100.
+        width (int, optional): The width of the plot figure. Defaults to 250.
+        **layout_kwargs: Additional keyword arguments to be passed to the layout dictionary.
+    
+    Returns:
+        go.Figure: An empty plot figure with the specified height, width, and layout.
+    """
     fig=go.Figure(layout=dict(height=height, width=width, **layout_kwargs))
     fig.update_layout(showlegend=False, template='simple_white')
     fig.update_xaxes(visible=False)
@@ -1257,19 +1253,22 @@ def get_empty_fig(height=100, width=250, **layout_kwargs):
     return fig
 
 
-def get_color(x):
-    if x=='L' or 'Left' in x: return LEFT_COLOR
-    if x=='R' or 'Right' in x: return RIGHT_COLOR
-    return BOTH_COLOR
 
 
 
 
-
-
-# @cache
 @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data):
+    """Plots the FIGURE using the specified figure class and serialized data. This function output is memoized so that future calls with the same arguments return cached results. This cache is stored in `PATH_CACHE` constant/config flag.
+    
+    Args:
+        figure_class (class): The figure class to use for plotting.
+        serialized_data (str): The serialized data to be used for plotting, which should be unpackable to (filter_data,selected,kwargs). If `serialized_data` is empty, an empty filter data, None for selected, and an empty dictionary for kwargs will be used.
+    
+    Returns:
+        str: The zlib-compressed and base64 encoded JSON string representation of the plotted figure.
+    """
+    
     logger.debug(f'plot_cache({figure_class}, {serialized_data})')
     filter_data,selected,kwargs = (
         unserialize(serialized_data) 
@@ -1278,47 +1277,74 @@ def plot_cache(figure_class, serialized_data):
     )
     ff = figure_class(filter_data=filter_data, selected=selected)
     fig = ff.plot(**kwargs)
-
-    fig_json_gz_str = b64encode(
-        zlib.compress(
-            pio.to_json(fig).encode()
-        )
-    ).decode('utf-8')
-
-    return fig_json_gz_str
+    return to_json_gz_str(fig)
 
 
 
 def get_ff_for_num_filters(fdL={}, fdR={}, **kwargs):
+    """Returns a figure factory based on the number of filters provided.
+    
+    Args:
+        fdL (dict): A dictionary representing the left filter.
+        fdR (dict): A dictionary representing the right filter.
+        **kwargs: Additional keyword arguments to be passed to the figure factory constructors.
+    
+    Returns:
+        FigureFactory: A figure factory object based on the number of filters provided.
+    
+    Examples:
+        # Example 1: No filters provided
+        ff = get_ff_for_num_filters()
+        # Returns a LandmarksFigureFactory object
+    
+        # Example 2: Only left filter provided
+        fdL = {'filter_param': 'value'}
+        ff = get_ff_for_num_filters(fdL=fdL)
+        # Returns a CombinedFigureFactory object with the left filter
+    
+        # Example 3: Only right filter provided
+        fdR = {'filter_param': 'value'}
+        ff = get_ff_for_num_filters(fdR=fdR)
+        # Returns a CombinedFigureFactory object with the right filter
+    
+        # Example 4: Both left and right filters provided
+        fdL = {'filter_param': 'value'}
+        fdR = {'filter_param': 'value'}
+        ff = get_ff_for_num_filters(fdL=fdL, fdR=fdR)
+        # Returns a ComparisonFigureFactory object
+    """
+    
+
     # get figure factory
     num_filters = len([x for x in [fdL,fdR] if x])
     # 3 cases
     if num_filters==0:
-        ff = LandmarksFigureFactory()
+        ff = LandmarksFigureFactory(**kwargs)
 
     elif num_filters==1:
         if fdL:
-            ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+            ff = CombinedFigureFactory(fdL, color=LEFT_COLOR, **kwargs)
         elif fdR:
-            ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+            ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR, **kwargs)
 
     elif num_filters == 2:
-        ff = ComparisonFigureFactory(fdL, fdR)
+        ff = ComparisonFigureFactory(fdL, fdR, **kwargs)
 
     return ff
 
-def get_mainmap_figdata(fdL={}, fdR={}):
-    if fdL or fdR:
-        odata=[]
-        if fdL: odata.extend(CombinedFigureFactory(fdL).plot_map(color=LEFT_COLOR).data)
-        if fdR: odata.extend(CombinedFigureFactory(fdR).plot_map(color=RIGHT_COLOR).data)
-    else:
-        odata = LandmarksFigureFactory().plot_map().data
-    return odata
 
 
 @cache_obj.memoize()
 def get_cached_fig_or_table(args_id):
+    """Produce or retrieve memoized/cached figure or table based on the given serialized arguments 
+    
+    Args:
+        args_id (str): The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab).
+    
+    Returns:
+        str: The JSON, zlib-compressed string representation of the figure or table.
+    """
+    
     fdL,fdR,active_tab,analysis_tab=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)
     logger.debug([args_id,ff])
@@ -1330,12 +1356,31 @@ def get_cached_fig_or_table(args_id):
     return to_json_gz_str(out)
 
 def to_json_gz_str(out):
+    """Converts the given object to a JSON string, compresses it using zlib, and returns the compressed string.
+    
+    Args:
+        out: The object to be converted to JSON.
+    
+    Returns:
+        str: The compressed JSON string.
+    """
+    
     ojson=pio.to_json(out)
     ojsongz=b64encode(zlib.compress(ojson.encode()))
     ojsongzstr=ojsongz.decode('utf-8')
     return ojsongzstr
 
 def from_json_gz_str(ojsongzstr):
+    """
+    This function takes a base64 encoded zlib compressed JSON string as input and
+    decompresses and decodes it back to the original JSON format.
+
+    Args:
+        ojsongzstr (str): The input string which is a base64 encoded and zlib compressed JSON string.
+
+    Returns:
+        object: The original JSON object obtained after decompressing and decoding the input string.
+    """
     ojsongz=b64decode(ojsongzstr.encode())
     ojson=zlib.decompress(ojsongz)
     ojsonstr=ojson.decode('utf-8')
@@ -1402,6 +1447,9 @@ def get_selected_records_from_figure_selected_data(selectedData:dict={}, quant=N
     if not points_data: return {}
 
     def get_record_id(d, keys=['label', 'location']):
+        """
+        Find the right kind of record label for the given plotly data type
+        """
         if not d: return None
         for k in keys:
             if k in d:
