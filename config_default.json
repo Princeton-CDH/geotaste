@@ -1,0 +1,44 @@
+{
+    "BASEMAP_SOURCES": [
+        "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
+        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+    ],
+    "CENTER": [
+        48.85107555543428,
+        2.3385039932538567
+    ],
+    "COMPARISON_MAXCATS": null,
+    "DEBUG": false,
+    "DEFAULT_COLOR": "#40b0a6",
+    "HOST": "127.0.0.1",
+    "LEFT_COLOR": "#40b0a6",
+    "MIN_P": 0.05,
+    "PLOTLY_TEMPLATE": "simple_white",
+    "PORT": 1919,
+    "PREDICT_COLS": [
+        "member_title",
+        "member_gender",
+        "member_nationalities",
+        "author_gender",
+        "author_nationalities",
+        "book_format",
+        "book_genre",
+        "arrond_id"
+    ],
+    "PREDICT_MIN_COUNT": 1,
+    "PREDICT_MIN_SUM": 10,
+    "RIGHT_COLOR": "#7d6ab6",
+    "ROOT_URL": "",
+    "TEXTFONT_SIZE": 20,
+    "URLS": {
+        "books": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/newdataset/data/1.3-beta/books-with-genres.csv",
+        "combinedmini": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/combined.mini.pkl.gz",
+        "creators": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/creators.csv",
+        "dwellings": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv",
+        "events": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv",
+        "geojson_arrond": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis",
+        "landmarks": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/landmarks.csv",
+        "members": "https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv"
+    },
+    "WELOME_MSG_ON": true
+}

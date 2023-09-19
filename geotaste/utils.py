@@ -298,29 +298,21 @@ def concat_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colva
 
 def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
     """
-    Combines two dataframes dfL and dfR by joining them on their indexes. 
-    The function creates a new column indicating whether a row belongs to the left dataframe, 
-    the right dataframe, or both. The resultant dataframe is returned.
+    Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.
 
     Args:
         dfL (pandas.DataFrame): The left dataframe.
         dfR (pandas.DataFrame): The right dataframe.
-        colname (str, optional): The name of the new column that indicates whether a row 
-                                 belongs to the left dataframe, the right dataframe, 
-                                 or both. Default is 'L_or_R'.
-        colval_L (str, optional): The value in the new column for rows that belong 
-                                  only to the left dataframe. Default is 'L'.
-        colval_R (str, optional): The value in the new column for rows that belong 
-                                  only to the right dataframe. Default is 'R'.
-        colval_LR (str, optional): The value in the new column for rows that belong 
-                                   to both dataframes. Default is 'LR'.
+        colname (str, optional): The name of the new column that indicates whether a row belongs to the left dataframe, the right dataframe, or both. Default is 'L_or_R'.
+        colval_L (str, optional): The value in the new column for rows that belong only to the left dataframe. Default is 'L'.
+        colval_R (str, optional): The value in the new column for rows that belong only to the right dataframe. Default is 'R'.
+        colval_LR (str, optional): The value in the new column for rows that belong to both dataframes. Default is 'LR'.
 
     Returns:
         pandas.DataFrame: The combined dataframe.
     """
     # logger.debug([dfL.columns, 'dfL cols'])
     # logger.debug([dfR.columns, 'dfR cols'])
-    print(dfL.index.name, dfR.index.name)
     assert dfL.index.name == dfR.index.name
     allL, allR = set(dfL.index), set(dfR.index)
     print(allR)
@@ -337,7 +329,7 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
      )
     
     
-    logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
+    # logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
 
     def assign(idx, underdog=True):
         if not onlyL and not onlyR: # nothing distinct
@@ -357,16 +349,12 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colv
                 else:
                     o=colval_L
         
-            if 'hemingway' in str(idx):
-                logger.debug([idx,idx in allL, idx in allR, idx in both, idx in either, '->',o])
-        
         return o
 
     odf = pd.concat([dfL, dfR])
     odf[colname] = [assign(i) for i in odf.index]
-    # odf = odf#.reset_index().drop_duplicates([odf.index.name,colname]).set_index(odf.index.name)
-    logger.debug([odf.columns, 'combo cols'])
-    logger.debug([odf.index.name, 'combo index name'])
+    logger.trace([odf.columns, 'combo cols'])
+    logger.trace([odf.index.name, 'combo index name'])
     return odf
 
 
@@ -437,7 +425,7 @@ def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
     c2c = {k:v for k,v in col2col.items() if k in set(df.columns)}
     return df[c2c.keys()].rename(columns=c2c)
 
-def qualquant_series(series, quant=False):
+def qualquant_series(series, quant=False, drop_na=False, drop_empty=False):
     """This function takes a series as input and converts it into a pandas
     Series object if it is not already. If the 'quant' parameter is set to
     True, it converts the series into numeric values using the 'pd.to_numeric'
@@ -455,8 +443,10 @@ def qualquant_series(series, quant=False):
     series=pd.Series(series) if type(series)!=pd.Series else series
     if quant is True: 
         series=pd.to_numeric(series, errors='coerce')
+        if drop_na: series=series.dropna()
     elif quant is False:
         series=series.fillna('').apply(str)
+        if drop_empty: series=series[series!='']
     return series
 
 def uid(length=10):
@@ -676,16 +666,95 @@ def wraptxt(s, n, newline_char='\n'):
 
 def wraphtml(x,xn=50): return wraptxt(x, ensure_int(xn), '<br>') if x else x
 
-def ifnanintstr(x,y='?'):
+def ifnanintstr(x,y=''):
     return ensure_int(x) if not np.isnan(x) else y
 
 
 
 def intersect_filters(filters_d):
-    logger.debug(f'intersecting {len(filters_d)} filters')
+    # logger.trace(f'intersecting {len(filters_d)} filters')
     filters_d = [d for d in filters_d if d]
     return {
         k:v 
         for d in filters_d 
         for k,v in d.items()
     }
+
+
+
+
+def postproc_df(df, 
+        cols=[],  # or dict to rename
+        cols_sep=[],
+        cols_q=[],
+        cols_pref=[], 
+        sep=';',
+        fillna=None,
+        ):
+        
+    # sep?
+    cols_qset=set(cols_q)
+    for c in cols_sep: 
+        df[c]=df[c].fillna('').apply(
+            lambda x: [
+                (
+                    y.strip()
+                    if c not in cols_qset
+                    else pd.to_numeric(
+                        y.strip(),
+                        errors='coerce'
+                    )
+                )
+                for y in str(x).split(sep)
+            ]
+        )
+    
+    # rename?
+    if cols: 
+        df=df[cols] if is_listy(cols) else selectrename_df(df, cols)
+    
+    # quantize?
+    for c in cols_q:
+        if c not in set(cols_sep) and c in set(df.columns):
+            df[c]=pd.to_numeric(df[c], errors='coerce')
+
+    # prefcols
+    if cols_pref:
+        cl1=[c for c in cols_pref if c in set(df.columns)] 
+        cl2=[c for c in df if c not in set(cols_pref)]
+        df=df[cl1+cl2]
+
+    if fillna is not None:
+        df=df.fillna(fillna)
+
+    return df
+
+
+
+
+def get_date_cmp(*l):
+    l=[str(x) for x in l]
+    minlen=min([len(x) for x in l])
+    return [x[:minlen] for x in l]
+
+def date_fuzzily_precedes(x,y):
+    x2,y2=get_date_cmp(x,y)
+    return x2<y2
+
+def date_fuzzily_follows(x,y):
+    x2,y2=get_date_cmp(x,y)    
+    return x2>y2
+
+
+
+def is_fuzzy_date_seq(x,y,z):
+    if any(not _ for _ in [x,y,z]): return False
+    
+    x,y,z=get_date_cmp(x,y,z)
+    return x<=y<=z
+
+
+def ensure_dir(fn):
+    dirname=os.path.dirname(fn)
+    if not os.path.exists:
+        os.makedirs(dirname)

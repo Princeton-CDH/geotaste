@@ -1,7 +1,7 @@
 from .imports import *
 from scipy.stats.contingency import odds_ratio
 from scipy.stats import fisher_exact
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 
 def analyze_contingency_tables(
@@ -58,7 +58,7 @@ def analyze_contingency_tables(
     return df
 
 
-def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterable'=[], min_count:int|None=None):
+def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterable'=[], min_count:int=None):
     """
     Iterates over contingency tables for two sets of values.
 
@@ -95,6 +95,28 @@ def iter_contingency_tables(vals1:'Iterable', vals2:'Iterable', uniqvals:'Iterab
 
 
 def table_info(ctbl):
+    """Returns a dictionary containing information about a given table.
+    
+    Args:
+        ctbl (list): A 2D list representing the table.
+    
+    Returns:
+        dict: A dictionary containing the following information:
+            - count_sum (int): The sum of count1 and count2.
+            - count_min (int): The minimum value between count1 and count2.
+            - count_L (int): The value of count1.
+            - count_R (int): The value of count2.
+            - perc_L (float): The percentage of count1 relative to support1.
+            - perc_R (float): The percentage of count2 relative to support2.
+            - perc_L->R (float): The difference between perc_R and perc_L.
+    
+    Examples:
+        >>> table_info([[10, 20], [30, 40]])
+        {'count_sum': 100, 'count_min': 10, 'count_L': 10, 'count_R': 20, 'perc_L': 33.33333333333333, 'perc_R': 66.66666666666666, 'perc_L->R': 33.33333333333333}
+        >>> table_info([[0, 0], [0, 0]])
+        {'count_sum': 0, 'count_min': 0, 'count_L': 0, 'count_R': 0, 'perc_L': nan, 'perc_R': nan, 'perc_L->R': nan}
+    """
+    
     count1=ctbl[0][0]
     count2=ctbl[0][1]
     support1=ctbl[0][0] + ctbl[1][0]
@@ -114,57 +136,47 @@ def table_info(ctbl):
 
 
 
-def quicklook_diffs(sL, sR):    
-    df = pd.DataFrame([sL, sR], index=['L','R']).T
-    df['L->R'] = df['R'] - df['L']
-    df = df.round().astype(int)
-    df = df[df['L->R']!=0]
-    return df.T.rename_axis('LR')
-
-
-
-
-def zfy(series):
-    s=pd.Series(series).replace([np.inf, -np.inf], np.nan).dropna()
-    if not len(s): return np.nan
-    return (s - s.mean()) / s.std()
-
 
 def filter_signif(df, p_col=None, min_p=MIN_P):
+    """Filters a DataFrame based on the significance level of a specified column.
+    
+    Args:
+        df (pandas.DataFrame): The DataFrame to be filtered.
+        p_col (str, optional): The name of the column containing p-values. If not provided, the function will attempt to find a column named 'pvalue' or ending with '_p'. Defaults to None.
+        min_p (float, optional): The minimum p-value threshold for filtering. Rows with p-values greater than this threshold will be removed. Defaults to MIN_P.
+    
+    Returns:
+        pandas.DataFrame: The filtered DataFrame.
+    
+    Examples:
+        >>> df = pd.DataFrame({'A': [1, 2, 3], 'B': [0.05, 0.1, 0.2]})
+        >>> filter_signif(df, min_p=0.1)
+           A     B
+        0  1  0.05
+        1  2  0.10
+    """
+    
     if min_p is None: return df
-    if p_col is None: pcol=first([c for c in df if c=='pvalue' or c.endswith('_p')])
-    if not pcol: return df
-    return df[df[pcol] <= min_p]
-
-
-
-def measure_dists(
-        series1, 
-        series2, 
-        methods = [
-            'braycurtis', 
-            'canberra', 
-            'chebyshev', 
-            'cityblock', 
-            'correlation', 
-            'cosine', 
-            'euclidean', 
-            'jensenshannon', 
-            'minkowski', 
-        ],
-        series_name='dists',
-        calc = ['median']
-        ):
-    from scipy.spatial import distance
-    a=pd.Series(series1).values
-    b=pd.Series(series2).values
-    o=pd.Series({fname:getattr(distance,fname)(a,b) for fname in methods}, name=series_name)
-    for fname in calc: o[fname]=o.agg(fname)
-    return o
-
+    if p_col is None: p_col=first([c for c in df if c=='pvalue' or c.endswith('_p')])
+    if not p_col: return df
+    return df[df[p_col] <= min_p]
 
 
 def geodist(latlon1, latlon2, unit='km'):
+    """Calculates the geodesic distance between two points given their latitude and longitude coordinates.
+    
+    Args:
+        latlon1 (tuple): A tuple containing the latitude and longitude coordinates of the first point.
+        latlon2 (tuple): A tuple containing the latitude and longitude coordinates of the second point.
+        unit (str, optional): The unit of measurement for the distance. Defaults to 'km'.
+    
+    Returns:
+        float: The geodesic distance between the two points in the specified unit.
+    
+    Raises:
+        ValueError: If the latitude or longitude coordinates are invalid.
+    """
+    
     from geopy.distance import geodesic as distfunc
     import numpy as np
     try:
@@ -176,49 +188,196 @@ def geodist(latlon1, latlon2, unit='km'):
     except ValueError as e:
         return np.nan
     
-
-
-
-
-
-
-
-####
-
-def describe_arronds(df_arronds, min_p=None, p_col=None):
-    signif_df = filter_signif(df_arronds)
-
-    if len(signif_df): 
-        signif_df['odds_ratio'] = signif_df['odds_ratio'].replace(np.inf, np.nan)
-        signif_df = signif_df[signif_df.odds_ratio.apply(is_numeric) & (~signif_df.odds_ratio.isna()) & (signif_df.odds_ratio!=0)]
-
-    desc_top = f'''Comparing where members from Filter 1 and Filter 2 lived produces **{len(signif_df)}** statistically significant arrondissement.'''
+def get_dist_from_SCO(lat,lon):
+    """Calculate the distance from a given latitude and longitude to the coordinates of SCO.
     
-    signif_more_L=signif_df[signif_df.odds_ratio>1]
-    signif_more_R=signif_df[signif_df.odds_ratio<1]
+    Args:
+        lat (float): The latitude of the location.
+        lon (float): The longitude of the location.
+    
+    Returns:
+        float: The distance in kilometers from the given location to SCO.
+    """    
+    return geodist((lat,lon), LATLON_SCO)
 
-    desc_L=describe_arronds_LR(signif_more_L,side='left') if len(signif_more_L) else ''
-    desc_R=describe_arronds_LR(signif_more_R,side='right') if len(signif_more_R) else ''
 
-    return (desc_L,desc_R,desc_top)
 
-def describe_arronds_row(row,side='left'):
-    ratio = row.odds_ratio
-    cL,cR,pL,pR=row.count_L,row.count_R,row.perc_L,row.perc_R
-    if side=='right':
-        if ratio == 0: ratio=np.nan
-        ratio=1/ratio
-        cL,cR=cR,cL
-        pL,pR=pR,pL
-    cL2 = cL*pR
-    cR2 = cR*pR
-    astr=ordinal_str(int(row.arrond_id))
-    return f'* **{ratio:.1f}x** more likely to live in the **{astr}** ({pL:.1f}% = {cL:.0f}/{cL2:.0f} vs. {pR:.1f}% = {cR:.0f}/{cR2:.0f})'
 
-def describe_arronds_LR(signif_df, side='left'):
-    descs=['',f'The {side.title()} Group is...']
-    dfx=signif_df.reset_index().sort_values('odds_ratio', ascending=side!='left')
-    for _,row in dfx.iterrows():
-        descs.append(describe_arronds_row(row,side=side))
-    return '\n'.join(descs)
+
+
+
+# @cache_obj.memoize()
+def get_distinctive_qual_vals(
+        dfL,
+        dfR,
+        maxcats=100,
+        cols=[
+            'member_title', 
+            'member_gender', 
+            'member_nationalities',
+            # 'event_type',
+            'creator_gender',
+            # 'creator_role',
+            'creator_nationalities',
+            'book_format',
+            'book_genre',
+            'arrond_id'
+        ],
+        only_signif=False,
+        round=4,
+        min_count=1,
+        min_sum=10,
+        drop_duplicates=[],
+        drop_empty=True
+        ):
+    """Calculates distinctive qualitative values between two dataframes.
+    
+    Args:
+        dfL (DataFrame): Left dataframe.
+        dfR (DataFrame): Right dataframe.
+        maxcats (int, optional): Maximum number of categories allowed for a column. Defaults to 100.
+        cols (list, optional): List of columns to analyze. Defaults to ['member_title', 'member_gender', 'member_nationalities', 'creator_gender', 'creator_nationalities', 'book_format', 'book_genre', 'arrond_id'].
+        only_signif (bool, optional): Flag to return only significant values. Defaults to False.
+        round (int, optional): Number of decimal places to round the results. Defaults to 4.
+        min_count (int, optional): Minimum count required for a value to be considered. Defaults to 1.
+        min_sum (int, optional): Minimum sum required for a value to be considered. Defaults to 10.
+        drop_duplicates (list or dict, optional): Columns to drop duplicates by. Defaults to [].
+        drop_empty (bool, optional): Flag to drop empty values. Defaults to True.
+    
+    Returns:
+        DataFrame: Distinctive qualitative values between the two dataframes.
+    
+    Examples:
+        >>> dfL = pd.DataFrame({'col1': ['A', 'B', 'C'], 'col2': ['X', 'Y', 'Z']})
+        >>> dfR = pd.DataFrame({'col1': ['A', 'B', 'D'], 'col2': ['X', 'Y', 'W']})
+        >>> get_distinctive_qual_vals(dfL, dfR)
+           col col_val comparison_scale  odds_ratio  perc_L  perc_R  count_L  count_R
+        0  col1       C                    0.000000     0.0     0.0      0.0      0.0
+        1  col2       Z                    0.000000     0.0     0.0      0.0      0.0
+    """
+    
+        
+    o=[]
+
+    if drop_duplicates:
+        if is_listy(drop_duplicates) or type(drop_duplicates)==str:
+            dfL=dfL.drop_duplicates(drop_duplicates)
+            dfR=dfR.drop_duplicates(drop_duplicates)
+
+
+    if cols is None: cols=list(set(dfL.columns) & set(dfR.columns))
+    
+    for col in cols:
+        try:
+            colpref=col.split('_')[0]
+            if drop_duplicates and type(drop_duplicates)==dict:
+                if col in drop_duplicates: 
+                    dedupby=drop_duplicates[col] 
+                elif colpref in drop_duplicates:
+                    dedupby=drop_duplicates[colpref]
+                
+                dfLnow = dfL.drop_duplicates(dedupby)
+                dfRnow = dfR.drop_duplicates(dedupby)
+            else:
+                dedupby = []
+                dfLnow = dfL
+                dfRnow = dfR
+                    
+            s1=qualquant_series(flatten_series(dfLnow[col]), quant=False, drop_empty=drop_empty)
+            s2=qualquant_series(flatten_series(dfRnow[col]), quant=False, drop_empty=drop_empty)
+
+            if maxcats and (s1.nunique()>maxcats or s2.nunique()>maxcats):
+                continue
+
+            coldf = analyze_contingency_tables(s1, s2)
+            coldf = coldf.query(
+                f'count_min>={min_count} & count_sum>={min_sum}'
+            ).assign(
+                col=col,
+                comparison_scale=' '.join(dedupby)
+            )
+            o.append(coldf)
+        except Exception as e:
+            logger.error(e)
+
+    if not len(o): return pd.DataFrame()
+
+    alldf=pd.concat(o).rename_axis('col_val').reset_index()
+    alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
+    alldf=alldf[alldf.fisher_exact!=0] # both must have counts?
+    alldf['odds_ratio_log']=alldf['odds_ratio'].apply(np.log10)
+    alldf['odds_ratio_pos']=alldf['odds_ratio'].apply(lambda x: 1/x if x<1 else x)
+    alldf=alldf[~alldf.col_val.str.contains('\n')]
+    prefcols=['col','col_val','comparison_scale','odds_ratio','perc_L','perc_R','count_L','count_R']
+    cols = prefcols + [c for c in alldf if c not in set(prefcols)]
+    alldf=alldf[cols].sort_values('fisher_exact',ascending=False)
+    sigdf=alldf.query('fisher_exact_p<=0.05')
+
+    return (sigdf if only_signif else alldf).round(round)
+
+
+
+
+def describe_comparison(comparison_df, lim=10, min_fac=1.1):
+    """Describe the comparison between two groups based on a comparison dataframe.
+    
+    Args:
+        comparison_df (DataFrame): The comparison dataframe containing the data for comparison.
+        lim (int, optional): The maximum number of rows to include in the description. Defaults to 10.
+        min_fac (float, optional): The minimum odds ratio threshold. Rows with odds ratio below this threshold will be excluded. Defaults to 1.1.
+    
+    Returns:
+        tuple: A tuple containing two lists of descriptions. The first list describes the comparison for group L, and the second list describes the comparison for group R.
+    
+    Examples:
+        >>> df = pd.DataFrame({'col': ['A', 'B', 'C'], 'col_val': ['X', 'Y', 'Z'], 'perc_L': [50, 60, 70], 'perc_R': [40, 30, 20], 'count_L': [100, 200, 300], 'count_R': [50, 100, 150], 'fisher_exact_p': [0.05, 0.1, 0.01], 'odds_ratio_pos': [1.5, 1.2, 1.8]})
+        >>> desc_L, desc_R = describe_comparison(df, lim=2, min_fac=1.2)
+        >>> print(desc_L)
+        * *1.80x* likelier for Col to be **X** **
+        * Group 1: 70.0% (300 of 428.6)
+        * Group 2: 20.0% (150 of 750.0)
+        * *1.50x* likelier for Col to be **Y** **
+        * Group 1: 60.0% (200 of 333.3)
+        * Group 2: 30.0% (100 of 333.3)
+    
+        >>> print(desc_R)
+        * *1.80x* likelier for Col to be **X** **
+        * Group 1: 40.0% (100 of 250.0)
+        * Group 2: 70.0% (300 of 428.6)
+        * *1.20x* likelier for Col to be **Y** **
+        * Group 1: 30.0% (50 of 166.7)
+        * Group 2: 60.0% (200 of 333.3)
+    """
+    
+    idf=comparison_df.sort_values('odds_ratio_pos',ascending=False)
+    L,R=idf.query('perc_L>perc_R'),idf.query('perc_R>perc_L')
+
+    def get_list_desc(xdf, LR='L'):
+        LR2='R' if LR=='L' else 'L'
+        o=[]
+        for i,row in xdf.iterrows():
+             if min_fac and row.odds_ratio_pos<min_fac: continue
+             pL=row[f'perc_{LR}']
+             pR=row[f'perc_{LR2}']
+             cL=row[f'count_{LR}']
+             cR=row[f'count_{LR2}']
+             tL=cL/(pL/100)
+             tR=cR/(pR/100)
+             p=row.fisher_exact_p
+             pstr='\*\*\*' if p<0.01 else ('\*\*' if p<0.05 else ('\*' if p<0.1 else ''))
+             colval=row.col_val.replace("[","\[").replace("]","\]")
+             orow=f'''* *{row.odds_ratio_pos:.2f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{colval}** {pstr}
+    * Group 1: {pL:.1f}% ({cL:.0f} of {tL:,.0f})
+    * Group 2: {pR:.1f}% ({cR:.0f} of {tR:,.0f})
+'''
+             o.append(orow)
+             if lim and len(o)>=lim: break
+        return o
+    
+    return get_list_desc(L), get_list_desc(R)
+
+    
+    
+    
+
 

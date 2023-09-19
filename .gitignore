@@ -13,3 +13,7 @@ cache
 dev_*.txt
 *tiles*/*
 *.bak.py
+build
+dist
+geckodriver.log
+.coverage*

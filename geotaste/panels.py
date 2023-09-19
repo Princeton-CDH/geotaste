@@ -1,48 +1,53 @@
 from .imports import *
-from .views import *
 
 
-class FilterPanel(FilterComponent):
+class FilterPanel(FilterCard):
     unfiltered = UNFILTERED
 
-    @cached_property
-    def content(self,params=None):
-        return dbc.Container([self.store] + super().content.children)
+    def describe_filters(self, panel_data):
+        """Describes the filters applied to the panel data.
+        
+        Args:
+            panel_data (list): The panel data to describe the filters for.
+        
+        Returns:
+            str: The filter query string.
+        """
+        return filter_query_str(panel_data, human=True)
+
     
-    @cached_property
-    def store_desc(self): 
-        return html.Span(
-            self.unfiltered,
-            id=self.id('query_str'), 
-            className='store_desc query_str', 
-            # placeholder=UNFILTERED, 
-            # value='', 
-            # style={'color':self.color}
-        )
-
-
     def component_callbacks(self, app):
+        """This function sets up the component callbacks for the given app.
+        
+        Args:
+            app: The Dash app object.
+        
+        Returns:
+            None
+        """
+        
+        # run parents
         super().component_callbacks(app)
         
         # intersect and listen
         if self.store_subcomponents:
             @app.callback(
-                [
-                    Output(self.store, 'data', allow_duplicate=True),
-                    Output(self.store_desc, 'children', allow_duplicate=True),
-                ],
+                Output(self.store, 'data', allow_duplicate=True),
                 [
                     Input(card.store, 'data')
                     for card in self.store_subcomponents
                 ],
+                State(self.store, 'data'),
                 prevent_initial_call=True
-            #@logger.catch
             )
-            def subcomponent_filters_updated(*filters_d):
-                logger.debug('subcomponent filters updated')
-                filter_data = self.intersect_filters(*filters_d)
-                filter_desc = filter_query_str(filter_data, human=True) if filter_data else UNFILTERED
-                return filter_data, filter_desc
+            def subcomponent_filters_updated(*args):
+                filters_d=args[:-1]
+                old_data=args[-1]
+                intersected_filters=self.intersect_filters(*filters_d)
+                if old_data == intersected_filters: raise PreventUpdate # likely a clear
+                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
+                return intersected_filters
+
             
             @app.callback(
                 [
@@ -56,85 +61,30 @@ class FilterPanel(FilterComponent):
                 ],
                 prevent_initial_call=True
             )
-            #@logger.catch
             def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
                 if panel_filter_data is None: panel_filter_data={}
-                logger.debug(f'panel_filter_data_changed({panel_filter_data})')
-
-
-                logger.debug([card.key for card in self.store_panel_subcomponents])
-
+                logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
                 new_filter_data_l = [
-                    {k:v for k,v in panel_filter_data.items() if k!=card.key}
+                    panel_filter_data
                     for card in self.store_panel_subcomponents    
                 ]
-                out = [
-                    (dash.no_update if old==new else new)
-                    for old,new in zip(old_filter_data_l, new_filter_data_l)
-                ]
-                logger.trace(f'out from panel {pformat(out)}')
+                out = new_filter_data_l
+                logger.debug(f'sending updates for new store_panel --> {out}')
                 return out
             
 
             
 
-        
+  
 
-
-class FilterPlotPanel(FilterPanel):
-    def component_callbacks(self, app):
-        super().component_callbacks(app)
-
-        # if self.graph_subcomponents:
-        #     @app.callback(
-        #         [
-        #             Output(card.graph,'figure',allow_duplicate=True)
-        #             for card in self.graph_subcomponents
-        #         ],
-        #         [
-        #             Input(self.store, 'data'),
-        #         ],
-        #         [
-        #             State(card.body,'is_open')
-        #             for card in self.graph_subcomponents
-        #         ],
-        #         prevent_initial_call=True
-        #     )
-        #     def redraw_graphs_from_new_data(filter_data, *cards_open):
-        #         logger.debug(f'redraw_graphs_from_new_data({filter_data})')
-        #         filtered_keys = set(filter_data.keys())
-        #         existing_fig = None # @TODO?
-                
-        #         return [
-        #             (
-        #                 dash.no_update 
-        #                 if (
-        #                     card.key in filtered_keys 
-        #                     or 
-        #                     not cards_open[i]
-        #                 )
-        #                 else card.plot(
-        #                     filter_data, 
-        #                     existing_fig=existing_fig
-        #                 )
-        #             )
-        #             for i,card in enumerate(self.graph_subcomponents)
-        #         ]
-            
-class CollapsiblePanel(CollapsibleCard):
-    body_is_open = False
-    className='collapsible-panel'
-
-
-class MemberPanel(CollapsiblePanel):
+class MemberPanel(FilterPanel):
     name='MP'
     figure_factory = CombinedFigureFactory
     desc = 'Members of the library'
     records_name='members'
-    # tooltip = 'Filter members of the library by name, date of birth, when active, gender, nationality, and arrondissement'
 
     @cached_property
-    def name_card(self): 
+    def name_card(self):
         return MemberNameCard(name_context=self.name, **self._kwargs)
     
     @cached_property
@@ -175,12 +125,11 @@ class MemberPanel(CollapsiblePanel):
     
     
 
-class BookPanel(CollapsiblePanel):
+class BookPanel(FilterPanel):
     name='BP'
     figure_factory = CombinedFigureFactory
     desc = 'Books they borrowed'
     records_name='books'
-    # tooltip = 'Filter books borrowed by title, date of publication, genre, author, author gender, author nationality, and the date borrowed'
 
     @cached_property
     def title_card(self): 
@@ -195,16 +144,16 @@ class BookPanel(CollapsiblePanel):
         return BookGenreCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_card(self):
-        return CreatorNameCard(name_context=self.name, **self._kwargs)
+    def author_card(self):
+        return AuthorNameCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_gender_card(self):
-        return CreatorGenderCard(name_context=self.name, **self._kwargs)
+    def author_gender_card(self):
+        return AuthorGenderCard(name_context=self.name, **self._kwargs)
     
     @cached_property
-    def creator_nationality_card(self):
-        return CreatorNationalityCard(name_context=self.name, **self._kwargs)
+    def author_nationality_card(self):
+        return AuthorNationalityCard(name_context=self.name, **self._kwargs)
     
     @cached_property
     def event_year_card(self): 
@@ -220,9 +169,9 @@ class BookPanel(CollapsiblePanel):
             self.title_card,
             self.year_card,
             self.genre_card,
-            self.creator_card,
-            self.creator_gender_card,
-            self.creator_nationality_card,
+            self.author_card,
+            self.author_gender_card,
+            self.author_nationality_card,
             self.event_year_card,
             self.event_month_card,
         ]
@@ -236,15 +185,48 @@ class BookPanel(CollapsiblePanel):
 
 
 
-class CombinedPanel(FilterPlotPanel):
+class CombinedPanel(FilterPanel):
+    name = 'CombinedPanel'
+    desc = 'Combined Panel'
     
     @cached_property
     def member_panel(self): 
-        return MemberPanel(name_context=self.name, **self._kwargs)
+        """Creates a member panel object.
+        
+        Args:
+            self (object): The current instance of the class.
+            
+        Returns:
+            MemberPanel: A member panel object with the specified attributes.
+        """
+        return MemberPanel(
+            name_context=self.name, 
+            desc=self.desc,
+            L_or_R=self.L_or_R,
+            color=self.color,
+            unfiltered=self.unfiltered,
+            **self._kwargs
+        )
 
     @cached_property
-    def book_panel(self):
-        return BookPanel(name_context=self.name, **self._kwargs)
+    def book_panel(self): 
+        """Creates a BookPanel object with the specified parameters.
+        
+        Args:
+            self (object): The current instance of the class.
+            
+        Returns:
+            BookPanel: A BookPanel object with the specified parameters.
+        """
+        
+        return BookPanel(
+            name_context=self.name, 
+            desc=self.desc,
+            L_or_R=self.L_or_R,
+            color=self.color,
+            unfiltered=self.unfiltered,
+            **self._kwargs
+        )
     
 
     @cached_property
@@ -255,323 +237,440 @@ class CombinedPanel(FilterPlotPanel):
         ]
     
     def cards_with_attr(self, attrname:str):
+        """Returns a list of cards that have a specific attribute.
+        
+        Args:
+            attrname (str): The name of the attribute to check for.
+        
+        Returns:
+            list: A list of cards that have the specified attribute.
+        """
+        
         return [
             card
             for panel in self.subcomponents
             for card in panel.subcomponents
             if hasattr(card,attrname)
         ]
+    
+
+
+
+class LeftPanel(CombinedPanel):
+    name='Filter_1'
+    desc='Filter 1'
+    L_or_R='L'
+    color=LEFT_COLOR
+    unfiltered=UNFILTERED_L
+
+class RightPanel(CombinedPanel):
+    name='Filter_2'
+    desc='Filter 2'
+    L_or_R='R'
+    color=RIGHT_COLOR
+    unfiltered=UNFILTERED_R
+
+
+
 
 
 
 class ComparisonPanel(BaseComponent):
+    """A class used to represent a Comparison Panel that is a child of the Base Component"""
+
     figure_factory = ComparisonFigureFactory
 
     @cached_property
-    def storedesc_L_btn(self):
-        return dbc.Button(
-            html.Span(self.L.store_desc), 
-            color="link", 
-            n_clicks=0,
-            className='button_store_desc store_desc query_str',
-            id='storedesc_L_btn',
-            style={'text-align':'center', 'height':'100px'}
-        )
-    
-    @cached_property
-    def storedesc_R_btn(self):
-        return dbc.Button(
-            html.Span(self.R.store_desc), 
-            color="link", 
-            n_clicks=0,
-            className='button_store_desc store_desc query_str',
-            id='storedesc_R_btn',
-            style={'text-align':'center', 'height':'100px'}
-        )
-    
-    
-    @cached_property
-    def storedesc_R_col(self):
-        return dbc.Col(
-            self.storedesc_R_btn,
-            className='storedescs-col storedescs-col-R',
-            id='storedescs-col-R'
-        )
-    
-    @cached_property
-    def storedesc_L_col(self):
-        return dbc.Col(
-            self.storedesc_L_btn,
-            className='storedescs-col storedescs-col-L',
-            id='storedescs-col-L'
-        )
-    
+    def store_json(self):
+        """Property method to represent a store giving the ability to store JSON objects
+
+        Returns:
+            dcc.Store: The dash core component Store object
+        """
+        return dcc.Store(id=self.id('store_json'))
+
+
+    def layout(self, params=None):
+        
+        return dbc.Container([
+            dbc.Container([
+                self.panel_L_col, 
+                self.panel_R_col,
+            ], className='filters-container'),
+
+            dbc.Container([
+                # self.mainview_tabs,
+                self.mainview,
+                self.store,
+                self.store_json,
+                self.table_json,
+            ], className='mainview-container')
+        ])
 
     @cached_property
-    def content_left_tabs(self,params=None):
-        spacercol=dbc.Col(
-            html.Nobr(), 
-            className='storedescs-inbetween',
-            width=1
-        )
-        return dbc.Container(
-            dbc.Row([
-                self.storedesc_L_col,
-                spacercol,
-                self.storedesc_R_col
-            ]), 
-            className='layout-toprow'
-        )
-    
-    
+    def store(self):
+        """Stores data in a Dash Core Component Store.
+        
+        Args:
+            self: The instance of the class.
+        
+        Returns:
+            dcc.Store: [left filter data, right filter data]
+        """
+        return dcc.Store(id=self.id('store'), data=[])
     @cached_property
-    def content_right_tabs(self,params=None):
-        return dbc.Container([
-            dbc.Row(
-                self.graphtabs, 
-                className='content-tabs-row'
-            )
-        ])
+    def table_json(self):
+        """Returns a Dash Core Component Store object with an empty JSON string as the initial data.
+        
+        Args:
+            self (object): The instance of the class.
+        
+        Returns:
+            dcc.Store: A Dash Core Component Store object.
+        """
+        
+        return dcc.Store(id=self.id('table_json'), data='')
+
     
-    @cached_property
-    def panel_R_col(self):
-        return dbc.Col(
-            self.R.layout(), 
-            width=6, 
-            className='panel_R panel',
-            id='panel_R'
-        )
     @cached_property
     def panel_L_col(self):
-        return dbc.Col(
-            self.L.layout(), 
-            width=6, 
+        return dbc.Container(
+            [dbc.Row(self.L.layout())], 
             className='panel_L panel',
             id='panel_L'
         )
     
     @cached_property
-    def content_main_row(self,params=None):
-        return dbc.Row(
-            [self.panel_L_col, self.panel_R_col],
-            className='layout-mainrow'
-        )
-    
-    @cached_property
-    def content_left(self,params=None):
-        return dbc.Collapse(
-            self.content_main_row, 
-            className='layout-leftcol',
-            is_open=False
-        )
-    
-    @cached_property
-    def content_right(self,params=None):
-        return dbc.Collapse(
-            dbc.Container(self.graphtab, className='content-belowtabs-row'),
-            className='layout-rightcol',
-            is_open=True
+    def panel_R_col(self):
+        return dbc.Container(
+            [dbc.Row(self.R.layout())],
+            className='panel_R panel',
+            id='panel_R'
         )
 
-    @cached_property
-    def content(self,params=None):
-        return dbc.Container([self.content_left, self.content_right])
-        
+
     @cached_property
     def subcomponents(self): return (self.L, self.R)
 
     @cached_property
     def L(self): 
-        return CombinedPanel(
-            name='L',
-            L_or_R='L', 
-            color=LEFT_COLOR,
-            desc='Left-hand Group Panel',
-            unfiltered=UNFILTERED_L
-        )
+        return LeftPanel()
     
     @cached_property
     def R(self): 
-        return CombinedPanel(
-            name='R',
-            L_or_R='R',
-            color=RIGHT_COLOR,
-            desc='Right-hand Group Panel',
-            unfiltered=UNFILTERED_R
-        )
-    
-    @cached_property
-    def graphtab_map(self):
-        return dbc.Tab(
-            children=[],
-            label='Map',
-            tab_id='map',
-        )
-    
-    @cached_property
-    def graphtab_data(self):
-        return dbc.Tab(
-            children=[],
-            label='Data',
-            tab_id='data',
-        )
-    
-    @cached_property
-    def graphtab_analysis(self):
-        return dbc.Tab(
-            children=[],
-            label='Analysis',
-            tab_id='analysis',
-        )
-    
-    
-    @cached_property
-    def graphtabs(self):
-        tabs = [
-            self.graphtab_map, 
-            self.graphtab_analysis
-        ]
-        active_tab = 'map'
+        return RightPanel()
         
-        return dbc.Tabs(
-            children=tabs, 
-            active_tab=active_tab,
-            className='graphtabs-container',
-            id='graphtabs'
-        )
 
     @cached_property
-    def graphtab_desc(self):
-        ## @TODO
-        return html.P(BLANK, className='graphtab_desc')
+    def mainview_tabs(self):
+        """Creates a Tabs component for the main view.
+        
+        Returns:
+            dbc.Tabs: The Tabs component.    
+        """
+        return dbc.Tabs(
+            [
+                dbc.Tab(
+                    label='Map', 
+                    tab_id='map'
+                ),
+
+                dbc.Tab(
+                    label='Analysis', 
+                    tab_id='table'
+                ),
+            ],
+            id='mainview_tabs',  
+            active_tab='map'
+        )
     
     @cached_property
-    def graphtab(self):
-        # default = html.Pre('Loading...')
-        # view = viewfunc()
-        view = MemberMapView(LandmarksFigureFactory())
-
-        return dbc.Container(
-            children=[view],
-            className='graphtab-div',
-            id=self.id('graphtab')
+    def mapview(self):
+        """Returns a Container component with the main map view.
+        
+        Returns:
+            dbc.Container: A Container component with the main map view.
+        """
+        
+        return dbc.Container(self.mainmap,id='mapview')
+    
+    @cached_property
+    def tblview(self):
+        """Returns a Dash Bootstrap Components (dbc) Container containing multiple dbc.Collapse components for the various parts of the tblview.
+        
+            Returns:
+                dbc.Container: object containing the main table preface landmarks, main table preface members, 
+                     main table preface analysis, and the main table itself.
+        """
+        
+        return dbc.Container([
+                self.maintbl_preface_landmarks,
+                self.maintbl_preface_members,
+                self.maintbl_preface_analysis,
+                self.maintbl,
+            ],
+            id='tblview'
         )
+
+    @cached_property
+    def maintbl_preface_landmarks(self):
+        """Returns a Collapse component containing a heading for the data on landmarks.
+        
+            Returns:
+                dbc.Collapse: A Collapse component containing a heading and any other introductory information for the data on landmarks.
+        """
+        
+        return dbc.Collapse(
+            [
+                html.H4('Data on Landmarks')
+            ],
+            is_open=True
+        )
+    
+    @cached_property
+    def maintbl_preface_members(self):
+        """Returns a Collapse component containing a preface for the main table of members. This function creates a Collapse component from the `dash_bootstrap_components.Collapse` class. The Collapse component is used to hide or show content based on user interaction. The preface for the main table of members is displayed inside the Collapse component.
+        
+            Returns:
+                dbc.Collapse: The Collapse component.
+        """
+        
+        return dbc.Collapse(
+            [
+                html.H4('Data on members')
+            ],
+            is_open=False
+        )
+    
+    @cached_property
+    def maintbl_preface_analysis(self):
+        """Returns a Collapse component containing the preface analysis for the main table. This function creates a Collapse component that includes a heading, tabs, and content for the preface analysis of the main table. The Collapse component is initially closed.
+        
+            Returns:
+                dbc.Collapse: A Collapse component containing the preface analysis for the main table.
+        """
+        
+        return dbc.Collapse(
+            [
+                html.H4('Data comparing filters'),
+                self.maintbl_preface_analysis_tabs,
+            ],
+            is_open=False
+        )
+    
+    @cached_property
+    def maintbl_preface_analysis_tabs(self):
+        """Creates a set of tabs for the main table preface analysis.
+        
+        Returns:
+            dbc.Tabs: A set of tabs for the main table preface analysis.
+        """
+        
+        return dbc.Tabs([
+            dbc.Tab(label='Arrondissement', tab_id='arrond'),
+            dbc.Tab(label='Members', tab_id='member'),
+            dbc.Tab(label='Authors', tab_id='author'),
+            dbc.Tab(label='Books', tab_id='book'),
+        ], id='maintbl_preface_analysis_tabs')
+    
+    @cached_property
+    def maintbl(self):
+        """Creates and returns a container with initially a table of landmarks.
+        
+        Returns:
+            dbc.Container: A container with initially the table of landmarks.
+        """
+        
+        ff = LandmarksFigureFactory()
+        dtbl=ff.table()
+        return dbc.Container(dtbl,id='maintbl-container')
+
+    @cached_property
+    def mainview(self):
+        """Returns a Container component containing the mapview and tblview components.
+            
+        Returns:
+            A dbc.Container component containing the mapview and tblview components.            
+        """
+        
+        return dbc.Container([
+            dbc.Container(self.mapview, id='mapview-container'),
+            dbc.Container(self.tblview, id='tblview-container')
+        ],
+        className='mainview',
+        id='mainview'
+    )
+    
+    @cached_property
+    def mainmap(self):
+        """Returns the main map.
+        
+        Returns:
+            dcc.Graph: The main map Graph component
+        """
+        return self.get_mainmap()
+    
+    def get_mainmap(self, ff=None):
+        """Get the main map.
+        
+        Args:
+            ff (optional): The figure factory object. Defaults to None.
+        
+        Returns:
+            dcc.Graph: The main map graph.
+        """
+        
+        if ff is None: ff=self.ff()
+        ofig = ff.plot_map()
+        ofig.update_layout(autosize=True)
+        ograph = dcc.Graph(
+            figure=go.Figure(ofig), 
+            className='comparison_map_graph',
+            config={'displayModeBar':False},
+            id='mainmap'
+        )
+        return ograph
+
+    def ff(self, fdL={}, fdR={}, **kwargs):
+        """Creates a figure factory based on the given filters.
+        
+        Args:
+            fdL (dict, optional): Filter dictionary for the left side. Defaults to {}.
+            fdR (dict, optional): Filter dictionary for the right side. Defaults to {}.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            FigureFactory: The created figure factory.
+        """
+        
+        # get figure factory
+        num_filters = len([x for x in [fdL,fdR] if x])
+        # 3 cases
+        if num_filters==0:
+            ff = LandmarksFigureFactory()
+
+        elif num_filters==1:
+            if fdL:
+                ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
+            elif fdR:
+                ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
+
+        elif num_filters == 2:
+            ff = ComparisonFigureFactory(fdL, fdR)
+
+        return ff
+
 
     def component_callbacks(self, app):
+        """Callback functions for component interactions in the app:
+    * switch_tab_simple -> clientside -> table
+    * update_LR_data -> cleintside -> figure
+        
+        Args:
+            app: The Dash app object.
+        
+        Returns:
+            None
+        """
+        
+
         super().component_callbacks(app)
+
+        ### SWITCHING TABS
 
         @app.callback(
             [
-                Output(self.content_left, 'is_open', allow_duplicate=True),                      # dropdowns open
-                # Output(self.storedesc_R_col, 'style', allow_duplicate=True),                     # whether right filter button visible
-                Output(self.panel_R_col, 'style', allow_duplicate=True),                         # whether right filter panel visible
-                Output(self.graphtab, 'children', allow_duplicate=True),   # actual content
+                Output(self.tblview,'style',allow_duplicate=True),
+                Output(self.table_json,'data',allow_duplicate=True),
+
+                Output(self.maintbl_preface_landmarks, 'is_open', allow_duplicate=True),
+                Output(self.maintbl_preface_members, 'is_open', allow_duplicate=True),
+                Output(self.maintbl_preface_analysis, 'is_open', allow_duplicate=True),
+
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
-                Input(self.L.store, 'data'),                               # any changes in left filter
-                Input(self.R.store, 'data'),                               # any in right filter
-                Input(self.storedesc_L_btn, "n_clicks"),
-                Input(self.storedesc_R_btn, "n_clicks"),
-                Input(self.graphtabs, 'active_tab')
+                Input(self.mainview_tabs,'active_tab'),
+                Input(self.store,'data'),
+                Input(self.maintbl_preface_analysis_tabs, 'active_tab')
             ],
             [
-                State(self.content_left, 'is_open'),
+                State(self.tblview,'style'),
             ],
             prevent_initial_call=True
         )
-        def determine_dropdown_and_view(
-                fdL, 
-                fdR, 
-                storedesc_L_clicked, 
-                storedesc_R_clicked, 
-                active_tab, 
-                filter_dropdown_open_now,
-                ):
-            input_ids = [
-                self.L.store.id, 
-                self.R.store.id, 
-                self.storedesc_L_btn.id, 
-                self.storedesc_R_btn.id, 
-                self.graphtabs.id
-            ]
-            outs = [
-                dash.no_update,  # both dropdown vis
-                # dash.no_update,  # right vis
-                # dash.no_update,  # right vis
-                # STYLE_VIS if fdL and storedesc_R_clicked else STYLE_VIS,
-                # STYLE_VIS,
-                STYLE_VIS if fdL and storedesc_R_clicked else STYLE_INVIS,
-                dash.no_update   # content
-            ]
+        def switch_tab_simple(active_tab, data, analysis_tab, style_d):
+            if style_d is None: style_d={}
+            is_open_l = [False, False, False]
+            if active_tab!='table':
+                ostyle={**style_d, **STYLE_INVIS}
+                return [ostyle, dash.no_update] + [dash.no_update for _ in is_open_l] + [True]
             
-            logger.debug(ctx.triggered)
-            logger.debug(input_ids)
-
-            # if we clicked the Left or Right top Filter tab button
-            if ctx.triggered_id in {self.storedesc_L_btn.id, self.storedesc_R_btn.id}:
-                if storedesc_R_clicked!=1:
-                    outs[0]=not filter_dropdown_open_now
-
-            # if the tab changed -- or the filters changed
-            elif ctx.triggered_id in {self.graphtabs.id, self.L.store.id, self.R.store.id}:
-
-                # make sure change actually happened?
-                args = [[active_tab],[],fdL,fdR]
-                logger.debug(['switchtab'] + args)
-                # logger.debug([fdL, old_fdL])
-                # logger.debug([fdR, old_fdR])
-                serialized_data = serialize(args)
-                outs[-1] = graphtab_cache(serialized_data)
-
-                # also collapse dropdowns if tab changed
-                # if ctx.triggered_id == self.graphtabs.id:
-                    # outs[0] = False
+            # table is active tab
+            ostyle={**style_d, **STYLE_VIS}
+            fdL,fdR=data if data else ({},{})
+            if not fdL and not fdR:
+                is_open_l=[True,False,False]
+            elif fdL and fdR:
+                is_open_l=[False,False,True]
+            else:
+                is_open_l=[False,True,False]
             
-            # logger.debug(outs)
-            return outs
+            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab]))
+            return [ostyle,ojson]+is_open_l+[True]
+            
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='decompress'
+            ),
+            Output(self.maintbl, 'children', allow_duplicate=True),
+            Input(self.table_json, 'data'),
+            prevent_initial_call=True
+        )
 
 
-        
+        ## CHANGING MAP
+        @app.callback(
+            [
+                Output(self.store_json, 'data',allow_duplicate=True),
+                Output(self.store,'data',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
+                # Output(self.mainview_tabs,'active_tab')
+            ],
+            [
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+                # Input(self.mainview_tabs, 'active_tab')
+            ],
+            [
+                State(self.mainmap,'figure'),
+            ],
+            prevent_initial_call=True
+        )
+        def update_LR_data(Lstore, Rstore, oldfig):
+            ostore=[Lstore,Rstore]
+            logger.debug(ostore)
+            with Logwatch('computing figdata on server'):
+                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','']))
+            
+            newfig = from_json_gz_str(newfig_gz_str)
+            ofig = go.Figure(data=newfig.data, layout=oldfig['layout'])
+            
+            logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
+                
+            return to_json_gz_str(ofig),ostore,True#,'map'
             
 
-# @cache
-# @cache_obj.memoize()
-def graphtab_cache(serialized_data):
-    logger.trace(f'graphtab_cache({serialized_data})')
-    tab_ids_1, tab_ids_2, fdL, fdR = unserialize(serialized_data)
-    
-    # get figure factory
-    if not fdL and not fdR:
-        # ... @todo change?
-        ff = LandmarksFigureFactory()
-        num_filters = 0
-        # ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
-        # num_filters = 1
-    elif fdL and not fdR:
-        ff = CombinedFigureFactory(fdL, color=LEFT_COLOR)
-        num_filters = 1
-    elif fdR and not fdL:
-        ff = CombinedFigureFactory(fdR, color=RIGHT_COLOR)
-        num_filters = 1
-    else:
-        # both
-        ff = ComparisonFigureFactory(fdL, fdR)
-        num_filters = 2
-
-    # get view
-    viewfunc = determine_view(tab_ids_1, tab_ids_2, num_filters=num_filters)
-
-    # return view
-    return dbc.Container(viewfunc(ff), className='viewfunc-container')
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='decompress'
+            ),
+            Output(self.mainmap, 'figure', allow_duplicate=True),
+            Input(self.store_json, 'data'),
+            prevent_initial_call=True
+        )
 
 
-def determine_view(tab_ids_1=[], tab_ids_2=[], default=MemberMapView, num_filters=1):
-    tab_ids_1_set=set(tab_ids_1)
-    if 'data' in tab_ids_1_set:
-        return MemberTableView
-    elif 'map' in tab_ids_1_set:
-        return MemberMapView
-    elif 'analysis' in tab_ids_1_set:
-        return ArrondTableAndMapView if num_filters>1 else MemberTableView
-    
-    return default
+

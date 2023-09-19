@@ -1,64 +1,82 @@
 from .imports import *
 
-
 class GeotasteLayout(BaseComponent):
+    """
+    The GeotasteLayout class inherits from the BaseComponent class and 
+    is used to define the layout and properties for the Geotaste Project.
+    """
+
     def __init__(self):
-        super().__init__(title="Shakespeare and Company Project Lab")
+        """
+        Initializes the GeotasteLayout class with a title.
+        """
+        super().__init__(title=SITE_TITLE)
         
     @cached_property
-    def comparison_panel(self): 
+    def comparison_panel(self):
+        """
+        Defines a cached property that returns an instance of the ComparisonPanel.
+        """
         return ComparisonPanel()
 
     @cached_property
     def logo_popup(self):
-        return html.Span([
-            dbc.Button(
-                self.title,
-                id='logo_popup',
-                color='link',
-                className='logo-title'
-            ),
-            # dbc.Popover(
-            #     [
-            #         dbc.PopoverHeader('ℹ️ How to use'),
-            #         dbc.PopoverBody('Filter the left and right hand groups and then compare how their distribute on the map.'),
-            #     ],
-            #     target='logo_popup',
-            #     trigger='hover',
-            #     style={'z-index':1000},
-            #     placement='auto'
-            # )
-        ], className='logo-title')
+        """
+        Defines a cached property for a logo popup. 
+        Code to return the actual logo popup has not currently been implemented.
+        """
+        return 
 
     @cached_property
     def logo(self):
-        return html.Div([
-            html.Img(src=LOGO_SRC, className='logo-img'),
-            self.logo_popup,
-        ], className='logo')
-    
-    @cached_property
-    def frozen_top_row(self):
-        return dbc.Container([
-            dbc.Row(dbc.Container([
-                dbc.Row([self.logo], className='navbar-row'),
-                dbc.Row([
-                    dbc.Col(self.comparison_panel.content_left_tabs, width=6),
-                    dbc.Col(self.comparison_panel.content_right_tabs, width=6),
-                ]),
-            ]))
-        ], className='frozen-top-row')
-    
-    @cached_property
-    def welcome_modal(self):
-        return get_welcome_modal()
+        """
+        Defines a cached property for a logo. 
+        Code to return the actual logo has not currently been implemented.
+        """
+        return 
+        
 
     def layout(self, params=None):
-        return dbc.Container(
-            [
-                self.frozen_top_row,
-                self.comparison_panel.content,
-                self.welcome_modal,
-            ],
-            className='layout-container'
-        )
+        """
+        Defines the layout for the GeotasteLayout. This includes the logo row,
+        navigation bar, actual content layout, and a loading spinner.
+        """
+        return dbc.Container([
+            # logo row
+            dbc.Row([
+                dbc.Col(
+                    html.Div([
+                        html.Img(src=LOGO_SRC, className='logo-img'),
+                        html.Span([
+                        dbc.Button(
+                                self.title,
+                                id='logo_popup',
+                                color='link',
+                                className='logo-title'
+                            ),
+                        ], className='logo-title'),
+                    ], className='logo'),
+                    width=6
+                ),
+                dbc.Col(
+                    self.comparison_panel.mainview_tabs,
+                    width=6,
+                    style={'display':'flex'}
+                ),
+            ], className='navbar-row'),
+
+            dbc.Row([
+                # actual content layout
+                self.comparison_panel.layout(),
+                # welcome modal
+                get_welcome_modal(),
+            ], className='content-row'),
+
+            dcc.Loading(
+                id='layout-loading', 
+                children=html.Div(id="layout-loading-output"),
+                type='graph', 
+                fullscreen=False, 
+                style={'background-color':'rgba(255,255,255,0)'},
+            ),
+        ], className='layout-container')
