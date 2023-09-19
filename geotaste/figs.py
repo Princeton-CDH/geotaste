@@ -85,7 +85,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
         Returns:
         - dict: A dictionary with one key, `self.key`, and one value, the selected values [val1, val2, ...]
         """
-        return {self.key:get_selected_records_from_figure_selected_data(selectedData)}    
+        return {self.key:get_selected_records_from_figure_selected_data(selectedData, quant=self.quant)}    
 
     @cached_property
     def dataset(self):
@@ -1377,7 +1377,7 @@ def from_json_gz_str(ojsongzstr):
 
 
 
-def get_selected_records_from_figure_selected_data(selectedData:dict={}):
+def get_selected_records_from_figure_selected_data(selectedData:dict={}, quant=None):
     """Get selected records from figure selected data.
     
     Args:
@@ -1406,6 +1406,6 @@ def get_selected_records_from_figure_selected_data(selectedData:dict={}):
     
     selected_records = qualquant_series(
         [x for x in [ get_record_id(d) for d in points_data ] if x], 
-        quant=self.quant
+        quant=quant
     ).sort_values().tolist()
     return selected_records
