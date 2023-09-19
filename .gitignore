@@ -18,4 +18,4 @@ dist
 _build
 docs/_build
 geckodriver.log
-.coverage
+.coverage*

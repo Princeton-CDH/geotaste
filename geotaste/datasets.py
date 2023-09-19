@@ -13,7 +13,7 @@ class Dataset:
     fillna:object = ''
     cols_q:list = []
     filter_data:dict = {}
-    prefcols:list = []
+    cols_pref:list = []
 
     def __init__(self, path:str='', cols:list=[], **kwargs):
         if path: self.path=path
@@ -42,7 +42,7 @@ class Dataset:
     def postproc_df(self, df=None):
         return postproc_df(
             df=df if df is not None else self.data,
-            prefcols=self.prefcols,    
+            cols_pref=self.cols_pref,    
             cols_rename=self.cols_rename
         )
 
@@ -194,12 +194,14 @@ class MiniMembersDataset(MembersDataset):
         'gender':'member_gender',
         'nationalities':'member_nationalities',
     }
+    cols_pref = [
+        'member',
+        'member_name',
+    ]
 
     @cached_property
     def data(self):
-        odf=postproc_df(super().data, self._cols_rename)
-        for c in ['member_dob','member_dod']:
-            odf[c]=odf[c].apply(lambda x: int(x) if x else x)
+        odf=postproc_df(super().data, self._cols_rename, cols_q=['member_dob', 'member_dod'])
         return odf
     
 @cache
@@ -207,7 +209,7 @@ def Members(): return MiniMembersDataset()
 
 
 
-### DWELLINGS
+### DWELLINGS   
 
 class DwellingsDataset(Dataset):
     url:str = URLS.get('dwellings')
@@ -364,6 +366,8 @@ class MiniBooksDataset(BooksDataset):
         'author_gender':'author_gender',
         'author_nationalities':'author_nationalities',
     }
+    cols_sep = []
+    cols_pref = ['book','author','author_name','book_title','book_year']
 
     @cached_property
     def data(self):
@@ -381,7 +385,7 @@ class MiniBooksDataset(BooksDataset):
                     pass
                 ld.append(d)
         odf=pd.DataFrame(ld)
-        odf=postproc_df(odf, cols=self._cols_rename, cols_q=['author_dob','book_year'])
+        odf=postproc_df(odf, cols=self._cols_rename, cols_q=['author_dob','author_dod','book_year','book_circulated'], cols_pref=self.cols_pref)
         odf['author_nationalities']=odf['author_nationalities'].apply(
             lambda x: [] if x is np.nan else x
         )

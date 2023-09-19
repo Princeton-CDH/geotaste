@@ -4,7 +4,7 @@ sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 # code
 from geotaste.datasets import *
 import random,tempfile
-
+from pandas.testing import assert_frame_equal
 
 def test_dataset():
     with tempfile.TemporaryDirectory() as tdir:
@@ -28,26 +28,85 @@ def test_dataset():
 
 
 
+def _test_dset(dset):
+    df=dset.data
+    def colx(x): 
+        try:
+            return dset._cols_rename.get(x,x)
+        except AttributeError:
+            return dset.cols_rename.get(x,x)
+        
+    for col in dset.cols_sep:
+        if colx(col) in set(df.columns):
+            assert {type(x) for x in df[colx(col)]} == {list}
+
+    for col in dset.cols_q:
+        if colx(col) in set(df.columns):
+            assert not {type(x) for x in df[colx(col)]} - {list, float, int}
+    
+    newcols = set(dset._cols_rename.values() if hasattr(dset,'_cols_rename') else dset.cols_rename.values())
+    oldcols = set(dset._cols_rename.keys() if hasattr(dset,'_cols_rename') else dset.cols_rename.keys()) - newcols
+
+    assert not (oldcols & set(df.columns))
+    assert not (newcols - set(df.columns))
+
+    assert list(df.columns)[:len(dset.cols_pref)] == [colx(x) for x in dset.cols_pref]
+
+
+
+
+
+def test_landmarks_dataset():
+    dset = LandmarksDataset()
+    _test_dset(dset)
+
+    assert 'arrond_id' in set(dset.data.columns)
+    assert 'tooltip' in set(dset.data.columns)
+    assert dset.data.lat.dtype == np.float64
+    assert dset.data.lon.dtype == np.float64
+
+    assert 'Shakespeare and Company' in set(dset.data.landmark)
+    assert 'American Hospital of Paris' in set(dset.data.landmark)
+
+    assert dset.data.set_index('landmark').loc['American Hospital of Paris'].arrond_id == 'NA'
+    assert dset.data.set_index('landmark').loc['Shakespeare and Company'].arrond_id == '6'
+
+    dset1 = Landmarks()
+    dset2 = Landmarks()
+    assert dset1 is dset2
+    assert dset1 is not dset
+    assert_frame_equal(dset.data, dset1.data)
+
+    
+
+
 def test_members_dataset():
-    obj = MembersDataset()
-    namecol = 'name'
-    df = obj.data.set_index('member')
-    print(df.columns)
+    dset = Members()
+    _test_dset(dset)
+
+    df = dset.data
+    namecol = 'member_name'
     names = df[namecol]
     assert 'James Joyce' in set(names)
 
     dfj = df[df[namecol]=='James Joyce']
-    assert set(dfj.index) == {'joyce-james'}
-
-    for col in obj.cols_sep:
-        assert {type(x) for x in df[col]} == {list}
+    assert set(dfj.member) == {'joyce-james'}
 
 
 
-def test_authors_dataset():
-    obj = CreatorsDataset()
-    df = obj.data
-    assert 'joyce-james' in set(df['creator'])
+def test_books_dataset():
+    dset = Books()
+    _test_dset(dset)
+
+def test_events_dataset():
+    dset = Events()
+    _test_dset(dset)
+
+
+
+def test_combined_dataset():
+    dset = Combined()
+    _test_dset(dset)
 
 
 
@@ -66,4 +125,8 @@ def test_prune_when_dwelling_matches():
     assert index[-1] == 'NA'
     assert index[0] == 'Singular'
     assert s['Exact'] > 1000
+
+
+
+
 
