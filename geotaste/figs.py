@@ -59,6 +59,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
     key = ''
     records_points_dim = 'xy'
     dataset_class = Combined
+    dataset_obj = None
     drop_duplicates = ()
     quant = False
     opts_xaxis=dict()
@@ -86,6 +87,9 @@ class FigureFactory(DashFigureFactory, Logmaker):
         self.name=name
         if filter_data is None: filter_data = {}
         self.filter_data = filter_data
+        self.kwargs=kwargs
+        for k,v in kwargs.items(): setattr(self,k,v)
+
         self.selection_data = (
             selected 
             if type(selected) is dict
@@ -95,8 +99,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
                 else {}
             ) 
         )
-        self.kwargs=kwargs
-        for k,v in kwargs.items(): setattr(self,k,v)
+        
 
     def has_selected(self):
         """Check if there is any selected data.
@@ -105,7 +108,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
             bool: True if there is selected data, False otherwise.
         """
         
-        return bool(self.selection_data and self.selected_values)
+        return bool(self.selection_data.get(self.key) and self.selected_indices)
 
     def get_selected(self, selectedData={}):
         """The `get_selected` function returns a dictionary containing selected records based on the provided `selectedData` parameter. If `selectedData` is empty or not provided, an empty dictionary is returned.
@@ -125,12 +128,10 @@ class FigureFactory(DashFigureFactory, Logmaker):
         Returns:
             object: The dataset object if the dataset class is defined, otherwise None.
         """
-        
-        return (
-            self.dataset_class.__func__() 
-            if self.dataset_class is not None 
-            else None
-        )
+        if self.dataset_obj is not None: return self.dataset_obj
+        if self.dataset_class is None: return None
+        if hasattr(self.dataset_class,'__func__'): return self.dataset_class.__func__()
+        return self.dataset_class()
 
     @cached_property
     def data_orig(self):
@@ -347,7 +348,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
         return pd.DataFrame()
     
     @cached_property
-    def selected_values(self) -> list:
+    def selected_indices(self) -> list:
         """Returns a list of selected values from the dataframe.
         
         Returns:
@@ -393,7 +394,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
         fig = self.plot_histogram(**kwargs)
         
         if self.has_selected():
-            fig.update_traces(selectedpoints=self.selected_values)
+            fig.update_traces(selectedpoints=self.selected_indices)
 
         return fig
         
