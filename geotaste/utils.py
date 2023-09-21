@@ -135,7 +135,7 @@ def find_plural_cols(df:pd.DataFrame) -> list:
     Returns:
         list: A list of column names that contain lists.
     """
-    return list(df.columns[(df.applymap(type) == list).any()])
+    return list(df.columns[(df.map(type) == list).any()])
 
 def first(l:Iterable, default:object=None) -> object:
     """Returns the first element of an iterable object.
