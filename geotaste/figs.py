@@ -809,9 +809,7 @@ class CombinedFigureFactory(FigureFactory):
         'member_dod',
         'member_nationalities',
         'member_gender',
-        'num_borrows',
         'dwelling_address',
-        'member_url'
     ]
 
     cols_table_books = [
@@ -1116,6 +1114,13 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             colval_LR='Both Groups'
         )
     
+    def plot_map(self):
+        trace1=self.L.plot_map(return_trace=True)
+        trace2=self.L.plot_map(return_trace=True)
+        fig = go.Figure()
+        fig.add_trace(trace1)
+        fig.add_trace(trace2)
+        return fig    
 
     def plot_oddsratio_map(self, comparison_df=None, col='odds_ratio_log', **kwargs):
         """Plots an odds ratio map using a choropleth mapbox.
@@ -1259,7 +1264,7 @@ def get_empty_fig(height=100, width=250, **layout_kwargs):
 
 
 @cache_obj.memoize()
-def plot_cache(figure_class, serialized_data):
+def plot_cache(figure_class, serialized_data=''):
     """Plots the FIGURE using the specified figure class and serialized data. This function output is memoized so that future calls with the same arguments return cached results. This cache is stored in `PATH_CACHE` constant/config flag.
     
     Args:
@@ -1352,8 +1357,11 @@ def get_cached_fig_or_table(args_id):
     if active_tab=='map':
         out=ff.plot_map()
     else:
-        pcols=[c for c in PREDICT_COLS if c.startswith(analysis_tab)] if analysis_tab else PREDICT_COLS
-        out=ff.table(cols=pcols)
+        if isinstance(ff,ComparisonFigureFactory):    
+            pcols=[c for c in PREDICT_COLS if c.startswith(analysis_tab)] if analysis_tab else PREDICT_COLS
+            out=ff.table(cols=pcols)
+        else:
+            out=ff.table()
     return to_json_gz_str(out)
 
 def to_json_gz_str(out):
@@ -1384,9 +1392,10 @@ def from_json_gz_str(ojsongzstr):
     """
     ojsongz=b64decode(ojsongzstr.encode())
     ojson=zlib.decompress(ojsongz)
-    ojsonstr=ojson.decode('utf-8')
-    obj=pio.from_json(ojsonstr)
-    return obj
+    try:
+        return pio.from_json(ojson)
+    except ValueError:
+        return orjson.loads(ojson)
 
 
 
