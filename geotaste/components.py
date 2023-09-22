@@ -49,7 +49,7 @@ class BaseComponent(DashComponent, Logmaker):
     def cards_with_attr(self, attrname:str):
         return [
             card
-            for card in self.cards()
+            for card in self.subcomponents
             if hasattr(card,attrname)
         ]
 

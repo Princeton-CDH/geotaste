@@ -344,7 +344,7 @@ class FigureFactory(DashFigureFactory, Logmaker):
                 pd.DataFrame: The filtered DataFrame.
         """
         
-        if self.selection_data and len(self.df_counts):
+        if self.selection_data.get(self.key) and len(self.df_counts):
             return filter_df(self.df_counts, self.selection_data)
         return pd.DataFrame()
     

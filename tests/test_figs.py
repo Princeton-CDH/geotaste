@@ -167,8 +167,8 @@ def test_CombinedFigureFactory():
     assert len(figdat['text'])
     assert not laydat.get('mapbox',{}).get('layers',{}) # only landmarks
 
-    assert [x.isdigit() for x in ff.valid_arronds]
-    assert [type(x)==str and len(x)<=2 for x in ff.arronds] 
+    assert all([x.isdigit() for x in ff.valid_arronds])
+    assert all([type(x)==str and len(x)<=2 for x in ff.arronds] )
 
 def test_ComparisonFigureFactory():
     # test case 1: empty
