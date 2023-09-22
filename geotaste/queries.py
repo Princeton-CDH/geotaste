@@ -136,6 +136,7 @@ def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, op
     ) if type(filter_data)!=str else filter_data
 
     # query and return
+    if qstr: logger.debug(f'Querying: {qstr}')
     odf=df.query(qstr) if qstr else df
     return (qstr,df) if return_query else odf
 

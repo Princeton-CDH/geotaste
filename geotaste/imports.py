@@ -88,8 +88,8 @@ px.set_mapbox_access_token(mapbox_access_token)
 
 
 BASEMAP_SOURCES = [
+    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png",
     "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
-    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
 ]
 
 # Paths

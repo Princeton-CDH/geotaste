@@ -119,7 +119,12 @@ class FigureFactory(DashFigureFactory, Logmaker):
         Returns:
         - dict: A dictionary with one key, `self.key`, and one value, the selected values [val1, val2, ...]
         """
-        return {self.key:get_selected_records_from_figure_selected_data(selectedData, quant=self.quant)}    
+        return {
+            self.key:get_selected_records_from_figure_selected_data(
+                selectedData, 
+                quant=self.quant
+            )
+        }    
 
     @cached_property
     def dataset(self):
@@ -1430,10 +1435,9 @@ def get_selected_records_from_figure_selected_data(selectedData:dict={}, quant=N
         ['A', 'B']
     """
     
-    if not selectedData: return {}
-    
+    if not selectedData: return []
     points_data = selectedData.get('points',[])
-    if not points_data: return {}
+    if not points_data: return []
 
     def get_record_id(d, keys=['label', 'location']):
         """

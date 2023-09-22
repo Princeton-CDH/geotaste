@@ -1,7 +1,7 @@
 {
     "BASEMAP_SOURCES": [
-        "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
-        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
+        "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png",
+        "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"
     ],
     "CENTER": [
         48.85107555543428,

@@ -404,6 +404,7 @@ class FilterPlotCard(FilterCard):
             if selected_data is None: raise PreventUpdate
             o=self.ff().get_selected(selected_data)
             if not o or o==old_data: raise PreventUpdate
+            if type(o)==dict and not o.get(self.key): raise PreventUpdate
             logger.debug(f'[{self.name}) selection updated to {o}')
             return o
         
@@ -443,6 +444,7 @@ class FilterPlotCard(FilterCard):
         )
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
             if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
+            logger.debug(f'triggered by {ctx.triggered_id}, with panel_filter_data = {panel_filter_data} and my_filter_data = {my_filter_data}')
             if not panel_filter_data:
                 # then a panel wide clear?
                 my_filter_data = {}
@@ -561,13 +563,16 @@ class FilterSliderCard(FilterPlotCard):
             prevent_initial_call=True
         )
         def graph_selection_updated2(graph_selected_data, btn_clk, start_value, end_value, panel_data):
+            logger.debug(f'graph_selected_data = {graph_selected_data}')
             if ctx.triggered_id == self.graph.id:
                 seldata=self.ff().get_selected(graph_selected_data)
-                if not seldata: raise PreventUpdate
+                logger.debug(f'seldata = {seldata}')
+                if not seldata or not seldata.get(self.key): raise PreventUpdate
 
                 vals=list(seldata.values())
-                minval=min(vals[0]) if vals else 0
-                maxval=max(vals[0]) if vals else 0
+                logger.debug(f'vals = {vals}')
+                minval=min(vals[0]) if vals and vals[0] else 0
+                maxval=max(vals[0]) if vals and vals[0] else 0
                 return dash.no_update,dash.no_update,minval,maxval
             else:
                 newvals=list(range(start_value, end_value+1))
