@@ -344,7 +344,7 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def test_suite(self):
-        return dbc.Container([self.test_suite_btn1, self.test_suite_btn2], className='test_suite')
+        return dbc.Container([self.test_suite_btn1, self.test_suite_btn2, self.test_suite_btn3], className='test_suite')
     
     @cached_property
     def test_suite_btn1(self):
@@ -358,13 +358,12 @@ class ComparisonPanel(BaseComponent):
     
     @cached_property
     def test_suite_btn2(self):
-        return dbc.Button(
-            '',
-            color='link',
-            n_clicks=0,
-            id='test_suite_btn2',
-            className='test_suite_btn'
-        )
+        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn2',className='test_suite_btn')
+    
+    @cached_property
+    def test_suite_btn3(self):
+        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn3',className='test_suite_btn')
+        
 
     @cached_property
     def store(self):
@@ -753,5 +752,14 @@ class ComparisonPanel(BaseComponent):
          )
         def test_suite_btn2_onclick(n_clicks):
             return {'member_nationalities':['United States']}
+
+
+        @app.callback(
+            Output(self.R.store, 'data', allow_duplicate=True),
+            Input(self.test_suite_btn3, 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn3_onclick(n_clicks):
+            return {}
 
 

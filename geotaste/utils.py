@@ -254,66 +254,72 @@ def force_int(x, errors=0) -> int:
     
 
     
-def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
-    """
-    Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.
+def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R'):
+    return pd.concat([
+        dfL.assign(**{colname:colval_L}),
+        dfR.assign(**{colname:colval_R})
+    ])
 
-    Args:
-        dfL (pandas.DataFrame): The left dataframe.
-        dfR (pandas.DataFrame): The right dataframe.
-        colname (str, optional): The name of the new column that indicates whether a row belongs to the left dataframe, the right dataframe, or both. Default is 'L_or_R'.
-        colval_L (str, optional): The value in the new column for rows that belong only to the left dataframe. Default is 'L'.
-        colval_R (str, optional): The value in the new column for rows that belong only to the right dataframe. Default is 'R'.
-        colval_LR (str, optional): The value in the new column for rows that belong to both dataframes. Default is 'LR'.
+# def combine_LR_df_1(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
+#     """
+#     Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.
 
-    Returns:
-        pandas.DataFrame: The combined dataframe.
-    """
-    # logger.debug([dfL.columns, 'dfL cols'])
-    # logger.debug([dfR.columns, 'dfR cols'])
-    assert dfL.index.name == dfR.index.name
-    allL, allR = set(dfL.index), set(dfR.index)
-    print(allR)
-    (
-        onlyL, 
-        onlyR, 
-        both,
-        either
-     ) = (
-        allL - allR, 
-        allR - allL, 
-        allR & allL,
-        allR | allL
-     )
+#     Args:
+#         dfL (pandas.DataFrame): The left dataframe.
+#         dfR (pandas.DataFrame): The right dataframe.
+#         colname (str, optional): The name of the new column that indicates whether a row belongs to the left dataframe, the right dataframe, or both. Default is 'L_or_R'.
+#         colval_L (str, optional): The value in the new column for rows that belong only to the left dataframe. Default is 'L'.
+#         colval_R (str, optional): The value in the new column for rows that belong only to the right dataframe. Default is 'R'.
+#         colval_LR (str, optional): The value in the new column for rows that belong to both dataframes. Default is 'LR'.
+
+#     Returns:
+#         pandas.DataFrame: The combined dataframe.
+#     """
+#     # logger.debug([dfL.columns, 'dfL cols'])
+#     # logger.debug([dfR.columns, 'dfR cols'])
+#     assert dfL.index.name == dfR.index.name
+#     allL, allR = set(dfL.index), set(dfR.index)
+#     print(allR)
+#     (
+#         onlyL, 
+#         onlyR, 
+#         both,
+#         either
+#      ) = (
+#         allL - allR, 
+#         allR - allL, 
+#         allR & allL,
+#         allR | allL
+#      )
     
     
-    # logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
+#     # logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
 
-    def assign(idx, underdog=True):
-        if not onlyL and not onlyR: # nothing distinct
-            o=colval_LR
+#     def assign(idx, underdog=True):
+#         if not onlyL and not onlyR: # nothing distinct
+#             o=colval_LR
 
-        else:
-            # L is underdog, prefer that
-            if len(allL) <= len(allR):
-                if idx in allL:
-                    o=colval_L
-                else:
-                    o=colval_R
-            else:
-                # R is dog
-                if idx in allR:
-                    o=colval_R
-                else:
-                    o=colval_L
+#         else:
+#             # L is underdog, prefer that
+#             if len(allL) <= len(allR):
+#                 if idx in allL:
+#                     o=colval_L
+#                 else:
+#                     o=colval_R
+#             else:
+#                 # R is dog
+#                 if idx in allR:
+#                     o=colval_R
+#                 else:
+#                     o=colval_L
         
-        return o
+#         return o
 
-    odf = pd.concat([dfL, dfR])
-    odf[colname] = [assign(i) for i in odf.index]
-    logger.trace([odf.columns, 'combo cols'])
-    logger.trace([odf.index.name, 'combo index name'])
-    return odf
+#     odf = pd.concat([dfL, dfR])
+#     odf[colname] = [assign(i) for i in odf.index]
+#     logger.trace([odf.columns, 'combo cols'])
+#     logger.trace([odf.index.name, 'combo index name'])
+#     return odf
 
 
 
