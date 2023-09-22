@@ -11,62 +11,79 @@ Python 3.10 / Dash 2.13 / Plotly 5.17 / Flask 2.2
 
 ## Installation
 
-```bash
-# 0. Clone repo
-git clone https://github.com/Princeton-CDH/geotaste
-cd geotaste
+- Clone repository:
+    ```bash
+    git clone https://github.com/Princeton-CDH/geotaste
+    cd geotaste
+    ```
 
-# 1. Install pyenv if necessary
-curl https://pyenv.run | bash
+- Install pyenv if you don't have it:
+    ```bash
+    curl https://pyenv.run | bash
+    ```
 
-# 2. Make python env
-vnum=$(cat .python-version)
-pyenv install $vnum
-pyenv shell $vnum
-python -m venv venv
+- Make python environment:
+    ```bash
+    vnum=$(cat .python-version)
+    pyenv install $vnum
+    pyenv shell $vnum
+    python -m venv venv
+    ```
 
-# 3. Activate python env
-. venv/bin/activate
-pip install -qU pip wheel
+- Activate python env:
+    ```bash
+    . venv/bin/activate
+    pip install -qU pip wheel
+    ```
 
-# 4. Install
-pip install -e .
+- Install:
+    ```bash
+    pip install -e .
+    ```
 
-# 5. Run locally
-geotaste-app
+- Run locally:
+    ```bash
+    geotaste-app
+    ```
 
-# 6. Navigate to localhost:1919
-```
+- Navigate to [http://localhost:1919](http://localhost:1919).
 
 
 ## Testing
 
-```bash
-# install requirements to develop/test
-pip install -r dev-requirements.txt
+- Install requirements to develop/test
+    ```bash
+    pip install -r dev-requirements.txt
+    ```
 
-# install chromedriver
-brew install --cask chromedriver    # on mac
-# for linux see: https://gist.github.com/mikesmullin/2636776?permalink_comment_id=2986509#gistcomment-2986509
-# for windows see: https://medium.com/@patrick.yoho11/installing-selenium-and-chromedriver-on-windows-e02202ac2b08
+- Install chromedriver. For [linux, see instructions here](https://gist.github.com/mikesmullin/2636776?permalink_comment_id=2986509#gistcomment-2986509); for [windows see here](https://medium.com/@patrick.yoho11/installing-selenium-and-chromedriver-on-windows-e02202ac2b08). For mac/OSX:
+    ```bash
+    # install brew if you don't have it yet:
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# run pytest
-pytest --headless --cov
-```
+    # use brew to install chromedriver
+    brew install --cask chromedriver
+    ```
+
+- Run pytest:
+    ```bash
+    pytest --headless --cov
+    ```
 
 ## Documentation
 
-See [full code documentation here](https://geotaste.readthedocs.io/en/latest). To generate documentation locally using [sphinx](http://www.sphinx-doc.org/):
+- See [full code documentation here](https://geotaste.readthedocs.io/en/latest). To generate documentation locally using [sphinx](http://www.sphinx-doc.org/):
+    ```bash
+    # install requirements to develop/test
+    pip install -r dev-requirements.txt
 
-```bash
-# install requirements to develop/test
-pip install -r dev-requirements.txt
+    # generate html
+    cd sphinx-docs
+    make html
+    ```
 
-# generate html
-cd sphinx-docs
-make html
-
-# check coverage
-make html -b coverage
-```
+- Check documentation coverage:
+    ```bash
+    make html -b coverage
+    ```
 
