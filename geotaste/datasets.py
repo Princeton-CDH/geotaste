@@ -402,7 +402,6 @@ def Books(): return MiniBooksDataset()
 
 class CreatorsDataset(Dataset):
     url:str = URLS.get('creators')
-    url:str = URLS.get('creators')
     path:str = PATHS.get('creators')
     cols:list = [
         # 'ID',

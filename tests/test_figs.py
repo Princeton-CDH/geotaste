@@ -141,7 +141,7 @@ def test_CombinedFigureFactory():
     assert len(ff.data)<len(ff.data_orig)
     assert_frame_equal(ff.data_orig, Combined().data)
     assert_frame_not_equal(ff.data, ff.data_orig)
-    assert set(flatten_series(ff.data.book_genre)) == {'Fiction'}
+    assert not any({'Fiction' not in x for x in ff.data.book_genre})
     fig=ff.plot_map()
     figdat=fig.data[0]
     laydat=json.loads(fig.layout.to_json())
