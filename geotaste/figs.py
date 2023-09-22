@@ -876,28 +876,6 @@ class CombinedFigureFactory(FigureFactory):
             cols = self.cols_table_members+self.cols_table_books
         return get_dash_table(df, cols=cols)
 
-    
-    @cached_property
-    def arronds(self):
-        """Returns a series containing the unique arrondissement IDs from the 'df_dwellings' DataFrame.
-        
-        Returns:
-            pandas.Series: A series containing the unique arrondissement IDs.
-        """
-        return qualquant_series(self.df_dwellings.arrond_id, quant=False)
-
-    @cached_property
-    def valid_arronds(self): 
-        """Returns a filtered DataFrame of valid arronds.
-        
-        This method filters the DataFrame `arronds` by applying the function `is_valid_arrond` to each row. The resulting DataFrame contains only the rows where `is_valid_arrond` returns True.
-        
-        Returns:
-            pandas.DataFrame: A filtered DataFrame of valid arronds.
-        """
-        
-        return self.arronds.loc[lambda v: is_valid_arrond(v)]
-
     def plot_map(self, color=None, color_text='black', return_trace=False, **kwargs):
         """Plot a map with member dwellings from the currently filtered data.
         

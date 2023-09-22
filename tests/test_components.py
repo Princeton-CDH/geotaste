@@ -30,3 +30,7 @@ def test_FilterComponent():
     assert fc.cards_with_attr('children') == []
     assert fc.layout().children == fc.content.children == fc.get_content().children == BLANK
 
+    assert fc.store_json.data == ''
+    assert fc.store_panel.data == {}
+    assert fc.store_desc.children == BLANK
+    assert fc.store.data == {}
