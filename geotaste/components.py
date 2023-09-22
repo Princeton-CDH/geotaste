@@ -740,49 +740,6 @@ class EventTypeCard(FilterPlotCard):
     figure_factory = EventTypeFigure
 
 
-def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
-    tabs = [
-        dbc.Tab(
-            children=d.get('children'),
-            label=d.get('label'),
-            tab_id=d.get('tab_id'),
-            id=d.get('id', uid())
-        )
-        for d in children
-    ]
-    tooltips = [
-        tooltip(tab, d.get('tooltip'))
-        for tab,d in zip(tabs,children)
-        if d.get('tooltip')
-    ]
-    active_tab=(
-        active_tab 
-        if active_tab 
-        else (
-            children[0].get('tab_id') 
-            if children 
-            else None
-        )
-    )
-    
-    tabs_obj = dbc.Tabs(
-        children=tabs, 
-        active_tab=active_tab, 
-        id=dict(
-            type=f'tab_level_{tab_level}', 
-            index=uid()
-        ),
-        **kwargs
-    )
-    return dbc.Container([tabs_obj] + tooltips)
-
-
-
-def tooltip(component, tooltip=''):
-    return dbc.Tooltip(tooltip, target=component.id)
-
-
-
 
 
 def get_welcome_modal():

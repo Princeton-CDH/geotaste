@@ -17,7 +17,7 @@ def test_BaseComponent():
     assert bc.layout().children == bc.content.children == bc.get_content().children == BLANK
 
 def test_FilterComponent():
-    fc=FilterComponent(name='test')
+    fc=FilterComponent(name='test', figure_factory=FigureFactory)
     assert fc.name == 'test'
     assert hasattr(fc,'store_json')
     assert hasattr(fc,'store_panel')
@@ -34,3 +34,15 @@ def test_FilterComponent():
     assert fc.store_panel.data == {}
     assert fc.store_desc.children == BLANK
     assert fc.store.data == {}
+
+    assert len(fc.plot().data[0]['x']) == 0
+    assert fc.key == FigureFactory.key
+
+def test_FilterCard():
+    fc = FilterCard()
+    assert fc.describe_filters({fc.key:['one','two']}) == 'one, two'
+
+def test_FilterSliderCard():
+    fc = FilterSliderCard()
+    assert fc.describe_filters({fc.key:[1,2]}) == '1 to 2'
+    assert fc.describe_filters({fc.key:['a',"b"]}) == 'a to b'
