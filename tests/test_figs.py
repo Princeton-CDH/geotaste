@@ -2,7 +2,7 @@ import sys,os,tempfile
 sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 # code
 from geotaste.imports import *
-from pandas.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal, assert_series_equal
 from pprint import pprint
 
 all_figs = [v for k,v in globals().items() if k.endswith('Figure')]
@@ -11,9 +11,9 @@ all_figs = [v for k,v in globals().items() if k.endswith('Figure')]
 def test_FigureFactory():
     ## get dataset
     with tempfile.TemporaryDirectory() as tdir:
-        numrows = 100
+        numrows = 1000
         df = pd.DataFrame(
-            {'a':random.random(), 'b':random.random(), 'c':random.random(), 'key':'Record Key' if random.random()>.5 else 'Second Key'}
+            {'a':random.random(), 'b':random.random(), 'c':random.random(), 'key':'Record Key' if random.random()>.75 else 'Second Key'}
             for n in range(numrows)
         )
         ofn=os.path.join(tdir,'data.csv')
@@ -34,6 +34,17 @@ def test_FigureFactory():
         assert_frame_equal(ff.data, df)
         assert isinstance(ff.data_orig, pd.DataFrame)
         assert isinstance(ff.data, pd.DataFrame)
+
+        # Test series's
+        assert len(ff.get_unique_vals()) == 2
+        assert ff.get_unique_vals(sort_by_count=True).iloc[0] == 'Second Key'
+        assert ff.get_unique_vals(sort_by_count=False).iloc[0] == 'Record Key'
+        assert list(ff.get_unique_vals(series_orig=True)) == list(ff.get_unique_vals(series_orig=False))  # no filtring yet
+        assert ff.minval == 'Record Key'
+        assert ff.maxval == 'Second Key'
+        assert np.isnan(ff.minval_q)
+        assert np.isnan(ff.maxval_q)
+        assert len(ff.df_selections) == 0
         
         # Test the has_selected method
         assert not len(ff.selection_data.get(ff.key))
@@ -61,11 +72,17 @@ def test_FigureFactory():
         assert 'Second Key' in ff.filter_desc
         assert len(ff.data) < numrows
         assert all(np.isnan(x) for x in ff.get_series(quant=True))
+        assert all(np.isnan(x) for x in ff.series_all_q)
         assert set(ff.get_series(quant=False, df=ff.data_orig).unique()) == {'Record Key', 'Second Key'}
         assert set(ff.series_orig.unique()) == {'Record Key', 'Second Key'}
         assert set(ff.get_series(quant=False, df=ff.data).unique()) == {'Second Key'}
         assert set(ff.get_series(quant=False).unique()) == {'Second Key'}
         assert set(ff.series.unique()) == {'Second Key'}
+        s=ff.get_series(df=pd.DataFrame())
+        assert s.name == ff.key
+        assert len(s) == 0
+        
+
 
         # test other
         ff = FigureFactory(key='key', dataset_class=DatasetTemp)
@@ -150,6 +167,9 @@ def test_CombinedFigureFactory():
     assert len(figdat['text'])
     assert not laydat.get('mapbox',{}).get('layers',{}) # only landmarks
 
+    assert [x.isdigit() for x in ff.valid_arronds]
+    assert [type(x)==str and len(x)<=2 for x in ff.arronds] 
+
 def test_ComparisonFigureFactory():
     # test case 1: empty
     ff=ComparisonFigureFactory()
@@ -176,6 +196,13 @@ def test_ComparisonFigureFactory():
         {'member_nationalities':['France']},
         {'member_nationalities':['United States']}
     )
+    # test case 2: filtered
+    ff2=ComparisonFigureFactory([
+        {'member_nationalities':['France']},
+        {'member_nationalities':['United States']}
+    ])
+    assert ff.L.filter_data == ff2.L.filter_data
+    assert ff.R.filter_data == ff2.R.filter_data
     assert len(ff.L.data)
     assert len(ff.R.data)
     assert isinstance(ff.L, CombinedFigureFactory)
@@ -193,6 +220,15 @@ def test_ComparisonFigureFactory():
     laydat=json.loads(fig.layout.to_json())
     assert len(figdat['geojson']['features'])
     assert not laydat.get('mapbox',{}).get('layers',{}) # only landmarks
+    ff3=ComparisonFigureFactory(
+        {'member_nationalities':['X']},
+        {'member_nationalities':['X']}
+    )
+    res=ff3.table()
+    assert 'failed' in res.children
+
+    assert len(ff.df_dwellings) == len(ff.L.df_dwellings) + len(ff.R.df_dwellings)
+    assert len(ff.df_members) == len(ff.L.df_members) + len(ff.R.df_members)
 
 
 def test_get_dash_table():
@@ -305,5 +341,31 @@ def test_update_fig_mapbox_background():
 
 
 def test_get_selected_records_from_figure_selected_data():
-    #@TODO
-    pass
+    inp={'points':[
+        {'name': 'X', 'label':'X'},
+        {'name': 'Y', 'label':'Y'}
+    ]}
+    assert get_selected_records_from_figure_selected_data(inp) == ['X','Y']
+
+    inp={'points':[
+        {'name': 'X', 'location':'X'},
+        {'name': 'Y', 'location':'Y'}
+    ]}
+    assert get_selected_records_from_figure_selected_data(inp) == ['X','Y']
+
+    inp={'points':[
+        {'name': 'X', 'label':'X', 'location':'LX'},
+        {'name': 'Y', 'label':'Y', 'location':'LY'}
+    ]}
+    assert get_selected_records_from_figure_selected_data(inp) == ['X','Y']
+
+
+    inp={'points':[
+        {'name': 'X'},
+        {'name': 'Y'}
+    ]}
+    assert get_selected_records_from_figure_selected_data(inp) == []
+
+    
+    
+

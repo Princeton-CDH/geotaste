@@ -141,12 +141,13 @@ class FigureFactory(DashFigureFactory, Logmaker):
             pandas.DataFrame: The original data from the dataset.
         """
 
-        return (
+        odf = (
             self.dataset.data 
             if self.dataset is not None and self.dataset.data is not None
             else pd.DataFrame()
         )
-    
+
+        return odf    
     
     @cached_property
     def data(self):
