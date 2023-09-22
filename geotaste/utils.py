@@ -135,7 +135,7 @@ def find_plural_cols(df:pd.DataFrame) -> list:
     Returns:
         list: A list of column names that contain lists.
     """
-    return list(df.columns[(df.map(type) == list).any()])
+    return list(df.columns[(df.applymap(type) == list).any()])
 
 def first(l:Iterable, default:object=None) -> object:
     """Returns the first element of an iterable object.
@@ -694,20 +694,25 @@ def postproc_df(df,
         
     # sep?
     cols_qset=set(cols_q)
-    for c in cols_sep: 
-        df[c]=df[c].fillna('').apply(
-            lambda x: [
-                (
-                    y.strip()
-                    if c not in cols_qset
-                    else pd.to_numeric(
-                        y.strip(),
-                        errors='coerce'
-                    )
+
+    def split_sep_col(x,quant,sep):
+        if not x: return []
+        if type(x)!=str: return x
+        return [
+            (
+                y.strip()
+                if not quant
+                else pd.to_numeric(
+                    y.strip(),
+                    errors='coerce'
                 )
-                for y in str(x).split(sep)
-            ]
-        )
+            )
+            for y in str(x).split(sep)
+        ]
+        
+
+    for c in cols_sep: 
+        df[c]=df[c].fillna('').apply(lambda x: split_sep_col(x, c in set(cols_q), sep))
     
     # rename?
     if cols: 

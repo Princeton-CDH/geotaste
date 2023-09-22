@@ -602,6 +602,11 @@ class CombinedDataset(Dataset):
         if frac is not None: odf=odf.sample(frac=frac)
         odf['hover_tooltip'] = odf.apply(hover_tooltip,axis=1)
         odf = prune_when_dwelling_matches(odf, progress=progress)
+        odf = postproc_df(
+            odf,
+            cols_sep=self._cols_sep,
+            cols_q=self._cols_q,
+        )
         if save: odf.to_pickle(self.path)
         return odf
 
