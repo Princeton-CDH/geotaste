@@ -61,26 +61,10 @@ def test_graph_selection_updated(dash_duo):
     app = get_app()
     flask_app = app.app
     dash_duo.start_server(flask_app)
-    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
-    dash_duo.multiple_click('#button_showhide-Filter_1', 1)
-    dash_duo.multiple_click('#button_showhide-Filter_2', 1)
-    dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
-    dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
-    dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
-    dash_duo.multiple_click('#button_showhide-BP-Filter_2', 1)
-    
-
     funcs = get_callback_func(flask_app, func_name='graph_selection_updated')
-    qual_cols = [col for col in Combined().data if col not in set(CombinedDataset._cols_q)|set(CombinedDataset.cols_q)]
-    quant_cols = [col for col in Combined().data if col in set(CombinedDataset._cols_q)|set(CombinedDataset.cols_q)]
     for elname,func in funcs:
         elx='#'+elname.split('.')[0]
-        print(elx)
         elxid=elx.split('-',1)[-1]
-        btnid=f'#button_showhide-{elxid}'
-        descid=f'#store_desc-{elxid}'
-        print(btnid)
-        # dash_duo.multiple_click(btnid, 1)
         cardname=elxid.split('-')[0]
         card=globals()[cardname]
         ff=card().ff()
@@ -91,11 +75,37 @@ def test_graph_selection_updated(dash_duo):
             assert_series_equal(pd.Series(res), pd.Series(correct))
 
 
+## Can't trigger callback? -->
 
-        # elif key in quant_cols:
-        #     assert_series_equal(pd.Series(res_qual), pd.Series({key:[np.nan,np.nan]}))
-        #     assert_series_equal(pd.Series(res_quant), pd.Series({key:[1,2]}))
-        #     assert_series_equal(pd.Series(res_geo), pd.Series({key:[1.0,2.0]}))
+# def test_panel_data_updated(dash_duo):
+#     app = get_app()
+#     flask_app = app.app
+#     dash_duo.start_server(flask_app)
+#     with app.ctx.callback_context:
 
-    
+#         print(globals().keys())
+#         all_cards = {x:globals()[x]() for x in globals() if 'Card' in x}
+#         funcs = get_callback_func(flask_app, func_name='panel_data_updated')
+#         print(all_cards.keys())
+#         for elname,func in funcs:
+#             cardname=elname.split('-')[1]
+#             print(cardname,'?')
+#             if not 'Card' in cardname or not cardname in all_cards: continue
+#             card=all_cards[cardname]
+#             ff=card.ff()
+#             val = random.choice(list(ff.get_unique_vals()))
+#             filterd = {ff.key: [val]}
 
+#             other_card = random.choice([c for cname,c in all_cards.items() if c is not None and cname != cardname])
+#             other_ff = other_card.ff()
+#             other_val = random.choice(list(other_ff.get_unique_vals()))
+#             other_filterd = {other_ff.key : [other_val]}
+            
+#             res = func(
+#                 panel_filter_data=other_filterd, 
+#                 my_filter_data=filterd, 
+#                 _clicked_open_1=1,
+#                 _clicked_open_2=1, 
+#                 current_sels={}
+#             )
+#             print(res)
