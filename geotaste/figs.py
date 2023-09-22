@@ -1064,7 +1064,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             self.R.df_dwellings, 
             colval_L='Filter 1',
             colval_R='Filter 2',
-            colval_LR='Both Groups'
         )
 
     
@@ -1081,7 +1080,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             self.R.df_members, 
             colval_L='Filter 1',
             colval_R='Filter 2',
-            colval_LR='Both Groups'
         )
     
     def plot_map(self):
