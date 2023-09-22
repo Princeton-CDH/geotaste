@@ -702,13 +702,13 @@ def postproc_df(df,
             l = [y.strip() for y in str(x).split(sep)]
 
         if quant: 
-            l = [pd.to_numeric(y,errors='coerce') for y in x]
+            l = [pd.to_numeric(y,errors='coerce') for y in l]
         
         return l
         
 
     for c in cols_sep: 
-        df[c]=df[c].fillna('').apply(lambda x: split_sep_col(x, c in set(cols_q), sep))
+        df[c]=df[c].fillna('').apply(lambda x: split_sep_col(x, c in cols_qset, sep))
     
     # rename?
     if cols: 
