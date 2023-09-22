@@ -431,12 +431,14 @@ class ComparisonPanel(BaseComponent):
             [
                 dbc.Tab(
                     label='Map', 
-                    tab_id='map'
+                    tab_id='map',
+                    id='tab_map'
                 ),
 
                 dbc.Tab(
                     label='Analysis', 
-                    tab_id='table'
+                    tab_id='table',
+                    id='tab_table'
                 ),
             ],
             id='mainview_tabs',  
@@ -481,7 +483,7 @@ class ComparisonPanel(BaseComponent):
         
         return dbc.Collapse(
             [
-                html.H4('Data on Landmarks')
+                html.H4('Data on landmarks')
             ],
             is_open=True
         )

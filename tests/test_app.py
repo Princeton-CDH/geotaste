@@ -120,10 +120,15 @@ def test_suites(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    dash_duo.multiple_click('#tab_table', 1)
+    dash_duo.wait_for_contains_text('#tblview','landmarks')
+    
+    
     dash_duo.multiple_click('#test_suite_btn1', 1)
     dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'France')
+    dash_duo.wait_for_contains_text('#tblview','members')
     
     dash_duo.multiple_click('#test_suite_btn2', 1)
     dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'United States')
-    
+    dash_duo.wait_for_contains_text('#tblview','comparing')
     
