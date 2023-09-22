@@ -38,13 +38,6 @@ class Dataset:
         # read from saved file
         df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
-    
-    def postproc_df(self, df=None):
-        return postproc_df(
-            df=df if df is not None else self.data,
-            cols_pref=self.cols_pref,    
-            cols_rename=self.cols_rename
-        )
 
     @cached_property
     def data(self):  
@@ -57,42 +50,9 @@ class Dataset:
             sep=self.sep,
             fillna=self.fillna
         )
-    
-    def filter(self, filter_data={}, **other_filter_data):
-        return intersect_filters(*[
-            self.filter_series(key,vals)
-            for key,vals in list(filter_data.items()) + list(other_filter_data.items())
-        ])
-    
+
     def filter_df(self, filter_data={}):
-        # if not filter_data: filter_data=self.filter_data
         return filter_df(self.data, filter_data)
-
-    def series(self, key) -> pd.Series:
-        try:
-            return self.data[key]
-        except KeyError:
-            try:
-                return self.data_orig[key]
-            except KeyError:
-                pass
-        return pd.Series()
-
-    def filter_series(
-            self, 
-            key, 
-            vals = [], 
-            test_func = isin_or_hasone,
-            matches = []
-            ):
-        
-        return filter_series(
-            series=self.series(key),
-            vals=vals,
-            test_func=test_func,
-            series_name=key,
-            matches = matches
-        )
     
     @cached_property
     def filter_desc(self):
@@ -271,9 +231,6 @@ class DwellingsDataset(Dataset):
         return postproc_df(df,cols_pref=self.cols_pref)
         
         
-
-    def get_member(self, member):
-        return self.data[self.data['member'] == member]
     
 class MiniDwellingsDataset(DwellingsDataset):
     _cols_rename = dict(
@@ -349,7 +306,7 @@ class BooksDataset(Dataset):
         df['book']=df.uri.apply(lambda x: x.split('/books/',1)[1][:-1] if '/books/' in x else '')
         return postproc_df(df, cols_pref=self.cols_pref)
 
-class MiniBooksDataset(BooksDataset):
+class MiniBooksDataset(Dataset):
     ## ONLY AUTHORS
     _cols_rename={
         'book':'book',
@@ -371,10 +328,11 @@ class MiniBooksDataset(BooksDataset):
 
     @cached_property
     def data(self):
-        df=super().data
-        dfau=CreatorsDataset().data.set_index('creator')
+        dfbooks=BooksDataset().data.drop_duplicates('book')
+        dfau=CreatorsDataset().data.drop_duplicates('creator').set_index('creator')
         ld=[]
-        for i,row in df.iterrows():
+        for i,row in dfbooks.iterrows():
+            assert type(row.author) == list
             for author in row.author if row.author else ['']:
                 d=dict(row)
                 aid=d['author']=to_name_id(author)
@@ -401,7 +359,6 @@ def Books(): return MiniBooksDataset()
 ### AUTHORS
 
 class CreatorsDataset(Dataset):
-    url:str = URLS.get('creators')
     url:str = URLS.get('creators')
     path:str = PATHS.get('creators')
     cols:list = [
@@ -573,11 +530,11 @@ class CombinedDataset(Dataset):
         'book_circulated', 
         'author_nationalities'
     ]
-    _cols_q = ['member_dob','member_dod','lat','lon','book_year','author_dob','author_dod']
+    _cols_q = ['member_membership','member_dob','member_dod','lat','lon','book_year','author_dob','author_dod','event_year','event_month']
     _cols_sep_nonan=['member_membership']
     _cols_pref=['member','event','dwelling','arrond_id','book','author']
 
-    def gen(self, save=True, progress=True):
+    def gen(self, save=True, progress=True, frac=None):
         dfmembers = Members().data
         dfbooks = Books().data
         dfevents = Events().data
@@ -600,9 +557,14 @@ class CombinedDataset(Dataset):
             odf[c]=[[y for y in x if not np.isnan(y) and y] for x in odf[c]]
 
         
-        
+        if frac is not None: odf=odf.sample(frac=frac)
         odf['hover_tooltip'] = odf.apply(hover_tooltip,axis=1)
         odf = prune_when_dwelling_matches(odf, progress=progress)
+        odf = postproc_df(
+            odf,
+            cols_sep=self._cols_sep,
+            cols_q=self._cols_q,
+        )
         if save: odf.to_pickle(self.path)
         return odf
 
@@ -639,9 +601,6 @@ def Combined():
 
 def is_valid_arrond(x):
     return bool(str(x).isdigit()) and bool(x!='99')
-
-def filter_valid_arrond(df):
-    return (df.index.str.isdigit()) & (df.index!='99')
 
 @cache
 def get_geojson_arrondissement(force=False):

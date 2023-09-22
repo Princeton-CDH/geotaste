@@ -17,3 +17,4 @@ build
 dist
 geckodriver.log
 .coverage*
+out.txt

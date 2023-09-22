@@ -86,61 +86,13 @@ def test_force_int():
 ## Tests deprecated behavior
 # @TODO: update
 
-# def test_combine_LR_df():
-
-#     def runtest(dfL,dfR,expected_result):
-#         print('\n\n\n')
-#         print('\ndfL')
-#         print(dfL)
-
-#         print('\ndfR')
-#         print(dfR)
-        
-#         print('\nobs')
-#         observed_result = combine_LR_df(dfL,dfR)
-#         observed_result = observed_result[sorted(observed_result.columns)].astype(object)
-#         print(observed_result)
-        
-#         print('\nexpected')
-#         expected_result = expected_result[sorted(expected_result.columns)].astype(object)
-#         print(expected_result)
-        
-#         # equals = observed_result.equals(expected_result)
-#         assert_frame_equal(observed_result, expected_result)
-
-#     import pandas as pd
-    
-#     # Test 1 - when dfL and dfR have no common index
-#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-#     dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[3, 4, 5])
-#     expected_result = pd.DataFrame({'L_or_R': ['L', 'L', 'L', 'R', 'R', 'R'], 'A': [1.0, 2.0, 3.0, None, None, None], 
-#                                     'B': [None, None, None, 4.0, 5.0, 6.0]}, index=[0, 1, 2, 3, 4, 5])
-#     runtest(dfL,dfR,expected_result)
-    
-#     # Test 2 - when dfL and dfR have some common indices
-#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-#     dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[2, 3, 4])
-#     expected_result = pd.DataFrame({'L_or_R': ['L', 'L', 'LR', 'R', 'R'], 'A': [1.0, 2.0, 3.0, None, None], 
-#                                     'B': [None, None, 4.0, 5.0, 6.0]}, index=[0, 1, 2, 3, 4])
-#     runtest(dfL,dfR,expected_result)
-    
-    
-#     # Test 3 - when all indices in dfL are in dfR
-#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-#     dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[0, 1, 2])
-#     expected_result = pd.DataFrame({'L_or_R': ['LR', 'LR', 'LR'], 'A': [1.0, 2.0, 3.0], 
-#                                     'B': [4.0, 5.0, 6.0]}, index=[0, 1, 2])
-#     runtest(dfL,dfR,expected_result)
-    
-#     # Test 4 - when dfL or dfR is an empty DataFrame
-#     dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-#     dfR = pd.DataFrame(columns=['B'])
-#     expected_result = pd.DataFrame({
-#         'L_or_R': ['L', 'L', 'L'],
-#         'A': [1.0, 2.0, 3.0], 
-#         'B': [None, None, None]
-#     }, index=[0, 1, 2])
-#     runtest(dfL,dfR,expected_result)
+def test_combine_LR_df():
+    dfL = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
+    dfR = pd.DataFrame({'B': [4, 5, 6]}, index=[3, 4, 5])
+    odf = combine_LR_df(dfL, dfR, colname='colname', colval_L='colL', colval_R='colR')
+    assert len(odf) == len(dfL) + len(dfR)
+    assert set(odf['colname']) == {'colL','colR'}
+    assert list(odf.index) == [0, 1, 2, 3, 4, 5]
 
 
 
@@ -251,3 +203,13 @@ def test_fuzzydates():
     assert date_fuzzily_follows('1750', '1751-12-12') == False
     assert date_fuzzily_follows('1750', '1749-12-12') == True
     assert date_fuzzily_precedes('1799-10-01', '1800') == True
+
+
+def test_ensure_int():
+    assert ensure_int(1.0) == 1
+    assert ensure_int(1) == 1
+    assert ensure_int('1') == 1
+    assert ensure_int('x', return_orig=False, default=None) == None
+    assert ensure_int('x', return_orig=False, default=1) == 1
+    assert ensure_int('x', return_orig=True) == 'x'
+

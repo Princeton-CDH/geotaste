@@ -302,7 +302,7 @@ def get_distinctive_qual_vals(
             )
             o.append(coldf)
         except Exception as e:
-            logger.error(e)
+            logger.warning(e)
 
     if not len(o): return pd.DataFrame()
 

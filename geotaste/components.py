@@ -1,7 +1,7 @@
 from .imports import *
 
 
-class BaseComponent(DashComponent, Logmaker):
+class BaseComponent(DashComponent):
     name = None
 
     def __init__(
@@ -49,7 +49,7 @@ class BaseComponent(DashComponent, Logmaker):
     def cards_with_attr(self, attrname:str):
         return [
             card
-            for card in self.cards()
+            for card in self.subcomponents
             if hasattr(card,attrname)
         ]
 
@@ -404,6 +404,7 @@ class FilterPlotCard(FilterCard):
             if selected_data is None: raise PreventUpdate
             o=self.ff().get_selected(selected_data)
             if not o or o==old_data: raise PreventUpdate
+            if type(o)==dict and not o.get(self.key): raise PreventUpdate
             logger.debug(f'[{self.name}) selection updated to {o}')
             return o
         
@@ -443,6 +444,7 @@ class FilterPlotCard(FilterCard):
         )
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
             if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
+            logger.debug(f'triggered by {ctx.triggered_id}, with panel_filter_data = {panel_filter_data} and my_filter_data = {my_filter_data}')
             if not panel_filter_data:
                 # then a panel wide clear?
                 my_filter_data = {}
@@ -561,13 +563,16 @@ class FilterSliderCard(FilterPlotCard):
             prevent_initial_call=True
         )
         def graph_selection_updated2(graph_selected_data, btn_clk, start_value, end_value, panel_data):
+            logger.debug(f'graph_selected_data = {graph_selected_data}')
             if ctx.triggered_id == self.graph.id:
                 seldata=self.ff().get_selected(graph_selected_data)
-                if not seldata: raise PreventUpdate
+                logger.debug(f'seldata = {seldata}')
+                if not seldata or not seldata.get(self.key): raise PreventUpdate
 
                 vals=list(seldata.values())
-                minval=min(vals[0]) if vals else 0
-                maxval=max(vals[0]) if vals else 0
+                logger.debug(f'vals = {vals}')
+                minval=min(vals[0]) if vals and vals[0] else 0
+                maxval=max(vals[0]) if vals and vals[0] else 0
                 return dash.no_update,dash.no_update,minval,maxval
             else:
                 newvals=list(range(start_value, end_value+1))
@@ -733,49 +738,6 @@ class EventMonthCard(FilterSliderCard):
 class EventTypeCard(FilterPlotCard):
     desc = 'type of event'
     figure_factory = EventTypeFigure
-
-
-def get_tabs(children=[], active_tab=None, tab_level=1, **kwargs):
-    tabs = [
-        dbc.Tab(
-            children=d.get('children'),
-            label=d.get('label'),
-            tab_id=d.get('tab_id'),
-            id=d.get('id', uid())
-        )
-        for d in children
-    ]
-    tooltips = [
-        tooltip(tab, d.get('tooltip'))
-        for tab,d in zip(tabs,children)
-        if d.get('tooltip')
-    ]
-    active_tab=(
-        active_tab 
-        if active_tab 
-        else (
-            children[0].get('tab_id') 
-            if children 
-            else None
-        )
-    )
-    
-    tabs_obj = dbc.Tabs(
-        children=tabs, 
-        active_tab=active_tab, 
-        id=dict(
-            type=f'tab_level_{tab_level}', 
-            index=uid()
-        ),
-        **kwargs
-    )
-    return dbc.Container([tabs_obj] + tooltips)
-
-
-
-def tooltip(component, tooltip=''):
-    return dbc.Tooltip(tooltip, target=component.id)
-
 
 
 

@@ -32,7 +32,10 @@ class FilterPanel(FilterCard):
         # intersect and listen
         if self.store_subcomponents:
             @app.callback(
-                Output(self.store, 'data', allow_duplicate=True),
+                [
+                    Output(card.store_panel, 'data', allow_duplicate=True)
+                    for card in self.store_panel_subcomponents
+                ] + [Output(self.store, 'data')],
                 [
                     Input(card.store, 'data')
                     for card in self.store_subcomponents
@@ -46,31 +49,60 @@ class FilterPanel(FilterCard):
                 intersected_filters=self.intersect_filters(*filters_d)
                 if old_data == intersected_filters: raise PreventUpdate # likely a clear
                 logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
-                return intersected_filters
 
-            
-            @app.callback(
-                [
-                    Output(card.store_panel, 'data', allow_duplicate=True)
-                    for card in self.store_panel_subcomponents
-                ],
-                Input(self.store, 'data'),
-                [
-                    State(card.store_panel, 'data')
-                    for card in self.store_panel_subcomponents
-                ],
-                prevent_initial_call=True
-            )
-            def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
-                if panel_filter_data is None: panel_filter_data={}
-                logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
+                # out
+                panel_filter_data = intersected_filters
                 new_filter_data_l = [
-                    panel_filter_data
+                    # (panel_filter_data if card.store.id != ctx.triggered_id else dash.no_update)
+                    panel_filter_data  # resets selections on clears better this way to update even the component that triggered the panel
                     for card in self.store_panel_subcomponents    
                 ]
-                out = new_filter_data_l
+                out = new_filter_data_l + [panel_filter_data]
                 logger.debug(f'sending updates for new store_panel --> {out}')
                 return out
+            
+
+
+            # @app.callback(
+            #     Output(self.store, 'data', allow_duplicate=True),
+            #     [
+            #         Input(card.store, 'data')
+            #         for card in self.store_subcomponents
+            #     ],
+            #     State(self.store, 'data'),
+            #     prevent_initial_call=True
+            # )
+            # def subcomponent_filters_updated(*args):
+            #     filters_d=args[:-1]
+            #     old_data=args[-1]
+            #     intersected_filters=self.intersect_filters(*filters_d)
+            #     if old_data == intersected_filters: raise PreventUpdate # likely a clear
+            #     logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
+            #     return intersected_filters
+
+            
+            # @app.callback(
+            #     [
+            #         Output(card.store_panel, 'data', allow_duplicate=True)
+            #         for card in self.store_panel_subcomponents
+            #     ],
+            #     Input(self.store, 'data'),
+            #     [
+            #         State(card.store_panel, 'data')
+            #         for card in self.store_panel_subcomponents
+            #     ],
+            #     prevent_initial_call=True
+            # )
+            # def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
+            #     if panel_filter_data is None: panel_filter_data={}
+            #     logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
+            #     new_filter_data_l = [
+            #         (panel_filter_data if )
+            #         for card in self.store_panel_subcomponents    
+            #     ]
+            #     out = new_filter_data_l
+            #     logger.debug(f'sending updates for new store_panel --> {out}')
+            #     return out
             
 
             
@@ -304,8 +336,34 @@ class ComparisonPanel(BaseComponent):
                 self.store,
                 self.store_json,
                 self.table_json,
+                self.test_suite
             ], className='mainview-container')
+
+
         ])
+    
+    @cached_property
+    def test_suite(self):
+        return dbc.Container([self.test_suite_btn1, self.test_suite_btn2, self.test_suite_btn3], className='test_suite')
+    
+    @cached_property
+    def test_suite_btn1(self):
+        return dbc.Button(
+            '',
+            color='link',
+            n_clicks=0,
+            id='test_suite_btn1',
+            className='test_suite_btn'
+        )
+    
+    @cached_property
+    def test_suite_btn2(self):
+        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn2',className='test_suite_btn')
+    
+    @cached_property
+    def test_suite_btn3(self):
+        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn3',className='test_suite_btn')
+        
 
     @cached_property
     def store(self):
@@ -372,12 +430,14 @@ class ComparisonPanel(BaseComponent):
             [
                 dbc.Tab(
                     label='Map', 
-                    tab_id='map'
+                    tab_id='map',
+                    id='tab_map'
                 ),
 
                 dbc.Tab(
                     label='Analysis', 
-                    tab_id='table'
+                    tab_id='table',
+                    id='tab_table'
                 ),
             ],
             id='mainview_tabs',  
@@ -422,7 +482,7 @@ class ComparisonPanel(BaseComponent):
         
         return dbc.Collapse(
             [
-                html.H4('Data on Landmarks')
+                html.H4('Data on landmarks')
             ],
             is_open=True
         )
@@ -471,7 +531,7 @@ class ComparisonPanel(BaseComponent):
             dbc.Tab(label='Members', tab_id='member'),
             dbc.Tab(label='Authors', tab_id='author'),
             dbc.Tab(label='Books', tab_id='book'),
-        ], id='maintbl_preface_analysis_tabs')
+        ], id='maintbl_preface_analysis_tabs', active_tab='arrond')
     
     @cached_property
     def maintbl(self):
@@ -576,6 +636,8 @@ class ComparisonPanel(BaseComponent):
 
         super().component_callbacks(app)
 
+        
+
         ### SWITCHING TABS
 
         @app.callback(
@@ -616,7 +678,7 @@ class ComparisonPanel(BaseComponent):
             else:
                 is_open_l=[False,True,False]
             
-            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab]))
+            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab,{}]))
             return [ostyle,ojson]+is_open_l+[True]
             
         app.clientside_callback(
@@ -652,7 +714,7 @@ class ComparisonPanel(BaseComponent):
             ostore=[Lstore,Rstore]
             logger.debug(ostore)
             with Logwatch('computing figdata on server'):
-                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','']))
+                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
             
             newfig = from_json_gz_str(newfig_gz_str)
             ofig = go.Figure(data=newfig.data, layout=oldfig['layout'])
@@ -672,5 +734,32 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
 
+
+
+        ### test funcs
+        @app.callback(
+            Output(self.L.store, 'data', allow_duplicate=True),
+            Input(self.test_suite_btn1, 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn1_onclick(n_clicks):
+            return {'member_nationalities':['France']}
+        
+        @app.callback(
+            Output(self.R.store, 'data', allow_duplicate=True),
+            Input(self.test_suite_btn2, 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn2_onclick(n_clicks):
+            return {'member_nationalities':['United States']}
+
+
+        @app.callback(
+            Output(self.R.store, 'data', allow_duplicate=True),
+            Input(self.test_suite_btn3, 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn3_onclick(n_clicks):
+            return {}
 
 

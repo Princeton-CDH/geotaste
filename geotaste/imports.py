@@ -55,6 +55,8 @@ import plotly.graph_objects as go
 from humanfriendly import format_timespan
 import zlib
 from base64 import b64decode,b64encode
+from colour import Color
+
 
 # setup logs
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
@@ -86,8 +88,8 @@ px.set_mapbox_access_token(mapbox_access_token)
 
 
 BASEMAP_SOURCES = [
+    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png",
     "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png",
-    "https://warper.wmflabs.org/maps/tile/6050/{z}/{x}/{y}.png"
 ]
 
 # Paths
@@ -166,7 +168,7 @@ URLS=dict(
     events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
     landmarks='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/landmarks.csv',
     dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
-    creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/creators.csv',
+    creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/creators.csv',
     combinedmini='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/combined.mini.pkl.gz',
     geojson_arrond='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
 )

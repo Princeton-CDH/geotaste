@@ -112,3 +112,36 @@ def get_ids(els):
 #     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
 #     dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'France')
 
+
+
+
+
+def test_suites(dash_duo):
+    app = get_app()
+    dash_duo.start_server(app.app)
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    dash_duo.multiple_click('#tab_table', 1)
+    dash_duo.wait_for_contains_text('#tblview','landmarks')
+
+    for idx in [
+        '#button_showhide-Filter_1',
+        '#button_showhide-Filter_2',
+        '#button_showhide-MP-Filter_1',
+        '#button_showhide-MP-Filter_2',
+        '#button_showhide-MemberNationalityCard-MP-Filter_1',
+        '#button_showhide-MemberNationalityCard-MP-Filter_2',
+    ]:
+        dash_duo.multiple_click(idx, 1)
+    
+    dash_duo.multiple_click('#test_suite_btn1', 1)
+    dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'France')
+    dash_duo.wait_for_contains_text('#tblview','members')
+    
+    dash_duo.multiple_click('#test_suite_btn2', 1)
+    dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'United States')
+    dash_duo.wait_for_contains_text('#tblview','comparing')
+    
+    dash_duo.multiple_click('#test_suite_btn3', 1)
+    dash_duo.wait_for_text_to_equal('#store_desc-Filter_2', BLANK)
+    dash_duo.wait_for_contains_text('#tblview','members')
+    dash_duo.wait_for_text_to_equal('#store_desc-MemberNationalityCard-MP-Filter_1', BLANK)
