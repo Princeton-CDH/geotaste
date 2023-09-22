@@ -648,7 +648,7 @@ class ComparisonPanel(BaseComponent):
             else:
                 is_open_l=[False,True,False]
             
-            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab]))
+            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab,{}]))
             return [ostyle,ojson]+is_open_l+[True]
             
         app.clientside_callback(
@@ -684,7 +684,7 @@ class ComparisonPanel(BaseComponent):
             ostore=[Lstore,Rstore]
             logger.debug(ostore)
             with Logwatch('computing figdata on server'):
-                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','']))
+                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
             
             newfig = from_json_gz_str(newfig_gz_str)
             ofig = go.Figure(data=newfig.data, layout=oldfig['layout'])

@@ -746,7 +746,7 @@ class LandmarksFigureFactory(FigureFactory):
         
         figdf = self.data
         if not 'tooltip' in set(figdf.columns): figdf['tooltip']=''
-        fig = go.Figure()
+        fig = update_fig_mapbox_background(go.Figure())
         fig.add_trace(
             go.Scattermapbox(
                 below='',
@@ -782,20 +782,7 @@ class LandmarksFigureFactory(FigureFactory):
         )
 
         # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
-        update_fig_mapbox_background(fig)
-        fig.update_layout(
-            margin={"r":0,"t":0,"l":0,"b":0},
-            legend=dict(
-                yanchor="bottom",
-                y=0.06,
-                xanchor="right",
-                x=0.99
-            ),
-            autosize=True
-        )
-        fig.update_layout(mapbox_accesstoken=mapbox_access_token)
-        fig.layout._config = {'responsive':True, 'scrollZoom':True}
-        fig.layout.update(showlegend=False)
+        
         return fig
 
 
@@ -893,7 +880,7 @@ class CombinedFigureFactory(FigureFactory):
         Returns:
             go.Figure: The figure object with the map.
         """
-        
+        logger.debug([color, self.color, DEFAULT_COLOR])
         if not color and self.color: color=self.color
         if not color: color=DEFAULT_COLOR
         figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
@@ -933,9 +920,8 @@ class CombinedFigureFactory(FigureFactory):
         if return_trace: return trace
 
 
-        fig = go.Figure()
+        fig = update_fig_mapbox_background(go.Figure())
         fig.add_trace(trace)
-        fig.update_layout(mapbox_accesstoken=mapbox_access_token)
         return fig
 
 
@@ -962,8 +948,8 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         if is_listy(ff1) and not ff2 and len(ff1)==2:
             ff1,ff2 = ff1
 
-        self.ff1 = self.L = self.indiv_ff(ff1,name='Filter 1') if type(ff1) in {dict,str} else ff1
-        self.ff2 = self.R = self.indiv_ff(ff2,name='Filter 2') if type(ff2) in {dict,str} else ff2
+        self.ff1 = self.L = self.indiv_ff(ff1,name='Filter 1', color=LEFT_COLOR) if type(ff1) in {dict,str} else ff1
+        self.ff2 = self.R = self.indiv_ff(ff2,name='Filter 2', color=RIGHT_COLOR) if type(ff2) in {dict,str} else ff2
     
     
     def compare(self, 
@@ -1099,12 +1085,13 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         )
     
     def plot_map(self):
-        trace1=self.L.plot_map(return_trace=True)
-        trace2=self.L.plot_map(return_trace=True)
-        fig = go.Figure()
-        fig.add_trace(trace1)
-        fig.add_trace(trace2)
-        return fig    
+        fig=go.Figure()
+        figL=self.L.plot_map(return_trace=True)
+        figR=self.R.plot_map(return_trace=True)
+        # ofig=go.Figure(data=figL.data + figR.data, layout=figL.layout)
+        ofig=go.Figure()
+        ofig.add_traces([figL, figR])
+        return update_fig_mapbox_background(ofig)
 
     def plot_oddsratio_map(self, comparison_df=None, col='odds_ratio_log', **kwargs):
         """Plots an odds ratio map using a choropleth mapbox.
@@ -1335,17 +1322,17 @@ def get_cached_fig_or_table(args_id):
         str: The JSON, zlib-compressed string representation of the figure or table.
     """
     
-    fdL,fdR,active_tab,analysis_tab=unserialize(args_id)
+    fdL,fdR,active_tab,analysis_tab,kwargs=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)
     logger.debug([args_id,ff])
     if active_tab=='map':
-        out=ff.plot_map()
+        out=ff.plot_map(**kwargs)
     else:
         if isinstance(ff,ComparisonFigureFactory):    
             pcols=[c for c in PREDICT_COLS if c.startswith(analysis_tab)] if analysis_tab else PREDICT_COLS
-            out=ff.table(cols=pcols)
+            out=ff.table(cols=pcols, **kwargs)
         else:
-            out=ff.table()
+            out=ff.table(**kwargs)
     return to_json_gz_str(out)
 
 def to_json_gz_str(out):
@@ -1398,14 +1385,14 @@ def update_fig_mapbox_background(fig):
         # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
         # style='stamen-toner',
         style="streets",
-        layers=[
-            {
-                "below": 'traces',
-                "sourcetype": "raster",
-                "sourceattribution": "paris1937",
-                "source": BASEMAP_SOURCES,
-            }
-        ],
+        # layers=[
+        #     {
+        #         "below": 'traces',
+        #         "sourcetype": "raster",
+        #         "sourceattribution": "paris1937",
+        #         "source": BASEMAP_SOURCES,
+        #     }
+        # ],
         # style='mapbox://styles/ryanheuser/cllpenazf00ei01qi7c888uug',
         accesstoken=mapbox_access_token,
         bearing=0,
@@ -1414,6 +1401,19 @@ def update_fig_mapbox_background(fig):
 
         zoom=14,
     )
+    fig.update_layout(
+        margin={"r":0,"t":0,"l":0,"b":0},
+        legend=dict(
+            yanchor="bottom",
+            y=0.06,
+            xanchor="right",
+            x=0.99
+        ),
+        autosize=True
+    )
+    fig.update_layout(mapbox_accesstoken=mapbox_access_token)
+    fig.layout._config = {'responsive':True, 'scrollZoom':True}
+    fig.layout.update(showlegend=False)
     return fig
 
 
