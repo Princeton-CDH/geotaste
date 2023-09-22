@@ -83,9 +83,6 @@ def is_numeric(x:object) -> bool:
     """
     return isinstance(x, numbers.Number)
 
-def is_numberish(x:object) -> bool:
-    return is_numeric(x) or (type(x)==str and x.isdigit())
-
 def is_listy(x:object) -> bool:
     """Checks if the input object is a list-like object.
 
@@ -256,46 +253,7 @@ def force_int(x, errors=0) -> int:
         return errors
     
 
-class CachedData:
-    """A class for caching data using SqliteDict.
-
-    Attributes:
-        path_cache (str): The path to the cache file. If not an absolute path, join the path to `PATH_DATA` constant defined elsewhere.
-    """
-    def __init__(self, *x, path_cache=None, **y):
-        self.path_cache = (
-            os.path.join(PATH_DATA, path_cache) 
-            if path_cache and not os.path.isabs(path_cache) 
-            else path_cache
-        )
-
-    def cache(self, tablename='unnamed', flag='c', autocommit=True, **kwargs) -> 'SqliteDict':
-        """Caches data using SqliteDict.
-
-        Args:
-            tablename (str): The name of the table in the cache.
-            flag (str): The flag indicating the mode of the cache.
-            autocommit (bool): Whether to automatically commit changes to the cache.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            SqliteDict: The SqliteDict object representing the cache.
-        """
-        return SqliteDict(
-            filename=self.path_cache, 
-            tablename=tablename, 
-            flag=flag,
-            autocommit=autocommit,
-            **kwargs
-        )
     
-def concat_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
-    return pd.concat([
-        dfL.assign(**{colname:colval_L}),
-        dfR.assign(**{colname:colval_R})
-    ]).sample(frac=1)
-
-
 def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
     """
     Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.
@@ -381,23 +339,6 @@ def unserialize(dstr:str) -> object:
         dict: A object representing the deserialized JSON.
     """
     return orjson.loads(dstr)
-
-
-
-def nowstr():
-    """Returns the current date and time as a formatted string.
-
-    Returns:
-        str: A string representing the current date and time in the format "YYYY-MM-DD HH:MM:SS.SSS".
-    
-    Example:
-        >>> nowstr()
-        '2022-01-01 12:30:45.123'
-    """
-    from datetime import datetime
-    current_datetime = datetime.now()
-    friendly_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    return friendly_string
 
 def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
     """Selects and renames columns in a DataFrame.
@@ -544,35 +485,6 @@ class Logwatch:
         self.ended = time.time()
         self.log(self.desc)
 
-class Logmaker:
-    """A class that provides logging functionality.
-
-    Attributes:
-        None
-
-    Methods:
-        log(*x, level='debug', **y): Logs the given message with the specified level.
-    """
-    def log(self, *x, level='debug', **y):
-        """Logs the given message with the specified level.
-
-        Args:
-            *x: Variable length argument list of values to be logged.
-            level (str): The log level to be used. Default is 'debug'.
-            **y: Variable length keyword argument list of additional values to be logged.
-
-        Returns:
-            None
-
-        Raises:
-            None
-        """
-        o=' '.join(str(xx) for xx in x)
-        name=self.__class__.__name__
-        if hasattr(self,'name'): name+=f' ({self.name})'
-        o = f'[{nowstr()}] {name}: {o}'
-        f=getattr(logger,level)
-        f(o)
 
 def is_range_of_ints(numbers:'Iterable') -> bool:
     """Check if the given numbers form a range of integers.
@@ -640,32 +552,6 @@ def oxfordcomma(l, repr=repr, op='and'):
     else:
         return f"{', '.join(repr(x) for x in l[:-1])}, {op} {repr(l[-1])}"
     
-
-
-def wraptxt(s, n, newline_char='\n'):
-    """
-    Args:
-    s (str): String to be wrapped.
-    n (int): Number of characters after which the string should be wrapped.
-    newline_char (str): The character to be inserted at the end of each wrapped line. Default is '\n'.
-
-    Returns:
-    str: The wrapped string.
-    """
-    words = s.split()
-    lines = []
-    current_line = ''
-    for word in words:
-        if len(current_line) + len(word) > n:
-            lines.append(current_line.strip())
-            current_line = word
-        else:
-            current_line += ' ' + word
-    lines.append(current_line.strip())
-    return newline_char.join(lines)
-
-def wraphtml(x,xn=50): return wraptxt(x, ensure_int(xn), '<br>') if x else x
-
 def ifnanintstr(x,y=''):
     return ensure_int(x) if not np.isnan(x) else y
 

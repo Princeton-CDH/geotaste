@@ -1,7 +1,7 @@
 from .imports import *
 
 
-class BaseComponent(DashComponent, Logmaker):
+class BaseComponent(DashComponent):
     name = None
 
     def __init__(

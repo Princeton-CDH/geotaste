@@ -11,7 +11,7 @@ from .imports import *
 # Figures #
 ###########
 
-class FigureFactory(DashFigureFactory, Logmaker):
+class FigureFactory(DashFigureFactory):
     """
     A class used to represent a factory for generating figures.
 

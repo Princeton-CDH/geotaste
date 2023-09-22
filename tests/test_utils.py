@@ -251,3 +251,13 @@ def test_fuzzydates():
     assert date_fuzzily_follows('1750', '1751-12-12') == False
     assert date_fuzzily_follows('1750', '1749-12-12') == True
     assert date_fuzzily_precedes('1799-10-01', '1800') == True
+
+
+def test_ensure_int():
+    assert ensure_int(1.0) == 1
+    assert ensure_int(1) == 1
+    assert ensure_int('1') == 1
+    assert ensure_int('x', return_orig=False, default=None) == None
+    assert ensure_int('x', return_orig=False, default=1) == 1
+    assert ensure_int('x', return_orig=True) == 'x'
+
