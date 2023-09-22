@@ -26,6 +26,14 @@ def test_dataset():
         assert len(dset.data) == numrows
         assert len(dset.data.columns) == numcols
 
+        try:
+            Dataset().read_df()
+            assert False, 'ought not to be able to read'
+        except Exception:
+            assert True, 'exception ought to be called'
+        
+
+
 
 
 def _test_dset(dset):
@@ -107,6 +115,8 @@ def test_events_dataset():
 def test_combined_dataset():
     dset = Combined()
     _test_dset(dset)
+    assert len(CombinedDataset().data)
+
 
 
 

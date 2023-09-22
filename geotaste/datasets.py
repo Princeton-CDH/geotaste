@@ -38,13 +38,6 @@ class Dataset:
         # read from saved file
         df = pd.read_csv(self.path, on_bad_lines='warn')
         return df
-    
-    def postproc_df(self, df=None):
-        return postproc_df(
-            df=df if df is not None else self.data,
-            cols_pref=self.cols_pref,    
-            cols_rename=self.cols_rename
-        )
 
     @cached_property
     def data(self):  
@@ -57,42 +50,9 @@ class Dataset:
             sep=self.sep,
             fillna=self.fillna
         )
-    
-    def filter(self, filter_data={}, **other_filter_data):
-        return intersect_filters(*[
-            self.filter_series(key,vals)
-            for key,vals in list(filter_data.items()) + list(other_filter_data.items())
-        ])
-    
+
     def filter_df(self, filter_data={}):
-        # if not filter_data: filter_data=self.filter_data
         return filter_df(self.data, filter_data)
-
-    def series(self, key) -> pd.Series:
-        try:
-            return self.data[key]
-        except KeyError:
-            try:
-                return self.data_orig[key]
-            except KeyError:
-                pass
-        return pd.Series()
-
-    def filter_series(
-            self, 
-            key, 
-            vals = [], 
-            test_func = isin_or_hasone,
-            matches = []
-            ):
-        
-        return filter_series(
-            series=self.series(key),
-            vals=vals,
-            test_func=test_func,
-            series_name=key,
-            matches = matches
-        )
     
     @cached_property
     def filter_desc(self):
@@ -271,9 +231,6 @@ class DwellingsDataset(Dataset):
         return postproc_df(df,cols_pref=self.cols_pref)
         
         
-
-    def get_member(self, member):
-        return self.data[self.data['member'] == member]
     
 class MiniDwellingsDataset(DwellingsDataset):
     _cols_rename = dict(
@@ -644,9 +601,6 @@ def Combined():
 
 def is_valid_arrond(x):
     return bool(str(x).isdigit()) and bool(x!='99')
-
-def filter_valid_arrond(df):
-    return (df.index.str.isdigit()) & (df.index!='99')
 
 @cache
 def get_geojson_arrondissement(force=False):
