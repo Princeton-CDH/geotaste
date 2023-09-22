@@ -696,19 +696,15 @@ def postproc_df(df,
     cols_qset=set(cols_q)
 
     def split_sep_col(x,quant,sep):
-        if not x: return []
-        if type(x)!=str: return x
-        return [
-            (
-                y.strip()
-                if not quant
-                else pd.to_numeric(
-                    y.strip(),
-                    errors='coerce'
-                )
-            )
-            for y in str(x).split(sep)
-        ]
+        if is_listy(x):
+            l = x
+        else:
+            l = [y.strip() for y in str(x).split(sep)]
+
+        if quant: 
+            l = [pd.to_numeric(y,errors='coerce') for y in x]
+        
+        return l
         
 
     for c in cols_sep: 

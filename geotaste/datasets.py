@@ -349,7 +349,7 @@ class BooksDataset(Dataset):
         df['book']=df.uri.apply(lambda x: x.split('/books/',1)[1][:-1] if '/books/' in x else '')
         return postproc_df(df, cols_pref=self.cols_pref)
 
-class MiniBooksDataset(BooksDataset):
+class MiniBooksDataset(Dataset):
     ## ONLY AUTHORS
     _cols_rename={
         'book':'book',
@@ -371,10 +371,11 @@ class MiniBooksDataset(BooksDataset):
 
     @cached_property
     def data(self):
-        df=super().data
-        dfau=CreatorsDataset().data.set_index('creator')
+        dfbooks=BooksDataset().data.drop_duplicates('book')
+        dfau=CreatorsDataset().data.drop_duplicates('creator').set_index('creator')
         ld=[]
-        for i,row in df.iterrows():
+        for i,row in dfbooks.iterrows():
+            assert type(row.author) == list
             for author in row.author if row.author else ['']:
                 d=dict(row)
                 aid=d['author']=to_name_id(author)
