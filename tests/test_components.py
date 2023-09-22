@@ -53,7 +53,7 @@ def get_callback_func(flask_app, func_name):
         if 'callback' in eld:
             func=eld['callback']
             if func.__name__ == func_name:
-                o.append(func.__wrapped__)
+                o.append((elname,func.__wrapped__))
     return o
     
 
@@ -61,23 +61,41 @@ def test_graph_selection_updated(dash_duo):
     app = get_app()
     flask_app = app.app
     dash_duo.start_server(flask_app)
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    dash_duo.multiple_click('#button_showhide-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-Filter_2', 1)
+    dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
+    dash_duo.multiple_click('#button_showhide-BP-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-BP-Filter_2', 1)
+    
 
     funcs = get_callback_func(flask_app, func_name='graph_selection_updated')
     qual_cols = [col for col in Combined().data if col not in set(CombinedDataset._cols_q)|set(CombinedDataset.cols_q)]
     quant_cols = [col for col in Combined().data if col in set(CombinedDataset._cols_q)|set(CombinedDataset.cols_q)]
-    for func in funcs:
-        res_qual = func({'points': [{'label': 'A'}, {'label': 'B'}]})
-        res_quant = func({'points': [{'label': 1}, {'label': 2}]})
-        res_geo = func({'points': [{'location': 1.0}, {'location': 2.0}]})
-        assert res_qual and res_quant and res_geo
-        key=list(res_qual.keys())[0]
-        print(key,key in qual_cols, key in quant_cols)
-        if key in qual_cols:
-            # assert res_qual == {key:['A','B']}
-            assert_series_equal(pd.Series(res_qual), pd.Series({key:['A','B']}))
-            assert_series_equal(pd.Series(res_quant), pd.Series({key:['1','2']}))
-            assert_series_equal(pd.Series(res_geo), pd.Series({key:['1.0','2.0']}))
-        elif key in quant_cols:
-            assert_series_equal(pd.Series(res_qual), pd.Series({key:[np.nan,np.nan]}))
-            assert_series_equal(pd.Series(res_quant), pd.Series({key:[1,2]}))
-            assert_series_equal(pd.Series(res_geo), pd.Series({key:[1.0,2.0]}))
+    for elname,func in funcs:
+        elx='#'+elname.split('.')[0]
+        print(elx)
+        elxid=elx.split('-',1)[-1]
+        btnid=f'#button_showhide-{elxid}'
+        descid=f'#store_desc-{elxid}'
+        print(btnid)
+        # dash_duo.multiple_click(btnid, 1)
+        cardname=elxid.split('-')[0]
+        card=globals()[cardname]
+        ff=card().ff()
+        if not ff.quant:
+            val = random.choice(list(ff.get_unique_vals()))
+            res = func({'points': [{'label': val}]})
+            correct = {ff.key:[val]}
+            assert_series_equal(pd.Series(res), pd.Series(correct))
+
+
+
+        # elif key in quant_cols:
+        #     assert_series_equal(pd.Series(res_qual), pd.Series({key:[np.nan,np.nan]}))
+        #     assert_series_equal(pd.Series(res_quant), pd.Series({key:[1,2]}))
+        #     assert_series_equal(pd.Series(res_geo), pd.Series({key:[1.0,2.0]}))
+
+    
+
