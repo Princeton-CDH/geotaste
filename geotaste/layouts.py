@@ -18,22 +18,6 @@ class GeotasteLayout(BaseComponent):
         Defines a cached property that returns an instance of the ComparisonPanel.
         """
         return ComparisonPanel()
-
-    @cached_property
-    def logo_popup(self):
-        """
-        Defines a cached property for a logo popup. 
-        Code to return the actual logo popup has not currently been implemented.
-        """
-        return 
-
-    @cached_property
-    def logo(self):
-        """
-        Defines a cached property for a logo. 
-        Code to return the actual logo has not currently been implemented.
-        """
-        return 
         
 
     def layout(self, params=None):

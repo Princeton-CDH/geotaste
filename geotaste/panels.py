@@ -336,8 +336,35 @@ class ComparisonPanel(BaseComponent):
                 self.store,
                 self.store_json,
                 self.table_json,
+                self.test_suite
             ], className='mainview-container')
+
+
         ])
+    
+    @cached_property
+    def test_suite(self):
+        return dbc.Container([self.test_suite_btn1, self.test_suite_btn2], className='test_suite')
+    
+    @cached_property
+    def test_suite_btn1(self):
+        return dbc.Button(
+            '',
+            color='link',
+            n_clicks=0,
+            id='test_suite_btn1',
+            className='test_suite_btn'
+        )
+    
+    @cached_property
+    def test_suite_btn2(self):
+        return dbc.Button(
+            '',
+            color='link',
+            n_clicks=0,
+            id='test_suite_btn2',
+            className='test_suite_btn'
+        )
 
     @cached_property
     def store(self):
@@ -608,6 +635,8 @@ class ComparisonPanel(BaseComponent):
 
         super().component_callbacks(app)
 
+        
+
         ### SWITCHING TABS
 
         @app.callback(
@@ -704,5 +733,23 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
 
+
+
+        ### test funcs
+        @app.callback(
+            Output(self.L.store, 'data', allow_duplicate=True),
+            Input(self.test_suite_btn1, 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn1_onclick(n_clicks):
+            return {'member_nationalities':['France']}
+        
+        @app.callback(
+            Output(self.R.store, 'data', allow_duplicate=True),
+            Input(self.test_suite_btn2, 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn2_onclick(n_clicks):
+            return {'member_nationalities':['United States']}
 
 
