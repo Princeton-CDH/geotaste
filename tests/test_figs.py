@@ -286,7 +286,7 @@ def test_get_cached_fig_or_table():
         return from_json_gz_str(
             get_cached_fig_or_table(
                 serialize(
-                    [fdL,fdR,tab,analysis_tab]
+                    [fdL,fdR,tab,analysis_tab,{}]
                 )
             )
         )
@@ -306,7 +306,7 @@ def test_get_cached_fig_or_table():
     
     assert len(mapfig4.data)==2
     assert mapfig4.data[0]['marker']['color'] == LEFT_COLOR
-    assert mapfig4.data[1]['marker']['color'] == LEFT_COLOR
+    assert mapfig4.data[1]['marker']['color'] == RIGHT_COLOR
 
     tblfig1=get(tab='table')
     tblfig2=get({'book_genre':['Fiction']}, tab='table')
