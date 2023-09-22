@@ -46,3 +46,38 @@ def test_FilterSliderCard():
     fc = FilterSliderCard()
     assert fc.describe_filters({fc.key:[1,2]}) == '1 to 2'
     assert fc.describe_filters({fc.key:['a',"b"]}) == 'a to b'
+
+def get_callback_func(flask_app, func_name):
+    o = []
+    for elname,eld in flask_app.callback_map.items():
+        if 'callback' in eld:
+            func=eld['callback']
+            if func.__name__ == func_name:
+                o.append(func.__wrapped__)
+    return o
+    
+
+def test_graph_selection_updated(dash_duo):
+    app = get_app()
+    flask_app = app.app
+    dash_duo.start_server(flask_app)
+
+    funcs = get_callback_func(flask_app, func_name='graph_selection_updated')
+    qual_cols = [col for col in Combined().data if col not in set(CombinedDataset._cols_q)|set(CombinedDataset.cols_q)]
+    quant_cols = [col for col in Combined().data if col in set(CombinedDataset._cols_q)|set(CombinedDataset.cols_q)]
+    for func in funcs:
+        res_qual = func({'points': [{'label': 'A'}, {'label': 'B'}]})
+        res_quant = func({'points': [{'label': 1}, {'label': 2}]})
+        res_geo = func({'points': [{'location': 1.0}, {'location': 2.0}]})
+        assert res_qual and res_quant and res_geo
+        key=list(res_qual.keys())[0]
+        print(key,key in qual_cols, key in quant_cols)
+        if key in qual_cols:
+            # assert res_qual == {key:['A','B']}
+            assert_series_equal(pd.Series(res_qual), pd.Series({key:['A','B']}))
+            assert_series_equal(pd.Series(res_quant), pd.Series({key:['1','2']}))
+            assert_series_equal(pd.Series(res_geo), pd.Series({key:['1.0','2.0']}))
+        elif key in quant_cols:
+            assert_series_equal(pd.Series(res_qual), pd.Series({key:[np.nan,np.nan]}))
+            assert_series_equal(pd.Series(res_quant), pd.Series({key:[1,2]}))
+            assert_series_equal(pd.Series(res_geo), pd.Series({key:[1.0,2.0]}))

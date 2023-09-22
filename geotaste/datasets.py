@@ -573,7 +573,7 @@ class CombinedDataset(Dataset):
         'book_circulated', 
         'author_nationalities'
     ]
-    _cols_q = ['member_dob','member_dod','lat','lon','book_year','author_dob','author_dod','event_year','event_month']
+    _cols_q = ['member_membership','member_dob','member_dod','lat','lon','book_year','author_dob','author_dod','event_year','event_month']
     _cols_sep_nonan=['member_membership']
     _cols_pref=['member','event','dwelling','arrond_id','book','author']
 
