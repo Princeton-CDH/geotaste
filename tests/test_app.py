@@ -237,6 +237,7 @@ def test_query_strings(dash_duo):
             pos = pyautogui.center(loc)
 
             logger.debug(f'found loc: {loc}, pos: {pos}')
+            print(f'found loc: {loc}, pos: {pos}')
             # x,y=pos.x, pos.y
             x,y=loc.left - (loc.width//2), loc.top - (loc.height)
             logger.debug(f'moving to {x},{y}')
@@ -247,15 +248,15 @@ def test_query_strings(dash_duo):
             pyautogui.scroll(10)
             time.sleep(1)
             try:
-                assert 'lat=' in driver.current_url
+                assert 'lat=' in str(driver.current_url)
                 break
             except Exception as e:
                 logger.error(e)
                 logger.debug('trying one more time')
         
-        assert 'lat=' in driver.current_url
-        assert 'lon=' in driver.current_url
-        assert 'zoom=' in driver.current_url
+        assert 'lat=' in str(driver.current_url)
+        assert 'lon=' in str(driver.current_url)
+        assert 'zoom=' in str(driver.current_url)
 
         # close
         driver.close()

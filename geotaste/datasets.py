@@ -306,7 +306,7 @@ class BooksDataset(Dataset):
         df['book']=df.uri.apply(lambda x: x.split('/books/',1)[1][:-1] if '/books/' in x else '')
         return postproc_df(df, cols_pref=self.cols_pref)
 
-class MiniBooksDataset(Dataset):
+class MiniBooksDataset(BooksDataset):
     ## ONLY AUTHORS
     _cols_rename={
         'book':'book',
@@ -328,7 +328,7 @@ class MiniBooksDataset(Dataset):
 
     @cached_property
     def data(self):
-        dfbooks=BooksDataset().data.drop_duplicates('book')
+        dfbooks=super().data.drop_duplicates('book')
         dfau=CreatorsDataset().data.drop_duplicates('creator').set_index('creator')
         ld=[]
         for i,row in dfbooks.iterrows():
@@ -488,14 +488,14 @@ class EventsDataset(Dataset):
         ], errors='coerce')
         return postproc_df(df,cols_pref=self.cols_pref)
 
-class MiniEventsDataset(Dataset):
+class MiniEventsDataset(EventsDataset):
     only_borrows = True
 
     @cached_property
     def data(self):
         # disaggregate EventsDataset by member_uris and get books too
         ld=[]
-        for i,row in EventsDataset().data.iterrows():
+        for i,row in super().data.iterrows():
             if self.only_borrows and row.event_type!='Borrow': continue
             for i,member_uri in enumerate(row['member_uris']):
                 d={
