@@ -159,7 +159,7 @@ def test_query_strings(dash_duo):
     
     hosts=['http://127.0.0.1:58050/', 'http://127.0.0.1:58052/']
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     # options.add_argument('--disable-gpu')
     # options.add_argument('--user-data-dir={}'.format(tmp_folder + '/user-data'))
     # options.add_argument('--data-path={}'.format(tmp_folder + '/data-path'))
@@ -272,7 +272,7 @@ def test_zoom2(dash_duo):
     dash_duo.start_server(app.app)
     hosts=['http://127.0.0.1:58050/', 'http://127.0.0.1:58052/']
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     driver = webdriver.Chrome(options=options)
 
     connected = False
