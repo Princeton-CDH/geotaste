@@ -294,6 +294,7 @@ class ComparisonPanel(BaseComponent):
                 self.store_json,
                 self.table_json,
                 self.test_suite,
+                self.test_suite_btn,
                 self.app_begun
             ], className='mainview-container')
 
@@ -301,28 +302,30 @@ class ComparisonPanel(BaseComponent):
         ])
     
     @cached_property
-    def test_suite(self):
-        return dbc.Container([self.test_suite_btn1, self.test_suite_btn2, self.test_suite_btn3], className='test_suite')
+    def test_suite(self, num_btn=5):
+        return dbc.Collapse(
+            [
+                self.get_test_suite_btn(suffix=f'{i+1}')
+                for i in range(num_btn)
+            ], 
+            className='test_suite', 
+            id='test_suite',
+            is_open=False
+        )
     
     @cached_property
-    def test_suite_btn1(self):
+    def test_suite_btn(self):
+        return self.get_test_suite_btn()
+    
+    def get_test_suite_btn(self, suffix=''):
         return dbc.Button(
             '',
             color='link',
             n_clicks=0,
-            id='test_suite_btn1',
+            id='test_suite_btn'+suffix,
             className='test_suite_btn'
         )
     
-    @cached_property
-    def test_suite_btn2(self):
-        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn2',className='test_suite_btn')
-    
-    @cached_property
-    def test_suite_btn3(self):
-        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn3',className='test_suite_btn')
-        
-
     @cached_property
     def store(self):
         """Stores data in a Dash Core Component Store.
@@ -697,32 +700,8 @@ class ComparisonPanel(BaseComponent):
 
 
 
-        ### test funcs
-        @app.callback(
-            Output(self.L.store, 'data', allow_duplicate=True),
-            Input(self.test_suite_btn1, 'n_clicks'),
-            prevent_initial_call=True
-         )
-        def test_suite_btn1_onclick(n_clicks):
-            return {'member_nationalities':['France']}
         
-        @app.callback(
-            Output(self.R.store, 'data', allow_duplicate=True),
-            Input(self.test_suite_btn2, 'n_clicks'),
-            prevent_initial_call=True
-         )
-        def test_suite_btn2_onclick(n_clicks):
-            return {'member_nationalities':['United States']}
-
-
-        @app.callback(
-            Output(self.R.store, 'data', allow_duplicate=True),
-            Input(self.test_suite_btn3, 'n_clicks'),
-            prevent_initial_call=True
-         )
-        def test_suite_btn3_onclick(n_clicks):
-            return {}
-
+        ## STATE TRACKING
 
         @app.callback(
             Output('url-output', 'search', allow_duplicate=True),
@@ -737,6 +716,7 @@ class ComparisonPanel(BaseComponent):
         )
         def track_state(fdL, fdR, tab, tab2, figdat):
             logger.debug(f'triggered by {ctx.triggered_id}')
+            logger.debug(f'figdat = {figdat}')
             state = {}
             for k,v in fdL.items(): state[k]=rejoin_sep(v)
             for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
@@ -805,3 +785,46 @@ class ComparisonPanel(BaseComponent):
             logger.debug(f'--> {out[:4] + out[5:]}')
             return out
             
+
+
+        ### TEST SUITE
+        @app.callback(
+            Output(self.test_suite, 'is_open', allow_duplicate=True),
+            Input(self.test_suite_btn, 'n_clicks'),
+            State(self.test_suite, 'is_open'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn_onclick(n_clicks, is_open):
+            return not is_open
+        
+        @app.callback(
+            Output(self.L.store, 'data', allow_duplicate=True),
+            Input('test_suite_btn1', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn2_onclick(n_clicks):
+            return {'member_nationalities':['France']}
+
+        @app.callback(
+            Output(self.R.store, 'data', allow_duplicate=True),
+            Input('test_suite_btn2', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn2_onclick(n_clicks):
+            return {'member_nationalities':['United States']}
+
+        @app.callback(
+            Output(self.R.store, 'data', allow_duplicate=True),
+            Input('test_suite_btn3', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn3_onclick(n_clicks):
+            return {}
+        
+        @app.callback(
+            Output(self.mainmap, 'relayoutData', allow_duplicate=True),
+            Input('test_suite_btn4', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn4_onclick(n_clicks):
+            return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}

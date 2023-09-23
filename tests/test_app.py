@@ -137,6 +137,8 @@ def test_suites(dash_duo):
     ]:
         dash_duo.multiple_click(idx, 1)
     
+    dash_duo.multiple_click('#test_suite_btn', 1)
+
     dash_duo.multiple_click('#test_suite_btn1', 1)
     dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'France')
     dash_duo.wait_for_contains_text('#tblview','members')
@@ -265,3 +267,30 @@ def test_query_strings(dash_duo):
         assert connected, "Never connected"
 
         
+def test_zoom2(dash_duo):
+    app = get_app()
+    dash_duo.start_server(app.app)
+    hosts=['http://127.0.0.1:58050/', 'http://127.0.0.1:58052/']
+    options = webdriver.ChromeOptions()
+    # options.add_argument('--headless')
+    driver = webdriver.Chrome(options=options)
+
+    connected = False
+    for host in hosts:
+        try:
+            driver.get(f'{host}?tab=map')            
+            connected = True
+        except Exception as e:
+            logger.error(e)
+            continue
+        
+        time.sleep(3)
+        driver.find_element_by_id('test_suite_btn').click()
+        time.sleep(3)
+        driver.find_element_by_id('test_suite_btn4').click()
+        time.sleep(3)
+        assert 'lat=' in driver.current_url
+        assert 'lon=' in driver.current_url
+        assert 'zoom=' in driver.current_url
+
+    assert connected

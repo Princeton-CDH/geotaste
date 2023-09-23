@@ -1,4 +1,4 @@
-pytest-xvfb
+# pytest-xvfb
 dash[testing]
 black>=22.10.0
 pre-commit>=2.20.0
@@ -12,6 +12,6 @@ pytest-ordering
 pyinstaller
 Pillow
 sphinx_rtd_theme
-pyautogui
-opencv-python
-python-xlib
+# pyautogui
+# opencv-python
+# python-xlib

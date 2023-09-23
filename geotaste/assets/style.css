@@ -532,7 +532,5 @@ button {
 
 /* .test_suite { display:none; } */
 
-.test_suite_btn { z-index: 100; position:absolute; height:10px; width:10px; bottom:0}
-#test_suite_btn1 {right:0}
-#test_suite_btn2 {right:100px}
-#test_suite_btn3 {right:200px}
+#test_suite_btn { z-index: 100; position:absolute; height:10px; width:10px; bottom:0; right:0;}
+#test_suite { z-index: 100; position:absolute; height:auto; width:fit-content; bottom:0; left:0; background: none; }
