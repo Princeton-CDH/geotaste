@@ -142,7 +142,7 @@ class MembersDataset(Dataset):
         df['nice_name'] = df['sort_name'].apply(to_name_nice)
         return postproc_df(df,cols_pref=self.cols_pref)
 
-class MiniMembersDataset(MembersDataset):
+class MiniMembersDataset(Dataset):
     _cols_rename = {
         'member':'member',
         'nice_name':'member_name',
@@ -161,7 +161,7 @@ class MiniMembersDataset(MembersDataset):
 
     @cached_property
     def data(self):
-        odf=postproc_df(super().data, self._cols_rename, cols_q=['member_dob', 'member_dod'])
+        odf=postproc_df(MembersDataset().data, self._cols_rename, cols_q=['member_dob', 'member_dod'])
         return odf
     
 @cache
@@ -232,7 +232,7 @@ class DwellingsDataset(Dataset):
         
         
     
-class MiniDwellingsDataset(DwellingsDataset):
+class MiniDwellingsDataset(Dataset):
     _cols_rename = dict(
         member='member',
         dwelling='dwelling',
@@ -247,7 +247,7 @@ class MiniDwellingsDataset(DwellingsDataset):
 
     @cached_property
     def data(self):
-        return postproc_df(super().data, self._cols_rename)
+        return postproc_df(DwellingsDataset().data, self._cols_rename)
 
 @cache
 def Dwellings(): return MiniDwellingsDataset()
@@ -306,7 +306,7 @@ class BooksDataset(Dataset):
         df['book']=df.uri.apply(lambda x: x.split('/books/',1)[1][:-1] if '/books/' in x else '')
         return postproc_df(df, cols_pref=self.cols_pref)
 
-class MiniBooksDataset(BooksDataset):
+class MiniBooksDataset(Dataset):
     ## ONLY AUTHORS
     _cols_rename={
         'book':'book',
@@ -328,7 +328,7 @@ class MiniBooksDataset(BooksDataset):
 
     @cached_property
     def data(self):
-        dfbooks=super().data.drop_duplicates('book')
+        dfbooks=BooksDataset().data.drop_duplicates('book')
         dfau=CreatorsDataset().data.drop_duplicates('creator').set_index('creator')
         ld=[]
         for i,row in dfbooks.iterrows():
@@ -495,7 +495,7 @@ class MiniEventsDataset(EventsDataset):
     def data(self):
         # disaggregate EventsDataset by member_uris and get books too
         ld=[]
-        for i,row in super().data.iterrows():
+        for i,row in EventsDataset().data.iterrows():
             if self.only_borrows and row.event_type!='Borrow': continue
             for i,member_uri in enumerate(row['member_uris']):
                 d={
