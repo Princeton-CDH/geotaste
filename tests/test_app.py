@@ -147,7 +147,7 @@ def test_suites(dash_duo):
 def test_query_strings(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
-    host='http://127.0.0.1:58050/'
+    hosts=['http://127.0.0.1:58050/', 'http://127.0.0.1:58052/']
     with tempfile.TemporaryDirectory() as tmp_folder:
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
@@ -160,23 +160,38 @@ def test_query_strings(dash_duo):
         options.binary_location = "/usr/bin/google-chrome"
 
         driver = webdriver.Chrome(options=options, executable_path="/usr/local/bin/chromedriver")
-        
-        driver.get(f'{host}?member_gender=Female')
-        time.sleep(5)
-        el = driver.find_element_by_id('store_desc-Filter_1')
-        assert 'Female' in el.text
 
-        driver.get(f'{host}?member_gender2=Male')
-        time.sleep(5)
-        el = driver.find_element_by_id('store_desc-Filter_2')
-        assert 'Male' in el.text
+        connected = False
+        for host in hosts:
+            try:
+                driver.get(f'{host}?member_gender=Female')
+            except Exception as e:
+                logger.error(e)
+                continue
+
+            connected = True
+
+            time.sleep(5)
+            el = driver.find_element_by_id('store_desc-Filter_1')
+            assert 'Female' in el.text
+
+            driver.get(f'{host}?member_gender2=Male')
+            time.sleep(5)
+            el = driver.find_element_by_id('store_desc-Filter_2')
+            assert 'Male' in el.text
 
 
-        driver.get(f'{host}?member_gender=Female&member_gender2=Male')
-        time.sleep(5)
-        el = driver.find_element_by_id('store_desc-Filter_1')
-        assert 'Female' in el.text
-        el = driver.find_element_by_id('store_desc-Filter_2')
-        assert 'Male' in el.text
+            driver.get(f'{host}?member_gender=Female&member_gender2=Male')
+            time.sleep(5)
+            el = driver.find_element_by_id('store_desc-Filter_1')
+            assert 'Female' in el.text
+            el = driver.find_element_by_id('store_desc-Filter_2')
+            assert 'Male' in el.text
+
+            # close
+            driver.close()
+            break
+
+        assert connected, "Never connected"
 
         
