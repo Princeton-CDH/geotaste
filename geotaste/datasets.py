@@ -488,7 +488,7 @@ class EventsDataset(Dataset):
         ], errors='coerce')
         return postproc_df(df,cols_pref=self.cols_pref)
 
-class MiniEventsDataset(EventsDataset):
+class MiniEventsDataset(Dataset):
     only_borrows = True
 
     @cached_property

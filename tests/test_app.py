@@ -11,6 +11,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import requests,bs4
 
+test_hosts=[f'http://127.0.0.1:5805{x}/' for x in range(10)]
+
 # import pyautogui
 
 def test_showhide_components(dash_duo):
@@ -157,7 +159,6 @@ def test_query_strings(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
     
-    hosts=['http://127.0.0.1:58050/', 'http://127.0.0.1:58052/']
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     # options.add_argument('--disable-gpu')
@@ -171,7 +172,7 @@ def test_query_strings(dash_duo):
     driver = webdriver.Chrome(options=options)#, executable_path="/usr/local/bin/chromedriver")
 
     connected = False
-    for host in hosts:
+    for host in test_hosts:
         try:
             driver.get(f'{host}')            
         except Exception as e:
@@ -270,13 +271,12 @@ def test_query_strings(dash_duo):
 def test_zoom2(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
-    hosts=['http://127.0.0.1:58050/', 'http://127.0.0.1:58052/']
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     driver = webdriver.Chrome(options=options)
 
     connected = False
-    for host in hosts:
+    for host in test_hosts:
         try:
             driver.get(f'{host}?tab=map')            
             connected = True
