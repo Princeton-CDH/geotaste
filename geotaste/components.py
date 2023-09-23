@@ -1,3 +1,10 @@
+"""
+All the classes and functions for making the base dash components for the Dash app. Panel components are in `panels.py`. Most of these classes have a `figure_factory` attached, such that `component.ff(filter_data)` will return an instance of that component's figure directory with that filter data. They rely on the `Dataset` classes in dataset.py and use plotly to plot figures. For example, `MemberNationalityCard` has a `figure_factory` attribute pointing to `MemberNationalityFigure`.
+
+The base class is in `BaseComponent`, which defines the default behavior of all components used in this app, including in `panels.py`. `FilterComponent` is a subclass of `BaseComponent`, adding `.store` and other filter-saving attributes; `FilterCard` a further subclass, allowing for opening/collapsing. `FilterPlotCard` extends `FilterCard` to allow graphing; `FilterSliderCard` adds graphing and numerical inputs for slider plots; and `FilterInputCard` adds a dropdown with input.
+"""
+
+
 from .imports import *
 
 

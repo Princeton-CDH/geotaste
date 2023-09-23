@@ -1,4 +1,4 @@
-import sys,os
+import sys,os,tempfile
 sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.imports import *
 from dash.testing.application_runners import import_app
@@ -148,26 +148,35 @@ def test_query_strings(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
     host='http://127.0.0.1:58050/'
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    driver = webdriver.Chrome(options=options)
-    
-    driver.get(f'{host}?member_gender=Female')
-    time.sleep(5)
-    el = driver.find_element_by_id('store_desc-Filter_1')
-    assert 'Female' in el.text
+    with tempfile.TemporaryDirectory() as tmp_folder:
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--user-data-dir={}'.format(tmp_folder + '/user-data'))
+        options.add_argument('--data-path={}'.format(tmp_folder + '/data-path'))
+        options.add_argument('--homedir={}'.format(tmp_folder))
+        options.add_argument('--disk-cache-dir={}'.format(tmp_folder + '/cache-dir'))
+        options.add_argument('--remote-debugging-port=9222')
+        options.binary_location = "/usr/bin/google-chrome"
 
-    driver.get(f'{host}?member_gender2=Male')
-    time.sleep(5)
-    el = driver.find_element_by_id('store_desc-Filter_2')
-    assert 'Male' in el.text
+        driver = webdriver.Chrome(options=options, executable_path="/usr/local/bin/chromedriver")
+        
+        driver.get(f'{host}?member_gender=Female')
+        time.sleep(5)
+        el = driver.find_element_by_id('store_desc-Filter_1')
+        assert 'Female' in el.text
+
+        driver.get(f'{host}?member_gender2=Male')
+        time.sleep(5)
+        el = driver.find_element_by_id('store_desc-Filter_2')
+        assert 'Male' in el.text
 
 
-    driver.get(f'{host}?member_gender=Female&member_gender2=Male')
-    time.sleep(5)
-    el = driver.find_element_by_id('store_desc-Filter_1')
-    assert 'Female' in el.text
-    el = driver.find_element_by_id('store_desc-Filter_2')
-    assert 'Male' in el.text
+        driver.get(f'{host}?member_gender=Female&member_gender2=Male')
+        time.sleep(5)
+        el = driver.find_element_by_id('store_desc-Filter_1')
+        assert 'Female' in el.text
+        el = driver.find_element_by_id('store_desc-Filter_2')
+        assert 'Male' in el.text
 
-    
+        
