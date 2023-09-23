@@ -40,6 +40,9 @@ jobs:
           pip install -r requirements.txt
           pip install -r dev-requirements.txt
 
+      - name: Prepare Selenium
+        uses: nanasess/setup-chromedriver@master
+
       - name: Run pytest
         run: pytest --headless --cov=geotaste --cov-report=xml
 
