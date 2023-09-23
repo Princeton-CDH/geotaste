@@ -216,6 +216,9 @@ DEFAULT_STATE={
 }
 
 
+TEST_HOSTS=[f'http://127.0.0.1:5805{x}/' for x in range(10)]
+
+
 
 #######################################################
 ## CONFIG OVERWRITES

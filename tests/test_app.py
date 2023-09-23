@@ -1,7 +1,3 @@
-# import pyscreeze
-# import PIL
-# __PIL_TUPLE_VERSION = tuple(int(x) for x in PIL.__version__.split("."))
-# pyscreeze.PIL__version__ = __PIL_TUPLE_VERSION
 import sys,os,tempfile
 sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.imports import *
@@ -11,10 +7,6 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import requests,bs4
-
-test_hosts=[f'http://127.0.0.1:5805{x}/' for x in range(10)]
-
-# import pyautogui
 
 def test_showhide_components(dash_duo):
     # app = import_app('geotaste.app')
@@ -86,43 +78,6 @@ def test_showhide_components(dash_duo):
 
 
 
-def get_ids(els):
-    return [f'#{el.get_attribute("id")}' for el in els]
-
-
-## doesnt work on github actions?
-
-# def test_filtering(dash_duo):
-#     app = get_app()
-#     dash_duo.start_server(app.app)
-
-#     click_y_US = .22
-#     click_y_FR = .24
-
-#     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
-#     dash_duo.multiple_click('#button_showhide-Filter_1', 1)
-#     dash_duo.multiple_click('#button_showhide-MP-Filter_1', 1)
-#     dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
-#     time.sleep(1)
-#     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
-#     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_1', .7, click_y_US) # click US ?
-#     dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'United States')
-
-#     time.sleep(1)
-
-#     # second
-#     dash_duo.multiple_click('#button_showhide-Filter_2', 1)
-#     dash_duo.multiple_click('#button_showhide-MP-Filter_2', 1)
-#     dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_2', 1)
-#     time.sleep(1)
-#     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
-#     dash_duo.click_at_coord_fractions('#graph-MemberNationalityCard-MP-Filter_2', .7, click_y_FR)
-#     dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'France')
-
-
-
-
-
 def test_suites(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
@@ -185,7 +140,7 @@ def test_query_strings(dash_duo):
     driver = webdriver.Chrome(options=options)#, executable_path="/usr/local/bin/chromedriver")
 
     connected = False
-    for host in test_hosts:
+    for host in TEST_HOSTS:
         try:
             driver.get(f'{host}')            
         except Exception as e:
