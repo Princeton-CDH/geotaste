@@ -1,7 +1,7 @@
-import pyscreeze
-import PIL
-__PIL_TUPLE_VERSION = tuple(int(x) for x in PIL.__version__.split("."))
-pyscreeze.PIL__version__ = __PIL_TUPLE_VERSION
+# import pyscreeze
+# import PIL
+# __PIL_TUPLE_VERSION = tuple(int(x) for x in PIL.__version__.split("."))
+# pyscreeze.PIL__version__ = __PIL_TUPLE_VERSION
 import sys,os,tempfile
 sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.imports import *
@@ -11,7 +11,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import requests,bs4
 
-import pyautogui
+# import pyautogui
 
 def test_showhide_components(dash_duo):
     # app = import_app('geotaste.app')
