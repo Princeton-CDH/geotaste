@@ -653,6 +653,6 @@ def ensure_dir(fn):
         os.makedirs(dirname)
 
 
-def rejoin_sep(l, sep=';'):
+def rejoin_sep(l, sep='_'):
     if not is_listy(l): return l
     return sep.join(str(x) for x in l)

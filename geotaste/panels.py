@@ -750,6 +750,7 @@ class ComparisonPanel(BaseComponent):
                 state['pitch']=round(figdat.get('mapbox.pitch',0), 5)
             
             state = {k:v for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v}
+            if not state: return ''
             ostr=f'?{urlencode(state)}'
             return ostr
                 
@@ -789,9 +790,9 @@ class ComparisonPanel(BaseComponent):
                 elif k=='tab2':
                     tab2=v[0]
                 elif k.endswith('2'):
-                    fdR[k[:-1]]=v
+                    fdR[k[:-1]]=v[0].split('_')
                 elif '_' in k:
-                    fdL[k]=v
+                    fdL[k]=v[0].split('_')
                 else:
                     mapd[k]=float(v[0])
             
