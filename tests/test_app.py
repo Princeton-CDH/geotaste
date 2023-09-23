@@ -182,24 +182,24 @@ def test_query_strings(dash_duo):
         connected = True
 
         logger.debug('Testing no filters')
-        time.sleep(5)
+        time.sleep(10)
         assert driver.find_element_by_id('store_desc-Filter_1').text == BLANK
         assert driver.find_element_by_id('store_desc-Filter_2').text == BLANK
 
         logger.debug('Testing one filter')
         driver.get(f'{host}?member_gender=Female')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('store_desc-Filter_1')
         assert 'Female' in el.text
         driver.get(f'{host}?member_gender2=Male')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('store_desc-Filter_2')
         assert 'Male' in el.text
 
 
         logger.debug('Testing two filters')
         driver.get(f'{host}?member_gender=Female&member_gender2=Male')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('store_desc-Filter_1')
         assert 'Female' in el.text
         el = driver.find_element_by_id('store_desc-Filter_2')
@@ -209,25 +209,25 @@ def test_query_strings(dash_duo):
 
         logger.debug('Testing tab')
         driver.get(f'{host}?tab=table')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('tblview')
         assert el.is_displayed()
         driver.get(f'{host}?tab=map')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('tblview')
         assert not el.is_displayed()
 
 
         logger.debug('Testing tab2')
         driver.get(f'{host}?tab=table&tab2=book&member_gender=Female&member_gender2=Male')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('maintbl-container')
         assert 'Fiction' in el.text
         assert 'Poetry' in el.text
 
         logger.debug('Testing lat/long/zoom query params')
         driver.get(f'{host}?lat=48.85697&lon=2.32748&zoom=16.23372')
-        time.sleep(5)
+        time.sleep(10)
         el = driver.find_element_by_id('mainmap')
         assert el.is_displayed()
 
