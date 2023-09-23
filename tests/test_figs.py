@@ -327,6 +327,12 @@ def test_from_json_gz_str():
     assert from_json_gz_str(to_json_gz_str(obj)) == obj
     assert type(to_json_gz_str(obj)) == str
 
+    obj = {'a':1, 'b':2}
+    assert from_json_gz_str(to_json_gz_str(obj)) == obj
+    assert type(to_json_gz_str(obj)) == str
+
+    
+
 def test_update_fig_mapbox_background():
     fig=go.Figure()
     laydat=json.loads(fig.layout.to_json())

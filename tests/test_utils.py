@@ -213,3 +213,12 @@ def test_ensure_int():
     assert ensure_int('x', return_orig=False, default=1) == 1
     assert ensure_int('x', return_orig=True) == 'x'
 
+def test_ensure_dir():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        odir=os.path.join(tmpdir,'tmpxxx')
+        outfn=os.path.join(odir,'out.txt')
+        ensure_dir(outfn)
+        assert os.path.exists(odir)
+        assert not os.path.exists(outfn)
+        with open(outfn,'w') as of: of.write('testing')
+        assert os.path.exists(outfn)

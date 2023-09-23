@@ -649,8 +649,11 @@ def is_fuzzy_date_seq(x,y,z):
 
 def ensure_dir(fn):
     dirname=os.path.dirname(fn)
-    if not os.path.exists:
+    if not os.path.exists(fn):
         os.makedirs(dirname)
+        logger.debug(f'{dirname} created')
+    else:
+        logger.debug(f'{dirname} already created')
 
 
 def rejoin_sep(l, sep='_'):
