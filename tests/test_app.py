@@ -82,7 +82,9 @@ def test_suites(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    time.sleep(3)
     dash_duo.multiple_click('#tab_table', 1)
+    time.sleep(3)
     dash_duo.wait_for_contains_text('#tblview','landmarks')
 
     # open panels
@@ -98,30 +100,35 @@ def test_suites(dash_duo):
     
     # show test suite buttons
     dash_duo.multiple_click('#test_suite_btn', 1)
+    time.sleep(3)
 
     # this btn puts {'member_nationalities':['France]} in L.member_panel.nation_card.store
     dash_duo.multiple_click('#test_suite_btn1', 1)
+    time.sleep(3)
     dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'France')
     dash_duo.wait_for_contains_text('#tblview','members')
     
     # this btn puts {'member_nationalities':['United States]} in R.member_panel.nation_card.store
     dash_duo.multiple_click('#test_suite_btn2', 1)
+    time.sleep(3)
     dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'United States')
     dash_duo.wait_for_contains_text('#tblview','comparing')
     
     # clear right by clicking filter clear
     dash_duo.multiple_click('#button_clear-MemberNationalityCard-MP-Filter_2', 1)
+    time.sleep(3)
     dash_duo.wait_for_text_to_equal('#store_desc-MemberNationalityCard-MP-Filter_2', BLANK)
     dash_duo.wait_for_text_to_equal('#store_desc-Filter_2', BLANK)
 
     # clear left by clicking top clear
     dash_duo.multiple_click('#button_clear-Filter_1', 1)
+    time.sleep(3)
     dash_duo.wait_for_text_to_equal('#store_desc-Filter_1', BLANK)
     dash_duo.wait_for_text_to_equal('#store_desc-MemberNationalityCard-MP-Filter_1', BLANK)
 
-
     # panel filter
     dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
+    time.sleep(3)
     dash_duo.wait_for_contains_text('#graph-MemberNationalityCard-MP-Filter_1', '4031')
     dash_duo.multiple_click('#test_suite_btn5', 1)
     time.sleep(10)
@@ -130,7 +137,21 @@ def test_suites(dash_duo):
         assert False, 'should not contain class'
     except TimeoutException:
         assert True
+    
+    # clear left by clicking top clear
+    dash_duo.multiple_click('#button_clear-Filter_1', 1)
+    time.sleep(3)
 
+    # panel filter
+    dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
+    dash_duo.multiple_click('#button_showhide-MembershipYearCard-MP-Filter_1', 1)
+    time.sleep(3)
+    dash_duo.wait_for_contains_text('#input_start-MembershipYearCard-MP-Filter_1', '1919')
+    dash_duo.multiple_click('#test_suite_btn6', 1)
+    time.sleep(3)
+    dash_duo.wait_for_contains_text('#input_start-MembershipYearCard-MP-Filter_1', '1932')
+    dash_duo.wait_for_contains_text('#input_end-MembershipYearCard-MP-Filter_1', '1939')
+    
 
 def test_query_strings(dash_duo):
     app = get_app()

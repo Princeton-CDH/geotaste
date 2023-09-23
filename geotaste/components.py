@@ -457,9 +457,9 @@ class FilterPlotCard(FilterCard):
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
             if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
             logger.debug(f'triggered by {ctx.triggered_id}, with panel_filter_data = {panel_filter_data} and my_filter_data = {my_filter_data}')
-            if not panel_filter_data:
+            # if not panel_filter_data:
                 # then a panel wide clear?
-                my_filter_data = {}
+                # my_filter_data = {}
 
 
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}

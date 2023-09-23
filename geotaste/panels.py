@@ -342,7 +342,7 @@ class ComparisonPanel(BaseComponent):
         ])
     
     @cached_property
-    def test_suite(self, num_btn=5):
+    def test_suite(self, num_btn=6):
         return dbc.Collapse(
             [
                 self.get_test_suite_btn(suffix=f'{i+1}')
@@ -876,3 +876,11 @@ class ComparisonPanel(BaseComponent):
          )
         def test_suite_btn5_onclick(n_clicks):
             return {'member_gender':['(Unknown)']}
+        
+        @app.callback(
+            Output(self.L.member_panel.membership_year_card.graph, 'selectedData', allow_duplicate=True),
+            Input('test_suite_btn6', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn6_onclick(n_clicks):
+            return {'points': [{'curveNumber': 0, 'pointNumber': 8, 'pointIndex': 8, 'x': 1937, 'y': 21, 'label': 1937, 'value': 21}, {'curveNumber': 0, 'pointNumber': 9, 'pointIndex': 9, 'x': 1938, 'y': 20, 'label': 1938, 'value': 20}, {'curveNumber': 0, 'pointNumber': 10, 'pointIndex': 10, 'x': 1936, 'y': 19, 'label': 1936, 'value': 19}, {'curveNumber': 0, 'pointNumber': 11, 'pointIndex': 11, 'x': 1933, 'y': 19, 'label': 1933, 'value': 19}, {'curveNumber': 0, 'pointNumber': 12, 'pointIndex': 12, 'x': 1934, 'y': 19, 'label': 1934, 'value': 19}, {'curveNumber': 0, 'pointNumber': 14, 'pointIndex': 14, 'x': 1939, 'y': 18, 'label': 1939, 'value': 18}, {'curveNumber': 0, 'pointNumber': 16, 'pointIndex': 16, 'x': 1935, 'y': 16, 'label': 1935, 'value': 16}, {'curveNumber': 0, 'pointNumber': 18, 'pointIndex': 18, 'x': 1932, 'y': 13, 'label': 1932, 'value': 13}], 'range': {'x': [1931.0454545454545, 1939.409090909091], 'y': [0, 37.89473684210526]}}
