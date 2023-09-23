@@ -252,6 +252,8 @@ if ROOT_URL.endswith('/'): ROOT_URL=ROOT_URL[:-1]
 ASSETS_URL = f'{ROOT_URL}/assets'
 LOGO_SRC=f"{ASSETS_URL}/SCo_logo_graphic-small.png"
 LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
+PATH_LOGO = os.path.join(PATH_ASSETS,os.path.basename(LOGO_SRC))
+PATH_LOC = os.path.join(PATH_ASSETS, 'jardin.png')
 
 
 from .utils import *
