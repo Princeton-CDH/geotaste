@@ -656,6 +656,6 @@ def ensure_dir(fn):
         logger.debug(f'{dirname} already created')
 
 
-def rejoin_sep(l, sep='_'):
-    if not is_listy(l): return l
-    return sep.join(str(x) for x in l)
+def rejoin_sep(listy_obj, sep='_'):
+    if not is_listy(listy_obj): return listy_obj
+    return sep.join(str(x) for x in listy_obj)
