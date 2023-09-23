@@ -790,9 +790,9 @@ class ComparisonPanel(BaseComponent):
                 elif k=='tab2':
                     tab2=v[0]
                 elif k.endswith('2'):
-                    fdR[k[:-1]]=v[0].split('_')
+                    fdR[k[:-1]]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
                 elif '_' in k:
-                    fdL[k]=v[0].split('_')
+                    fdL[k]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
                 else:
                     mapd[k]=float(v[0])
             
