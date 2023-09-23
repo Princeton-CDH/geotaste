@@ -59,7 +59,7 @@ Python 3.10 / Dash 2.13 / Plotly 5.17 / Flask 2.2
 - Install chromedriver. For [linux, see instructions here](https://gist.github.com/mikesmullin/2636776?permalink_comment_id=2986509#gistcomment-2986509); for [windows see here](https://medium.com/@patrick.yoho11/installing-selenium-and-chromedriver-on-windows-e02202ac2b08). For mac/OSX:
     ```bash
     # install brew if you don't have it yet:
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     # use brew to install chromedriver
     brew install --cask chromedriver
