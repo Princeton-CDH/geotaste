@@ -79,8 +79,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.components.EventYearCard"><code class="docutils literal notranslate"><span class="pre">EventYearCard</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.components.EventMonthCard"><code class="docutils literal notranslate"><span class="pre">EventMonthCard</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.components.EventTypeCard"><code class="docutils literal notranslate"><span class="pre">EventTypeCard</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.components.get_tabs"><code class="docutils literal notranslate"><span class="pre">get_tabs()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.components.tooltip"><code class="docutils literal notranslate"><span class="pre">tooltip()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.components.get_welcome_modal"><code class="docutils literal notranslate"><span class="pre">get_welcome_modal()</span></code></a></li>
 </ul>
 </li>
@@ -108,7 +106,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.CombinedDataset"><code class="docutils literal notranslate"><span class="pre">CombinedDataset</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.Combined"><code class="docutils literal notranslate"><span class="pre">Combined()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.is_valid_arrond"><code class="docutils literal notranslate"><span class="pre">is_valid_arrond()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.filter_valid_arrond"><code class="docutils literal notranslate"><span class="pre">filter_valid_arrond()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.get_geojson_arrondissement"><code class="docutils literal notranslate"><span class="pre">get_geojson_arrondissement()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.hover_tooltip"><code class="docutils literal notranslate"><span class="pre">hover_tooltip()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.datasets.determine_arrond"><code class="docutils literal notranslate"><span class="pre">determine_arrond()</span></code></a></li>
@@ -153,14 +150,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-geotaste.geotaste">geotaste.geotaste module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-geotaste.gui">geotaste.gui module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.gui.get_app_global"><code class="docutils literal notranslate"><span class="pre">get_app_global()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.gui.mainview"><code class="docutils literal notranslate"><span class="pre">mainview()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.gui.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.gui.browse"><code class="docutils literal notranslate"><span class="pre">browse()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.gui.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#geotaste-gui-module">geotaste.gui module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-geotaste.imports">geotaste.imports module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.imports.read_config_json"><code class="docutils literal notranslate"><span class="pre">read_config_json()</span></code></a></li>
 </ul>
@@ -205,7 +195,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.to_set"><code class="docutils literal notranslate"><span class="pre">to_set()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.overlaps"><code class="docutils literal notranslate"><span class="pre">overlaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.is_numeric"><code class="docutils literal notranslate"><span class="pre">is_numeric()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.is_numberish"><code class="docutils literal notranslate"><span class="pre">is_numberish()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.is_listy"><code class="docutils literal notranslate"><span class="pre">is_listy()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.ensure_int"><code class="docutils literal notranslate"><span class="pre">ensure_int()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.ensure_dict"><code class="docutils literal notranslate"><span class="pre">ensure_dict()</span></code></a></li>
@@ -216,22 +205,16 @@
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.make_counts_df"><code class="docutils literal notranslate"><span class="pre">make_counts_df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.ordinal_str"><code class="docutils literal notranslate"><span class="pre">ordinal_str()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.force_int"><code class="docutils literal notranslate"><span class="pre">force_int()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.CachedData"><code class="docutils literal notranslate"><span class="pre">CachedData</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.concat_LR_df"><code class="docutils literal notranslate"><span class="pre">concat_LR_df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.combine_LR_df"><code class="docutils literal notranslate"><span class="pre">combine_LR_df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.serialize"><code class="docutils literal notranslate"><span class="pre">serialize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.unserialize"><code class="docutils literal notranslate"><span class="pre">unserialize()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.nowstr"><code class="docutils literal notranslate"><span class="pre">nowstr()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.selectrename_df"><code class="docutils literal notranslate"><span class="pre">selectrename_df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.qualquant_series"><code class="docutils literal notranslate"><span class="pre">qualquant_series()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.uid"><code class="docutils literal notranslate"><span class="pre">uid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.Logwatch"><code class="docutils literal notranslate"><span class="pre">Logwatch</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.Logmaker"><code class="docutils literal notranslate"><span class="pre">Logmaker</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.is_range_of_ints"><code class="docutils literal notranslate"><span class="pre">is_range_of_ints()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.delist_df"><code class="docutils literal notranslate"><span class="pre">delist_df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.oxfordcomma"><code class="docutils literal notranslate"><span class="pre">oxfordcomma()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.wraptxt"><code class="docutils literal notranslate"><span class="pre">wraptxt()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.wraphtml"><code class="docutils literal notranslate"><span class="pre">wraphtml()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.ifnanintstr"><code class="docutils literal notranslate"><span class="pre">ifnanintstr()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.intersect_filters"><code class="docutils literal notranslate"><span class="pre">intersect_filters()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geotaste.utils.postproc_df"><code class="docutils literal notranslate"><span class="pre">postproc_df()</span></code></a></li>
@@ -386,7 +369,7 @@ run(debug=True)</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geotaste.components.BaseComponent">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.components.</span></span><span class="sig-name descname"><span class="pre">BaseComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Dash</span> <span class="pre">Component'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_store</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_add_uuid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/components.html#BaseComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.components.BaseComponent" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DashComponent</span></code>, <a class="reference internal" href="#geotaste.utils.Logmaker" title="geotaste.utils.Logmaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logmaker</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DashComponent</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.components.BaseComponent.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geotaste.components.BaseComponent.name" title="Link to this definition"></a></dt>
@@ -998,16 +981,6 @@ All element id’s should append +self.name to make sure they are unique.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geotaste.components.get_tabs">
-<span class="sig-prename descclassname"><span class="pre">geotaste.components.</span></span><span class="sig-name descname"><span class="pre">get_tabs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_tab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/components.html#get_tabs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.components.get_tabs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.components.tooltip">
-<span class="sig-prename descclassname"><span class="pre">geotaste.components.</span></span><span class="sig-name descname"><span class="pre">tooltip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tooltip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/components.html#tooltip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.components.tooltip" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="geotaste.components.get_welcome_modal">
 <span class="sig-prename descclassname"><span class="pre">geotaste.components.</span></span><span class="sig-name descname"><span class="pre">get_welcome_modal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/components.html#get_welcome_modal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.components.get_welcome_modal" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -1079,34 +1052,14 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <span class="sig-name descname"><span class="pre">read_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#Dataset.read_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.Dataset.read_df" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.datasets.Dataset.postproc_df">
-<span class="sig-name descname"><span class="pre">postproc_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#Dataset.postproc_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.Dataset.postproc_df" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="geotaste.datasets.Dataset.data">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#geotaste.datasets.Dataset.data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geotaste.datasets.Dataset.filter">
-<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">other_filter_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#Dataset.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.Dataset.filter" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="geotaste.datasets.Dataset.filter_df">
 <span class="sig-name descname"><span class="pre">filter_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#Dataset.filter_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.Dataset.filter_df" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.datasets.Dataset.series">
-<span class="sig-name descname"><span class="pre">series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Series</span></span></span><a class="reference internal" href="_modules/geotaste/datasets.html#Dataset.series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.Dataset.series" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.datasets.Dataset.filter_series">
-<span class="sig-name descname"><span class="pre">filter_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals=[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_func=&lt;function</span> <span class="pre">isin_or_hasone&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matches=[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#Dataset.filter_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.Dataset.filter_series" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1258,11 +1211,6 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#geotaste.datasets.DwellingsDataset.data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.datasets.DwellingsDataset.get_member">
-<span class="sig-name descname"><span class="pre">get_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#DwellingsDataset.get_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.DwellingsDataset.get_member" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -1330,7 +1278,7 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geotaste.datasets.MiniBooksDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.datasets.</span></span><span class="sig-name descname"><span class="pre">MiniBooksDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#MiniBooksDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.MiniBooksDataset" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#geotaste.datasets.BooksDataset" title="geotaste.datasets.BooksDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooksDataset</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#geotaste.datasets.Dataset" title="geotaste.datasets.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.datasets.MiniBooksDataset.cols_sep">
 <span class="sig-name descname"><span class="pre">cols_sep</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#geotaste.datasets.MiniBooksDataset.cols_sep" title="Link to this definition"></a></dt>
@@ -1359,7 +1307,7 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <dd><p>Bases: <a class="reference internal" href="#geotaste.datasets.Dataset" title="geotaste.datasets.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.datasets.CreatorsDataset.url">
-<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/creators.csv'</span></em><a class="headerlink" href="#geotaste.datasets.CreatorsDataset.url" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/creators.csv'</span></em><a class="headerlink" href="#geotaste.datasets.CreatorsDataset.url" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1472,7 +1420,7 @@ All element id’s should append +self.name to make sure they are unique.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geotaste.datasets.CombinedDataset.gen">
-<span class="sig-name descname"><span class="pre">gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#CombinedDataset.gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.CombinedDataset.gen" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#CombinedDataset.gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.CombinedDataset.gen" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1490,11 +1438,6 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.datasets.is_valid_arrond">
 <span class="sig-prename descclassname"><span class="pre">geotaste.datasets.</span></span><span class="sig-name descname"><span class="pre">is_valid_arrond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#is_valid_arrond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.is_valid_arrond" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.datasets.filter_valid_arrond">
-<span class="sig-prename descclassname"><span class="pre">geotaste.datasets.</span></span><span class="sig-name descname"><span class="pre">filter_valid_arrond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/datasets.html#filter_valid_arrond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.datasets.filter_valid_arrond" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1537,7 +1480,7 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">FigureFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FigureFactory'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#FigureFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.FigureFactory" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DashFigureFactory</span></code>, <a class="reference internal" href="#geotaste.utils.Logmaker" title="geotaste.utils.Logmaker"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logmaker</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DashFigureFactory</span></code></p>
 <p>A class used to represent a factory for generating figures.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory.records_name">
@@ -1755,6 +1698,11 @@ All element id’s should append +self.name to make sure they are unique.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="id3">
 <span class="sig-name descname"><span class="pre">dataset_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.dataset_obj">
+<span class="sig-name descname"><span class="pre">dataset_obj</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#geotaste.figs.FigureFactory.dataset_obj" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2005,7 +1953,7 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geotaste.figs.FigureFactory.get_series">
-<span class="sig-name descname"><span class="pre">get_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#geotaste.utils.Logmaker.None" title="geotaste.utils.Logmaker.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#geotaste.utils.Logmaker.None" title="geotaste.utils.Logmaker.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#geotaste.utils.Logmaker.None" title="geotaste.utils.Logmaker.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#FigureFactory.get_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.FigureFactory.get_series" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#FigureFactory.get_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.FigureFactory.get_series" title="Link to this definition"></a></dt>
 <dd><p>Get a series from a DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2109,8 +2057,8 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.selected_values">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a></em><a class="headerlink" href="#geotaste.figs.FigureFactory.selected_values" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="geotaste.figs.FigureFactory.selected_indices">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">selected_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a></em><a class="headerlink" href="#geotaste.figs.FigureFactory.selected_indices" title="Link to this definition"></a></dt>
 <dd><p>Returns a list of selected values from the dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -2672,7 +2620,7 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="geotaste.figs.CombinedFigureFactory.cols_table_members">
-<span class="sig-name descname"><span class="pre">cols_table_members</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['member_name',</span> <span class="pre">'member_dob',</span> <span class="pre">'member_dod',</span> <span class="pre">'member_nationalities',</span> <span class="pre">'member_gender',</span> <span class="pre">'num_borrows',</span> <span class="pre">'dwelling_address',</span> <span class="pre">'member_url']</span></em><a class="headerlink" href="#geotaste.figs.CombinedFigureFactory.cols_table_members" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cols_table_members</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['member_name',</span> <span class="pre">'member_dob',</span> <span class="pre">'member_dod',</span> <span class="pre">'member_nationalities',</span> <span class="pre">'member_gender',</span> <span class="pre">'dwelling_address']</span></em><a class="headerlink" href="#geotaste.figs.CombinedFigureFactory.cols_table_members" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2740,35 +2688,6 @@ If False, use the deduplicated and filtered series. Defaults to True.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dash_table.DataTable</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="geotaste.figs.CombinedFigureFactory.arronds">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">arronds</span></span><a class="headerlink" href="#geotaste.figs.CombinedFigureFactory.arronds" title="Link to this definition"></a></dt>
-<dd><p>Returns a series containing the unique arrondissement IDs from the ‘df_dwellings’ DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A series containing the unique arrondissement IDs.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas.Series</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="geotaste.figs.CombinedFigureFactory.valid_arronds">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_arronds</span></span><a class="headerlink" href="#geotaste.figs.CombinedFigureFactory.valid_arronds" title="Link to this definition"></a></dt>
-<dd><p>Returns a filtered DataFrame of valid arronds.</p>
-<p>This method filters the DataFrame <cite>arronds</cite> by applying the function <cite>is_valid_arrond</cite> to each row. The resulting DataFrame contains only the rows where <cite>is_valid_arrond</cite> returns True.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A filtered DataFrame of valid arronds.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2905,6 +2824,28 @@ If not provided, the function will call self.compare(<a href="#id18"><span class
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.plot_map">
+<span class="sig-name descname"><span class="pre">plot_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.plot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.plot_map" title="Link to this definition"></a></dt>
+<dd><p>Plot a map with member dwellings from the currently filtered data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The color of the markers. Defaults to None.</p></li>
+<li><p><strong>color_text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The color of the text. Defaults to ‘black’.</p></li>
+<li><p><strong>return_trace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to return only the trace. Defaults to False.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure object with the map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>go.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="geotaste.figs.ComparisonFigureFactory.plot_oddsratio_map">
 <span class="sig-name descname"><span class="pre">plot_oddsratio_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'odds_ratio_log'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#ComparisonFigureFactory.plot_oddsratio_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.ComparisonFigureFactory.plot_oddsratio_map" title="Link to this definition"></a></dt>
 <dd><p>Plots an odds ratio map using a choropleth mapbox.</p>
@@ -2972,7 +2913,7 @@ If not provided, the function will call self.compare(<a href="#id18"><span class
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.figs.plot_cache">
-<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">plot_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialized_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#plot_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.plot_cache" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geotaste.figs.</span></span><span class="sig-name descname"><span class="pre">plot_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialized_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/figs.html#plot_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.figs.plot_cache" title="Link to this definition"></a></dt>
 <dd><p>Plots the FIGURE using the specified figure class and serialized data. This function output is memoized so that future calls with the same arguments return cached results. This cache is stored in <cite>PATH_CACHE</cite> constant/config flag.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3124,33 +3065,8 @@ decompresses and decodes it back to the original JSON format.</p>
 <section id="module-geotaste.geotaste">
 <span id="geotaste-geotaste-module"></span><h2>geotaste.geotaste module<a class="headerlink" href="#module-geotaste.geotaste" title="Link to this heading"></a></h2>
 </section>
-<section id="module-geotaste.gui">
-<span id="geotaste-gui-module"></span><h2>geotaste.gui module<a class="headerlink" href="#module-geotaste.gui" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.gui.get_app_global">
-<span class="sig-prename descclassname"><span class="pre">geotaste.gui.</span></span><span class="sig-name descname"><span class="pre">get_app_global</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/gui.html#get_app_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.gui.get_app_global" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.gui.mainview">
-<span class="sig-prename descclassname"><span class="pre">geotaste.gui.</span></span><span class="sig-name descname"><span class="pre">mainview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/gui.html#mainview"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.gui.mainview" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.gui.main">
-<span class="sig-prename descclassname"><span class="pre">geotaste.gui.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/gui.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.gui.main" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.gui.browse">
-<span class="sig-prename descclassname"><span class="pre">geotaste.gui.</span></span><span class="sig-name descname"><span class="pre">browse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/gui.html#browse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.gui.browse" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.gui.run">
-<span class="sig-prename descclassname"><span class="pre">geotaste.gui.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/gui.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.gui.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<section id="geotaste-gui-module">
+<h2>geotaste.gui module<a class="headerlink" href="#geotaste-gui-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-geotaste.imports">
 <span id="geotaste-imports-module"></span><h2>geotaste.imports module<a class="headerlink" href="#module-geotaste.imports" title="Link to this heading"></a></h2>
@@ -3172,20 +3088,6 @@ is used to define the layout and properties for the Geotaste Project.</p>
 <dt class="sig sig-object py" id="geotaste.layouts.GeotasteLayout.comparison_panel">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">comparison_panel</span></span><a class="headerlink" href="#geotaste.layouts.GeotasteLayout.comparison_panel" title="Link to this definition"></a></dt>
 <dd><p>Defines a cached property that returns an instance of the ComparisonPanel.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="geotaste.layouts.GeotasteLayout.logo_popup">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logo_popup</span></span><a class="headerlink" href="#geotaste.layouts.GeotasteLayout.logo_popup" title="Link to this definition"></a></dt>
-<dd><p>Defines a cached property for a logo popup.
-Code to return the actual logo popup has not currently been implemented.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="geotaste.layouts.GeotasteLayout.logo">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logo</span></span><a class="headerlink" href="#geotaste.layouts.GeotasteLayout.logo" title="Link to this definition"></a></dt>
-<dd><p>Defines a cached property for a logo.
-Code to return the actual logo has not currently been implemented.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3561,6 +3463,26 @@ navigation bar, actual content layout, and a loading spinner.</p>
 <dd><p>layout to be defined by the particular ExplainerComponent instance.
 All element id’s should append +self.name to make sure they are unique.</p>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geotaste.panels.ComparisonPanel.test_suite">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_suite</span></span><a class="headerlink" href="#geotaste.panels.ComparisonPanel.test_suite" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geotaste.panels.ComparisonPanel.test_suite_btn1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_suite_btn1</span></span><a class="headerlink" href="#geotaste.panels.ComparisonPanel.test_suite_btn1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geotaste.panels.ComparisonPanel.test_suite_btn2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_suite_btn2</span></span><a class="headerlink" href="#geotaste.panels.ComparisonPanel.test_suite_btn2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geotaste.panels.ComparisonPanel.test_suite_btn3">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_suite_btn3</span></span><a class="headerlink" href="#geotaste.panels.ComparisonPanel.test_suite_btn3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geotaste.panels.ComparisonPanel.store">
@@ -3956,7 +3878,7 @@ All element id’s should append +self.name to make sure they are unique.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.statutils.iter_contingency_tables">
-<span class="sig-prename descclassname"><span class="pre">geotaste.statutils.</span></span><span class="sig-name descname"><span class="pre">iter_contingency_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniqvals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#geotaste.utils.Logmaker.None" title="geotaste.utils.Logmaker.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/statutils.html#iter_contingency_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.statutils.iter_contingency_tables" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geotaste.statutils.</span></span><span class="sig-name descname"><span class="pre">iter_contingency_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniqvals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/statutils.html#iter_contingency_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.statutils.iter_contingency_tables" title="Link to this definition"></a></dt>
 <dd><p>Iterates over contingency tables for two sets of values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -4284,11 +4206,6 @@ the given list.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geotaste.utils.is_numberish">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">is_numberish</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/geotaste/utils.html#is_numberish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.is_numberish" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="geotaste.utils.is_listy">
 <span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">is_listy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/geotaste/utils.html#is_listy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.is_listy" title="Link to this definition"></a></dt>
 <dd><p>Checks if the input object is a list-like object.</p>
@@ -4359,7 +4276,7 @@ the given list.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.utils.first">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#geotaste.utils.Logmaker.None" title="geotaste.utils.Logmaker.None"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></span><a class="reference internal" href="_modules/geotaste/utils.html#first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.first" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">first</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></span><a class="reference internal" href="_modules/geotaste/utils.html#first"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.first" title="Link to this definition"></a></dt>
 <dd><p>Returns the first element of an iterable object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -4486,74 +4403,10 @@ and the ‘count’ column contains the corresponding counts.</p>
 </dl>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="geotaste.utils.CachedData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">CachedData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#CachedData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.CachedData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>A class for caching data using SqliteDict.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.utils.CachedData.path_cache">
-<span class="sig-name descname"><span class="pre">path_cache</span></span><a class="headerlink" href="#geotaste.utils.CachedData.path_cache" title="Link to this definition"></a></dt>
-<dd><p>The path to the cache file. If not an absolute path, join the path to <cite>PATH_DATA</cite> constant defined elsewhere.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.utils.CachedData.cache">
-<span class="sig-name descname"><span class="pre">cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tablename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unnamed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'c'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autocommit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SqliteDict</span></span></span><a class="reference internal" href="_modules/geotaste/utils.html#CachedData.cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.CachedData.cache" title="Link to this definition"></a></dt>
-<dd><p>Caches data using SqliteDict.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tablename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The name of the table in the cache.</p></li>
-<li><p><strong>flag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The flag indicating the mode of the cache.</p></li>
-<li><p><strong>autocommit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Whether to automatically commit changes to the cache.</p></li>
-<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The SqliteDict object representing the cache.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>SqliteDict</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.utils.concat_LR_df">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">concat_LR_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L_or_R'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'R'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_LR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LR'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#concat_LR_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.concat_LR_df" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.utils.combine_LR_df">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">combine_LR_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L_or_R'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'R'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_LR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LR'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#combine_LR_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.combine_LR_df" title="Link to this definition"></a></dt>
-<dd><p>Combines two dataframes dfL and dfR by joining them on their indexes. The function creates a new column indicating whether a row belongs to the left dataframe, the right dataframe, or both. The resultant dataframe is returned.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dfL</strong> (<em>pandas.DataFrame</em>) – The left dataframe.</p></li>
-<li><p><strong>dfR</strong> (<em>pandas.DataFrame</em>) – The right dataframe.</p></li>
-<li><p><strong>colname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The name of the new column that indicates whether a row belongs to the left dataframe, the right dataframe, or both. Default is ‘L_or_R’.</p></li>
-<li><p><strong>colval_L</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The value in the new column for rows that belong only to the left dataframe. Default is ‘L’.</p></li>
-<li><p><strong>colval_R</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The value in the new column for rows that belong only to the right dataframe. Default is ‘R’.</p></li>
-<li><p><strong>colval_LR</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The value in the new column for rows that belong to both dataframes. Default is ‘LR’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The combined dataframe.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">combine_LR_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L_or_R'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colval_R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'R'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#combine_LR_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.combine_LR_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.utils.serialize">
@@ -4587,25 +4440,6 @@ and the ‘count’ column contains the corresponding counts.</p>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.utils.nowstr">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">nowstr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#nowstr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.nowstr" title="Link to this definition"></a></dt>
-<dd><p>Returns the current date and time as a formatted string.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A string representing the current date and time in the format “YYYY-MM-DD HH:MM:SS.SSS”.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
-</dd>
-</dl>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nowstr</span><span class="p">()</span>
-<span class="go">&#39;2022-01-01 12:30:45.123&#39;</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py function">
@@ -4799,45 +4633,6 @@ the task is still running.</p>
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="geotaste.utils.Logmaker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">Logmaker</span></span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.Logmaker" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>A class that provides logging functionality.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="geotaste.utils.Logmaker.None">
-<span class="sig-name descname"><span class="pre">None</span></span><a class="headerlink" href="#geotaste.utils.Logmaker.None" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="geotaste.utils.Logmaker.log">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.Logmaker.log" title="Link to this definition"></a></dt>
-<dd><p>Logs the given message with the specified level.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id20">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#Logmaker.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id20" title="Link to this definition"></a></dt>
-<dd><p>Logs the given message with the specified level.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*x</strong> – Variable length argument list of values to be logged.</p></li>
-<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The log level to be used. Default is ‘debug’.</p></li>
-<li><p><strong>**y</strong> – Variable length keyword argument list of additional values to be logged.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.utils.is_range_of_ints">
 <span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">is_range_of_ints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numbers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.11)"><span class="pre">Iterable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/geotaste/utils.html#is_range_of_ints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.is_range_of_ints" title="Link to this definition"></a></dt>
@@ -4895,27 +4690,6 @@ Default is a space.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="geotaste.utils.oxfordcomma">
 <span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">oxfordcomma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repr=&lt;built-in</span> <span class="pre">function</span> <span class="pre">repr&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op='and'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#oxfordcomma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.oxfordcomma" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.utils.wraptxt">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">wraptxt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#wraptxt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.wraptxt" title="Link to this definition"></a></dt>
-<dd><blockquote>
-<div><p>Args:
-s (str): String to be wrapped.
-n (int): Number of characters after which the string should be wrapped.
-newline_char (str): The character to be inserted at the end of each wrapped line. Default is ‘</p>
-</div></blockquote>
-<p>‘.</p>
-<blockquote>
-<div><p>Returns:
-str: The wrapped string.</p>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geotaste.utils.wraphtml">
-<span class="sig-prename descclassname"><span class="pre">geotaste.utils.</span></span><span class="sig-name descname"><span class="pre">wraphtml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geotaste/utils.html#wraphtml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geotaste.utils.wraphtml" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

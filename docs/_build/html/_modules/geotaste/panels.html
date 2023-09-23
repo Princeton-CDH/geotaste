@@ -1,33 +1,76 @@
 <!DOCTYPE html>
-
-<html lang="en" data-content_root="../../">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>geotaste.panels &#8212; Shakespeare and Co Project Lab 0.3.5 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
-    <script src="../../_static/documentation_options.js?v=ba50482b"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geotaste.panels &mdash; Shakespeare and Co Project Lab 0.3.5 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=ba50482b"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-   
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
+          
+          <a href="../../index.html" class="icon icon-home">
+            Shakespeare and Co Project Lab
+          </a>
+              <div class="version">
+                0.3.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
+</ul>
 
-          <div class="body" role="main">
-            
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Shakespeare and Co Project Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geotaste.panels</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <h1>Source code for geotaste.panels</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">.imports</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -70,7 +113,10 @@
         <span class="c1"># intersect and listen</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_subcomponents</span><span class="p">:</span>
             <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
-                <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="p">[</span>
+                    <span class="n">Output</span><span class="p">(</span><span class="n">card</span><span class="o">.</span><span class="n">store_panel</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_panel_subcomponents</span>
+                <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)],</span>
                 <span class="p">[</span>
                     <span class="n">Input</span><span class="p">(</span><span class="n">card</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_subcomponents</span>
@@ -84,33 +130,62 @@
                 <span class="n">intersected_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intersect_filters</span><span class="p">(</span><span class="o">*</span><span class="n">filters_d</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">old_data</span> <span class="o">==</span> <span class="n">intersected_filters</span><span class="p">:</span> <span class="k">raise</span> <span class="n">PreventUpdate</span> <span class="c1"># likely a clear</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">] subcomponent filters updated, triggered by: </span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">triggered_id</span><span class="si">}</span><span class="s1">, incoming = </span><span class="si">{</span><span class="n">filters_d</span><span class="si">}</span><span class="s1">, returning </span><span class="si">{</span><span class="n">intersected_filters</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">intersected_filters</span>
 
-            
-            <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">Output</span><span class="p">(</span><span class="n">card</span><span class="o">.</span><span class="n">store_panel</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_panel_subcomponents</span>
-                <span class="p">],</span>
-                <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">),</span>
-                <span class="p">[</span>
-                    <span class="n">State</span><span class="p">(</span><span class="n">card</span><span class="o">.</span><span class="n">store_panel</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_panel_subcomponents</span>
-                <span class="p">],</span>
-                <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span>
-            <span class="k">def</span> <span class="nf">panel_filter_data_changed</span><span class="p">(</span><span class="n">panel_filter_data</span><span class="p">,</span> <span class="o">*</span><span class="n">old_filter_data_l</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">panel_filter_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">panel_filter_data</span><span class="o">=</span><span class="p">{}</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">] updating my </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_panel_subcomponents</span><span class="p">)</span><span class="si">}</span><span class="s1"> subcomponents with my new panel filter data&#39;</span><span class="p">)</span>
+                <span class="c1"># out</span>
+                <span class="n">panel_filter_data</span> <span class="o">=</span> <span class="n">intersected_filters</span>
                 <span class="n">new_filter_data_l</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">panel_filter_data</span>
+                    <span class="c1"># (panel_filter_data if card.store.id != ctx.triggered_id else dash.no_update)</span>
+                    <span class="n">panel_filter_data</span>  <span class="c1"># resets selections on clears better this way to update even the component that triggered the panel</span>
                     <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_panel_subcomponents</span>    
                 <span class="p">]</span>
-                <span class="n">out</span> <span class="o">=</span> <span class="n">new_filter_data_l</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">new_filter_data_l</span> <span class="o">+</span> <span class="p">[</span><span class="n">panel_filter_data</span><span class="p">]</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;sending updates for new store_panel --&gt; </span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">out</span></div>
 </div>
 
+            
+
+
+            <span class="c1"># @app.callback(</span>
+            <span class="c1">#     Output(self.store, &#39;data&#39;, allow_duplicate=True),</span>
+            <span class="c1">#     [</span>
+            <span class="c1">#         Input(card.store, &#39;data&#39;)</span>
+            <span class="c1">#         for card in self.store_subcomponents</span>
+            <span class="c1">#     ],</span>
+            <span class="c1">#     State(self.store, &#39;data&#39;),</span>
+            <span class="c1">#     prevent_initial_call=True</span>
+            <span class="c1"># )</span>
+            <span class="c1"># def subcomponent_filters_updated(*args):</span>
+            <span class="c1">#     filters_d=args[:-1]</span>
+            <span class="c1">#     old_data=args[-1]</span>
+            <span class="c1">#     intersected_filters=self.intersect_filters(*filters_d)</span>
+            <span class="c1">#     if old_data == intersected_filters: raise PreventUpdate # likely a clear</span>
+            <span class="c1">#     logger.debug(f&#39;[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}&#39;)</span>
+            <span class="c1">#     return intersected_filters</span>
+
+            
+            <span class="c1"># @app.callback(</span>
+            <span class="c1">#     [</span>
+            <span class="c1">#         Output(card.store_panel, &#39;data&#39;, allow_duplicate=True)</span>
+            <span class="c1">#         for card in self.store_panel_subcomponents</span>
+            <span class="c1">#     ],</span>
+            <span class="c1">#     Input(self.store, &#39;data&#39;),</span>
+            <span class="c1">#     [</span>
+            <span class="c1">#         State(card.store_panel, &#39;data&#39;)</span>
+            <span class="c1">#         for card in self.store_panel_subcomponents</span>
+            <span class="c1">#     ],</span>
+            <span class="c1">#     prevent_initial_call=True</span>
+            <span class="c1"># )</span>
+            <span class="c1"># def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):</span>
+            <span class="c1">#     if panel_filter_data is None: panel_filter_data={}</span>
+            <span class="c1">#     logger.trace(f&#39;[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data&#39;)</span>
+            <span class="c1">#     new_filter_data_l = [</span>
+            <span class="c1">#         (panel_filter_data if )</span>
+            <span class="c1">#         for card in self.store_panel_subcomponents    </span>
+            <span class="c1">#     ]</span>
+            <span class="c1">#     out = new_filter_data_l</span>
+            <span class="c1">#     logger.debug(f&#39;sending updates for new store_panel --&gt; {out}&#39;)</span>
+            <span class="c1">#     return out</span>
             
 
             
@@ -366,9 +441,35 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">store_json</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">table_json</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_suite</span>
             <span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;mainview-container&#39;</span><span class="p">)</span>
+
+
         <span class="p">])</span></div>
 
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">test_suite</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Container</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">test_suite_btn1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_suite_btn2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_suite_btn3</span><span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="s1">&#39;test_suite&#39;</span><span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">test_suite_btn1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
+            <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;link&#39;</span><span class="p">,</span>
+            <span class="n">n_clicks</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;test_suite_btn1&#39;</span><span class="p">,</span>
+            <span class="n">className</span><span class="o">=</span><span class="s1">&#39;test_suite_btn&#39;</span>
+        <span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">test_suite_btn2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;link&#39;</span><span class="p">,</span><span class="n">n_clicks</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;test_suite_btn2&#39;</span><span class="p">,</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;test_suite_btn&#39;</span><span class="p">)</span>
+    
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">test_suite_btn3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;link&#39;</span><span class="p">,</span><span class="n">n_clicks</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;test_suite_btn3&#39;</span><span class="p">,</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;test_suite_btn&#39;</span><span class="p">)</span>
+        
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -435,12 +536,14 @@
             <span class="p">[</span>
                 <span class="n">dbc</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span>
                     <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Map&#39;</span><span class="p">,</span> 
-                    <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;map&#39;</span>
+                    <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;map&#39;</span><span class="p">,</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;tab_map&#39;</span>
                 <span class="p">),</span>
 
                 <span class="n">dbc</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span>
                     <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Analysis&#39;</span><span class="p">,</span> 
-                    <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;table&#39;</span>
+                    <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;table&#39;</span><span class="p">,</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;tab_table&#39;</span>
                 <span class="p">),</span>
             <span class="p">],</span>
             <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;mainview_tabs&#39;</span><span class="p">,</span>  
@@ -485,7 +588,7 @@
         
         <span class="k">return</span> <span class="n">dbc</span><span class="o">.</span><span class="n">Collapse</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="s1">&#39;Data on Landmarks&#39;</span><span class="p">)</span>
+                <span class="n">html</span><span class="o">.</span><span class="n">H4</span><span class="p">(</span><span class="s1">&#39;Data on landmarks&#39;</span><span class="p">)</span>
             <span class="p">],</span>
             <span class="n">is_open</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
@@ -534,7 +637,7 @@
             <span class="n">dbc</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Members&#39;</span><span class="p">,</span> <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;member&#39;</span><span class="p">),</span>
             <span class="n">dbc</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Authors&#39;</span><span class="p">,</span> <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;author&#39;</span><span class="p">),</span>
             <span class="n">dbc</span><span class="o">.</span><span class="n">Tab</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Books&#39;</span><span class="p">,</span> <span class="n">tab_id</span><span class="o">=</span><span class="s1">&#39;book&#39;</span><span class="p">),</span>
-        <span class="p">],</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;maintbl_preface_analysis_tabs&#39;</span><span class="p">)</span>
+        <span class="p">],</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;maintbl_preface_analysis_tabs&#39;</span><span class="p">,</span> <span class="n">active_tab</span><span class="o">=</span><span class="s1">&#39;arrond&#39;</span><span class="p">)</span>
     
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">maintbl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -647,6 +750,8 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">component_callbacks</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
 
+        
+
         <span class="c1">### SWITCHING TABS</span>
 
         <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
@@ -687,7 +792,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">is_open_l</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">]</span>
             
-            <span class="n">ojson</span><span class="o">=</span><span class="n">get_cached_fig_or_table</span><span class="p">(</span><span class="n">serialize</span><span class="p">([</span><span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">,</span><span class="s1">&#39;table&#39;</span><span class="p">,</span><span class="n">analysis_tab</span><span class="p">]))</span>
+            <span class="n">ojson</span><span class="o">=</span><span class="n">get_cached_fig_or_table</span><span class="p">(</span><span class="n">serialize</span><span class="p">([</span><span class="n">fdL</span><span class="p">,</span><span class="n">fdR</span><span class="p">,</span><span class="s1">&#39;table&#39;</span><span class="p">,</span><span class="n">analysis_tab</span><span class="p">,{}]))</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">ostyle</span><span class="p">,</span><span class="n">ojson</span><span class="p">]</span><span class="o">+</span><span class="n">is_open_l</span><span class="o">+</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span>
             
         <span class="n">app</span><span class="o">.</span><span class="n">clientside_callback</span><span class="p">(</span>
@@ -723,7 +828,7 @@
             <span class="n">ostore</span><span class="o">=</span><span class="p">[</span><span class="n">Lstore</span><span class="p">,</span><span class="n">Rstore</span><span class="p">]</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">ostore</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">Logwatch</span><span class="p">(</span><span class="s1">&#39;computing figdata on server&#39;</span><span class="p">):</span>
-                <span class="n">newfig_gz_str</span><span class="o">=</span><span class="n">get_cached_fig_or_table</span><span class="p">(</span><span class="n">serialize</span><span class="p">([</span><span class="n">Lstore</span><span class="p">,</span><span class="n">Rstore</span><span class="p">,</span><span class="s1">&#39;map&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">]))</span>
+                <span class="n">newfig_gz_str</span><span class="o">=</span><span class="n">get_cached_fig_or_table</span><span class="p">(</span><span class="n">serialize</span><span class="p">([</span><span class="n">Lstore</span><span class="p">,</span><span class="n">Rstore</span><span class="p">,</span><span class="s1">&#39;map&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,{}]))</span>
             
             <span class="n">newfig</span> <span class="o">=</span> <span class="n">from_json_gz_str</span><span class="p">(</span><span class="n">newfig_gz_str</span><span class="p">)</span>
             <span class="n">ofig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">newfig</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">oldfig</span><span class="p">[</span><span class="s1">&#39;layout&#39;</span><span class="p">])</span>
@@ -741,76 +846,66 @@
             <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainmap</span><span class="p">,</span> <span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">store_json</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">),</span>
             <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span>
 
+
+
+        <span class="c1">### test funcs</span>
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_suite_btn1</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span>
+         <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">test_suite_btn1_onclick</span><span class="p">(</span><span class="n">n_clicks</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;member_nationalities&#39;</span><span class="p">:[</span><span class="s1">&#39;France&#39;</span><span class="p">]}</span>
+        
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_suite_btn2</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span>
+         <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">test_suite_btn2_onclick</span><span class="p">(</span><span class="n">n_clicks</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;member_nationalities&#39;</span><span class="p">:[</span><span class="s1">&#39;United States&#39;</span><span class="p">]}</span>
+
+
+        <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">store</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">allow_duplicate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_suite_btn3</span><span class="p">,</span> <span class="s1">&#39;n_clicks&#39;</span><span class="p">),</span>
+            <span class="n">prevent_initial_call</span><span class="o">=</span><span class="kc">True</span>
+         <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">test_suite_btn3_onclick</span><span class="p">(</span><span class="n">n_clicks</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{}</span></div>
+</div>
 
 
 
 </pre></div>
 
+           </div>
           </div>
-          
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, CDH @ Princeton University.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">Shakespeare and Co Project Lab</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-<p class="blurb">Analytic dashboard application for the Shakespare and Co CDH project</p>
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=Princeton-CDH&repo=geotaste&type=watch&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">geotaste</a></li>
-</ul>
-
-
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script><div class="powered_by">
-<p>Powered by:</p>
-<a href="http://cdh.princeton.edu/">
-<img src="https://cdh.princeton.edu/static/img/CDH_logo.svg"
-    alt="Center for Digital Humanities @ Princeton" />
-</a>
-</div>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2023, CDH @ Princeton University.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>
