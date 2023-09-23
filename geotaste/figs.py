@@ -1342,9 +1342,11 @@ def to_json_gz_str(out):
     Returns:
         str: The compressed JSON string.
     """
-    
-    ojson=pio.to_json(out)
-    ojsongz=b64encode(zlib.compress(ojson.encode()))
+    try:
+        ojson=pio.to_json(out).encode()
+    except ValueError:
+        ojson=orjson.dumps(out)
+    ojsongz=b64encode(zlib.compress(ojson))
     ojsongzstr=ojsongz.decode('utf-8')
     return ojsongzstr
 

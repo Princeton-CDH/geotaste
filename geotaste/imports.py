@@ -81,7 +81,7 @@ logger.add(
 MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3'
 mapbox_access_token = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 px.set_mapbox_access_token(mapbox_access_token)
-
+SEARCH_PARAM_PREFIX='?'
 
 
 #### CONSTANTS ########################################
@@ -203,6 +203,17 @@ DISPREFERRED_ADDRESSES = {
 }
 DWELLING_ID_SEP='; '
 TCOLS=['event','dwelling','event_start','event_end','dwelling_start','dwelling_end']
+
+
+DEFAULT_STATE={
+    'bearing': 0,
+    'lat': MAP_CENTER['lat'],
+    'lon': MAP_CENTER['lon'],
+    'pitch': 0,
+    'zoom': 14,
+    'tab': 'map',
+    'tab2': 'arrond'
+}
 
 
 

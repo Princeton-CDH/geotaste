@@ -1,4 +1,5 @@
 from .imports import *
+from urllib.parse import urlencode, parse_qs
 
 
 class FilterPanel(FilterCard):
@@ -61,50 +62,6 @@ class FilterPanel(FilterCard):
                 logger.debug(f'sending updates for new store_panel --> {out}')
                 return out
             
-
-
-            # @app.callback(
-            #     Output(self.store, 'data', allow_duplicate=True),
-            #     [
-            #         Input(card.store, 'data')
-            #         for card in self.store_subcomponents
-            #     ],
-            #     State(self.store, 'data'),
-            #     prevent_initial_call=True
-            # )
-            # def subcomponent_filters_updated(*args):
-            #     filters_d=args[:-1]
-            #     old_data=args[-1]
-            #     intersected_filters=self.intersect_filters(*filters_d)
-            #     if old_data == intersected_filters: raise PreventUpdate # likely a clear
-            #     logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
-            #     return intersected_filters
-
-            
-            # @app.callback(
-            #     [
-            #         Output(card.store_panel, 'data', allow_duplicate=True)
-            #         for card in self.store_panel_subcomponents
-            #     ],
-            #     Input(self.store, 'data'),
-            #     [
-            #         State(card.store_panel, 'data')
-            #         for card in self.store_panel_subcomponents
-            #     ],
-            #     prevent_initial_call=True
-            # )
-            # def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
-            #     if panel_filter_data is None: panel_filter_data={}
-            #     logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
-            #     new_filter_data_l = [
-            #         (panel_filter_data if )
-            #         for card in self.store_panel_subcomponents    
-            #     ]
-            #     out = new_filter_data_l
-            #     logger.debug(f'sending updates for new store_panel --> {out}')
-            #     return out
-            
-
             
 
   
@@ -336,7 +293,8 @@ class ComparisonPanel(BaseComponent):
                 self.store,
                 self.store_json,
                 self.table_json,
-                self.test_suite
+                self.test_suite,
+                self.app_begun
             ], className='mainview-container')
 
 
@@ -501,6 +459,9 @@ class ComparisonPanel(BaseComponent):
             ],
             is_open=False
         )
+    
+    @cached_property
+    def app_begun(self): return dcc.Store(id=self.id('app_begun'), data=None)
     
     @cached_property
     def maintbl_preface_analysis(self):
@@ -763,3 +724,100 @@ class ComparisonPanel(BaseComponent):
             return {}
 
 
+        @app.callback(
+            Output('url-output', 'search', allow_duplicate=True),
+            [
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+                Input(self.mainview_tabs, 'active_tab'),
+                Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
+                Input(self.mainmap, 'relayoutData')
+            ],
+            prevent_initial_call=True
+        )
+        def track_state(fdL, fdR, tab, tab2, figdat):
+            logger.debug(f'triggered by {ctx.triggered_id}')
+            state = {}
+            for k,v in fdL.items(): state[k]=rejoin_sep(v)
+            for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
+            state['tab']=tab
+            state['tab2']=tab2
+            if figdat:
+                state['lat']=round(figdat.get('mapbox.center',{}).get('lat',0), 5)
+                state['lon']=round(figdat.get('mapbox.center',{}).get('lon',0), 5)
+                state['zoom']=round(figdat.get('mapbox.zoom',0), 5)
+                state['bearing']=round(figdat.get('mapbox.bearing',0), 5)
+                state['pitch']=round(figdat.get('mapbox.pitch',0), 5)
+            
+            state = {k:v for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v}
+            ostr=f'?{urlencode(state)}'
+            return ostr
+                
+
+
+
+
+
+        @app.callback(
+            [
+                Output(self.L.store, 'data',allow_duplicate=True),
+                Output(self.R.store, 'data',allow_duplicate=True),
+                Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
+                Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
+                Output(self.mainmap, 'figure',allow_duplicate=True),
+                Output(self.app_begun, 'data',allow_duplicate=True),
+                Output('welcome-modal', 'is_open')
+            ],
+            Input('url-input','search'),
+            [
+                State(self.app_begun, 'data'),
+                State(self.mainmap, 'figure'),
+            ],
+            prevent_initial_call=True
+        )
+        def load_query_param(searchstr, app_begun, figdat):
+            if app_begun: raise PreventUpdate
+            searchstrx=searchstr[1:]
+            if not searchstrx: raise PreventUpdate
+            params = parse_qs(searchstrx)
+            logger.debug(params)
+            fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
+
+            for k,v in list(params.items()):
+                if k=='tab':
+                    tab=v[0]
+                elif k=='tab2':
+                    tab2=v[0]
+                elif k.endswith('2'):
+                    fdR[k[:-1]]=v
+                elif '_' in k:
+                    fdL[k]=v
+                else:
+                    mapd[k]=float(v[0])
+            
+            if 'lat' in mapd: figdat['layout']['mapbox']['center']['lat'] = mapd['lat']
+            if 'lon' in mapd: figdat['layout']['mapbox']['center']['lon'] = mapd['lon']
+            if 'zoom' in mapd: figdat['layout']['mapbox']['zoom'] = mapd['zoom']
+            if 'bearing' in mapd: figdat['layout']['mapbox']['bearing'] = mapd['bearing']
+            if 'pitch' in mapd: figdat['layout']['mapbox']['pitch'] = mapd['pitch']
+
+            # figdat = {
+            #     'layout':{
+            #         'mapbox':{
+            #             'center':{
+            #                 'lat':mapd.get('lat',DEFAULT_STATE['lat']),
+            #                 'lon':mapd.get('lon',DEFAULT_STATE['lon']),
+            #             },
+            #             'zoom':mapd.get('zoom',DEFAULT_STATE['zoom']),
+            #             'bearing':mapd.get('bearing',DEFAULT_STATE['bearing']),
+            #             'pitch':mapd.get('pitch',DEFAULT_STATE['pitch'])
+            #         }
+            #     }
+            # }
+
+            out = [fdL, fdR, tab, tab2]
+
+            logger.debug(f'--> {out} + {figdat["layout"]["mapbox"]} + [True, False]')
+
+            return out + [figdat, True, False]
+            

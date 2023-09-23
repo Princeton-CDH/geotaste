@@ -651,3 +651,8 @@ def ensure_dir(fn):
     dirname=os.path.dirname(fn)
     if not os.path.exists:
         os.makedirs(dirname)
+
+
+def rejoin_sep(l, sep=';'):
+    if not is_listy(l): return l
+    return sep.join(str(x) for x in l)
