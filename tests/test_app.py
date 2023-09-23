@@ -7,6 +7,7 @@ sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.imports import *
 from dash.testing.application_runners import import_app
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import requests,bs4
@@ -129,30 +130,50 @@ def test_suites(dash_duo):
     dash_duo.multiple_click('#tab_table', 1)
     dash_duo.wait_for_contains_text('#tblview','landmarks')
 
+    # open panels
     for idx in [
         '#button_showhide-Filter_1',
         '#button_showhide-Filter_2',
         '#button_showhide-MP-Filter_1',
         '#button_showhide-MP-Filter_2',
-        '#button_showhide-MemberNationalityCard-MP-Filter_1',
-        '#button_showhide-MemberNationalityCard-MP-Filter_2',
+        # '#button_showhide-MemberNationalityCard-MP-Filter_1',
+        # '#button_showhide-MemberNationalityCard-MP-Filter_2',
     ]:
         dash_duo.multiple_click(idx, 1)
     
+    # show test suite buttons
     dash_duo.multiple_click('#test_suite_btn', 1)
 
+    # this btn puts {'member_nationalities':['France]} in L.member_panel.nation_card.store
     dash_duo.multiple_click('#test_suite_btn1', 1)
     dash_duo.wait_for_contains_text('#store_desc-Filter_1', 'France')
     dash_duo.wait_for_contains_text('#tblview','members')
     
+    # this btn puts {'member_nationalities':['United States]} in R.member_panel.nation_card.store
     dash_duo.multiple_click('#test_suite_btn2', 1)
     dash_duo.wait_for_contains_text('#store_desc-Filter_2', 'United States')
     dash_duo.wait_for_contains_text('#tblview','comparing')
     
-    dash_duo.multiple_click('#test_suite_btn3', 1)
+    # clear right by clicking filter clear
+    dash_duo.multiple_click('#button_clear-MemberNationalityCard-MP-Filter_2', 1)
+    dash_duo.wait_for_text_to_equal('#store_desc-MemberNationalityCard-MP-Filter_2', BLANK)
     dash_duo.wait_for_text_to_equal('#store_desc-Filter_2', BLANK)
-    dash_duo.wait_for_contains_text('#tblview','members')
+
+    # clear left by clicking top clear
+    dash_duo.multiple_click('#button_clear-Filter_1', 1)
+    dash_duo.wait_for_text_to_equal('#store_desc-Filter_1', BLANK)
     dash_duo.wait_for_text_to_equal('#store_desc-MemberNationalityCard-MP-Filter_1', BLANK)
+
+
+    # panel filter
+    dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
+    dash_duo.wait_for_contains_text('#graph-MemberNationalityCard-MP-Filter_1', '4031')
+    dash_duo.multiple_click('#test_suite_btn5', 1)
+    try:
+        dash_duo.wait_for_contains_text('#graph-MemberNationalityCard-MP-Filter_1', '4031')
+        assert False, 'should not contain class'
+    except TimeoutException:
+        assert True
 
 
 def test_query_strings(dash_duo):
@@ -161,14 +182,6 @@ def test_query_strings(dash_duo):
     
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
-    # options.add_argument('--disable-gpu')
-    # options.add_argument('--user-data-dir={}'.format(tmp_folder + '/user-data'))
-    # options.add_argument('--data-path={}'.format(tmp_folder + '/data-path'))
-    # options.add_argument('--homedir={}'.format(tmp_folder))
-    # options.add_argument('--disk-cache-dir={}'.format(tmp_folder + '/cache-dir'))
-    # options.add_argument('--remote-debugging-port=9222')
-    # options.binary_location = "/usr/bin/google-chrome"
-
     driver = webdriver.Chrome(options=options)#, executable_path="/usr/local/bin/chromedriver")
 
     connected = False
@@ -206,7 +219,6 @@ def test_query_strings(dash_duo):
         assert 'Male' in el.text
 
 
-
         logger.debug('Testing tab')
         driver.get(f'{host}?tab=table')
         time.sleep(10)
@@ -231,66 +243,21 @@ def test_query_strings(dash_duo):
         el = driver.find_element_by_id('mainmap')
         assert el.is_displayed()
 
-        # doesnt work on github actions :(
-        # for n in range(5):
-        #     logger.debug('Testing graph zoom')
-        #     driver.get(f'{host}?tab=map')
-        #     time.sleep(3)
-        #     loc = pyautogui.locateOnScreen(PATH_LOC, minSearchTime=30, grayscale=False)#, confidence=.95)
-        #     if loc is None: continue
-        #     pos = pyautogui.center(loc)
+        driver.get(f'{host}?tab=map')
+        time.sleep(10)
+        assert 'lat=' not in driver.current_url
 
-        #     logger.debug(f'found loc: {loc}, pos: {pos}')
-        #     print(f'found loc: {loc}, pos: {pos}')
-        #     # x,y=pos.x, pos.y
-        #     x,y=loc.left - (loc.width//2), loc.top - (loc.height)
-        #     logger.debug(f'moving to {x},{y}')
-        #     pyautogui.moveTo(x,y)
-        #     pyautogui.click(x,y)
+        driver.find_element_by_id('test_suite_btn').click()
+        time.sleep(10)
 
-        #     logger.debug('Scrolling...')
-        #     pyautogui.scroll(10)
-        #     time.sleep(1)
-        #     try:
-        #         assert 'lat=' in str(driver.current_url)
-        #         break
-        #     except Exception as e:
-        #         logger.error(e)
-        #         logger.debug('trying one more time')
-        
-        # assert 'lat=' in str(driver.current_url)
-        # assert 'lon=' in str(driver.current_url)
-        # assert 'zoom=' in str(driver.current_url)
+        driver.find_element_by_id('test_suite_btn4').click()
+        time.sleep(10)
+
+        assert 'lat=' in driver.current_url
+        assert 'lon=' in driver.current_url
+        assert 'zoom=' in driver.current_url
 
         # close
         driver.close()
 
         assert connected, "Never connected"
-
-        
-def test_zoom2(dash_duo):
-    app = get_app()
-    dash_duo.start_server(app.app)
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    driver = webdriver.Chrome(options=options)
-
-    connected = False
-    for host in test_hosts:
-        try:
-            driver.get(f'{host}?tab=map')            
-            connected = True
-        except Exception as e:
-            logger.error(e)
-            continue
-        
-        time.sleep(3)
-        driver.find_element_by_id('test_suite_btn').click()
-        time.sleep(3)
-        driver.find_element_by_id('test_suite_btn4').click()
-        time.sleep(3)
-        assert 'lat=' in driver.current_url
-        assert 'lon=' in driver.current_url
-        assert 'zoom=' in driver.current_url
-
-    assert connected

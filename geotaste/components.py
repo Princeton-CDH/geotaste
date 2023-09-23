@@ -111,6 +111,11 @@ class FilterComponent(BaseComponent):
     def store_panel(self):
         return dcc.Store(id=self.id('store_panel'), data={})
     
+    @cached_property
+    def store_incoming(self):
+        return dcc.Store(id=self.id('store_incoming'), data={})
+    
+    
     # @cached_property
     # def store_selection(self):
     #     return dcc.Store(id=self.id('store_selection'), data={})
@@ -178,7 +183,7 @@ class FilterCard(FilterComponent):
             self.store, 
             self.store_json,
             self.store_panel,
-            # self.store_selection,
+            self.store_incoming
 
         ], className=f'collapsible-card {self.className}')
 
@@ -614,7 +619,8 @@ class FilterInputCard(FilterCard):
     multi = True
     sort_by_count = True
     
-    def get_content(self,**y): 
+    @cached_property
+    def content(self):
         logger.debug(f'[{self.name}] getting content for input card')
         return dbc.Container(self.input)
 
