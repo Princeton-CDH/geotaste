@@ -3,9 +3,9 @@ Code, notebooks and resources for a "Geography of Taste" in the Shakespeare &amp
 
 
 [![Documentation Status](https://readthedocs.org/projects/geotaste/badge/?version=latest)](https://geotaste.readthedocs.io/en/latest/?badge=latest)
-[![Code coverage](https://codecov.io/gh/Princeton-CDH/geotaste/branch/main/graph/badge.svg)](https://codecov.io/gh/Princeton-CDH/ppa-django)
+[![Code coverage](https://codecov.io/gh/Princeton-CDH/geotaste/branch/main/graph/badge.svg)](https://codecov.io/gh/Princeton-CDH/geotaste)
 [![Unit test status](https://github.com/Princeton-CDH/geotaste/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/Princeton-CDH/geotaste/actions/workflows/unit-tests.yml)
-[![CodeFactor](https://www.codefactor.io/repository/github/princeton-cdh/geotaste/badge)](https://www.codefactor.io/repository/github/geotaste/ppa-django)
+[![CodeFactor](https://www.codefactor.io/repository/github/princeton-cdh/geotaste/badge)](https://www.codefactor.io/repository/github/Princeton-CDH/geotaste)
 
 Python 3.10 / Dash 2.13 / Plotly 5.17 / Flask 2.2
 
