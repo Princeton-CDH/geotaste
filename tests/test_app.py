@@ -124,6 +124,7 @@ def test_suites(dash_duo):
     dash_duo.multiple_click('#button_showhide-MemberNationalityCard-MP-Filter_1', 1)
     dash_duo.wait_for_contains_text('#graph-MemberNationalityCard-MP-Filter_1', '4031')
     dash_duo.multiple_click('#test_suite_btn5', 1)
+    time.sleep(10)
     try:
         dash_duo.wait_for_contains_text('#graph-MemberNationalityCard-MP-Filter_1', '4031')
         assert False, 'should not contain class'
