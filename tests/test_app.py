@@ -1,12 +1,9 @@
-from selenium import webdriver
-# import chromedriver_binary  # Adds chromedriver binary to path
-
-
 import sys,os
 sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.imports import *
 from dash.testing.application_runners import import_app
-# 
+from selenium import webdriver
+import requests,bs4
 
 
 def test_showhide_components(dash_duo):
@@ -145,3 +142,32 @@ def test_suites(dash_duo):
     dash_duo.wait_for_text_to_equal('#store_desc-Filter_2', BLANK)
     dash_duo.wait_for_contains_text('#tblview','members')
     dash_duo.wait_for_text_to_equal('#store_desc-MemberNationalityCard-MP-Filter_1', BLANK)
+
+
+def test_query_strings(dash_duo):
+    app = get_app()
+    dash_duo.start_server(app.app)
+    host='http://127.0.0.1:58050/'
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    driver = webdriver.Chrome(options=options)
+    
+    driver.get(f'{host}?member_gender=Female')
+    time.sleep(5)
+    el = driver.find_element_by_id('store_desc-Filter_1')
+    assert 'Female' in el.text
+
+    driver.get(f'{host}?member_gender2=Male')
+    time.sleep(5)
+    el = driver.find_element_by_id('store_desc-Filter_2')
+    assert 'Male' in el.text
+
+
+    driver.get(f'{host}?member_gender=Female&member_gender2=Male')
+    time.sleep(5)
+    el = driver.find_element_by_id('store_desc-Filter_1')
+    assert 'Female' in el.text
+    el = driver.find_element_by_id('store_desc-Filter_2')
+    assert 'Male' in el.text
+
+    

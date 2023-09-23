@@ -801,24 +801,7 @@ class ComparisonPanel(BaseComponent):
             if 'zoom' in mapd: figdat['layout']['mapbox']['zoom'] = mapd['zoom']
             if 'bearing' in mapd: figdat['layout']['mapbox']['bearing'] = mapd['bearing']
             if 'pitch' in mapd: figdat['layout']['mapbox']['pitch'] = mapd['pitch']
-
-            # figdat = {
-            #     'layout':{
-            #         'mapbox':{
-            #             'center':{
-            #                 'lat':mapd.get('lat',DEFAULT_STATE['lat']),
-            #                 'lon':mapd.get('lon',DEFAULT_STATE['lon']),
-            #             },
-            #             'zoom':mapd.get('zoom',DEFAULT_STATE['zoom']),
-            #             'bearing':mapd.get('bearing',DEFAULT_STATE['bearing']),
-            #             'pitch':mapd.get('pitch',DEFAULT_STATE['pitch'])
-            #         }
-            #     }
-            # }
-
-            out = [fdL, fdR, tab, tab2]
-
-            logger.debug(f'--> {out} + {figdat["layout"]["mapbox"]} + [True, False]')
-
-            return out + [figdat, True, False]
+            out = [fdL, fdR, tab, tab2, figdat, True, False]
+            logger.debug(f'--> {out[:4] + out[5:]}')
+            return out
             
