@@ -66,4 +66,32 @@ class GeotasteLayout(BaseComponent):
 
             dcc.Location(id='url-output', refresh="callback-nav"),
             dcc.Location(id='url-input', refresh="callback-nav"),
+
+            dbc.Button(
+                'ⓘ',
+                color="link",
+                n_clicks=0,
+                id='welcome_modal_info_btn',
+            ),
+
+            dbc.Container(DONOTCITE, id='donotcite')
+
         ], className='layout-container')
+
+
+
+    def component_callbacks(self, app):
+        """
+        """
+        super().component_callbacks(app)
+
+        ### SWITCHING TABS
+
+        @app.callback(
+            Output('welcome-modal','is_open',allow_duplicate=True),
+            Input('welcome_modal_info_btn', 'n_clicks'),
+            State('welcome-modal', 'is_open'),
+            prevent_initial_call=True
+        )
+        def toggle_welcome_modal(n_clicks, is_open):
+            return not is_open

@@ -10,8 +10,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import requests,bs4,flask
 
-NAPTIME = int(os.environ.get('NAPTIME', 3))
-def _nap(): time.sleep(NAPTIME)
+NAPTIME = int(os.environ.get('NAPTIME', 5))
+def _nap(naptime=NAPTIME): time.sleep(naptime)
 
 
 
@@ -20,10 +20,41 @@ def test_showhide_components(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
 
-    assert dash_duo.find_element('.modal-title').text == WELCOME_HEADER
+    # modal open
+    assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    # close modal
     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    _nap()
+    # modal ought to be closed
+    try:
+        dash_duo.find_element('#welcome-modal .modal-title')
+        assert False, 'should be gone'
+    except Exception:
+        assert True, 'correctly not found'
 
+    # open modal another way
+    dash_duo.multiple_click('#welcome_modal_info_btn', 1)
+    _nap(5 if NAPTIME < 5 else NAPTIME)
+    # modal ought to be open
+    assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    # close modal
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    _nap()
+    # modal ought to be closed
+    try:
+        dash_duo.find_element('#welcome-modal .modal-title')
+        assert False, 'should be gone'
+    except Exception:
+        assert True, 'correctly not found'
+
+
+
+
+
+    assert dash_duo.find_element('#donotcite').text == DONOTCITE
     assert dash_duo.find_element('#logo_popup').text == SITE_TITLE
+
+
 
     def test_button_showhide_l(button_showhide_ids, close=False):    
         for btn_id in button_showhide_ids:

@@ -532,5 +532,22 @@ button {
 
 /* .test_suite { display:none; } */
 
-#test_suite_btn { z-index: 100; position:absolute; height:10px; width:10px; bottom:0; right:0;}
-#test_suite { z-index: 100; position:absolute; height:auto; width:fit-content; bottom:0; left:0; background: none; }
+#test_suite_btn { z-index: 100; position:absolute; height:10px; width:10px; bottom:0; left:10px;}
+#test_suite { z-index: 100; position:absolute; height:auto; width:fit-content; bottom:100px; left:10px; background: none; }
+
+#welcome_modal_info_btn {
+    z-index: 500; position:fixed; bottom:5px; right:5px; 
+    font-size:30px;
+    line-height:30px;
+}
+.mapboxgl-control-container {display:none;}
+
+#donotcite {
+    color:red;
+    font-weight:bold;
+    width:fit-content;
+    position:fixed;
+    bottom:5px;
+    left:5px;
+    z-index:1000;
+}

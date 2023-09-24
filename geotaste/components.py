@@ -756,13 +756,31 @@ class EventTypeCard(FilterPlotCard):
 
 
 def get_welcome_modal():
+    body_md=f"""
+#### Credits
+
+- Director: [Joshua Kotin](https://english.princeton.edu/people/joshua-kotin)
+- Technical Lead: [Ryan Heuser](https://ryanheuser.org)
+- Project Manager: [Fedor Karmanov](https://www.fedorkarmanov.com/)
+- Advisers
+    - [Eric Bulson](https://www.cgu.edu/people/eric-bulson/)
+    - [Effie Rentzou](https://fit.princeton.edu/people/effie-rentzou)
+    - [Robert Spoo](https://law.utulsa.edu/law-faculty/profile/robert-spoo/)
+    - [Keri Walsh](https://www.fordham.edu/academics/departments/english/faculty/keri-walsh/)
+    """.strip()
     return dbc.Modal(
         [
             dbc.ModalHeader(dbc.ModalTitle(WELCOME_HEADER)),
             dbc.ModalBody([
                 html.H3(WELCOME_HEADER2),
-                html.Br(),
                 html.P(WELCOME_BODY),
+                # dcc.Markdown(body_md)
+                # dcc.Markdown(credits_md),
+                html.Ul([
+                    html.Li(html.A(children="Credits", href="https://shakespeareandco.princeton.edu/lab-credits/",target="_blank")),
+                    html.Li(html.A(children="Project", href="https://shakespeareandco.princeton.edu",target="_blank")),
+                    html.Li(html.A(children="Code", href="https://github.com/Princeton-CDH/geotaste",target="_blank")),
+                ])
             ])
         ],
         id="welcome-modal",
