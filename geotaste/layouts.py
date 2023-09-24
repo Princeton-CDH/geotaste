@@ -74,7 +74,7 @@ class GeotasteLayout(BaseComponent):
                 id='welcome_modal_info_btn',
             ),
 
-            dbc.Container(DONOTCITE, id='donotcite')
+            # dbc.Container(DONOTCITE, id='donotcite')
 
         ], className='layout-container')
 

@@ -22,6 +22,7 @@ def test_showhide_components(dash_duo):
 
     # modal open
     assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    assert dash_duo.find_element('#donotcite').text == DONOTCITE
     # close modal
     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
     _nap()
@@ -51,7 +52,6 @@ def test_showhide_components(dash_duo):
 
 
 
-    assert dash_duo.find_element('#donotcite').text == DONOTCITE
     assert dash_duo.find_element('#logo_popup').text == SITE_TITLE
 
 

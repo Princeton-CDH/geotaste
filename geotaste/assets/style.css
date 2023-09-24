@@ -536,7 +536,7 @@ button {
 #test_suite { z-index: 100; position:absolute; height:auto; width:fit-content; bottom:100px; left:10px; background: none; }
 
 #welcome_modal_info_btn {
-    z-index: 500; position:fixed; bottom:5px; right:5px; 
+    z-index: 500; position:absolute; bottom:5px; right:5px; 
     font-size:30px;
     line-height:30px;
 }
@@ -545,9 +545,9 @@ button {
 #donotcite {
     color:red;
     font-weight:bold;
-    width:fit-content;
-    position:fixed;
-    bottom:5px;
-    left:5px;
-    z-index:1000;
+    /* width:fit-content; */
+    /* position:fixed; */
+    /* bottom:5px; */
+    /* left:5px; */
+    /* z-index:1000; */
 }
