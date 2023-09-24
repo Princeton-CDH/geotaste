@@ -69,7 +69,6 @@ def run(host=HOST, port=PORT, debug=DEBUG, url_base_pathname=ROOT_URL, dry_run=F
     with Logwatch('running app'):
         logger.debug(f'geotaste running at http://{host}:{port}')
         if not dry_run:
-            print('running geotaste app')
             app.run(
                 host=host,
                 port=port,

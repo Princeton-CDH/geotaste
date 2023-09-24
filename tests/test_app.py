@@ -312,11 +312,21 @@ def _apprun(q):
 def test_run():
     try:
         queue = Queue()
+        try:
+            from pytest_cov.embed import cleanup_on_sigterm
+        except ImportError:
+            pass
+        else:
+            cleanup_on_sigterm()
+
         p = Process(target=_apprun, args=(queue,))
-        p.start()
-        time.sleep(10)
-        p.kill()
-        p.join()    
-        assert True, 'server running succeeded'
+        try:
+            p.start()
+            time.sleep(10)
+        finally:
+            p.terminate()
+            time.sleep(5)
+            p.join()    
+            assert True, 'server running succeeded'
     except Exception:
         assert False, 'server running failed'
