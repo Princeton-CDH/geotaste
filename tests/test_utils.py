@@ -258,8 +258,11 @@ def test_read_config_json():
     d1=read_config_json(PATH_CONFIG_DEFAULT)
     assert type(d1)==dict and d1
     with tempfile.TemporaryDirectory() as tdir:        
+        assert read_config_json(os.path.join(tdir,'nonexistentfile.json')) == {}
+        badfile = os.path.join(tdir,'badfile.json')
+        with open(badfile,'w') as of: of.write('gobbledygook')
         try:
-            read_config_json(os.path.join(tdir,'nonexistentfile.json'))
+            read_config_json(badfile)
             assert False, 'ought to throw exception for reading unknown json file'
         except Exception:
             assert True, 'success'

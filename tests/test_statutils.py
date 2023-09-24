@@ -200,6 +200,13 @@ def test_get_distinctive_qual_vals():
     assert_frame_equal(output2, output3)
     assert len(output2)<len(output)
 
+    # Run the function
+    output4 = get_distinctive_qual_vals(dfL, dfR, cols=[
+        'member_title', 
+        'member_nationalities',
+    ], maxcats=2)
+    assert len(output4)==0
+
 
 
 
