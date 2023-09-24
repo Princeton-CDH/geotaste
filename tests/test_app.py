@@ -1,3 +1,5 @@
+import subprocess,logging
+from multiprocessing import Process, Queue
 import sys,os,tempfile
 sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from geotaste.imports import *
@@ -302,3 +304,19 @@ def test_get_server():
     assert isinstance(app, DashApp)
     assert isinstance(app.app, Dash)
     assert isinstance(app.app.server, flask.app.Flask)
+
+def _apprun(q): 
+    q.put(run(port=1992))
+
+
+def test_run():
+    try:
+        queue = Queue()
+        p = Process(target=_apprun, args=(queue,))
+        p.start()
+        time.sleep(10)
+        p.kill()
+        p.join()    
+        assert True, 'server running succeeded'
+    except Exception:
+        assert False, 'server running failed'
