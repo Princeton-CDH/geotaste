@@ -511,6 +511,7 @@ def is_range_of_ints(numbers:'Iterable') -> bool:
     """
     
     l = numbers
+    if not is_listy(l): return False
     if len(l)<2: return False
     try:
         if any(x!=int(x) for x in l): return False

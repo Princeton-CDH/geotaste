@@ -144,11 +144,8 @@ def test_is_range_of_ints():
     assert is_range_of_ints([1,2,3,4]) == True
     assert is_range_of_ints([1,2,3.0,4.000]) == True
     assert is_range_of_ints([-1,0,1,2,3.0,4.000]) == True
-    try:
-        is_range_of_ints([1,2,'three'])
-        assert False, "ought to throw exception"
-    except ValueError:
-        pass # succeed
+    assert is_range_of_ints([1,2,'three']) == False
+    assert is_range_of_ints(object) == False
 
 
 
