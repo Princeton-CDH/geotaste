@@ -1322,7 +1322,7 @@ def get_cached_fig_or_table(args_id):
     """Produce or retrieve memoized/cached figure or table based on the given serialized arguments 
     
     Args:
-        args_id (str): The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab).
+        args_id (str): The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab,kwargs).
     
     Returns:
         str: The JSON, zlib-compressed string representation of the figure or table.
