@@ -1,3 +1,10 @@
+"""
+All the classes and functions for making the base dash components for the Dash app. Panel components are in `panels.py`. Most of these classes have a `figure_factory` attached, such that `component.ff(filter_data)` will return an instance of that component's figure directory with that filter data. They rely on the `Dataset` classes in dataset.py and use plotly to plot figures. For example, `MemberNationalityCard` has a `figure_factory` attribute pointing to `MemberNationalityFigure`.
+
+The base class is in `BaseComponent`, which defines the default behavior of all components used in this app, including in `panels.py`. `FilterComponent` is a subclass of `BaseComponent`, adding `.store` and other filter-saving attributes; `FilterCard` a further subclass, allowing for opening/collapsing. `FilterPlotCard` extends `FilterCard` to allow graphing; `FilterSliderCard` adds graphing and numerical inputs for slider plots; and `FilterInputCard` adds a dropdown with input.
+"""
+
+
 from .imports import *
 
 
@@ -104,6 +111,11 @@ class FilterComponent(BaseComponent):
     def store_panel(self):
         return dcc.Store(id=self.id('store_panel'), data={})
     
+    @cached_property
+    def store_incoming(self):
+        return dcc.Store(id=self.id('store_incoming'), data={})
+    
+    
     # @cached_property
     # def store_selection(self):
     #     return dcc.Store(id=self.id('store_selection'), data={})
@@ -171,7 +183,7 @@ class FilterCard(FilterComponent):
             self.store, 
             self.store_json,
             self.store_panel,
-            # self.store_selection,
+            self.store_incoming
 
         ], className=f'collapsible-card {self.className}')
 
@@ -445,9 +457,9 @@ class FilterPlotCard(FilterCard):
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
             if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
             logger.debug(f'triggered by {ctx.triggered_id}, with panel_filter_data = {panel_filter_data} and my_filter_data = {my_filter_data}')
-            if not panel_filter_data:
+            # if not panel_filter_data:
                 # then a panel wide clear?
-                my_filter_data = {}
+                # my_filter_data = {}
 
 
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
@@ -607,7 +619,8 @@ class FilterInputCard(FilterCard):
     multi = True
     sort_by_count = True
     
-    def get_content(self,**y): 
+    @cached_property
+    def content(self):
         logger.debug(f'[{self.name}] getting content for input card')
         return dbc.Container(self.input)
 

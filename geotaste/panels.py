@@ -1,4 +1,5 @@
 from .imports import *
+from urllib.parse import urlencode, parse_qs
 
 
 class FilterPanel(FilterCard):
@@ -32,10 +33,7 @@ class FilterPanel(FilterCard):
         # intersect and listen
         if self.store_subcomponents:
             @app.callback(
-                [
-                    Output(card.store_panel, 'data', allow_duplicate=True)
-                    for card in self.store_panel_subcomponents
-                ] + [Output(self.store, 'data')],
+                Output(self.store, 'data'),
                 [
                     Input(card.store, 'data')
                     for card in self.store_subcomponents
@@ -47,65 +45,64 @@ class FilterPanel(FilterCard):
                 filters_d=args[:-1]
                 old_data=args[-1]
                 intersected_filters=self.intersect_filters(*filters_d)
-                if old_data == intersected_filters: raise PreventUpdate # likely a clear
-                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
-
+                if old_data == intersected_filters: raise PreventUpdate
+                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}, which is diff from {old_data}')
+                return intersected_filters
+                
+            @app.callback(
+                [
+                    Output(card.store_panel, 'data', allow_duplicate=True)
+                    for card in self.store_panel_subcomponents
+                ],
+                Input(self.store, 'data'),
+                prevent_initial_call=True
+            )
+            def filter_panel_store_updated(panel_filter_data):
                 # out
-                panel_filter_data = intersected_filters
-                new_filter_data_l = [
-                    # (panel_filter_data if card.store.id != ctx.triggered_id else dash.no_update)
-                    panel_filter_data  # resets selections on clears better this way to update even the component that triggered the panel
+                out = [
+                    panel_filter_data
                     for card in self.store_panel_subcomponents    
                 ]
-                out = new_filter_data_l + [panel_filter_data]
                 logger.debug(f'sending updates for new store_panel --> {out}')
                 return out
             
-
-
-            # @app.callback(
-            #     Output(self.store, 'data', allow_duplicate=True),
-            #     [
-            #         Input(card.store, 'data')
-            #         for card in self.store_subcomponents
-            #     ],
-            #     State(self.store, 'data'),
-            #     prevent_initial_call=True
-            # )
-            # def subcomponent_filters_updated(*args):
-            #     filters_d=args[:-1]
-            #     old_data=args[-1]
-            #     intersected_filters=self.intersect_filters(*filters_d)
-            #     if old_data == intersected_filters: raise PreventUpdate # likely a clear
-            #     logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}')
-            #     return intersected_filters
-
+            @app.callback(
+                 [
+                    Output(card.store, 'data', allow_duplicate=True)
+                    for card in self.store_subcomponents
+                ],
+                Input(self.button_clear, 'n_clicks'),
+                prevent_initial_call=True
+            )
+            def clear_all_subcomponents(n_clicks):
+                logger.debug(f'clearing: {self.store_subcomponents}')
+                return [{} for c in self.store_subcomponents]
             
-            # @app.callback(
-            #     [
-            #         Output(card.store_panel, 'data', allow_duplicate=True)
-            #         for card in self.store_panel_subcomponents
-            #     ],
-            #     Input(self.store, 'data'),
-            #     [
-            #         State(card.store_panel, 'data')
-            #         for card in self.store_panel_subcomponents
-            #     ],
-            #     prevent_initial_call=True
-            # )
-            # def panel_filter_data_changed(panel_filter_data, *old_filter_data_l):
-            #     if panel_filter_data is None: panel_filter_data={}
-            #     logger.trace(f'[{self.name}] updating my {len(self.store_panel_subcomponents)} subcomponents with my new panel filter data')
-            #     new_filter_data_l = [
-            #         (panel_filter_data if )
-            #         for card in self.store_panel_subcomponents    
-            #     ]
-            #     out = new_filter_data_l
-            #     logger.debug(f'sending updates for new store_panel --> {out}')
-            #     return out
+            @app.callback(
+                [
+                    Output(card.store, 'data', allow_duplicate=True)
+                    for card in self.store_subcomponents
+                ],
+                Input(self.store_incoming, 'data'),
+                prevent_initial_call=True
+            )
+            def clear_all_subcomponents(data):
+                key2out={card.key:dash.no_update for card in self.store_subcomponents}
+                not_found = {k for k in data if k not in key2out}
+                if not_found: logger.warning(f'not found keys: {not_found}')
+
+                found = set(key2out.keys()) & set(data.keys())
+                for key in found:
+                    key2out[key] = {key: data[key]}
+
+                out = [key2out[card.key] for card in self.store_subcomponents]
+                logger.debug(f'--> {out}')
+                return out
+            
             
 
             
+        
 
   
 
@@ -336,35 +333,39 @@ class ComparisonPanel(BaseComponent):
                 self.store,
                 self.store_json,
                 self.table_json,
-                self.test_suite
+                self.test_suite,
+                self.test_suite_btn,
+                self.app_begun
             ], className='mainview-container')
 
 
         ])
     
     @cached_property
-    def test_suite(self):
-        return dbc.Container([self.test_suite_btn1, self.test_suite_btn2, self.test_suite_btn3], className='test_suite')
+    def test_suite(self, num_btn=6):
+        return dbc.Collapse(
+            [
+                self.get_test_suite_btn(suffix=f'{i+1}')
+                for i in range(num_btn)
+            ], 
+            className='test_suite', 
+            id='test_suite',
+            is_open=False
+        )
     
     @cached_property
-    def test_suite_btn1(self):
+    def test_suite_btn(self):
+        return self.get_test_suite_btn()
+    
+    def get_test_suite_btn(self, suffix=''):
         return dbc.Button(
             '',
             color='link',
             n_clicks=0,
-            id='test_suite_btn1',
+            id='test_suite_btn'+suffix,
             className='test_suite_btn'
         )
     
-    @cached_property
-    def test_suite_btn2(self):
-        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn2',className='test_suite_btn')
-    
-    @cached_property
-    def test_suite_btn3(self):
-        return dbc.Button('',color='link',n_clicks=0,id='test_suite_btn3',className='test_suite_btn')
-        
-
     @cached_property
     def store(self):
         """Stores data in a Dash Core Component Store.
@@ -501,6 +502,9 @@ class ComparisonPanel(BaseComponent):
             ],
             is_open=False
         )
+    
+    @cached_property
+    def app_begun(self): return dcc.Store(id=self.id('app_begun'), data=None)
     
     @cached_property
     def maintbl_preface_analysis(self):
@@ -736,30 +740,147 @@ class ComparisonPanel(BaseComponent):
 
 
 
-        ### test funcs
+        
+        ## STATE TRACKING
+
         @app.callback(
-            Output(self.L.store, 'data', allow_duplicate=True),
-            Input(self.test_suite_btn1, 'n_clicks'),
+            Output('url-output', 'search', allow_duplicate=True),
+            [
+                Input(self.L.store, 'data'),
+                Input(self.R.store, 'data'),
+                Input(self.mainview_tabs, 'active_tab'),
+                Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
+                Input(self.mainmap, 'relayoutData')
+            ],
+            prevent_initial_call=True
+        )
+        def track_state(fdL, fdR, tab, tab2, figdat):
+            logger.debug(f'triggered by {ctx.triggered_id}')
+            logger.debug(f'figdat = {figdat}')
+            state = {}
+            for k,v in fdL.items(): state[k]=rejoin_sep(v)
+            for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
+            state['tab']=tab
+            state['tab2']=tab2
+            if figdat:
+                state['lat']=round(figdat.get('mapbox.center',{}).get('lat',0), 5)
+                state['lon']=round(figdat.get('mapbox.center',{}).get('lon',0), 5)
+                state['zoom']=round(figdat.get('mapbox.zoom',0), 5)
+                state['bearing']=round(figdat.get('mapbox.bearing',0), 5)
+                state['pitch']=round(figdat.get('mapbox.pitch',0), 5)
+            
+            state = {k:v for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v}
+            if not state: return ''
+            ostr=f'?{urlencode(state)}'
+            return ostr
+                
+
+
+
+
+
+        @app.callback(
+            [
+                Output(self.L.store_incoming, 'data',allow_duplicate=True),
+                Output(self.R.store_incoming, 'data',allow_duplicate=True),
+                Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
+                Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
+                Output(self.mainmap, 'figure',allow_duplicate=True),
+                Output(self.app_begun, 'data',allow_duplicate=True),
+                Output('welcome-modal', 'is_open')
+            ],
+            Input('url-input','search'),
+            [
+                State(self.app_begun, 'data'),
+                State(self.mainmap, 'figure'),
+            ],
+            prevent_initial_call=True
+        )
+        def load_query_param(searchstr, app_begun, figdat):
+            if app_begun: raise PreventUpdate
+            searchstrx=searchstr[1:]
+            if not searchstrx: raise PreventUpdate
+            params = parse_qs(searchstrx)
+            logger.debug(params)
+            fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
+
+            for k,v in list(params.items()):
+                if k=='tab':
+                    tab=v[0]
+                elif k=='tab2':
+                    tab2=v[0]
+                elif k.endswith('2'):
+                    fdR[k[:-1]]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
+                elif '_' in k:
+                    fdL[k]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
+                else:
+                    mapd[k]=float(v[0])
+            
+            if 'lat' in mapd: figdat['layout']['mapbox']['center']['lat'] = mapd['lat']
+            if 'lon' in mapd: figdat['layout']['mapbox']['center']['lon'] = mapd['lon']
+            if 'zoom' in mapd: figdat['layout']['mapbox']['zoom'] = mapd['zoom']
+            if 'bearing' in mapd: figdat['layout']['mapbox']['bearing'] = mapd['bearing']
+            if 'pitch' in mapd: figdat['layout']['mapbox']['pitch'] = mapd['pitch']
+            out = [fdL, fdR, tab, tab2, figdat, True, False]
+            logger.debug(f'--> {out[:4] + out[5:]}')
+            return out
+            
+
+
+        ### TEST SUITE
+        @app.callback(
+            Output(self.test_suite, 'is_open', allow_duplicate=True),
+            Input(self.test_suite_btn, 'n_clicks'),
+            State(self.test_suite, 'is_open'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn_onclick(n_clicks, is_open):
+            return not is_open
+        
+        @app.callback(
+            Output(self.L.member_panel.nation_card.store, 'data', allow_duplicate=True),
+            Input('test_suite_btn1', 'n_clicks'),
             prevent_initial_call=True
          )
         def test_suite_btn1_onclick(n_clicks):
             return {'member_nationalities':['France']}
-        
+
         @app.callback(
-            Output(self.R.store, 'data', allow_duplicate=True),
-            Input(self.test_suite_btn2, 'n_clicks'),
+            Output(self.R.member_panel.nation_card.store, 'data', allow_duplicate=True),
+            Input('test_suite_btn2', 'n_clicks'),
             prevent_initial_call=True
          )
         def test_suite_btn2_onclick(n_clicks):
             return {'member_nationalities':['United States']}
 
-
+        # @app.callback(
+        #     Output(self.R.store, 'data', allow_duplicate=True),
+        #     Input('test_suite_btn3', 'n_clicks'),
+        #     prevent_initial_call=True
+        #  )
+        # def test_suite_btn3_onclick(n_clicks):
+        #     return {}
+        
         @app.callback(
-            Output(self.R.store, 'data', allow_duplicate=True),
-            Input(self.test_suite_btn3, 'n_clicks'),
+            Output(self.mainmap, 'relayoutData', allow_duplicate=True),
+            Input('test_suite_btn4', 'n_clicks'),
             prevent_initial_call=True
          )
-        def test_suite_btn3_onclick(n_clicks):
-            return {}
-
-
+        def test_suite_btn4_onclick(n_clicks):
+            return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}
+        
+        @app.callback(
+            Output(self.L.store, 'data', allow_duplicate=True),
+            Input('test_suite_btn5', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn5_onclick(n_clicks):
+            return {'member_gender':['(Unknown)']}
+        
+        @app.callback(
+            Output(self.L.member_panel.membership_year_card.graph, 'selectedData', allow_duplicate=True),
+            Input('test_suite_btn6', 'n_clicks'),
+            prevent_initial_call=True
+         )
+        def test_suite_btn6_onclick(n_clicks):
+            return {'points': [{'curveNumber': 0, 'pointNumber': 8, 'pointIndex': 8, 'x': 1937, 'y': 21, 'label': 1937, 'value': 21}, {'curveNumber': 0, 'pointNumber': 9, 'pointIndex': 9, 'x': 1938, 'y': 20, 'label': 1938, 'value': 20}, {'curveNumber': 0, 'pointNumber': 10, 'pointIndex': 10, 'x': 1936, 'y': 19, 'label': 1936, 'value': 19}, {'curveNumber': 0, 'pointNumber': 11, 'pointIndex': 11, 'x': 1933, 'y': 19, 'label': 1933, 'value': 19}, {'curveNumber': 0, 'pointNumber': 12, 'pointIndex': 12, 'x': 1934, 'y': 19, 'label': 1934, 'value': 19}, {'curveNumber': 0, 'pointNumber': 14, 'pointIndex': 14, 'x': 1939, 'y': 18, 'label': 1939, 'value': 18}, {'curveNumber': 0, 'pointNumber': 16, 'pointIndex': 16, 'x': 1935, 'y': 16, 'label': 1935, 'value': 16}, {'curveNumber': 0, 'pointNumber': 18, 'pointIndex': 18, 'x': 1932, 'y': 13, 'label': 1932, 'value': 13}], 'range': {'x': [1931.0454545454545, 1939.409090909091], 'y': [0, 37.89473684210526]}}

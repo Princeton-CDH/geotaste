@@ -87,3 +87,13 @@ Python 3.10 / Dash 2.13 / Plotly 5.17 / Flask 2.2
     make html -b coverage
     ```
 
+## Credits
+
+- Director: [Joshua Kotin](https://english.princeton.edu/people/joshua-kotin)
+- Technical Lead: [Ryan Heuser](https://ryanheuser.org)
+- Project Manager: [Fedor Karmanov](https://www.fedorkarmanov.com/)
+- Advisers
+    - [Eric Bulson](https://www.cgu.edu/people/eric-bulson/)
+    - [Effie Rentzou](https://fit.princeton.edu/people/effie-rentzou)
+    - [Robert Spoo](https://law.utulsa.edu/law-faculty/profile/robert-spoo/)
+    - [Keri Walsh](https://www.fordham.edu/academics/departments/english/faculty/keri-walsh/)

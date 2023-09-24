@@ -12,3 +12,6 @@ pytest-ordering
 pyinstaller
 Pillow
 sphinx_rtd_theme
+# pyautogui
+# opencv-python
+# python-xlib

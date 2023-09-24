@@ -17,6 +17,9 @@ def test_isin_or_hasone():
     assert isin_or_hasone(1, [1, 2, 3]) == True
     assert isin_or_hasone([1, 2, 3], [3, 4, 5]) == True
     assert isin_or_hasone(4, [1, 2, 3]) == False
+    assert isin_or_hasone(4, 4) == True
+    assert isin_or_hasone(4, 5) == False
+
 
 def test_to_set():
     assert to_set(1) == {1}
@@ -141,6 +144,9 @@ def test_is_range_of_ints():
     assert is_range_of_ints([1,2,3,4]) == True
     assert is_range_of_ints([1,2,3.0,4.000]) == True
     assert is_range_of_ints([-1,0,1,2,3.0,4.000]) == True
+    assert is_range_of_ints([1,2,'three']) == False
+    assert is_range_of_ints(object) == False
+
 
 
 def test_delist_df():
@@ -213,3 +219,50 @@ def test_ensure_int():
     assert ensure_int('x', return_orig=False, default=1) == 1
     assert ensure_int('x', return_orig=True) == 'x'
 
+def test_ensure_dir():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        odir=os.path.join(tmpdir,'tmpxxx')
+        outfn=os.path.join(odir,'out.txt')
+        ensure_dir(outfn)
+        assert os.path.exists(odir)
+        assert not os.path.exists(outfn)
+        with open(outfn,'w') as of: of.write('testing')
+        assert os.path.exists(outfn)
+
+
+def test_oxfordcomma():
+    # Test with three elements in the list
+    assert oxfordcomma(['apple', 'banana', 'orange']) == "'apple', 'banana', and 'orange'"
+    
+    # Test with two elements in the list
+    assert oxfordcomma(['apple', 'banana']) == "'apple' and 'banana'"
+    
+    # Test with one element in the list
+    assert oxfordcomma(['apple']) == "'apple'"
+    
+    # Test with an number elements in the list
+    assert oxfordcomma([1, 2, 3]) == "1, 2, and 3"
+
+    assert oxfordcomma(['1', '2', '3']) == "'1', '2', and '3'"
+    
+    # Test with different op (conjunction) value
+    assert oxfordcomma(['apple', 'banana', 'orange'], op='or') == "'apple', 'banana', or 'orange'"
+    
+    # Test with repr function to represent each element as a string
+    assert oxfordcomma([1, 2, 3], repr=str) == "1, 2, and 3"
+    assert oxfordcomma(['1', '2', '3'], repr=str) == "1, 2, and 3"
+    assert oxfordcomma(['apple', 'banana', 'orange'], repr=str) == "apple, banana, and orange"
+
+
+def test_read_config_json():
+    d1=read_config_json(PATH_CONFIG_DEFAULT)
+    assert type(d1)==dict and d1
+    with tempfile.TemporaryDirectory() as tdir:        
+        assert read_config_json(os.path.join(tdir,'nonexistentfile.json')) == {}
+        badfile = os.path.join(tdir,'badfile.json')
+        with open(badfile,'w') as of: of.write('gobbledygook')
+        try:
+            read_config_json(badfile)
+            assert False, 'ought to throw exception for reading unknown json file'
+        except Exception:
+            assert True, 'success'

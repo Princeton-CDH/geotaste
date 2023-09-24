@@ -1082,11 +1082,19 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             colval_R='Filter 2',
         )
     
-    def plot_map(self):
+    def plot_map(self, plot_kwargs_L={}, plot_kwargs_R={}) -> go.Figure:
+        """Plot a map using the given plot_kwargs for the left and right panels' map plots.
+        
+        Args:
+            plot_kwargs_L (dict): Keyword arguments for the left plot.
+            plot_kwargs_R (dict): Keyword arguments for the right plot.
+        
+        Returns:
+            go.Figure: The plotted map as a Plotly Figure object.
+        """
         fig=go.Figure()
-        figL=self.L.plot_map(return_trace=True)
-        figR=self.R.plot_map(return_trace=True)
-        # ofig=go.Figure(data=figL.data + figR.data, layout=figL.layout)
+        figL=self.L.plot_map(return_trace=True, **plot_kwargs_L)
+        figR=self.R.plot_map(return_trace=True, **plot_kwargs_R)
         ofig=go.Figure()
         ofig.add_traces([figL, figR])
         return update_fig_mapbox_background(ofig)
@@ -1342,9 +1350,11 @@ def to_json_gz_str(out):
     Returns:
         str: The compressed JSON string.
     """
-    
-    ojson=pio.to_json(out)
-    ojsongz=b64encode(zlib.compress(ojson.encode()))
+    try:
+        ojson=pio.to_json(out).encode()
+    except ValueError:
+        ojson=orjson.dumps(out)
+    ojsongz=b64encode(zlib.compress(ojson))
     ojsongzstr=ojsongz.decode('utf-8')
     return ojsongzstr
 

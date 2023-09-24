@@ -63,4 +63,7 @@ class GeotasteLayout(BaseComponent):
                 fullscreen=False, 
                 style={'background-color':'rgba(255,255,255,0)'},
             ),
+
+            dcc.Location(id='url-output', refresh="callback-nav"),
+            dcc.Location(id='url-input', refresh="callback-nav"),
         ], className='layout-container')

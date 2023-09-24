@@ -511,6 +511,7 @@ def is_range_of_ints(numbers:'Iterable') -> bool:
     """
     
     l = numbers
+    if not is_listy(l): return False
     if len(l)<2: return False
     try:
         if any(x!=int(x) for x in l): return False
@@ -553,6 +554,17 @@ def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
 
 
 def oxfordcomma(l, repr=repr, op='and'):
+    """Join a list of elements with an Oxford comma.
+    
+    Args:
+        l (list): The list of elements to join.
+        repr (function, optional): The function used to represent each element as a string. Defaults to repr.
+        op (str, optional): The conjunction used before the last element. Defaults to 'and'.
+    
+    Returns:
+        str: The joined string with an Oxford comma.
+    """
+    
     if len(l)<3:
         return f' {op} '.join(repr(x) for x in l)
     else:
@@ -649,5 +661,14 @@ def is_fuzzy_date_seq(x,y,z):
 
 def ensure_dir(fn):
     dirname=os.path.dirname(fn)
-    if not os.path.exists:
-        os.makedirs(dirname)
+    if not os.path.exists(fn):
+        try:
+            os.makedirs(dirname)
+            logger.debug(f'{dirname} created')
+        except Exception as e:
+            logger.warning(e)
+
+
+def rejoin_sep(listy_obj, sep='_'):
+    if not is_listy(listy_obj): return listy_obj
+    return sep.join(str(x) for x in listy_obj)

@@ -81,7 +81,7 @@ logger.add(
 MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3'
 mapbox_access_token = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 px.set_mapbox_access_token(mapbox_access_token)
-
+SEARCH_PARAM_PREFIX='?'
 
 
 #### CONSTANTS ########################################
@@ -205,6 +205,20 @@ DWELLING_ID_SEP='; '
 TCOLS=['event','dwelling','event_start','event_end','dwelling_start','dwelling_end']
 
 
+DEFAULT_STATE={
+    'bearing': 0,
+    'lat': MAP_CENTER['lat'],
+    'lon': MAP_CENTER['lon'],
+    'pitch': 0,
+    'zoom': 14,
+    'tab': 'map',
+    'tab2': 'arrond'
+}
+
+
+TEST_HOSTS=[f'http://127.0.0.1:5805{x}/' for x in range(10)]
+
+
 
 #######################################################
 ## CONFIG OVERWRITES
@@ -241,6 +255,8 @@ if ROOT_URL.endswith('/'): ROOT_URL=ROOT_URL[:-1]
 ASSETS_URL = f'{ROOT_URL}/assets'
 LOGO_SRC=f"{ASSETS_URL}/SCo_logo_graphic-small.png"
 LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
+PATH_LOGO = os.path.join(PATH_ASSETS,os.path.basename(LOGO_SRC))
+PATH_LOC = os.path.join(PATH_ASSETS, 'jardin.png')
 
 
 from .utils import *

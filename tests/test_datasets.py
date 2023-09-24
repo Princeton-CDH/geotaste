@@ -31,6 +31,19 @@ def test_dataset():
             assert False, 'ought not to be able to read'
         except Exception:
             assert True, 'exception ought to be called'
+
+        try:
+            Dataset(path=os.path.join(tdir,'tmp2','file.txt')).read_df()
+            assert False, 'ought not to be able to read'
+        except Exception:
+            assert True, 'exception ought to be called'
+        
+        try:
+            Dataset(path=os.path.join(tdir,'tmp3','file.csv'), url=URLS.get('landmarks')).read_df()
+            assert False, 'ought not to be able to read'
+        except Exception:
+            assert True, 'exception ought to be called'
+
         
 
 
@@ -133,6 +146,24 @@ def test_gen_combined_dataset():
     assert index[-1] == 'NA'
     assert index[0] == 'Singular'
     assert s['Exact'] > 0
+
+
+def test_gen_combined_dataset2():
+    with tempfile.TemporaryDirectory() as tdir:
+        dset1=CombinedDataset()
+        dset1.path = os.path.join(tdir,'new.csv')
+
+        dset2=CombinedDataset()
+        dset2.path = os.path.join(tdir,'new2.csv')
+        dset2.url = ''
+
+        with Logwatch('downloading dataset for test2?') as lw1:
+            dset1.data
+
+        with Logwatch('generating dataset for test2?') as lw2:
+            dset2.data
+
+        assert lw2.duration > (lw1.duration*2)  # ought to take at least twice as much time to gen than to download
 
 
 def test_prune_when_dwelling_matches():

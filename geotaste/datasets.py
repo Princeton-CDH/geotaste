@@ -51,16 +51,6 @@ class Dataset:
             fillna=self.fillna
         )
 
-    def filter_df(self, filter_data={}):
-        return filter_df(self.data, filter_data)
-    
-    @cached_property
-    def filter_desc(self):
-        return filter_query_str(
-            self.filter_data,
-            human=True
-        )
-    
     
 
 ### LANDMARKS
@@ -142,7 +132,7 @@ class MembersDataset(Dataset):
         df['nice_name'] = df['sort_name'].apply(to_name_nice)
         return postproc_df(df,cols_pref=self.cols_pref)
 
-class MiniMembersDataset(MembersDataset):
+class MiniMembersDataset(Dataset):
     _cols_rename = {
         'member':'member',
         'nice_name':'member_name',
@@ -161,7 +151,7 @@ class MiniMembersDataset(MembersDataset):
 
     @cached_property
     def data(self):
-        odf=postproc_df(super().data, self._cols_rename, cols_q=['member_dob', 'member_dod'])
+        odf=postproc_df(MembersDataset().data, self._cols_rename, cols_q=['member_dob', 'member_dod'])
         return odf
     
 @cache
@@ -232,7 +222,7 @@ class DwellingsDataset(Dataset):
         
         
     
-class MiniDwellingsDataset(DwellingsDataset):
+class MiniDwellingsDataset(Dataset):
     _cols_rename = dict(
         member='member',
         dwelling='dwelling',
@@ -247,7 +237,7 @@ class MiniDwellingsDataset(DwellingsDataset):
 
     @cached_property
     def data(self):
-        return postproc_df(super().data, self._cols_rename)
+        return postproc_df(DwellingsDataset().data, self._cols_rename)
 
 @cache
 def Dwellings(): return MiniDwellingsDataset()
