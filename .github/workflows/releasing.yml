@@ -10,7 +10,7 @@ jobs:
     pre-release:
         name: "Pre Release"
         runs-on: "ubuntu-latest"
-
+    
         steps:
             - name: "Releasing"
               uses: "marvinpinto/action-automatic-releases@latest"
@@ -19,7 +19,3 @@ jobs:
                 automatic_release_tag: "latest"
                 prerelease: true
                 title: "Development Build"
-                files: |
-                    *
-                    **/*
-                    **/**/*
