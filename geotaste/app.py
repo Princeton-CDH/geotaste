@@ -76,34 +76,4 @@ def run(host=HOST, port=PORT, debug=DEBUG, url_base_pathname=ROOT_URL, **kwargs)
         )
     return app.app.server
 
-def run_debug(host=HOST, port=PORT, **kwargs):
-    """Runs the application in debug mode.
-    
-    Args:
-        host (str, optional): The host IP address. Defaults to HOST.
-        port (int, optional): The port number. Defaults to PORT.
-        **kwargs: Additional keyword arguments.
-    
-    Returns:
-        The result of the `run` function, a Flask app server object.    
-    """
-    
-    kwargs['debug']=True
-    return run(host=host,port=port,**kwargs)
-
-def run_safe(host=HOST, port=PORT, **kwargs):
-    """Runs the application NOT in debug mode / in production mode.
-    
-    Args:
-        host (str, optional): The host IP address. Defaults to HOST.
-        port (int, optional): The port number. Defaults to PORT.
-        **kwargs: Additional keyword arguments.
-    
-    Returns:
-        The result of the `run` function, a Flask app server object.    
-    """
-
-    kwargs['debug']=False
-    return run(host=host,port=port,**kwargs)
-
 if __name__=='__main__': run()

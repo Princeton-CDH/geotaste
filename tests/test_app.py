@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-import requests,bs4
+import requests,bs4,flask
 
 def test_showhide_components(dash_duo):
     # app = import_app('geotaste.app')
@@ -238,3 +238,16 @@ def test_query_strings(dash_duo):
         driver.close()
 
         assert connected, "Never connected"
+
+def test_get_server():
+    server=get_server()
+    assert isinstance(server, flask.app.Flask)
+
+    # needs testing in separate thread?
+    # runner=run(port=1991)
+    # assert isinstance(runner, flask.app.Flask)
+    
+    app=get_app()
+    assert isinstance(app, DashApp)
+    assert isinstance(app.app, Dash)
+    assert isinstance(app.app.server, flask.app.Flask)
