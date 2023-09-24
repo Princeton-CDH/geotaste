@@ -17,6 +17,9 @@ def test_isin_or_hasone():
     assert isin_or_hasone(1, [1, 2, 3]) == True
     assert isin_or_hasone([1, 2, 3], [3, 4, 5]) == True
     assert isin_or_hasone(4, [1, 2, 3]) == False
+    assert isin_or_hasone(4, 4) == True
+    assert isin_or_hasone(4, 5) == False
+
 
 def test_to_set():
     assert to_set(1) == {1}
@@ -141,6 +144,12 @@ def test_is_range_of_ints():
     assert is_range_of_ints([1,2,3,4]) == True
     assert is_range_of_ints([1,2,3.0,4.000]) == True
     assert is_range_of_ints([-1,0,1,2,3.0,4.000]) == True
+    try:
+        is_range_of_ints([1,2,'three'])
+        assert False, "ought to throw exception"
+    except ValueError:
+        pass # succeed
+
 
 
 def test_delist_df():
@@ -222,3 +231,38 @@ def test_ensure_dir():
         assert not os.path.exists(outfn)
         with open(outfn,'w') as of: of.write('testing')
         assert os.path.exists(outfn)
+
+
+def test_oxfordcomma():
+    # Test with three elements in the list
+    assert oxfordcomma(['apple', 'banana', 'orange']) == "'apple', 'banana', and 'orange'"
+    
+    # Test with two elements in the list
+    assert oxfordcomma(['apple', 'banana']) == "'apple' and 'banana'"
+    
+    # Test with one element in the list
+    assert oxfordcomma(['apple']) == "'apple'"
+    
+    # Test with an number elements in the list
+    assert oxfordcomma([1, 2, 3]) == "1, 2, and 3"
+
+    assert oxfordcomma(['1', '2', '3']) == "'1', '2', and '3'"
+    
+    # Test with different op (conjunction) value
+    assert oxfordcomma(['apple', 'banana', 'orange'], op='or') == "'apple', 'banana', or 'orange'"
+    
+    # Test with repr function to represent each element as a string
+    assert oxfordcomma([1, 2, 3], repr=str) == "1, 2, and 3"
+    assert oxfordcomma(['1', '2', '3'], repr=str) == "1, 2, and 3"
+    assert oxfordcomma(['apple', 'banana', 'orange'], repr=str) == "apple, banana, and orange"
+
+
+def test_read_config_json():
+    d1=read_config_json(PATH_CONFIG_DEFAULT)
+    assert type(d1)==dict and d1
+
+    try:
+        read_config_json('/tmp/wegoblewrwerwerwfwefwefwwerwerw.json')
+        assert False, 'ought to throw exception for reading unknown json file'
+    except Exception:
+        pass # success

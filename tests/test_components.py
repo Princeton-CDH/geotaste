@@ -42,10 +42,20 @@ def test_FilterCard():
     fc = FilterCard()
     assert fc.describe_filters({fc.key:['one','two']}) == 'one, two'
 
-def test_FilterSliderCard():
-    fc = FilterSliderCard()
-    assert fc.describe_filters({fc.key:[1,2]}) == '1 to 2'
-    assert fc.describe_filters({fc.key:['a',"b"]}) == 'a to b'
+
+def test_ComparisonPanel():
+    cp = ComparisonPanel()
+    assert isinstance(cp.ff(), LandmarksFigureFactory)
+
+    cp = ComparisonPanel()
+    assert isinstance(cp.ff({'member_gender':['Female']}), CombinedFigureFactory)
+
+    cp = ComparisonPanel()
+    assert isinstance(cp.ff({}, {'member_gender':['Male']}), CombinedFigureFactory)
+
+    cp = ComparisonPanel()
+    assert isinstance(cp.ff({'member_gender':['Female']}, {'member_gender':['Male']}), ComparisonFigureFactory)
+
 
 def get_callback_func(flask_app, func_name):
     o = []

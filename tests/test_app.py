@@ -171,6 +171,15 @@ def test_suites(dash_duo, done=True):
         _nap()
         dash_duo.wait_for_contains_text('#input_start-MembershipYearCard-MP-Filter_1', '1920')
         dash_duo.wait_for_contains_text('#input_end-MembershipYearCard-MP-Filter_1', '1930')
+        _nap()
+        dash_duo.multiple_click('#button_clear-MembershipYearCard-MP-Filter_1', 1)
+        _nap()
+        dash_duo.wait_for_text_to_equal('#store_desc-MembershipYearCard-MP-Filter_1', BLANK)
+        dash_duo.wait_for_text_to_equal('#store_desc-Filter_1', BLANK)
+
+
+
+
 
     dash_duo.multiple_click('#button_showhide-MemberNameCard-MP-Filter_1', 1)
     _nap()
@@ -186,6 +195,10 @@ def test_suites(dash_duo, done=True):
     input.send_keys('James Joyce')
     input.send_keys(Keys.ENTER)
     dash_duo.wait_for_text_to_equal("#store_desc-MemberNameCard-MP-Filter_1", "James Joyce")
+    dash_duo.multiple_click('#button_clear-MemberNameCard-MP-Filter_1', 1)
+    _nap()
+    dash_duo.wait_for_text_to_equal('#store_desc-MemberNameCard-MP-Filter_1', BLANK)
+    dash_duo.wait_for_text_to_equal('#store_desc-Filter_1', BLANK)
     
 
 
@@ -281,9 +294,9 @@ def test_get_server():
     server=get_server()
     assert isinstance(server, flask.app.Flask)
 
-    # needs testing in separate thread?
-    # runner=run(port=1991)
-    # assert isinstance(runner, flask.app.Flask)
+    # needs testing in separate thread when not a dry run?
+    runner=run(port=1991, dry_run=True)
+    assert isinstance(runner, flask.app.Flask)
     
     app=get_app()
     assert isinstance(app, DashApp)

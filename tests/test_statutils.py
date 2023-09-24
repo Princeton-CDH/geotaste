@@ -195,8 +195,12 @@ def test_get_distinctive_qual_vals():
     assert all(output['count_L'] != 0.0), "'count_L' column values are all 0.0."
     assert all(output['count_R'] != 0.0), "'count_R' column values are all 0.0."
 
+    output2 = get_distinctive_qual_vals(dfL, dfR, cols=['member_title', 'member_nationalities'],drop_duplicates='member')
+    output3 = get_distinctive_qual_vals(dfL, dfR, cols=['member_title', 'member_nationalities'],drop_duplicates=['member'])
+    assert_frame_equal(output2, output3)
+    assert len(output2)<len(output)
 
-import pandas as pd
+
 
 
 def test_describe_comparison():

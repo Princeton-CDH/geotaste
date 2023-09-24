@@ -41,7 +41,7 @@ def get_server():
     app = get_app()
     return app.app.server
 
-def run(host=HOST, port=PORT, debug=DEBUG, url_base_pathname=ROOT_URL, **kwargs):
+def run(host=HOST, port=PORT, debug=DEBUG, url_base_pathname=ROOT_URL, dry_run=False, **kwargs):
     """Runs the geotaste app on the specified host and port. The constants mentioned below can be overwritten/set in ~/geotaste_data/config.json.
     
     Args:
@@ -68,12 +68,13 @@ def run(host=HOST, port=PORT, debug=DEBUG, url_base_pathname=ROOT_URL, **kwargs)
     app = get_app(url_base_pathname=url_base_pathname)
     with Logwatch('running app'):
         logger.debug(f'geotaste running at http://{host}:{port}')
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            **kwargs
-        )
+        if not dry_run:
+            app.run(
+                host=host,
+                port=port,
+                debug=debug,
+                **kwargs
+            )
     return app.app.server
 
 if __name__=='__main__': run()

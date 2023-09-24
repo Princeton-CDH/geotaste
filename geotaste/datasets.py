@@ -51,16 +51,6 @@ class Dataset:
             fillna=self.fillna
         )
 
-    def filter_df(self, filter_data={}):
-        return filter_df(self.data, filter_data)
-    
-    @cached_property
-    def filter_desc(self):
-        return filter_query_str(
-            self.filter_data,
-            human=True
-        )
-    
     
 
 ### LANDMARKS

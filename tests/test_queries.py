@@ -16,3 +16,5 @@ def test_filter_query_str_series():
 
     assert filter_query_str_series('gender',['Nonbinary','Female','Male'],maxlen=3,plural_cols=['gender']) == '@overlaps(gender, ["Nonbinary", "Female", "Male"])'
 
+    assert '"Nonbinary", "Female", or "Male"' in filter_query_str_series('gender',['Nonbinary','Female','Male'],maxlen=3,plural_cols=['gender'],human=True)
+

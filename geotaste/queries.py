@@ -139,21 +139,3 @@ def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, op
     if qstr: logger.debug(f'Querying: {qstr}')
     odf=df.query(qstr) if qstr else df
     return (qstr,df) if return_query else odf
-
-def filter_series(series:pd.Series, vals:list = [], test_func:'function' = isin_or_hasone, matches:list=[]) -> pd.Series:
-    """
-    Filter a pandas Series based on specified values or a custom test function.
-
-    Args:
-        series (pd.Series): The pandas Series to be filtered.
-        vals (list, optional): A list of values to filter the Series by. Defaults to an empty list.
-        test_func (function, optional): A custom test function to filter the Series by. Defaults to isin_or_hasone.
-        matches (list, optional): A list of index labels to filter the Series by. Defaults to an empty list.
-
-    Returns:
-        pd.Series: The filtered pandas Series.
-    """
-    if matches: series_matching = series[[m for m in matches if m in set(series.index)]]
-    elif not vals: series_matching = series
-    else: series_matching = series[series.apply(lambda x: test_func(x, vals))]    
-    return series_matching

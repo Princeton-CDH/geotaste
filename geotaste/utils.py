@@ -553,6 +553,17 @@ def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
 
 
 def oxfordcomma(l, repr=repr, op='and'):
+    """Join a list of elements with an Oxford comma.
+    
+    Args:
+        l (list): The list of elements to join.
+        repr (function, optional): The function used to represent each element as a string. Defaults to repr.
+        op (str, optional): The conjunction used before the last element. Defaults to 'and'.
+    
+    Returns:
+        str: The joined string with an Oxford comma.
+    """
+    
     if len(l)<3:
         return f' {op} '.join(repr(x) for x in l)
     else:
