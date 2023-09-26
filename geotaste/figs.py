@@ -733,7 +733,7 @@ class LandmarksFigureFactory(FigureFactory):
     dataset_class = Landmarks
     cols_table = ['landmark','address','arrond_id','lat','lon']
 
-    def plot_map(self, color='gray', **kwargs):
+    def plot_map_mapbox(self, color='gray', **kwargs):
         """Plot a scattermapbox with landmarks.
         
         Args:
@@ -784,6 +784,43 @@ class LandmarksFigureFactory(FigureFactory):
         # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
         
         return fig
+    
+    def plot_map(self, color='gray', **kwargs):
+        """Plot a dash leaflet map with one landmark, S and Co.
+        
+        Args:
+            color (str, optional): The color of the markers. Defaults to 'gray'.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            go.Figure: The scattermapbox figure.
+        """
+        w=49
+        h=63
+        sco_marker = dl.Marker(
+            title='Shakespeare and Co',
+            position=LATLON_SCO,
+            icon={
+                'iconUrl':'/assets/bookstore-pin.png',
+                'iconSize': (w,h),
+                'iconAnchor': (w//2,h)
+            },
+        )
+        map = dl.Map(
+            children=[
+                dl.TileLayer(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
+                dl.TileLayer(url="https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"),
+                dl.FeatureGroup([sco_marker])
+            ],
+            # preferCanvas=True, 
+            # style={'width': "100vw", 'height': "100vh"}, 
+            center=LATLON_SCO, 
+            zoom=14, 
+            id="mainmap",
+            maxZoom=16,
+            minZoom=2
+        )
+        return map
 
 
 

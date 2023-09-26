@@ -18,3 +18,8 @@ dist
 geckodriver.log
 .coverage*
 out.txt
+notebooks/**/*.js
+notebooks/**/*.css
+notebooks/**/*.jpg
+notebooks/**/*.png
+notebooks/**/*.html

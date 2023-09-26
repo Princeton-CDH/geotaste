@@ -540,7 +540,7 @@ button {
     font-size:30px;
     line-height:30px;
 }
-.mapboxgl-control-container {display:none;}
+.mapboxgl-control-container, .leaflet-control-attribution {display:none;}
 
 #donotcite {
     color:red;
@@ -550,4 +550,13 @@ button {
     /* bottom:5px; */
     /* left:5px; */
     /* z-index:1000; */
+}
+
+#mainmap {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    z-index:0;
 }

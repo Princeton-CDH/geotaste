@@ -217,6 +217,8 @@ class BookPanel(FilterPanel):
 class CombinedPanel(FilterPanel):
     name = 'CombinedPanel'
     desc = 'Combined Panel'
+    L_or_R = 'X'
+    color=None
     
     @cached_property
     def member_panel(self): 
@@ -585,15 +587,20 @@ class ComparisonPanel(BaseComponent):
         """
         
         if ff is None: ff=self.ff()
-        ofig = ff.plot_map()
-        ofig.update_layout(autosize=True)
-        ograph = dcc.Graph(
-            figure=go.Figure(ofig), 
-            className='comparison_map_graph',
-            config={'displayModeBar':False},
-            id='mainmap'
-        )
-        return ograph
+        return ff.plot_map()
+        # ofig.update_layout(autosize=True)
+        # ograph = dcc.Graph(
+        #     figure=go.Figure(ofig), 
+        #     className='comparison_map_graph',
+        #     config={'displayModeBar':False},
+        #     id='mainmap'
+        # )
+        # ograph = dbc.Container(
+        #     className='comparison_map_graph',
+        #     id='mainmap',
+        #     children=[ofig]
+        # )
+        # return ograph
 
     def ff(self, fdL={}, fdR={}, **kwargs):
         """Creates a figure factory based on the given filters.
