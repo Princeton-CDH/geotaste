@@ -1,5 +1,5 @@
 from .imports import *
-from urllib.parse import urlencode, parse_qs
+from urllib.parse import urlencode
 
 
 class FilterPanel(FilterCard):
@@ -594,20 +594,8 @@ class ComparisonPanel(BaseComponent):
         """
         
         if ff is None: ff=self.ff()
-        return ff.plot_map()
-        # ofig.update_layout(autosize=True)
-        # ograph = dcc.Graph(
-        #     figure=go.Figure(ofig), 
-        #     className='comparison_map_graph',
-        #     config={'displayModeBar':False},
-        #     id='mainmap'
-        # )
-        # ograph = dbc.Container(
-        #     className='comparison_map_graph',
-        #     id='mainmap',
-        #     children=[ofig]
-        # )
-        # return ograph
+        dlMap = ff.plot_map()
+        return dlMap
 
     def ff(self, fdL={}, fdR={}, **kwargs):
         """Creates a figure factory based on the given filters.
@@ -895,28 +883,26 @@ class ComparisonPanel(BaseComponent):
                 Input(self.R.store, 'data'),
                 Input(self.mainview_tabs, 'active_tab'),
                 Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
-                Input(self.mainmap, 'relayoutData')
+                # Input(self.mainmap, 'zoom'),
+                # Input(self.mainmap, 'center'),
             ],
             prevent_initial_call=True
         )
-        def track_state(fdL, fdR, tab, tab2, figdat):
-            logger.debug(f'triggered by {ctx.triggered_id}')
-            logger.debug(f'figdat = {figdat}')
+        def track_state(fdL, fdR, tab, tab2):#, zoom, center):
+            logger.debug(f'state changed, triggered by {ctx.triggered_id}: {fdL}, {fdR}, {tab}, {tab2}')#, {zoom}, {center}')
             state = {}
             for k,v in fdL.items(): state[k]=rejoin_sep(v)
             for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
             state['tab']=tab
             state['tab2']=tab2
-            if figdat:
-                state['lat']=round(figdat.get('mapbox.center',{}).get('lat',0), 5)
-                state['lon']=round(figdat.get('mapbox.center',{}).get('lon',0), 5)
-                state['zoom']=round(figdat.get('mapbox.zoom',0), 5)
-                state['bearing']=round(figdat.get('mapbox.bearing',0), 5)
-                state['pitch']=round(figdat.get('mapbox.pitch',0), 5)
-            
+            # state['lat']=center['lat']
+            # state['lon']=center['lng']
+            # state['zoom']=zoom
             state = {k:v for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v}
+            # logger.debug(f'state changed to: {state}')
             if not state: return ''
             ostr=f'?{urlencode(state)}'
+            logger.debug(f'-> {ostr}')
             return ostr
                 
 
@@ -930,7 +916,8 @@ class ComparisonPanel(BaseComponent):
                 Output(self.R.store_incoming, 'data',allow_duplicate=True),
                 Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
                 Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
-                Output(self.mainmap, 'figure',allow_duplicate=True),
+                # Output(self.mainmap, 'zoom',allow_duplicate=True),
+                # Output(self.mainmap, 'center',allow_duplicate=True),
                 Output(self.app_begun, 'data',allow_duplicate=True),
                 Output('welcome-modal', 'is_open')
             ],
@@ -943,9 +930,8 @@ class ComparisonPanel(BaseComponent):
         )
         def load_query_param(searchstr, app_begun, figdat):
             if app_begun: raise PreventUpdate
-            searchstrx=searchstr[1:]
-            if not searchstrx: raise PreventUpdate
-            params = parse_qs(searchstrx)
+            if not searchstr: raise PreventUpdate
+            params = get_query_params(searchstr)
             logger.debug(params)
             fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
 
@@ -960,14 +946,12 @@ class ComparisonPanel(BaseComponent):
                     fdL[k]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
                 else:
                     mapd[k]=float(v[0])
-            
-            if 'lat' in mapd: figdat['layout']['mapbox']['center']['lat'] = mapd['lat']
-            if 'lon' in mapd: figdat['layout']['mapbox']['center']['lon'] = mapd['lon']
-            if 'zoom' in mapd: figdat['layout']['mapbox']['zoom'] = mapd['zoom']
-            if 'bearing' in mapd: figdat['layout']['mapbox']['bearing'] = mapd['bearing']
-            if 'pitch' in mapd: figdat['layout']['mapbox']['pitch'] = mapd['pitch']
-            out = [fdL, fdR, tab, tab2, figdat, True, False]
-            logger.debug(f'--> {out[:4] + out[5:]}')
+            logger.debug(f'mapd: {mapd}')
+            center = {'lat':mapd.get('lat', DEFAULT_STATE['lat']), 'lng':mapd.get('lon', DEFAULT_STATE['lon'])}
+            # zoom = int(mapd.get('zoom', DEFAULT_STATE['zoom']))
+            # out = [fdL, fdR, tab, tab2, dash.no_update, center, True, False]
+            out = [fdL, fdR, tab, tab2, True, False]
+            logger.debug(f'--> {out}')
             return out
             
 
