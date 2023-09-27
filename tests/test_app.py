@@ -49,6 +49,20 @@ def test_showhide_components(dash_duo):
         assert True, 'correctly not found'
 
 
+    # open modal ANOTHER way
+    dash_duo.multiple_click('#logo_popup', 1)
+    _nap(5 if NAPTIME < 5 else NAPTIME)
+    # modal ought to be open
+    assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    # close modal
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    _nap()
+    # modal ought to be closed
+    try:
+        dash_duo.find_element('#welcome-modal .modal-title')
+        assert False, 'should be gone'
+    except Exception:
+        assert True, 'correctly not found'
 
 
 

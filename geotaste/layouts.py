@@ -89,9 +89,13 @@ class GeotasteLayout(BaseComponent):
 
         @app.callback(
             Output('welcome-modal','is_open',allow_duplicate=True),
-            Input('welcome_modal_info_btn', 'n_clicks'),
+            [
+                Input('welcome_modal_info_btn', 'n_clicks'),
+                Input('logo_popup', 'n_clicks')
+            ],
             State('welcome-modal', 'is_open'),
             prevent_initial_call=True
         )
-        def toggle_welcome_modal(n_clicks, is_open):
+        def toggle_welcome_modal(n_clicks, n_clicks2, is_open):
             return not is_open
+        
