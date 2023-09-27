@@ -761,8 +761,13 @@ def get_welcome_modal():
             dbc.ModalHeader(dbc.ModalTitle(WELCOME_HEADER)),
             dbc.ModalBody([
                 html.H3(WELCOME_HEADER2),
-                html.Br(),
                 html.P(WELCOME_BODY),
+                html.Ul([
+                    html.Li(html.A(children="Credits", href="https://shakespeareandco.princeton.edu/lab-credits/",target="_blank")),
+                    html.Li(html.A(children="Project", href="https://shakespeareandco.princeton.edu",target="_blank")),
+                    html.Li(html.A(children="Code", href="https://github.com/Princeton-CDH/geotaste",target="_blank")),
+                ]),
+                html.P(DONOTCITE, id='donotcite')
             ])
         ],
         id="welcome-modal",

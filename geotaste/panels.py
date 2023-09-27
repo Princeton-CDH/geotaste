@@ -1,5 +1,5 @@
 from .imports import *
-from urllib.parse import urlencode, parse_qs
+from urllib.parse import urlencode
 
 
 class FilterPanel(FilterCard):
@@ -217,6 +217,8 @@ class BookPanel(FilterPanel):
 class CombinedPanel(FilterPanel):
     name = 'CombinedPanel'
     desc = 'Combined Panel'
+    L_or_R = 'X'
+    color=None
     
     @cached_property
     def member_panel(self): 
@@ -332,6 +334,8 @@ class ComparisonPanel(BaseComponent):
                 self.mainview,
                 self.store,
                 self.store_json,
+                self.store_markers_L,
+                self.store_markers_R,
                 self.table_json,
                 self.test_suite,
                 self.test_suite_btn,
@@ -340,6 +344,11 @@ class ComparisonPanel(BaseComponent):
 
 
         ])
+    
+    @cached_property
+    def store_markers_L(self): return dcc.Store(id=self.id('store_markers_L'), data={})
+    @cached_property
+    def store_markers_R(self): return dcc.Store(id=self.id('store_markers_R'), data={})
     
     @cached_property
     def test_suite(self, num_btn=6):
@@ -585,15 +594,8 @@ class ComparisonPanel(BaseComponent):
         """
         
         if ff is None: ff=self.ff()
-        ofig = ff.plot_map()
-        ofig.update_layout(autosize=True)
-        ograph = dcc.Graph(
-            figure=go.Figure(ofig), 
-            className='comparison_map_graph',
-            config={'displayModeBar':False},
-            id='mainmap'
-        )
-        return ograph
+        dlMap = ff.plot_map()
+        return dlMap
 
     def ff(self, fdL={}, fdR={}, **kwargs):
         """Creates a figure factory based on the given filters.
@@ -696,47 +698,178 @@ class ComparisonPanel(BaseComponent):
         )
 
 
-        ## CHANGING MAP
+        # app.clientside_callback(
+        #     """
+        #     function(val) {
+        #         console.log(val);
+        #         return '1';
+        #     }
+        #     """,
+        #     Output("mainview_tabs", "children"), 
+        #     Input({'type': 'marker', 'index': MATCH}, 'clicked'),
+        # )
+
+        
+        # app.clientside_callback(
+        #     """
+        #     function(val) {
+        #         console.log(val);
+        #         return '1';
+        #     }
+        #     """,
+        #     Output("mainview_tabs", "children"), 
+        #     Input({'type': 'marker', 'index': ALL}, 'n_clicks'),
+        # )
+
+        # app.clientside_callback(
+        #     """
+        #     function(val) {
+        #         console.log(val);
+        #         return '1';
+        #     }
+        #     """,
+        #     Output("mainview_tabs", "children"), 
+        #     Input('sco_marker', 'click'),
+        # )
+
+        # @app.callback(
+        #     Output("logo", "children"), 
+        #     Input('sco_marker', 'n_clicks'),
+        # )
+        # def get_click(x):
+        #     print(x)
+        #     raise PreventUpdate
+        #     return 'hello'
+        
+
+        # @app.callback(
+        #     Output('mainview_tabs','children'),
+        #     Input('mainmap','n_clicks'),
+        #     State('mainmap', 'clickData')
+        # )
+        # def marker_click(x, clickdata):
+        #     lat = clickdata['latlng']['lat']
+        #     lon = clickdata['latlng']['lon']
+
+        #     raise PreventUpdate
+
+
+        # @app.callback(
+        #     Output('mainview_tabs','children'),
+        #     Input('mainmap','n_clicks'),
+        #     State('mainmap', 'clickData')
+        # )
+        # def marker_click(x, clickdata):
+        #     print(x, clickdata)
+        #     raise PreventUpdate
+
+
+        # ## CHANGING MAP
+        # @app.callback(
+        #     [
+        #         # Output(self.store_json, 'data',allow_duplicate=True),
+        #         Output('featuregroup-markers', 'children', allow_duplicate=True),
+        #         Output(self.store,'data',allow_duplicate=True),
+        #         Output('layout-loading-output', 'children', allow_duplicate=True),
+        #         # Output(self.mainview_tabs,'active_tab')
+        #     ],
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #         # Input(self.mainview_tabs, 'active_tab')
+        #     ],
+        #     [
+        #         # State(self.mainmap,'figure'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def update_LR_data(Lstore, Rstore):#, oldfig):
+        #     ostore=[Lstore,Rstore]
+        #     logger.debug(ostore)
+        #     ff = self.ff(Lstore,Rstore)
+        #     markers = ff.plot_map(return_markers=True)
+        #     # print(markers)
+        #     # with Logwatch('computing figdata on server'):
+        #     #     newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
+            
+        #     # logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
+                
+        #     # o=newfig_gz_str
+        #     # o = pickled(markers)
+        #     return markers, ostore, True
+                    ## CHANGING MAP
         @app.callback(
             [
-                Output(self.store_json, 'data',allow_duplicate=True),
                 Output(self.store,'data',allow_duplicate=True),
                 Output('layout-loading-output', 'children', allow_duplicate=True),
-                # Output(self.mainview_tabs,'active_tab')
+                # Output(self.store_markers_L, 'data'),
+                # Output(self.store_markers_R, 'data'),
+                # Output('featuregroup-markers', 'children', allow_duplicate=True),
+                # Output('featuregroup-markers2', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.L.store, 'data'),
                 Input(self.R.store, 'data'),
-                # Input(self.mainview_tabs, 'active_tab')
-            ],
-            [
-                State(self.mainmap,'figure'),
             ],
             prevent_initial_call=True
         )
-        def update_LR_data(Lstore, Rstore, oldfig):
+        def update_LR_data(Lstore, Rstore):
             ostore=[Lstore,Rstore]
             logger.debug(ostore)
-            with Logwatch('computing figdata on server'):
-                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
-            
-            newfig = from_json_gz_str(newfig_gz_str)
-            ofig = go.Figure(data=newfig.data, layout=oldfig['layout'])
-            
-            logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
-                
-            return to_json_gz_str(ofig),ostore,True#,'map'
-            
+            out = [ostore, True]
+            # qd = {'fdL':Lstore} if ctx.triggered_id == self.L.store.id else {'fdR':Rstore}
+            # dwellings = list(self.ff(**qd).df_dwellings.index)
+            # out += [dwellings, dash.no_update] if ctx.triggered_id == self.L.store.id else [dash.no_update, dwellings]
+            return out
+
+
+        @app.callback(
+            Output(self.store_markers_L, 'data'),
+            Input(self.L.store, 'data')
+        )
+        def put_markers_L(data):
+            if not data: return []
+            return list(self.ff(fdL=data).df_dwellings.index)
+        
+        @app.callback(
+            Output(self.store_markers_R, 'data'),
+            Input(self.R.store, 'data')
+        )
+        def put_markers_L(data):
+            if not data: return []
+            return list(self.ff(fdR=data).df_dwellings.index)
 
         app.clientside_callback(
-            ClientsideFunction(
-                namespace='clientside',
-                function_name='decompress'
-            ),
-            Output(self.mainmap, 'figure', allow_duplicate=True),
-            Input(self.store_json, 'data'),
+            """
+            function(dwellings) {
+                return get_dwelling_markers(dwellings, "L");
+            }
+            """,
+            Output("featuregroup-markers", "children", allow_duplicate=True), 
+            Input(self.store_markers_L, 'data'),
             prevent_initial_call=True
         )
+
+        app.clientside_callback(
+            """
+            function(dwellings) {
+                return get_dwelling_markers(dwellings, "R");
+            }
+            """,
+            Output("featuregroup-markers2", "children", allow_duplicate=True), 
+            Input(self.store_markers_R, 'data'),
+            prevent_initial_call=True
+        )
+
+        # app.clientside_callback(
+        #     ClientsideFunction(
+        #         namespace='clientside',
+        #         function_name='unpickle'
+        #     ),
+        #     Output('featuregroup-markers', 'children', allow_duplicate=True),
+        #     Input(self.store_json, 'data'),
+        #     prevent_initial_call=True
+        # )
 
 
 
@@ -750,28 +883,26 @@ class ComparisonPanel(BaseComponent):
                 Input(self.R.store, 'data'),
                 Input(self.mainview_tabs, 'active_tab'),
                 Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
-                Input(self.mainmap, 'relayoutData')
+                # Input(self.mainmap, 'zoom'),
+                # Input(self.mainmap, 'center'),
             ],
             prevent_initial_call=True
         )
-        def track_state(fdL, fdR, tab, tab2, figdat):
-            logger.debug(f'triggered by {ctx.triggered_id}')
-            logger.debug(f'figdat = {figdat}')
+        def track_state(fdL, fdR, tab, tab2):#, zoom, center):
+            logger.debug(f'state changed, triggered by {ctx.triggered_id}: {fdL}, {fdR}, {tab}, {tab2}')#, {zoom}, {center}')
             state = {}
             for k,v in fdL.items(): state[k]=rejoin_sep(v)
             for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
             state['tab']=tab
             state['tab2']=tab2
-            if figdat:
-                state['lat']=round(figdat.get('mapbox.center',{}).get('lat',0), 5)
-                state['lon']=round(figdat.get('mapbox.center',{}).get('lon',0), 5)
-                state['zoom']=round(figdat.get('mapbox.zoom',0), 5)
-                state['bearing']=round(figdat.get('mapbox.bearing',0), 5)
-                state['pitch']=round(figdat.get('mapbox.pitch',0), 5)
-            
+            # state['lat']=center['lat']
+            # state['lon']=center['lng']
+            # state['zoom']=zoom
             state = {k:v for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v}
+            # logger.debug(f'state changed to: {state}')
             if not state: return ''
             ostr=f'?{urlencode(state)}'
+            logger.debug(f'-> {ostr}')
             return ostr
                 
 
@@ -785,24 +916,22 @@ class ComparisonPanel(BaseComponent):
                 Output(self.R.store_incoming, 'data',allow_duplicate=True),
                 Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
                 Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
-                Output(self.mainmap, 'figure',allow_duplicate=True),
+                # Output(self.mainmap, 'zoom',allow_duplicate=True),
+                # Output(self.mainmap, 'center',allow_duplicate=True),
                 Output(self.app_begun, 'data',allow_duplicate=True),
                 Output('welcome-modal', 'is_open')
             ],
             Input('url-input','search'),
-            [
-                State(self.app_begun, 'data'),
-                State(self.mainmap, 'figure'),
-            ],
+            State(self.app_begun, 'data'),
             prevent_initial_call=True
         )
-        def load_query_param(searchstr, app_begun, figdat):
+        def load_query_param(searchstr, app_begun):
             if app_begun: raise PreventUpdate
-            searchstrx=searchstr[1:]
-            if not searchstrx: raise PreventUpdate
-            params = parse_qs(searchstrx)
+            if not searchstr: raise PreventUpdate
+            params = get_query_params(searchstr)
             logger.debug(params)
-            fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
+            fdL, fdR, tab, tab2 = {}, {}, 'map', 'arrond'
+            # fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
 
             for k,v in list(params.items()):
                 if k=='tab':
@@ -813,16 +942,14 @@ class ComparisonPanel(BaseComponent):
                     fdR[k[:-1]]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
                 elif '_' in k:
                     fdL[k]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
-                else:
-                    mapd[k]=float(v[0])
-            
-            if 'lat' in mapd: figdat['layout']['mapbox']['center']['lat'] = mapd['lat']
-            if 'lon' in mapd: figdat['layout']['mapbox']['center']['lon'] = mapd['lon']
-            if 'zoom' in mapd: figdat['layout']['mapbox']['zoom'] = mapd['zoom']
-            if 'bearing' in mapd: figdat['layout']['mapbox']['bearing'] = mapd['bearing']
-            if 'pitch' in mapd: figdat['layout']['mapbox']['pitch'] = mapd['pitch']
-            out = [fdL, fdR, tab, tab2, figdat, True, False]
-            logger.debug(f'--> {out[:4] + out[5:]}')
+                # else:
+                    # mapd[k]=float(v[0])
+            # logger.debug(f'mapd: {mapd}')
+            # center = {'lat':mapd.get('lat', DEFAULT_STATE['lat']), 'lng':mapd.get('lon', DEFAULT_STATE['lon'])}
+            # zoom = int(mapd.get('zoom', DEFAULT_STATE['zoom']))
+            # out = [fdL, fdR, tab, tab2, dash.no_update, center, True, False]
+            out = [fdL, fdR, tab, tab2, True, False]
+            logger.debug(f'--> {out}')
             return out
             
 
@@ -861,13 +988,13 @@ class ComparisonPanel(BaseComponent):
         # def test_suite_btn3_onclick(n_clicks):
         #     return {}
         
-        @app.callback(
-            Output(self.mainmap, 'relayoutData', allow_duplicate=True),
-            Input('test_suite_btn4', 'n_clicks'),
-            prevent_initial_call=True
-         )
-        def test_suite_btn4_onclick(n_clicks):
-            return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}
+        # @app.callback(
+        #     Output(self.mainmap, 'relayoutData', allow_duplicate=True),
+        #     Input('test_suite_btn4', 'n_clicks'),
+        #     prevent_initial_call=True
+        #  )
+        # def test_suite_btn4_onclick(n_clicks):
+        #     return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}
         
         @app.callback(
             Output(self.L.store, 'data', allow_duplicate=True),

@@ -266,3 +266,13 @@ def test_read_config_json():
             assert False, 'ought to throw exception for reading unknown json file'
         except Exception:
             assert True, 'success'
+
+
+def test_compressed_funcs():
+    x={'a':1}
+    assert uncompressed_bytes(compressed_bytes(x)) == x
+    assert uncompressed_str(compressed_str(x)) == x
+    with tempfile.TemporaryDirectory() as tdir:
+        ofn=os.path.join(tdir,'tmp.obj')
+        compress_to(x, ofn)
+        assert uncompress_from(ofn) == x

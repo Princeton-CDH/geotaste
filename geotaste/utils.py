@@ -672,3 +672,85 @@ def ensure_dir(fn):
 def rejoin_sep(listy_obj, sep='_'):
     if not is_listy(listy_obj): return listy_obj
     return sep.join(str(x) for x in listy_obj)
+
+
+def compressed_bytes(obj):
+    """Compresses the given object into a base64 encoded string.
+    
+    Args:
+        obj: The object to be compressed.
+    
+    Returns:
+        str: The base64 encoded string representing the compressed object.
+    """
+    
+    ojson_b=orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
+    ojson_bz = zlib.compress(ojson_b)
+    ojson_bz64 = b64encode(ojson_bz)
+    return ojson_bz64
+
+def uncompressed_bytes(ojson_bz64):
+    if type(ojson_bz64)==str: ojson_bz64=ojson_bz64.encode()
+    ojson_bz = b64decode(ojson_bz64)
+    ojson_b = zlib.decompress(ojson_bz)
+    ojson=orjson.loads(ojson_b)
+    return ojson
+
+def compressed_str(obj):
+    """Return a compressed string representation of the given object.
+    
+    Args:
+        obj: The object to be compressed.
+    
+    Returns:
+        str: The compressed string representation of the object.
+    
+    Note:
+        This function internally uses the `compressed_bytes` function to compress the object and then decodes the compressed bytes using 'utf-8' encoding.
+    """
+    
+    return compressed_bytes(obj).decode('utf-8')
+
+def uncompressed_str(x):
+    return uncompressed_bytes(x)
+
+def compress_to(obj, fn):
+    """Compresses the given object and writes the compressed bytes to a file.
+    
+    Args:
+        obj: The object to be compressed.
+        fn: The filename of the file to write the compressed bytes to.
+    
+    Returns:
+        None
+    
+    Raises:
+        IOError: If there is an error while writing to the file.
+    """
+    
+    with open(fn,'wb') as of:
+        of.write(compressed_bytes(obj))
+
+def uncompress_from(fn):
+    with open(fn,'rb') as of:
+        return uncompressed_bytes(of.read())
+
+def get_query_params(qstr:str) -> dict:
+    """Returns a dictionary of query parameters from the given query string.
+    
+    Args:
+        qstr (str): The query string containing the parameters.
+    
+    Returns:
+        dict: A dictionary containing the query parameters.
+    
+    Example:
+        >>> get_query_params('?name=John&age=25')
+        {'name': 'John', 'age': '25'}
+    """
+    from urllib.parse import parse_qs
+    if not qstr: return {}
+    if qstr.startswith('?'): qstr=qstr[1:]
+    if not qstr: return {}
+    params = parse_qs(qstr)
+    return dict(params) if params else {}

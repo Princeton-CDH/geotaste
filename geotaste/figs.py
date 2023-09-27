@@ -733,7 +733,7 @@ class LandmarksFigureFactory(FigureFactory):
     dataset_class = Landmarks
     cols_table = ['landmark','address','arrond_id','lat','lon']
 
-    def plot_map(self, color='gray', **kwargs):
+    def plot_map_mapbox(self, color='gray', **kwargs):
         """Plot a scattermapbox with landmarks.
         
         Args:
@@ -784,6 +784,33 @@ class LandmarksFigureFactory(FigureFactory):
         # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
         
         return fig
+    
+    def plot_map(self, color='gray', **kwargs):
+        """Plot a dash leaflet map with one landmark, S and Co.
+        
+        Args:
+            color (str, optional): The color of the markers. Defaults to 'gray'.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            go.Figure: The scattermapbox figure.
+        """
+        map = dl.Map(
+            children=[
+                dl.TileLayer(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
+                dl.TileLayer(url="https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"),
+                dl.FeatureGroup(id='featuregroup-markers'),
+                dl.FeatureGroup(id='featuregroup-markers2'),
+                get_sco_marker()
+            ],
+            preferCanvas=True, 
+            center=LATLON_SCO, 
+            zoom=DEFAULT_STATE['zoom'],
+            id="mainmap",
+            maxZoom=16,
+            minZoom=2
+        )
+        return map
 
 
 
@@ -822,7 +849,11 @@ class CombinedFigureFactory(FigureFactory):
             pandas.DataFrame: A dataframe with dwelling as index
         """
         assert 'dwelling' in set(self.data.columns)
-        return self.data.drop_duplicates('dwelling').set_index('dwelling')
+        df = self.data[self.data.dwelling!=''].drop_duplicates('dwelling')
+        df = postproc_df(df, cols_q=['lat','lon'])
+        df = df.dropna(subset=['lat','lon'])
+        df = df.set_index('dwelling')
+        return df
     
     @cached_property
     def df_members(self): 
@@ -868,7 +899,7 @@ class CombinedFigureFactory(FigureFactory):
             cols = self.cols_table_members+self.cols_table_books
         return get_dash_table(df, cols=cols)
 
-    def plot_map(self, color=None, color_text='black', return_trace=False, **kwargs):
+    def plot_map_mapbox(self, color=None, color_text='black', return_trace=False, **kwargs):
         """Plot a map with member dwellings from the currently filtered data.
         
         Args:
@@ -923,6 +954,45 @@ class CombinedFigureFactory(FigureFactory):
         fig = update_fig_mapbox_background(go.Figure())
         fig.add_trace(trace)
         return fig
+
+    def plot_map(self, color=None, color_text='black', return_trace=False, return_markers=True, **kwargs):
+        """Plot a map with member dwellings from the currently filtered data.
+        
+        Args:
+            color (str, optional): The color of the markers. Defaults to None.
+            color_text (str, optional): The color of the text. Defaults to 'black'.
+            return_trace (bool, optional): Whether to return only the trace. Defaults to False.
+            **kwargs: Additional keyword arguments to pass to the function.
+        
+        Returns:
+            go.Figure: The figure object with the map.
+        """
+
+        logger.debug([color, self.color, DEFAULT_COLOR])
+        if not color and self.color: color=self.color
+        if not color: color=DEFAULT_COLOR
+        figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
+
+        markers=[get_member_marker(row) for i,row in figdf.iterrows()]
+        if return_markers: return markers
+        fg = dl.FeatureGroup(markers, id='featuregroup-markers')
+
+        map = dl.Map(
+                children=[
+                    dl.TileLayer(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
+                    dl.TileLayer(url="https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"),
+                    fg,
+                    get_sco_marker()
+                ],
+                preferCanvas=True, 
+                center=LATLON_SCO, 
+                zoom=14, 
+                id="mainmap",
+                maxZoom=16,
+                minZoom=2
+            )
+        return map
 
 
 
@@ -1081,23 +1151,24 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             colval_L='Filter 1',
             colval_R='Filter 2',
         )
-    
-    def plot_map(self, plot_kwargs_L={}, plot_kwargs_R={}) -> go.Figure:
-        """Plot a map using the given plot_kwargs for the left and right panels' map plots.
+
+    # NOTE: deprecated  -->
+    # def plot_map(self, plot_kwargs_L={}, plot_kwargs_R={}) -> go.Figure:
+    #     """Plot a map using the given plot_kwargs for the left and right panels' map plots.
         
-        Args:
-            plot_kwargs_L (dict): Keyword arguments for the left plot.
-            plot_kwargs_R (dict): Keyword arguments for the right plot.
+    #     Args:
+    #         plot_kwargs_L (dict): Keyword arguments for the left plot.
+    #         plot_kwargs_R (dict): Keyword arguments for the right plot.
         
-        Returns:
-            go.Figure: The plotted map as a Plotly Figure object.
-        """
-        fig=go.Figure()
-        figL=self.L.plot_map(return_trace=True, **plot_kwargs_L)
-        figR=self.R.plot_map(return_trace=True, **plot_kwargs_R)
-        ofig=go.Figure()
-        ofig.add_traces([figL, figR])
-        return update_fig_mapbox_background(ofig)
+    #     Returns:
+    #         go.Figure: The plotted map as a Plotly Figure object.
+    #     """
+    #     fig=go.Figure()
+    #     figL=self.L.plot_map(return_trace=True, **plot_kwargs_L)
+    #     figR=self.R.plot_map(return_trace=True, **plot_kwargs_R)
+    #     ofig=go.Figure()
+    #     ofig.add_traces([figL, figR])
+    #     return update_fig_mapbox_background(ofig)
 
     def plot_oddsratio_map(self, comparison_df=None, col='odds_ratio_log', **kwargs):
         """Plots an odds ratio map using a choropleth mapbox.
@@ -1322,7 +1393,7 @@ def get_cached_fig_or_table(args_id):
     """Produce or retrieve memoized/cached figure or table based on the given serialized arguments 
     
     Args:
-        args_id (str): The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab).
+        args_id (str): The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab,kwargs).
     
     Returns:
         str: The JSON, zlib-compressed string representation of the figure or table.
@@ -1331,9 +1402,9 @@ def get_cached_fig_or_table(args_id):
     fdL,fdR,active_tab,analysis_tab,kwargs=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)
     logger.debug([args_id,ff])
-    if active_tab=='map':
-        out=ff.plot_map(**kwargs)
-    else:
+    # if active_tab=='map':
+        # out=ff.plot_map(**kwargs)
+    if active_tab=='table':
         if isinstance(ff,ComparisonFigureFactory):    
             pcols=[c for c in PREDICT_COLS if c.startswith(analysis_tab)] if analysis_tab else PREDICT_COLS
             out=ff.table(cols=pcols, **kwargs)
@@ -1375,7 +1446,6 @@ def from_json_gz_str(ojsongzstr):
         return pio.from_json(ojson)
     except ValueError:
         return orjson.loads(ojson)
-
 
 
 
@@ -1462,3 +1532,66 @@ def get_selected_records_from_figure_selected_data(selectedData:dict={}, quant=N
         quant=quant
     ).sort_values().tolist()
     return selected_records
+
+
+
+def get_sco_marker():
+    w=49
+    h=63
+    sco_marker = dl.Marker(
+        id='sco_marker',
+        title='Shakespeare and Co',
+        position=LATLON_SCO,
+        icon={
+            'iconUrl':'/assets/bookstore-pin.png',
+            'iconSize': (w,h),
+            'iconAnchor': (w//2,h)
+        },
+    )
+    return sco_marker
+
+
+
+# marker_js_func=js_assign("""
+# function(e, ctx) {
+#     console.log('click4', ctx.id);
+#     ctx.setProps({clicked:ctx.id});
+# }
+# """)
+
+def get_member_marker(row, L_or_R='L',as_json=False):
+    popup=dl.Popup(content=row.hover_tooltip)
+    if as_json: popup=popup.to_plotly_json()
+    marker = dl.Marker(
+        children=popup,
+        id=row.dwelling+'_'+L_or_R,
+        title=row.member_name,
+        interactive=True,
+        bubblingMouseEvents=True,
+        position=(row.lat,row.lon),
+        icon={
+            'iconUrl': f'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-{"blue" if L_or_R=="L" else "violet"}.png',
+            'shadowUrl': 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            'iconSize': [25, 41],
+            'iconAnchor': [12, 41],
+            'popupAnchor': [1, -34],
+            'shadowSize': [10, 10]
+        },
+        # eventHandlers = dict(
+            # click=marker_js_func
+        # )
+    )
+    if as_json: marker=marker.to_plotly_json()
+    return marker
+
+
+def store_all_markers_in_assets_folder(ofn=None):
+    if ofn is None: ofn=os.path.join(PATH_ASSETS, 'data.markers.compressed.json')
+    df=CombinedFigureFactory().df_dwellings.reset_index()
+    odx={}
+    for i,row in df.iterrows():
+        for lr in ['L','R']:
+            marker = get_member_marker(row, L_or_R=lr, as_json=True)
+            odx[marker['props']['id']] = marker
+    compress_to(odx, ofn)
+    return ofn

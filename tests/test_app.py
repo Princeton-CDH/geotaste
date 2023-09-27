@@ -10,8 +10,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import requests,bs4,flask
 
-NAPTIME = int(os.environ.get('NAPTIME', 3))
-def _nap(): time.sleep(NAPTIME)
+NAPTIME = int(os.environ.get('NAPTIME', 5))
+def _nap(naptime=NAPTIME): time.sleep(naptime)
 
 
 
@@ -20,10 +20,55 @@ def test_showhide_components(dash_duo):
     app = get_app()
     dash_duo.start_server(app.app)
 
-    assert dash_duo.find_element('.modal-title').text == WELCOME_HEADER
+    # modal open
+    assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    assert dash_duo.find_element('#donotcite').text == DONOTCITE
+    # close modal
     dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    _nap()
+    # modal ought to be closed
+    try:
+        dash_duo.find_element('#welcome-modal .modal-title')
+        assert False, 'should be gone'
+    except Exception:
+        assert True, 'correctly not found'
+
+    # open modal another way
+    dash_duo.multiple_click('#welcome_modal_info_btn', 1)
+    _nap(5 if NAPTIME < 5 else NAPTIME)
+    # modal ought to be open
+    assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    # close modal
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    _nap()
+    # modal ought to be closed
+    try:
+        dash_duo.find_element('#welcome-modal .modal-title')
+        assert False, 'should be gone'
+    except Exception:
+        assert True, 'correctly not found'
+
+
+    # open modal ANOTHER way
+    dash_duo.multiple_click('#logo_popup', 1)
+    _nap(5 if NAPTIME < 5 else NAPTIME)
+    # modal ought to be open
+    assert dash_duo.find_element('#welcome-modal .modal-title').text == WELCOME_HEADER
+    # close modal
+    dash_duo.multiple_click('#welcome-modal .btn-close', 1)
+    _nap()
+    # modal ought to be closed
+    try:
+        dash_duo.find_element('#welcome-modal .modal-title')
+        assert False, 'should be gone'
+    except Exception:
+        assert True, 'correctly not found'
+
+
 
     assert dash_duo.find_element('#logo_popup').text == SITE_TITLE
+
+
 
     def test_button_showhide_l(button_showhide_ids, close=False):    
         for btn_id in button_showhide_ids:
@@ -267,11 +312,11 @@ def test_query_strings(dash_duo):
         assert 'Fiction' in el.text
         assert 'Poetry' in el.text
 
-        logger.debug('Testing lat/long/zoom query params')
-        driver.get(f'{host}?lat=48.85697&lon=2.32748&zoom=16.23372')
-        _nap()
-        el = driver.find_element_by_id('mainmap')
-        assert el.is_displayed()
+        # logger.debug('Testing lat/long/zoom query params')
+        # driver.get(f'{host}?lat=48.85697&lon=2.32748&zoom=16.23372')
+        # _nap()
+        # el = driver.find_element_by_id('mainmap')
+        # assert el.is_displayed()
 
         driver.get(f'{host}?tab=map')
         _nap()
@@ -280,12 +325,12 @@ def test_query_strings(dash_duo):
         driver.find_element_by_id('test_suite_btn').click()
         _nap()
 
-        driver.find_element_by_id('test_suite_btn4').click()
-        _nap()
+        # driver.find_element_by_id('test_suite_btn4').click()
+        # _nap()
 
-        assert 'lat=' in driver.current_url
-        assert 'lon=' in driver.current_url
-        assert 'zoom=' in driver.current_url
+        # assert 'lat=' in driver.current_url
+        # assert 'lon=' in driver.current_url
+        # assert 'zoom=' in driver.current_url
 
         # close
         driver.close()

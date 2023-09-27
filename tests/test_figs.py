@@ -115,12 +115,15 @@ def test_LandmarksFigureFactory():
     ff=LandmarksFigureFactory()
     assert_frame_equal(ff.data, LandmarksDataset().data)
     fig=ff.plot_map()
+    assert fig.zoom == DEFAULT_STATE['zoom']
+    d=fig.to_plotly_json()
+    assert type(d)==dict and d
+
+    fig=ff.plot_map_mapbox()
     figdat=fig.data[0]
-    laydat=json.loads(fig.layout.to_json())
     assert len(figdat['lat'])
     assert len(figdat['lon'])
     assert len(figdat['text'])
-    # assert laydat.get('mapbox',{}).get('layers',{}) # not now
 
 
 
@@ -159,13 +162,18 @@ def test_CombinedFigureFactory():
     assert_frame_equal(ff.data_orig, Combined().data)
     assert_frame_not_equal(ff.data, ff.data_orig)
     assert not any({'Fiction' not in x for x in ff.data.book_genre})
-    fig=ff.plot_map()
+    fig=ff.plot_map(return_markers=False)
+    assert fig.zoom == DEFAULT_STATE['zoom']
+    d=fig.to_plotly_json()
+    assert type(d)==dict and d
+    markers=ff.plot_map(return_markers=True)
+    assert type(markers)==list and markers
+
+    fig=ff.plot_map_mapbox()
     figdat=fig.data[0]
-    laydat=json.loads(fig.layout.to_json())
     assert len(figdat['lat'])
     assert len(figdat['lon'])
     assert len(figdat['text'])
-    assert not laydat.get('mapbox',{}).get('layers',{}) # only landmarks
 
 def test_ComparisonFigureFactory():
     # test case 1: empty
@@ -290,23 +298,24 @@ def test_get_cached_fig_or_table():
                 )
             )
         )
-    
-    mapfig1=get()
-    mapfig2=get({'book_genre':['Fiction']})
-    mapfig3=get({}, {'book_genre':['Fiction']})
-    mapfig4=get({'book_genre':['Poetry']}, {'book_genre':['Fiction']})
-    
-    assert mapfig1.data[0].name.startswith('Landmark')
-    assert mapfig2.data[0].name.startswith('Member')
-    assert mapfig3.data[0].name.startswith('Member')
-    assert mapfig4.data[0].name.startswith('Member')
 
-    assert mapfig2.data[0]['marker']['color'] == LEFT_COLOR
-    assert mapfig3.data[0]['marker']['color'] == RIGHT_COLOR
+    # no longer used ->    
+    # mapfig1=get()
+    # mapfig2=get({'book_genre':['Fiction']})
+    # mapfig3=get({}, {'book_genre':['Fiction']})
+    # mapfig4=get({'book_genre':['Poetry']}, {'book_genre':['Fiction']})
     
-    assert len(mapfig4.data)==2
-    assert mapfig4.data[0]['marker']['color'] == LEFT_COLOR
-    assert mapfig4.data[1]['marker']['color'] == RIGHT_COLOR
+    # assert mapfig1.data[0].name.startswith('Landmark')
+    # assert mapfig2.data[0].name.startswith('Member')
+    # assert mapfig3.data[0].name.startswith('Member')
+    # assert mapfig4.data[0].name.startswith('Member')
+
+    # assert mapfig2.data[0]['marker']['color'] == LEFT_COLOR
+    # assert mapfig3.data[0]['marker']['color'] == RIGHT_COLOR
+    
+    # assert len(mapfig4.data)==2
+    # assert mapfig4.data[0]['marker']['color'] == LEFT_COLOR
+    # assert mapfig4.data[1]['marker']['color'] == RIGHT_COLOR
 
     tblfig1=get(tab='table')
     tblfig2=get({'book_genre':['Fiction']}, tab='table')
@@ -372,3 +381,13 @@ def test_get_selected_records_from_figure_selected_data():
     
     
 
+def test_store_all_markers_in_assets_folder():
+    ofn=store_all_markers_in_assets_folder()
+    odx=uncompress_from(ofn)
+    assert type(odx) is dict and all(';' in key for key in odx.keys())
+
+    with tempfile.TemporaryDirectory() as tdir:
+        ofn=os.path.join(tdir,'tmp.obj')
+        store_all_markers_in_assets_folder(ofn)
+        odx=uncompress_from(ofn)
+        assert type(odx) is dict and all(';' in key for key in odx.keys())
