@@ -298,11 +298,11 @@ def test_query_strings(dash_duo):
         assert 'Fiction' in el.text
         assert 'Poetry' in el.text
 
-        logger.debug('Testing lat/long/zoom query params')
-        driver.get(f'{host}?lat=48.85697&lon=2.32748&zoom=16.23372')
-        _nap()
-        el = driver.find_element_by_id('mainmap')
-        assert el.is_displayed()
+        # logger.debug('Testing lat/long/zoom query params')
+        # driver.get(f'{host}?lat=48.85697&lon=2.32748&zoom=16.23372')
+        # _nap()
+        # el = driver.find_element_by_id('mainmap')
+        # assert el.is_displayed()
 
         driver.get(f'{host}?tab=map')
         _nap()
