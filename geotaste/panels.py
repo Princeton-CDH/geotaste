@@ -990,13 +990,13 @@ class ComparisonPanel(BaseComponent):
         # def test_suite_btn3_onclick(n_clicks):
         #     return {}
         
-        @app.callback(
-            Output(self.mainmap, 'relayoutData', allow_duplicate=True),
-            Input('test_suite_btn4', 'n_clicks'),
-            prevent_initial_call=True
-         )
-        def test_suite_btn4_onclick(n_clicks):
-            return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}
+        # @app.callback(
+        #     Output(self.mainmap, 'relayoutData', allow_duplicate=True),
+        #     Input('test_suite_btn4', 'n_clicks'),
+        #     prevent_initial_call=True
+        #  )
+        # def test_suite_btn4_onclick(n_clicks):
+        #     return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}
         
         @app.callback(
             Output(self.L.store, 'data', allow_duplicate=True),
