@@ -675,14 +675,69 @@ def rejoin_sep(listy_obj, sep='_'):
 
 
 def compressed_bytes(obj):
+    """Compresses the given object into a base64 encoded string.
+    
+    Args:
+        obj: The object to be compressed.
+    
+    Returns:
+        str: The base64 encoded string representing the compressed object.
+    """
+    
     ojson_b=orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
     ojson_bz = zlib.compress(ojson_b)
     ojson_bz64 = b64encode(ojson_bz)
     return ojson_bz64
 
 def compressed_str(obj):
+    """Return a compressed string representation of the given object.
+    
+    Args:
+        obj: The object to be compressed.
+    
+    Returns:
+        str: The compressed string representation of the object.
+    
+    Note:
+        This function internally uses the `compressed_bytes` function to compress the object and then decodes the compressed bytes using 'utf-8' encoding.
+    """
+    
     return compressed_bytes(obj).decode('utf-8')
 
 def compress_to(obj, fn):
+    """Compresses the given object and writes the compressed bytes to a file.
+    
+    Args:
+        obj: The object to be compressed.
+        fn: The filename of the file to write the compressed bytes to.
+    
+    Returns:
+        None
+    
+    Raises:
+        IOError: If there is an error while writing to the file.
+    """
+    
     with open(fn,'wb') as of:
         of.write(compressed_bytes(obj))
+
+
+def get_query_params(qstr:str) -> dict:
+    """Returns a dictionary of query parameters from the given query string.
+    
+    Args:
+        qstr (str): The query string containing the parameters.
+    
+    Returns:
+        dict: A dictionary containing the query parameters.
+    
+    Example:
+        >>> get_query_params('?name=John&age=25')
+        {'name': 'John', 'age': '25'}
+    """
+    from urllib.parse import parse_qs
+    if not qstr: return {}
+    if qstr.startswith('?'): qstr=qstr[1:]
+    if not qstr: return {}
+    params = parse_qs(qstr)
+    return dict(params) if params else {}
