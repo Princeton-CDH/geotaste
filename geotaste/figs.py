@@ -1583,3 +1583,15 @@ def get_member_marker(row, L_or_R='L',as_json=False):
     )
     if as_json: marker=marker.to_plotly_json()
     return marker
+
+
+def store_all_markers_in_assets_folder(ofn=None):
+    if ofn is None: ofn=os.path.join(PATH_ASSETS, 'data.markers.compressed.json')
+    df=CombinedFigureFactory().df_dwellings.reset_index()
+    odx={}
+    for i,row in df.iterrows():
+        for lr in ['L','R']:
+            marker = get_member_marker(row, L_or_R=lr, as_json=True)
+            odx[marker['props']['id']] = marker
+    compress_to(odx, ofn)
+    return ofn

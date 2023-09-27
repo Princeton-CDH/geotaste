@@ -381,3 +381,13 @@ def test_get_selected_records_from_figure_selected_data():
     
     
 
+def test_store_all_markers_in_assets_folder():
+    ofn=store_all_markers_in_assets_folder()
+    odx=uncompress_from(ofn)
+    assert type(odx) is dict and all(';' in key for key in odx.keys())
+
+    with tempfile.TemporaryDirectory() as tdir:
+        ofn=os.path.join(tdir,'tmp.obj')
+        store_all_markers_in_assets_folder(ofn)
+        odx=uncompress_from(ofn)
+        assert type(odx) is dict and all(';' in key for key in odx.keys())

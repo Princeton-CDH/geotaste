@@ -272,3 +272,6 @@ from .components import *
 from .panels import *
 from .layouts import *
 from .app import *
+
+# any preprocess steps
+store_all_markers_in_assets_folder()
