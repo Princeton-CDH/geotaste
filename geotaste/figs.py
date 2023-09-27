@@ -805,7 +805,7 @@ class LandmarksFigureFactory(FigureFactory):
             ],
             preferCanvas=True, 
             center=LATLON_SCO, 
-            zoom=14, 
+            zoom=DEFAULT_STATE['zoom'],
             id="mainmap",
             maxZoom=16,
             minZoom=2
@@ -1574,7 +1574,7 @@ def get_member_marker(row, L_or_R='L',as_json=False):
             'iconSize': [25, 41],
             'iconAnchor': [12, 41],
             'popupAnchor': [1, -34],
-            'shadowSize': [0, 0]
+            'shadowSize': [10, 10]
         },
         # eventHandlers = dict(
             # click=marker_js_func
