@@ -1402,9 +1402,9 @@ def get_cached_fig_or_table(args_id):
     fdL,fdR,active_tab,analysis_tab,kwargs=unserialize(args_id)
     ff=get_ff_for_num_filters(fdL,fdR)
     logger.debug([args_id,ff])
-    if active_tab=='map':
-        out=ff.plot_map(**kwargs)
-    else:
+    # if active_tab=='map':
+        # out=ff.plot_map(**kwargs)
+    if active_tab=='table':
         if isinstance(ff,ComparisonFigureFactory):    
             pcols=[c for c in PREDICT_COLS if c.startswith(analysis_tab)] if analysis_tab else PREDICT_COLS
             out=ff.table(cols=pcols, **kwargs)
