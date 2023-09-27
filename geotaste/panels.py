@@ -334,6 +334,8 @@ class ComparisonPanel(BaseComponent):
                 self.mainview,
                 self.store,
                 self.store_json,
+                self.store_markers_L,
+                self.store_markers_R,
                 self.table_json,
                 self.test_suite,
                 self.test_suite_btn,
@@ -342,6 +344,11 @@ class ComparisonPanel(BaseComponent):
 
 
         ])
+    
+    @cached_property
+    def store_markers_L(self): return dcc.Store(id=self.id('store_markers_L'), data={})
+    @cached_property
+    def store_markers_R(self): return dcc.Store(id=self.id('store_markers_R'), data={})
     
     @cached_property
     def test_suite(self, num_btn=6):
@@ -703,47 +710,178 @@ class ComparisonPanel(BaseComponent):
         )
 
 
-        ## CHANGING MAP
+        # app.clientside_callback(
+        #     """
+        #     function(val) {
+        #         console.log(val);
+        #         return '1';
+        #     }
+        #     """,
+        #     Output("mainview_tabs", "children"), 
+        #     Input({'type': 'marker', 'index': MATCH}, 'clicked'),
+        # )
+
+        
+        # app.clientside_callback(
+        #     """
+        #     function(val) {
+        #         console.log(val);
+        #         return '1';
+        #     }
+        #     """,
+        #     Output("mainview_tabs", "children"), 
+        #     Input({'type': 'marker', 'index': ALL}, 'n_clicks'),
+        # )
+
+        # app.clientside_callback(
+        #     """
+        #     function(val) {
+        #         console.log(val);
+        #         return '1';
+        #     }
+        #     """,
+        #     Output("mainview_tabs", "children"), 
+        #     Input('sco_marker', 'click'),
+        # )
+
+        # @app.callback(
+        #     Output("logo", "children"), 
+        #     Input('sco_marker', 'n_clicks'),
+        # )
+        # def get_click(x):
+        #     print(x)
+        #     raise PreventUpdate
+        #     return 'hello'
+        
+
+        # @app.callback(
+        #     Output('mainview_tabs','children'),
+        #     Input('mainmap','n_clicks'),
+        #     State('mainmap', 'clickData')
+        # )
+        # def marker_click(x, clickdata):
+        #     lat = clickdata['latlng']['lat']
+        #     lon = clickdata['latlng']['lon']
+
+        #     raise PreventUpdate
+
+
+        # @app.callback(
+        #     Output('mainview_tabs','children'),
+        #     Input('mainmap','n_clicks'),
+        #     State('mainmap', 'clickData')
+        # )
+        # def marker_click(x, clickdata):
+        #     print(x, clickdata)
+        #     raise PreventUpdate
+
+
+        # ## CHANGING MAP
+        # @app.callback(
+        #     [
+        #         # Output(self.store_json, 'data',allow_duplicate=True),
+        #         Output('featuregroup-markers', 'children', allow_duplicate=True),
+        #         Output(self.store,'data',allow_duplicate=True),
+        #         Output('layout-loading-output', 'children', allow_duplicate=True),
+        #         # Output(self.mainview_tabs,'active_tab')
+        #     ],
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #         # Input(self.mainview_tabs, 'active_tab')
+        #     ],
+        #     [
+        #         # State(self.mainmap,'figure'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def update_LR_data(Lstore, Rstore):#, oldfig):
+        #     ostore=[Lstore,Rstore]
+        #     logger.debug(ostore)
+        #     ff = self.ff(Lstore,Rstore)
+        #     markers = ff.plot_map(return_markers=True)
+        #     # print(markers)
+        #     # with Logwatch('computing figdata on server'):
+        #     #     newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
+            
+        #     # logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
+                
+        #     # o=newfig_gz_str
+        #     # o = pickled(markers)
+        #     return markers, ostore, True
+                    ## CHANGING MAP
         @app.callback(
             [
-                Output(self.store_json, 'data',allow_duplicate=True),
                 Output(self.store,'data',allow_duplicate=True),
                 Output('layout-loading-output', 'children', allow_duplicate=True),
-                # Output(self.mainview_tabs,'active_tab')
+                # Output(self.store_markers_L, 'data'),
+                # Output(self.store_markers_R, 'data'),
+                # Output('featuregroup-markers', 'children', allow_duplicate=True),
+                # Output('featuregroup-markers2', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.L.store, 'data'),
                 Input(self.R.store, 'data'),
-                # Input(self.mainview_tabs, 'active_tab')
-            ],
-            [
-                State(self.mainmap,'figure'),
             ],
             prevent_initial_call=True
         )
-        def update_LR_data(Lstore, Rstore, oldfig):
+        def update_LR_data(Lstore, Rstore):
             ostore=[Lstore,Rstore]
             logger.debug(ostore)
-            with Logwatch('computing figdata on server'):
-                newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
-            
-            newfig = from_json_gz_str(newfig_gz_str)
-            ofig = go.Figure(data=newfig.data, layout=oldfig['layout'])
-            
-            logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
-                
-            return to_json_gz_str(ofig),ostore,True#,'map'
-            
+            out = [ostore, True]
+            # qd = {'fdL':Lstore} if ctx.triggered_id == self.L.store.id else {'fdR':Rstore}
+            # dwellings = list(self.ff(**qd).df_dwellings.index)
+            # out += [dwellings, dash.no_update] if ctx.triggered_id == self.L.store.id else [dash.no_update, dwellings]
+            return out
+
+
+        @app.callback(
+            Output(self.store_markers_L, 'data'),
+            Input(self.L.store, 'data')
+        )
+        def put_markers_L(data):
+            if not data: return []
+            return list(self.ff(fdL=data).df_dwellings.index)
+        
+        @app.callback(
+            Output(self.store_markers_R, 'data'),
+            Input(self.R.store, 'data')
+        )
+        def put_markers_L(data):
+            if not data: return []
+            return list(self.ff(fdR=data).df_dwellings.index)
 
         app.clientside_callback(
-            ClientsideFunction(
-                namespace='clientside',
-                function_name='decompress'
-            ),
-            Output(self.mainmap, 'figure', allow_duplicate=True),
-            Input(self.store_json, 'data'),
+            """
+            function(dwellings) {
+                return get_dwelling_markers(dwellings, "L");
+            }
+            """,
+            Output("featuregroup-markers", "children", allow_duplicate=True), 
+            Input(self.store_markers_L, 'data'),
             prevent_initial_call=True
         )
+
+        app.clientside_callback(
+            """
+            function(dwellings) {
+                return get_dwelling_markers(dwellings, "R");
+            }
+            """,
+            Output("featuregroup-markers2", "children", allow_duplicate=True), 
+            Input(self.store_markers_R, 'data'),
+            prevent_initial_call=True
+        )
+
+        # app.clientside_callback(
+        #     ClientsideFunction(
+        #         namespace='clientside',
+        #         function_name='unpickle'
+        #     ),
+        #     Output('featuregroup-markers', 'children', allow_duplicate=True),
+        #     Input(self.store_json, 'data'),
+        #     prevent_initial_call=True
+        # )
 
 
 

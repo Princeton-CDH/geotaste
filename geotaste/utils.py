@@ -672,3 +672,17 @@ def ensure_dir(fn):
 def rejoin_sep(listy_obj, sep='_'):
     if not is_listy(listy_obj): return listy_obj
     return sep.join(str(x) for x in listy_obj)
+
+
+def compressed_bytes(obj):
+    ojson_b=orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
+    ojson_bz = zlib.compress(ojson_b)
+    ojson_bz64 = b64encode(ojson_bz)
+    return ojson_bz64
+
+def compressed_str(obj):
+    return compressed_bytes(obj).decode('utf-8')
+
+def compress_to(obj, fn):
+    with open(fn,'wb') as of:
+        of.write(compressed_bytes(obj))

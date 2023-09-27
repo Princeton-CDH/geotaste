@@ -16,7 +16,7 @@ import random
 import pandas as pd
 import numbers
 from numbers import Number
-import json
+import json,pickle
 from collections import Counter
 
 # for typing purposes
@@ -24,6 +24,9 @@ from typing import *
 from collections.abc import *
 
 ## Non-sys imports
+os.environ['ASSETS_FOLDER'] = PATH_ASSETS
+
+
 import orjson
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -35,7 +38,7 @@ from diskcache import Cache
 cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
 # cache = cache_obj.memoize()
 import dash
-from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL, DiskcacheManager
+from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL, DiskcacheManager, Patch
 # background_manager = DiskcacheManager(cache_obj)
 from dash.exceptions import PreventUpdate
 from pprint import pprint, pformat
@@ -57,7 +60,6 @@ import zlib
 from base64 import b64decode,b64encode
 from colour import Color
 import dash_leaflet as dl
-
 
 
 # setup logs
@@ -259,7 +261,6 @@ ASSETS_URL = f'{ROOT_URL}/assets'
 LOGO_SRC=f"{ASSETS_URL}/SCo_logo_graphic-small.png"
 LOGO_SRC2=f"{ASSETS_URL}/rulerlab-small.png"
 PATH_LOGO = os.path.join(PATH_ASSETS,os.path.basename(LOGO_SRC))
-PATH_LOC = os.path.join(PATH_ASSETS, 'jardin.png')
 
 
 from .utils import *

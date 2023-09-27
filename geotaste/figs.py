@@ -795,25 +795,15 @@ class LandmarksFigureFactory(FigureFactory):
         Returns:
             go.Figure: The scattermapbox figure.
         """
-        w=49
-        h=63
-        sco_marker = dl.Marker(
-            title='Shakespeare and Co',
-            position=LATLON_SCO,
-            icon={
-                'iconUrl':'/assets/bookstore-pin.png',
-                'iconSize': (w,h),
-                'iconAnchor': (w//2,h)
-            },
-        )
         map = dl.Map(
             children=[
                 dl.TileLayer(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
                 dl.TileLayer(url="https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"),
-                dl.FeatureGroup([sco_marker])
+                dl.FeatureGroup(id='featuregroup-markers'),
+                dl.FeatureGroup(id='featuregroup-markers2'),
+                get_sco_marker()
             ],
-            # preferCanvas=True, 
-            # style={'width': "100vw", 'height': "100vh"}, 
+            preferCanvas=True, 
             center=LATLON_SCO, 
             zoom=14, 
             id="mainmap",
@@ -859,7 +849,11 @@ class CombinedFigureFactory(FigureFactory):
             pandas.DataFrame: A dataframe with dwelling as index
         """
         assert 'dwelling' in set(self.data.columns)
-        return self.data.drop_duplicates('dwelling').set_index('dwelling')
+        df = self.data[self.data.dwelling!=''].drop_duplicates('dwelling')
+        df = postproc_df(df, cols_q=['lat','lon'])
+        df = df.dropna(subset=['lat','lon'])
+        df = df.set_index('dwelling')
+        return df
     
     @cached_property
     def df_members(self): 
@@ -905,7 +899,7 @@ class CombinedFigureFactory(FigureFactory):
             cols = self.cols_table_members+self.cols_table_books
         return get_dash_table(df, cols=cols)
 
-    def plot_map(self, color=None, color_text='black', return_trace=False, **kwargs):
+    def plot_map_mapbox(self, color=None, color_text='black', return_trace=False, **kwargs):
         """Plot a map with member dwellings from the currently filtered data.
         
         Args:
@@ -960,6 +954,45 @@ class CombinedFigureFactory(FigureFactory):
         fig = update_fig_mapbox_background(go.Figure())
         fig.add_trace(trace)
         return fig
+
+    def plot_map(self, color=None, color_text='black', return_trace=False, return_markers=True, **kwargs):
+        """Plot a map with member dwellings from the currently filtered data.
+        
+        Args:
+            color (str, optional): The color of the markers. Defaults to None.
+            color_text (str, optional): The color of the text. Defaults to 'black'.
+            return_trace (bool, optional): Whether to return only the trace. Defaults to False.
+            **kwargs: Additional keyword arguments to pass to the function.
+        
+        Returns:
+            go.Figure: The figure object with the map.
+        """
+
+        logger.debug([color, self.color, DEFAULT_COLOR])
+        if not color and self.color: color=self.color
+        if not color: color=DEFAULT_COLOR
+        figdf = self.df_dwellings.reset_index().fillna('').query('(lat!="") & (lon!="")')
+        # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
+
+        markers=[get_member_marker(row) for i,row in figdf.iterrows()]
+        if return_markers: return markers
+        fg = dl.FeatureGroup(markers, id='featuregroup-markers')
+
+        map = dl.Map(
+                children=[
+                    dl.TileLayer(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
+                    dl.TileLayer(url="https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"),
+                    fg,
+                    get_sco_marker()
+                ],
+                preferCanvas=True, 
+                center=LATLON_SCO, 
+                zoom=14, 
+                id="mainmap",
+                maxZoom=16,
+                minZoom=2
+            )
+        return map
 
 
 
@@ -1415,7 +1448,6 @@ def from_json_gz_str(ojsongzstr):
 
 
 
-
 def update_fig_mapbox_background(fig):
     """Updates the background of a Mapbox figure.
     
@@ -1499,3 +1531,54 @@ def get_selected_records_from_figure_selected_data(selectedData:dict={}, quant=N
         quant=quant
     ).sort_values().tolist()
     return selected_records
+
+
+
+def get_sco_marker():
+    w=49
+    h=63
+    sco_marker = dl.Marker(
+        id='sco_marker',
+        title='Shakespeare and Co',
+        position=LATLON_SCO,
+        icon={
+            'iconUrl':'/assets/bookstore-pin.png',
+            'iconSize': (w,h),
+            'iconAnchor': (w//2,h)
+        },
+    )
+    return sco_marker
+
+
+
+# marker_js_func=js_assign("""
+# function(e, ctx) {
+#     console.log('click4', ctx.id);
+#     ctx.setProps({clicked:ctx.id});
+# }
+# """)
+
+def get_member_marker(row, L_or_R='L',as_json=False):
+    popup=dl.Popup(content=row.hover_tooltip)
+    if as_json: popup=popup.to_plotly_json()
+    marker = dl.Marker(
+        children=popup,
+        id=row.dwelling+'_'+L_or_R,
+        title=row.member_name,
+        interactive=True,
+        bubblingMouseEvents=True,
+        position=(row.lat,row.lon),
+        icon={
+            'iconUrl': f'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-{"blue" if L_or_R=="L" else "violet"}.png',
+            'shadowUrl': 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            'iconSize': [25, 41],
+            'iconAnchor': [12, 41],
+            'popupAnchor': [1, -34],
+            'shadowSize': [41, 41]
+        },
+        # eventHandlers = dict(
+            # click=marker_js_func
+        # )
+    )
+    if as_json: marker=marker.to_plotly_json()
+    return marker
