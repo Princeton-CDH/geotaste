@@ -616,12 +616,15 @@ def get_geojson_arrondissement(force=False):
     return jsond
 
 def hover_tooltip(row):
+    mrange_start = f"{int(min(row.member_membership)) if row.member_membership else ''}"
+    mrange_end = f"{int(max(row.member_membership)) if row.member_membership else ''}"
+    mrange=f'{mrange_start} – {mrange_end}' if mrange_start!=mrange_end else mrange_start
     return f"""
-<a href="https://shakespeareandco.princeton.edu/members/{row.member}/">{row.member_name} ({ifnanintstr(row.member_dob)} – {ifnanintstr(row.member_dod)})
+<a href="https://shakespeareandco.princeton.edu/members/{row.member}/" target="_blank"><b>{row.member_name}</b> ({ifnanintstr(row.member_dob)} – {ifnanintstr(row.member_dod)})</a>
 {row.dwelling_address}
-{row.dwelling_city} {row.arrond_id}ᵉ
+{row.dwelling_city} {row.arrond_id}{"ᵉ" if row.arrond_id!="1" else "ᵉʳ"}
 
-Member: {int(min(row.member_membership)) if row.member_membership else ''} – {int(max(row.member_membership)) if row.member_membership else ''}
+Member: {mrange}
 """.strip().replace('\n','<br>')
 
 def determine_arrond(lat, lon, default='NA'):
