@@ -922,18 +922,16 @@ class ComparisonPanel(BaseComponent):
                 Output('welcome-modal', 'is_open')
             ],
             Input('url-input','search'),
-            [
-                State(self.app_begun, 'data'),
-                State(self.mainmap, 'figure'),
-            ],
+            State(self.app_begun, 'data'),
             prevent_initial_call=True
         )
-        def load_query_param(searchstr, app_begun, figdat):
+        def load_query_param(searchstr, app_begun):
             if app_begun: raise PreventUpdate
             if not searchstr: raise PreventUpdate
             params = get_query_params(searchstr)
             logger.debug(params)
-            fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
+            fdL, fdR, tab, tab2 = {}, {}, 'map', 'arrond'
+            # fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
 
             for k,v in list(params.items()):
                 if k=='tab':
@@ -944,10 +942,10 @@ class ComparisonPanel(BaseComponent):
                     fdR[k[:-1]]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
                 elif '_' in k:
                     fdL[k]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
-                else:
-                    mapd[k]=float(v[0])
-            logger.debug(f'mapd: {mapd}')
-            center = {'lat':mapd.get('lat', DEFAULT_STATE['lat']), 'lng':mapd.get('lon', DEFAULT_STATE['lon'])}
+                # else:
+                    # mapd[k]=float(v[0])
+            # logger.debug(f'mapd: {mapd}')
+            # center = {'lat':mapd.get('lat', DEFAULT_STATE['lat']), 'lng':mapd.get('lon', DEFAULT_STATE['lon'])}
             # zoom = int(mapd.get('zoom', DEFAULT_STATE['zoom']))
             # out = [fdL, fdR, tab, tab2, dash.no_update, center, True, False]
             out = [fdL, fdR, tab, tab2, True, False]

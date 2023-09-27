@@ -689,6 +689,13 @@ def compressed_bytes(obj):
     ojson_bz64 = b64encode(ojson_bz)
     return ojson_bz64
 
+def uncompressed_bytes(ojson_bz64):
+    if type(ojson_bz64)==str: ojson_bz64=ojson_bz64.encode()
+    ojson_bz = b64decode(ojson_bz64)
+    ojson_b = zlib.decompress(ojson_bz)
+    ojson=orjson.loads(ojson_b)
+    return ojson
+
 def compressed_str(obj):
     """Return a compressed string representation of the given object.
     
@@ -703,6 +710,9 @@ def compressed_str(obj):
     """
     
     return compressed_bytes(obj).decode('utf-8')
+
+def uncompressed_str(x):
+    return uncompressed_bytes(x)
 
 def compress_to(obj, fn):
     """Compresses the given object and writes the compressed bytes to a file.
@@ -721,6 +731,9 @@ def compress_to(obj, fn):
     with open(fn,'wb') as of:
         of.write(compressed_bytes(obj))
 
+def uncompress_from(fn):
+    with open(fn,'rb') as of:
+        return uncompressed_bytes(of.read())
 
 def get_query_params(qstr:str) -> dict:
     """Returns a dictionary of query parameters from the given query string.

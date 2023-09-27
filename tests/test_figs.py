@@ -119,6 +119,12 @@ def test_LandmarksFigureFactory():
     d=fig.to_plotly_json()
     assert type(d)==dict and d
 
+    fig=ff.plot_map_mapbox()
+    figdat=fig.data[0]
+    assert len(figdat['lat'])
+    assert len(figdat['lon'])
+    assert len(figdat['text'])
+
 
 
 def assert_frame_not_equal(*args, **kwargs):
@@ -162,6 +168,12 @@ def test_CombinedFigureFactory():
     assert type(d)==dict and d
     markers=ff.plot_map(return_markers=True)
     assert type(markers)==list and markers
+
+    fig=ff.plot_map_mapbox()
+    figdat=fig.data[0]
+    assert len(figdat['lat'])
+    assert len(figdat['lon'])
+    assert len(figdat['text'])
 
 def test_ComparisonFigureFactory():
     # test case 1: empty

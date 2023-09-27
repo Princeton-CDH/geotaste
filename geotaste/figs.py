@@ -1151,23 +1151,24 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             colval_L='Filter 1',
             colval_R='Filter 2',
         )
-    
-    def plot_map(self, plot_kwargs_L={}, plot_kwargs_R={}) -> go.Figure:
-        """Plot a map using the given plot_kwargs for the left and right panels' map plots.
+
+    # NOTE: deprecated  -->
+    # def plot_map(self, plot_kwargs_L={}, plot_kwargs_R={}) -> go.Figure:
+    #     """Plot a map using the given plot_kwargs for the left and right panels' map plots.
         
-        Args:
-            plot_kwargs_L (dict): Keyword arguments for the left plot.
-            plot_kwargs_R (dict): Keyword arguments for the right plot.
+    #     Args:
+    #         plot_kwargs_L (dict): Keyword arguments for the left plot.
+    #         plot_kwargs_R (dict): Keyword arguments for the right plot.
         
-        Returns:
-            go.Figure: The plotted map as a Plotly Figure object.
-        """
-        fig=go.Figure()
-        figL=self.L.plot_map(return_trace=True, **plot_kwargs_L)
-        figR=self.R.plot_map(return_trace=True, **plot_kwargs_R)
-        ofig=go.Figure()
-        ofig.add_traces([figL, figR])
-        return update_fig_mapbox_background(ofig)
+    #     Returns:
+    #         go.Figure: The plotted map as a Plotly Figure object.
+    #     """
+    #     fig=go.Figure()
+    #     figL=self.L.plot_map(return_trace=True, **plot_kwargs_L)
+    #     figR=self.R.plot_map(return_trace=True, **plot_kwargs_R)
+    #     ofig=go.Figure()
+    #     ofig.add_traces([figL, figR])
+    #     return update_fig_mapbox_background(ofig)
 
     def plot_oddsratio_map(self, comparison_df=None, col='odds_ratio_log', **kwargs):
         """Plots an odds ratio map using a choropleth mapbox.
