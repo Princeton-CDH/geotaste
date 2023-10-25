@@ -168,13 +168,13 @@ ROOT_URL = ''
 
 # Urls
 URLS=dict(
-    books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/newdataset/data/1.3-beta/books-with-genres.csv',
-    members='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/members.csv',
-    events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/events.csv',
-    landmarks='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/landmarks.csv',
-    dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/dwellings.csv',
-    creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/creators.csv',
-    combinedmini='https://raw.githubusercontent.com/Princeton-CDH/geotaste/main/data/1.3-beta/combined.mini.pkl.gz',
+    books='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/books-with-genres.csv',
+    members='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/members.csv',
+    events='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/events.csv',
+    landmarks='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/landmarks.csv',
+    dwellings='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/dwellings.csv',
+    creators='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/creators.csv',
+    combinedmini='https://raw.githubusercontent.com/Princeton-CDH/geotaste/develop/data/1.3-beta/combined.mini.pkl.gz',
     geojson_arrond='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
 )
 
