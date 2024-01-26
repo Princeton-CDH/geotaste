@@ -63,6 +63,9 @@ Python 3.10 / Dash 2.13 / Plotly 5.17 / Flask 2.2
 
     # use brew to install chromedriver
     brew install --cask chromedriver
+
+    # allow mac to run chromedriver
+    xattr -d com.apple.quarantine `which chromedriver`
     ```
 
 - Run pytest:
