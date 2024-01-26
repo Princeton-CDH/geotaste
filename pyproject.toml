@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geotaste"
-requires-python = ">=3.8"
+requires-python = ">=3.8.2"
 authors = [
     { name = "Ryan Heuser", email = "ryan.heuser@princeton.edu" },
     { name = "The Center for Digital Humanities at Princeton", email = "cdhdevteam@princeton.edu" },
@@ -28,6 +28,6 @@ scripts = { geotaste-app = "geotaste.app:run" }
 packages = ['geotaste']
 
 [tool.setuptools.dynamic]
-version = {attr = "_version.__version__"}
+version = {attr = "version.__version__"}
 dependencies = {file = "requirements.txt"}
 optional-dependencies.dev = { file = "dev-requirements.txt"}
