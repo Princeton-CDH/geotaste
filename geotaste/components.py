@@ -314,14 +314,10 @@ class FilterCard(FilterComponent):
         super().component_callbacks(app)
 
         app.clientside_callback(
-            """
-            function(nclick1,nclick2,isOpen) { 
-                let isOpenNow=!isOpen;
-                let btn = "";
-                if(isOpenNow) { btn = "[–]"; } else { btn = "[+]" }
-                return [isOpenNow, btn];
-            }
-            """,
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='toggle_showhide_btn'
+            ),
             [
                 Output(self.body,'is_open',allow_duplicate=True),
                 Output(self.showhide_btn, "children", allow_duplicate=True),
@@ -330,31 +326,17 @@ class FilterCard(FilterComponent):
                 Input(self.showhide_btn, "n_clicks"),
                 Input(self.header_btn, 'n_clicks'),
             ],
-            State(self.body,'is_open'),
+            [
+                State(self.body,'is_open'),
+            ],
             prevent_initial_call=True
         )
-
         
         app.clientside_callback(
-            """
-            function(filter_data) {
-                let button_msg = "Switch to negative matches";
-                let style = {"display":"none"}
-                if(!filter_data.length) {
-                    for (const key in filter_data) {
-                        const val = filter_data[key];
-                        if(val.length) {
-                            style = {"display":"block"};
-                            if(val[0]=="~"){
-                                button_msg = "Switch to positive matches";
-                            }
-                        }
-                    }
-                }
-                console.log(style,filter_data);
-                return [button_msg,style];
-            }
-            """,
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='get_negation_btn_msg_and_style'
+            ),
             [
                 Output(self.negate_btn, "children"),
                 Output(self.negate_btn, 'style')
@@ -363,29 +345,21 @@ class FilterCard(FilterComponent):
         )
 
         app.clientside_callback(
-            """
-            function(nclick,filter_data) {
-                for (const key in filter_data) {
-                    const val = filter_data[key];
-                    if(val.length) {
-                        if(val[0]=="~"){
-                            filter_data[key] = val.slice(1);
-                        } else {
-                            filter_data[key] = ["~"].concat(val);
-                            button_msg = "(YES)";
-                        }
-                    }
-                }
-                return filter_data;
-            }
-            """,
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='negate_filter_data'
+            ),
             Output(self.store, "data", allow_duplicate=True),
             Input(self.negate_btn, 'n_clicks'),
             State(self.store,'data'),
             prevent_initial_call=True
         )
 
-        @app.callback(
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='get_component_desc_and_is_open'
+            ),
             [
                 Output(self.store_desc, 'children', allow_duplicate=True),
                 Output(self.footer, 'is_open', allow_duplicate=True),
@@ -393,31 +367,17 @@ class FilterCard(FilterComponent):
             Input(self.store, 'data'),
             prevent_initial_call=True
         )
-        #@logger.catchq
-        def toggle_footer_storedesc(store_data):
-            logger.debug(store_data)
-            # filter cleared?
-            # logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
-            if not store_data: 
-                logger.debug('no data blank desc')
-                return BLANK, False
-            else:
-                res=self.describe_filters(store_data)
-                logger.debug(res)
-                return res if res else BLANK, True
-        
 
-
-        @app.callback(
+        app.clientside_callback(
+            """
+            function(clear_clicked) {
+                return {};
+            }
+            """,
             Output(self.store, "data", allow_duplicate=True),
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
-        #@logger.catch
-        def clear_selection(n_clicks):
-            logger.debug(f'[{self.name}] clearing selection v1')
-            return {}
-        
         
         
 
@@ -486,6 +446,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def draw(is_open,json_now, my_filter_data, panel_filter_data):
+            print('?????')
             if not is_open or json_now: raise PreventUpdate
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
@@ -526,7 +487,7 @@ class FilterPlotCard(FilterCard):
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
-                function_name='decompress'
+                function_name='decompress_json_gz'
             ),
             Output(self.graph, 'figure', allow_duplicate=True),
             Input(self.store_json, 'data'),
