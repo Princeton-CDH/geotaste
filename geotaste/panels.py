@@ -904,7 +904,10 @@ class ComparisonPanel(BaseComponent):
             # state['lat']=center['lat']
             # state['lon']=center['lng']
             # state['zoom']=zoom
-            state = {k:v for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v}
+            state = {
+                k:v 
+                for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v
+            }
             # logger.debug(f'state changed to: {state}')
             if not state: return ''
             ostr=f'?{urlencode(state)}'

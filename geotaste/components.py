@@ -241,11 +241,13 @@ class FilterCard(FilterComponent):
     def body(self):
         from .panels import FilterPanel
         logger.trace(self.name)
-        negbtn = html.Div(
+        negbtn = dbc.Container(
             self.negate_btn,
             style={
                 'color':self.color,
-                'display':'none' if isinstance(self, FilterPanel) else 'block'
+                'display':'none' if isinstance(self, FilterPanel) else 'block',
+                'margin':'0',
+                'padding-right':'5px'
             }
         )
         return dbc.Collapse(
@@ -303,7 +305,7 @@ class FilterCard(FilterComponent):
         vals=[str(x) for x in flatten_list(store_data.get(self.key,[]))]
         if vals and vals[0]=='~':
             valstr=", ".join(vals[1:])
-            return f'~({valstr})' if len(vals)>1 else '~'+valstr
+            return f'~({valstr})' if len(vals[1:])>1 else '~'+valstr
         else:
             return ', '.join(vals)
 
@@ -314,12 +316,10 @@ class FilterCard(FilterComponent):
         app.clientside_callback(
             """
             function(nclick1,nclick2,isOpen) { 
-                console.log(nclick1,nclick2,isOpen);
-                if (nclick1+nclick2 > 0) {
-                    return [!isOpen, "[+]"];
-                } else {
-                    return [isOpen, "[-]"];
-                }
+                let isOpenNow=!isOpen;
+                let btn = "";
+                if(isOpenNow) { btn = "[–]"; } else { btn = "[+]" }
+                return [isOpenNow, btn];
             }
             """,
             [
@@ -338,20 +338,20 @@ class FilterCard(FilterComponent):
         app.clientside_callback(
             """
             function(filter_data) {
-                var button_msg = "Switch to negative matches";
-                var style = {"display":"block"}
-                if(!filter_data) {
-                    style = {"display":"none"}
-                } else {
+                let button_msg = "Switch to negative matches";
+                let style = {"display":"none"}
+                if(!filter_data.length) {
                     for (const key in filter_data) {
                         const val = filter_data[key];
                         if(val.length) {
+                            style = {"display":"block"};
                             if(val[0]=="~"){
-                                var button_msg = "Switch to positive matches";
+                                button_msg = "Switch to positive matches";
                             }
                         }
                     }
                 }
+                console.log(style,filter_data);
                 return [button_msg,style];
             }
             """,
@@ -385,61 +385,6 @@ class FilterCard(FilterComponent):
             prevent_initial_call=True
         )
 
-        # @app.callback(
-        #     [
-        #         Output(self.body, "is_open", allow_duplicate=True),
-        #         Output(self.showhide_btn, "children", allow_duplicate=True),
-        #         Output(self.content, 'children', allow_duplicate=True),
-        #         # Output(self.store_json, "data", allow_duplicate=True),
-        #     ],
-        #     [
-        #         Input(self.showhide_btn, "n_clicks"),
-        #         Input(self.header_btn, 'n_clicks'),
-        #     ],
-        #     [
-        #         State(self.body, "is_open"),
-        #         State(self.content,'children'),
-        #         # State(self.store_json, 'data'),
-        #         State(self.store, 'data'),
-        #         State(self.store_panel, 'data'),
-                
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def toggle_collapse(_clicked1, _clicked2, body_open_now, content_now, card_data, panel_data):
-        #     """Toggle the collapse state of a section.
-            
-        #     Args:
-        #         _clicked1 (any): The first clicked parameter.
-        #         _clicked2 (any): The second clicked parameter.
-        #         body_open_now (bool): The current state of the body.
-        #         content_now (any): The current content.
-            
-        #     Returns:
-        #         tuple: A tuple containing the new state of the body (bool), the new toggle symbol (str), and the new content (any).
-        #     """
-            
-        #     if body_open_now:
-        #         # then we're going to shut
-        #         logger.debug(f'[{self.name}] toggle_collapse: closing')
-        #         return False, '[+]', content_now
-        #     else:
-        #         # then we're going to open
-        #         logger.debug(f'[{self.name}] toggle_collapse: opening')
-        #         # logger.debug(content_now)
-        #         content_exists_already = bool(content_now)# and content_now[0].get('props',{}).get('children')
-        #         logger.debug(f'content currently exists? --> {content_exists_already}, {len(str(content_now))}')
-
-
-        #         return True, '[-]', content_now if content_exists_already else self.get_content(
-        #             card_data=card_data,
-        #             panel_data=panel_data
-        #         )
-
-
-        #     # return now_is_open, '[–]' if now_is_open else '[+]', content_now if content_now else self.get_content()
-        
         @app.callback(
             [
                 Output(self.store_desc, 'children', allow_duplicate=True),

@@ -680,7 +680,9 @@ def ensure_dir(fn):
 
 def rejoin_sep(listy_obj, sep='_'):
     if not is_listy(listy_obj): return listy_obj
-    return sep.join(str(x) for x in listy_obj)
+    o=sep.join(str(x) for x in listy_obj if x)
+    while o.startswith('~_'): o='~'+o[2:]
+    return o
 
 
 def compressed_bytes(obj):

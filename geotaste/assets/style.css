@@ -208,11 +208,11 @@ h5 { font-size:1.1rem;}
 }
 
 .card-footer {
-    padding:2px;
+    padding:5px;
     font-size:2em;
     /* background-color: rgba(255,255,255,0); */
     border:none;
-    text-align: center;
+    text-align: left;
 }
 .card-body .card-footer { text-align: right; }
 
