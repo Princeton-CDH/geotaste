@@ -87,7 +87,10 @@ class GeotasteLayout(BaseComponent):
 
         ### SWITCHING TABS
 
-        @app.callback(
+        app.clientside_callback(
+            """
+            function toggle(is_open){ return !is_open; }
+            """,
             Output('welcome-modal','is_open',allow_duplicate=True),
             [
                 Input('welcome_modal_info_btn', 'n_clicks'),
@@ -96,6 +99,4 @@ class GeotasteLayout(BaseComponent):
             State('welcome-modal', 'is_open'),
             prevent_initial_call=True
         )
-        def toggle_welcome_modal(n_clicks, n_clicks2, is_open):
-            return not is_open
         

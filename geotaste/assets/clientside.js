@@ -1,48 +1,16 @@
 
-function get_filter_values(filter_data) {
-    let vals = [];
-    if(filters_are_active(filter_data)) {
-        for (const key in filter_data) {
-            console.log(key,filter_data[key]);
-            vals.push(...filter_data[key]);
-        }
-    }
-    return vals;
-}
-
 
 function list_is_negation(vals) {
-    return (vals.length && (vals[0]=='~'))
+    console.log('list_is_negation <-',vals,ensureArray(vals));
+    let res = (ensureArray(vals).length && (ensureArray(vals)[0]=='~'))
+    console.log('list_is_negation ->',res);
+    return res;
 }
 
-function get_val_str(vals) {
-    console.log('get_val_str <-',vals);
-    let posneg='';
-    if(list_is_negation(vals)) {
-        vals=vals.slice(1);
-        posneg='~';
-    }
-    let out = posneg.concat(vals.join(", "));
-    console.log('get_val_str ->',out);
-    return out;
-}
 
 function isNumeric(str) {
     return !isNaN(str) && !isNaN(parseInt(str));
 }
-
-function firstAndLast(arr) {
-    if (arr.length === 0) {
-      // If the array is empty, return an empty array
-      return [];
-    } else if (arr.length === 1) {
-      // If the array has only one element, return an array with that element twice
-      return [arr[0], arr[0]];
-    } else {
-      // Return an array containing the first and last elements of the original array
-      return [arr[0], arr[arr.length - 1]];
-    }
-  }
 
 function sortedFirstAndLast(arr) {
     // Convert strings to numbers, sort the array in ascending order, and then map back to strings if necessary
@@ -59,12 +27,32 @@ function sortedFirstAndLast(arr) {
       return [sortedArr[0], sortedArr[sortedArr.length - 1]];
     }
   }
+function ensureArray(input) {
+    // Check if the input is an array and return it directly
+    if (Array.isArray(input)) {
+      return input;
+    }
+  
+    // Check if the input is a non-empty string and return it in an array
+    if (typeof input === 'string' && input.length > 0) {
+      return [input];
+    }
+  
+    // Return an empty array for empty strings or any other input types
+    return [];
+  }
+  
+
+
 
 function describe_filters(filter_data) {
+    console.log('describe_filters',filter_data);
     let desc_parts = [];
     if(filters_are_active(filter_data)) {
-        for (const key in filter_data) {
-            let val_list = filter_data[key];
+        console.log('filters data now',filter_data);
+        for (const key of Object.keys(filter_data)) {
+            console.log('key',key,filter_data[key]);
+            let val_list = ensureArray(filter_data[key]);
             if(val_list.length) {
                 let is_neg = false;
                 if(list_is_negation(val_list)) {
@@ -80,6 +68,7 @@ function describe_filters(filter_data) {
                         const [x,y] = sortedFirstAndLast(val_list);
                         thisvalstr = thisvalstr.concat(x).concat(" to ").concat(y)
                     } else {
+                        console.log('val_list',val_list, val_list.join);
                         thisvalstr = thisvalstr.concat(val_list.join(", "));
                     }
                 }
@@ -88,7 +77,7 @@ function describe_filters(filter_data) {
         }
     }
     let out = desc_parts.join(" and ")
-    console.log('describe_filters ->',out);
+    console.log('describe_filters ->',out,filter_data);
     return out;
 }
 
@@ -102,29 +91,25 @@ function pretty_format_string(str) {
     return formattedString;
 }
 
-// vals=[v for v in list(store_data.values())[0]]
-    // is_neg=False
-    // if vals and vals[0]=='~':
-    //     vals = vals[1:]
-    //     is_neg=True
-    // minval=min(vals) if vals else self.minval
-    // maxval=max(vals) if vals else self.maxval
-    // o = f'{minval} to {maxval}'
-    // return f'~({o})' if is_neg else o
 
 function filters_are_active(filter_data) {
-    return (Object.keys(filter_data).length>0);
+    console.log('filters_are_active <-',filter_data)
+    let res= (Object.keys(filter_data).length>0);
+    console.log('filters_are_active ->',res);
+    return res;
 }
 
 function get_component_desc_and_is_open(filter_data) {
-    console.log('valstr',filter_data);    
+    console.log('get_component_desc_and_is_open <-',filter_data);    
     if(!filters_are_active(filter_data)) {
-        return ["",false];
+        var res = ["",false];
     } else {
         let valstr = describe_filters(filter_data);
         console.log('valstr2',valstr);
-        return [valstr, true];
+        var res = [valstr, true];
     }
+    console.log('get_component_desc_and_is_open ->',res);    
+    return res;
 }
 
 function decompress_json_gz(json_gz) {
@@ -135,11 +120,12 @@ function decompress_json_gz(json_gz) {
     return jsonObject;
 }
 
-function get_negation_btn_msg_and_style(filter_data) {
+function get_negation_btn_msg_and_style(filter_data, is_open) {
+    console.log('get_negation_btn_msg_and_style <-',filter_data, is_open)
     let button_msg = "Switch to negative matches";
     let style = {"display":"none"}
-    for (const key in filter_data) {
-        const val_list = filter_data[key];
+    for (const key of Object.keys(filter_data)) {
+        const val_list = ensureArray(filter_data[key]);
         if(val_list.length) {
             style = {"display":"block"};
             if(list_is_negation(val_list)) {
@@ -147,7 +133,9 @@ function get_negation_btn_msg_and_style(filter_data) {
             }
         }
     }
-    return [button_msg,style];
+    let res=[button_msg,style];
+    console.log('get_negation_btn_msg_and_style ->',res);
+    return res;
 }
 
 function toggle_showhide_btn(nclick1,nclick2,isOpen) { 
@@ -159,8 +147,9 @@ function toggle_showhide_btn(nclick1,nclick2,isOpen) {
 }
 
 function negate_filter_data(nclick,filter_data) {
-    for (const key in filter_data) {
-        const val_list = filter_data[key];
+    console.log('negate_filter_data',filter_data);
+    for (const key of Object.keys(filter_data)) {
+        const val_list = ensureArray(filter_data[key]);
         if(val_list.length) {
             if(list_is_negation(val_list)) {
                 filter_data[key] = val_list.slice(1);
@@ -172,6 +161,36 @@ function negate_filter_data(nclick,filter_data) {
     return filter_data;
 }
 
+function mergeSubcomponentFilters(...objs) {
+    // Merge all objects into a single object
+    return Object.assign({}, ...objs);
+  }
+  
+
+function intersect_subcomponent_filters(...args) {
+    console.log('intersect_subcomponent_filters <-',args);
+    const filtersD = args.slice(0, -1);
+    const oldData = args[args.length - 1];
+    const intersectedFilters = mergeSubcomponentFilters(...filtersD);
+    console.log('intersect_subcomponent_filters 2',intersectedFilters);
+  
+    // Comparing objects in JavaScript requires a custom function since === doesn't do deep comparison
+    if (JSON.stringify(oldData) === JSON.stringify(intersectedFilters)) {
+        console.log('no change');
+        return window.dash_clientside.no_update;
+    } else {
+        console.log('changed');
+        console.log(JSON.stringify(oldData));
+        console.log(JSON.stringify(intersectedFilters));
+        
+    }
+  
+    // console.debug(`[YourComponentName] subcomponent filters updated, triggered by: ${ctx.triggeredId}, incoming = ${JSON.stringify(filtersD)}, returning ${JSON.stringify(intersectedFilters)}, which is diff from ${JSON.stringify(oldData)}`);
+    console.log('intersected',intersectedFilters);
+    return intersectedFilters;
+  }
+
+
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
@@ -180,6 +199,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         get_negation_btn_msg_and_style: get_negation_btn_msg_and_style,
         negate_filter_data: negate_filter_data,
         toggle_showhide_btn: toggle_showhide_btn,
-        describe_filters: describe_filters
+        describe_filters: describe_filters,
+        intersect_subcomponent_filters: intersect_subcomponent_filters
     }
 });

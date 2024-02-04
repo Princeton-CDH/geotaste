@@ -32,7 +32,12 @@ class FilterPanel(FilterCard):
         
         # intersect and listen
         if self.store_subcomponents:
-            @app.callback(
+            logger.warning(f'{self} -> {self.store_subcomponents}')
+            app.clientside_callback(
+                ClientsideFunction(
+                    namespace='clientside',
+                    function_name='intersect_subcomponent_filters'
+                ),
                 Output(self.store, 'data'),
                 [
                     Input(card.store, 'data')
@@ -41,49 +46,114 @@ class FilterPanel(FilterCard):
                 State(self.store, 'data'),
                 prevent_initial_call=True
             )
-            def subcomponent_filters_updated(*args):
-                filters_d=args[:-1]
-                old_data=args[-1]
-                intersected_filters={
-                    k:v 
-                    for d in filters_d 
-                    for k,v in d.items()
-                    if d
-                }
-                if old_data == intersected_filters: raise PreventUpdate
-                logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}, which is diff from {old_data}')
-                return intersected_filters
+
+            # def subcomponent_filters_updated(*args):
+            #     filters_d=args[:-1]
+            #     old_data=args[-1]
+            #     intersected_filters={
+            #         k:v 
+            #         for d in filters_d 
+            #         for k,v in d.items()
+            #         if d
+            #     }
+            #     if old_data == intersected_filters: raise PreventUpdate
+            #     logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}, which is diff from {old_data}')
+            #     return intersected_filters
                 
-            @app.callback(
+            app.clientside_callback(
+                """
+                function(panel_data) {
+                    // """ + self.name +"""
+                    console.log(""" + repr(self.name) + """, "sending",panel_data,"to","""+json.dumps([card.name for card in self.store_panel_subcomponents])+""");
+                    return new Array("""+str(len(self.store_panel_subcomponents))+""").fill(panel_data);
+                }
+                """,
                 [
                     Output(card.store_panel, 'data', allow_duplicate=True)
                     for card in self.store_panel_subcomponents
                 ],
                 Input(self.store, 'data'),
                 prevent_initial_call=True
-            )
-            def filter_panel_store_updated(panel_filter_data):
-                # out
-                out = [
-                    panel_filter_data
-                    for card in self.store_panel_subcomponents    
-                ]
-                logger.debug(f'sending updates for new store_panel --> {out}')
-                return out
+                )
+
+            # def filter_panel_store_updated(panel_filter_data):
+            #     # out
+            #     out = [
+            #         panel_filter_data
+            #         for card in self.store_panel_subcomponents    
+            #     ]
+            #     logger.debug(f'sending updates for new store_panel --> {out}')
+            #     return out
             
-            @app.callback(
-                 [
-                    Output(card.store, 'data', allow_duplicate=True)
-                    for card in self.store_subcomponents
-                ],
-                Input(self.button_clear, 'n_clicks'),
-                prevent_initial_call=True
-            )
-            def clear_all_subcomponents(n_clicks):
-                logger.debug(f'clearing: {self.store_subcomponents}')
-                return [{} for c in self.store_subcomponents]
+            if not isinstance(self,ComparisonPanel):
+                app.clientside_callback(
+                    """
+                    function(clicks) {
+                        res = new Array("""+(
+                            str(len(self.store_subcomponents))
+                        )+""").fill({});
+                        console.log('clearing',""" + repr(self.name) +""",res);
+                        return res;
+                    }
+                    """,
+                    [
+                        Output(card.store, 'data', allow_duplicate=True)
+                        for card in self.store_subcomponents
+                    ],
+                    Input(self.button_clear, 'n_clicks'),
+                    prevent_initial_call=True
+                )
+
+            # def clear_all_subcomponents(n_clicks):
+            #     logger.debug(f'clearing: {self.store_subcomponents}')
+            #     return [{} for c in self.store_subcomponents]
             
-            @app.callback(
+            # @app.callback(
+            #     [
+            #         Output(card.store, 'data', allow_duplicate=True)
+            #         for card in self.store_subcomponents
+            #     ],
+            #     Input(self.store_incoming, 'data'),
+            #     prevent_initial_call=True
+            # )
+            # def propagate_incoming_data(data):
+            #     key2out={card.key:dash.no_update for card in self.store_subcomponents}
+            #     not_found = {k for k in data if k not in key2out}
+            #     # if not_found: logger.warning(f'not found keys: {not_found}')
+            #     data_shared = {x:data[x] for x in not_found}
+            #     found = set(key2out.keys()) & set(data.keys())
+            #     for key in found:
+            #         key2out[key] = {key: data[key], **data_shared}
+
+            #     out = [key2out[card.key] for card in self.store_subcomponents]
+            #     out_new = [o for o in out if o != dash.no_update]
+            #     logger.debug(f'--> {out_new}')
+            #     return out
+
+            # if not isinstance(self, ComparisonPanel):
+            app.clientside_callback(
+                """
+                function(data) {
+                    console.log('incoming data',data);
+                    let keys = [""" + ", ".join(f'{repr(card.key)}' for card in self.store_subcomponents) + """];
+                    let key2out={};
+                    for(const key of keys) {
+                        key2out[key]=window.dash_clientside.no_update;
+                    }
+                    for(const key of Object.keys(data)) {
+                        if(key in key2out) {
+                            key2out[key] = {};
+                            key2out[key][key]=data[key]; // kinda weird but we want each to have its key
+                        }
+                    }
+                    let out = [];
+                    for(key of keys) {
+                        out.push(key2out[key]);
+                    }
+                    console.log('out',out);
+                    return out;
+                }
+                """,
                 [
                     Output(card.store, 'data', allow_duplicate=True)
                     for card in self.store_subcomponents
@@ -91,19 +161,6 @@ class FilterPanel(FilterCard):
                 Input(self.store_incoming, 'data'),
                 prevent_initial_call=True
             )
-            def clear_all_subcomponents(data):
-                key2out={card.key:dash.no_update for card in self.store_subcomponents}
-                not_found = {k for k in data if k not in key2out}
-                # if not_found: logger.warning(f'not found keys: {not_found}')
-                data_shared = {x:data[x] for x in not_found}
-                found = set(key2out.keys()) & set(data.keys())
-                for key in found:
-                    key2out[key] = {key: data[key], **data_shared}
-
-                out = [key2out[card.key] for card in self.store_subcomponents]
-                out_new = [o for o in out if o != dash.no_update]
-                logger.debug(f'--> {out_new}')
-                return out
             
             
 
@@ -835,6 +892,7 @@ class ComparisonPanel(BaseComponent):
         )
         def put_markers_L(data):
             if not data: return []
+            print(data)
             return list(self.ff(fdL=data).df_dwellings.index)
         
         @app.callback(
@@ -982,7 +1040,7 @@ class ComparisonPanel(BaseComponent):
             # negate other fields if contrast else manually set
             if is_contrast:
                 fdR={**negate_fd(fdL), **fdR}
-
+            
             out = [fdL, fdR, tab, tab2, True, False]
             logger.debug(f'--> {out}')
             return out

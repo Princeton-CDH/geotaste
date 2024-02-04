@@ -37,7 +37,7 @@ def filter_query_str_series(
     if not is_listy(svals): svals=[svals]
 
     # is negation?
-    if svals[0]=='~':
+    if svals and svals[0]=='~':
         svals=[v for v in svals[1:]]
         posneg='~'
         is_neg=True
@@ -118,7 +118,7 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, 
     query=sep.join([
         filter_query_str_series(sname,svals,op='or',maxlen=maxlen,plural_cols=plural_cols,fname=fname,human=human)
         for sname,svals in filter_data.items()
-        if svals is not None
+        if svals
     ])
     return query# if not is_negation else f'~({query})'
 

@@ -53,6 +53,7 @@ class BaseComponent(DashComponent):
     def subcomponents(self):
         return []  # subclass this
     
+    
     def cards_with_attr(self, attrname:str):
         return [
             card
@@ -341,7 +342,11 @@ class FilterCard(FilterComponent):
                 Output(self.negate_btn, "children"),
                 Output(self.negate_btn, 'style')
             ],
-            Input(self.store, 'data'),
+            [
+                Input(self.store, 'data'),
+                Input(self.body, 'is_open')
+            ],
+            prevent_initial_call=True
         )
 
         app.clientside_callback(
