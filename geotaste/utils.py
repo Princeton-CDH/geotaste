@@ -57,6 +57,18 @@ def to_set(x:object) -> set:
     """
     return {x} if not is_listy(x) else set(flatten_list(x))
     
+# def is_negation(number_or_str):
+#     # if isinstance(number_or_str,Number):
+#     #     return number_or_str<0
+#     # else:
+#     #     return number_or_str.startswith('-')
+
+# def de_negate(number_or_str):
+#     if is_negation(number_or_str):
+#         return number_or_str*-1 if isinstance(number_or_str,Number) else number_or_str[1:]
+#     else:
+#         return number_or_str
+
 def overlaps(series:pd.Series, vals:list) -> pd.Series:
     """Checks if any element in the given series overlaps with the values in
     the given list.
@@ -68,9 +80,11 @@ def overlaps(series:pd.Series, vals:list) -> pd.Series:
     Returns:
         pandas.Series: A boolean series indicating if each element in the series overlaps with any value in the list.
     """
+    if not vals: return series
     vals_set = to_set(vals)
     series_set = series.apply(to_set)
-    return series_set.apply(lambda xset: bool(xset & vals_set))
+    res = series_set.apply(lambda xset: bool(xset & vals_set))
+    return res
 
 def is_numeric(x:object) -> bool:
     """Checks if the given object is a numeric value.
@@ -93,6 +107,10 @@ def is_listy(x:object) -> bool:
         bool: True if the object is a tuple, list, or pandas Series; False otherwise.
     """
     return type(x) in {tuple,list,pd.Series}
+
+
+def as_int_if_poss(x:Number) -> int:
+    return ensure_int(x,return_orig=True)
 
 def ensure_int(x:Number, return_orig=True, default=None) -> int:
     try:
@@ -574,15 +592,6 @@ def ifnanintstr(x,y=''):
     return ensure_int(x) if not np.isnan(x) else y
 
 
-
-def intersect_filters(filters_d):
-    # logger.trace(f'intersecting {len(filters_d)} filters')
-    filters_d = [d for d in filters_d if d]
-    return {
-        k:v 
-        for d in filters_d 
-        for k,v in d.items()
-    }
 
 
 

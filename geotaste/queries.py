@@ -36,27 +36,36 @@ def filter_query_str_series(
     # make sure input is listlike
     if not is_listy(svals): svals=[svals]
 
+    # is negation?
+    if svals[0]=='~':
+        svals=[v for v in svals[1:]]
+        posneg='~'
+        is_neg=True
+    else:
+        posneg=''  
+        is_neg=False
+
     # stringifying
     def repr(x): return json.dumps(x, ensure_ascii=False)
 
     def getplural():
         if not human:
-            return f'@{fname}({sname}, {repr(svals)})'
+            return f'{posneg}@{fname}({sname}, {repr(svals)})'
         else:
-            return f'{humancol(sname)} is either {oxfordcomma(svals, repr=repr, op="or")}'
+            return f'{humancol(sname)} is {"n" if is_neg else ""}either {oxfordcomma(svals, repr=repr, op="or" if not is_neg else "nor")}'
         
     def getrange():
         if not human:
-            return f'({svals[0]} <= {sname} <= {svals[-1]})'
+            return f'{posneg}({svals[0]} <= {sname} <= {svals[-1]})'
         else:
-            return f'{humancol(sname)} ranges from {svals[0]} through {svals[-1]}'
+            return f'{humancol(sname)} {"does not" if is_neg else ""} range{"s" if not is_neg else ""} from {svals[0]} through {svals[-1]}'
     
     def getsinglequerygroup():
         strs=[
             (
-                f'({sname} == {repr(x)})' 
+                f'({sname} {"=" if not is_neg else "!"}= {repr(x)})' 
                 if not human
-                else f'{humancol(sname)} is {repr(x)}'
+                else f'{humancol(sname)} is {"not " if is_neg else ""}{repr(x)}'
             )
             for x in svals
         ]
@@ -101,13 +110,17 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, 
     
     if not filter_data: return ''
     fname=test_func.__name__ if type(test_func)!=str else test_func
+
+    # filter_data = {**filter_data}
+    # is_negation = '_not' in filter_data and filter_data.pop('_not')
     
     sep = f' {operator} '
-    return sep.join([
+    query=sep.join([
         filter_query_str_series(sname,svals,op='or',maxlen=maxlen,plural_cols=plural_cols,fname=fname,human=human)
         for sname,svals in filter_data.items()
         if svals is not None
     ])
+    return query# if not is_negation else f'~({query})'
 
 def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, operator:str='and', plural_cols:list=None, return_query:bool=False) -> pd.DataFrame:
     """Filter a pandas DataFrame based on the provided filter data.

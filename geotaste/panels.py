@@ -44,7 +44,12 @@ class FilterPanel(FilterCard):
             def subcomponent_filters_updated(*args):
                 filters_d=args[:-1]
                 old_data=args[-1]
-                intersected_filters=self.intersect_filters(*filters_d)
+                intersected_filters={
+                    k:v 
+                    for d in filters_d 
+                    for k,v in d.items()
+                    if d
+                }
                 if old_data == intersected_filters: raise PreventUpdate
                 logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}, which is diff from {old_data}')
                 return intersected_filters
@@ -89,14 +94,15 @@ class FilterPanel(FilterCard):
             def clear_all_subcomponents(data):
                 key2out={card.key:dash.no_update for card in self.store_subcomponents}
                 not_found = {k for k in data if k not in key2out}
-                if not_found: logger.warning(f'not found keys: {not_found}')
-
+                # if not_found: logger.warning(f'not found keys: {not_found}')
+                data_shared = {x:data[x] for x in not_found}
                 found = set(key2out.keys()) & set(data.keys())
                 for key in found:
-                    key2out[key] = {key: data[key]}
+                    key2out[key] = {key: data[key], **data_shared}
 
                 out = [key2out[card.key] for card in self.store_subcomponents]
-                logger.debug(f'--> {out}')
+                out_new = [o for o in out if o != dash.no_update]
+                logger.debug(f'--> {out_new}')
                 return out
             
             
@@ -929,25 +935,50 @@ class ComparisonPanel(BaseComponent):
             if app_begun: raise PreventUpdate
             if not searchstr: raise PreventUpdate
             params = get_query_params(searchstr)
-            logger.debug(params)
+            params = {k:v[0] for k,v in params.items()}  # only allow one query param per param name
+            logger.debug(f'params = {params}')
+            is_contrast = 'contrast' in params and params.pop('contrast')!='False'
             fdL, fdR, tab, tab2 = {}, {}, 'map', 'arrond'
             # fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
-
             for k,v in list(params.items()):
+                if not v: continue
                 if k=='tab':
-                    tab=v[0]
+                    tab=v
                 elif k=='tab2':
-                    tab2=v[0]
-                elif k.endswith('2'):
-                    fdR[k[:-1]]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
-                elif '_' in k:
-                    fdL[k]=[ensure_int(y,return_orig=True) for y in v[0].split('_')]
-                # else:
-                    # mapd[k]=float(v[0])
-            # logger.debug(f'mapd: {mapd}')
-            # center = {'lat':mapd.get('lat', DEFAULT_STATE['lat']), 'lng':mapd.get('lon', DEFAULT_STATE['lon'])}
-            # zoom = int(mapd.get('zoom', DEFAULT_STATE['zoom']))
-            # out = [fdL, fdR, tab, tab2, dash.no_update, center, True, False]
+                    tab2=v
+                else:
+                    if k.endswith('2'):
+                        fd=fdR
+                        k=k[:-1]
+                    else:
+                        fd=fdL
+                    is_neg = v[0]=='~'
+                    if v[0]=='~': v=v[1:]
+                    fd[k]=(['~'] if is_neg else []) + [
+                        as_int_if_poss(val)
+                        for val in v.split('_')
+                    ]
+                    # fd[k]=v.split('_')
+
+                    # print(fd)
+
+
+            # # def negate_val(int_or_str):
+            # #     if isinstance(int_or_str, Number):
+            # #         return int_or_str * -1
+            # #     else:
+            # #         return '-'+int_or_str if int_or_str[0]!='-' else int_or_str[1:]
+
+            def negate_fd(fd):
+                return {
+                    k:['~']+vl if vl and vl[0]!='~' else vl[1:]
+                    for k,vl in fd.items()
+                }
+
+            # negate other fields if contrast else manually set
+            if is_contrast:
+                fdR={**negate_fd(fdL), **fdR}
+
             out = [fdL, fdR, tab, tab2, True, False]
             logger.debug(f'--> {out}')
             return out

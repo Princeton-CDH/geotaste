@@ -124,8 +124,6 @@ class FilterComponent(BaseComponent):
     def store_desc(self): 
         return html.Span(BLANK, className='store_desc')
 
-    def intersect_filters(self, *filters_d):
-        return intersect_filters(filters_d)
     
     def ff(self, filter_data={}, selected:list=[], **kwargs):
         # if self.figure_factory is not None:
@@ -375,6 +373,7 @@ class FilterCard(FilterComponent):
         )
         #@logger.catchq
         def toggle_footer_storedesc(store_data):
+            logger.debug(store_data)
             # filter cleared?
             logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
             if not store_data: 

@@ -800,8 +800,8 @@ class LandmarksFigureFactory(FigureFactory):
             children=[
                 dl.TileLayer(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
                 dl.TileLayer(url="https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"),
-                dl.FeatureGroup(id='featuregroup-markers'),
                 dl.FeatureGroup(id='featuregroup-markers2'),
+                dl.FeatureGroup(id='featuregroup-markers'),
                 get_sco_marker()
             ],
             preferCanvas=True, 
