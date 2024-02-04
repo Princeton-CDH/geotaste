@@ -444,23 +444,6 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
 
-        
-        # @app.callback(
-        #     Output(self.store, "data", allow_duplicate=True),
-        #     Input(self.graph, 'selectedData'),
-        #     State(self.store, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # #@logger.catch
-        # def graph_selection_updated(selected_data, old_data={}):
-        #     if selected_data is None: raise PreventUpdate
-        #     o=self.ff().get_selected(selected_data)
-        #     if not o or o==old_data: raise PreventUpdate
-        #     if type(o)==dict and not o.get(self.key): raise PreventUpdate
-        #     logger.debug(f'[{self.name}) selection updated to {o}')
-        #     return o
-        
-        
         @app.callback(
             Output(self.store_json, "data", allow_duplicate=True),
             Input(self.body, "is_open"),

@@ -104,32 +104,6 @@ class FilterPanel(FilterCard):
                     prevent_initial_call=True
                 )
 
-            # def clear_all_subcomponents(n_clicks):
-            #     logger.debug(f'clearing: {self.store_subcomponents}')
-            #     return [{} for c in self.store_subcomponents]
-            
-            # @app.callback(
-            #     [
-            #         Output(card.store, 'data', allow_duplicate=True)
-            #         for card in self.store_subcomponents
-            #     ],
-            #     Input(self.store_incoming, 'data'),
-            #     prevent_initial_call=True
-            # )
-            # def propagate_incoming_data(data):
-            #     key2out={card.key:dash.no_update for card in self.store_subcomponents}
-            #     not_found = {k for k in data if k not in key2out}
-            #     # if not_found: logger.warning(f'not found keys: {not_found}')
-            #     data_shared = {x:data[x] for x in not_found}
-            #     found = set(key2out.keys()) & set(data.keys())
-            #     for key in found:
-            #         key2out[key] = {key: data[key], **data_shared}
-
-            #     out = [key2out[card.key] for card in self.store_subcomponents]
-            #     out_new = [o for o in out if o != dash.no_update]
-            #     logger.debug(f'--> {out_new}')
-            #     return out
-
             # if not isinstance(self, ComparisonPanel):
             app.clientside_callback(
                 """
@@ -760,108 +734,6 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
 
-
-        # app.clientside_callback(
-        #     """
-        #     function(val) {
-        #         console.log(val);
-        #         return '1';
-        #     }
-        #     """,
-        #     Output("mainview_tabs", "children"), 
-        #     Input({'type': 'marker', 'index': MATCH}, 'clicked'),
-        # )
-
-        
-        # app.clientside_callback(
-        #     """
-        #     function(val) {
-        #         console.log(val);
-        #         return '1';
-        #     }
-        #     """,
-        #     Output("mainview_tabs", "children"), 
-        #     Input({'type': 'marker', 'index': ALL}, 'n_clicks'),
-        # )
-
-        # app.clientside_callback(
-        #     """
-        #     function(val) {
-        #         console.log(val);
-        #         return '1';
-        #     }
-        #     """,
-        #     Output("mainview_tabs", "children"), 
-        #     Input('sco_marker', 'click'),
-        # )
-
-        # @app.callback(
-        #     Output("logo", "children"), 
-        #     Input('sco_marker', 'n_clicks'),
-        # )
-        # def get_click(x):
-        #     print(x)
-        #     raise PreventUpdate
-        #     return 'hello'
-        
-
-        # @app.callback(
-        #     Output('mainview_tabs','children'),
-        #     Input('mainmap','n_clicks'),
-        #     State('mainmap', 'clickData')
-        # )
-        # def marker_click(x, clickdata):
-        #     lat = clickdata['latlng']['lat']
-        #     lon = clickdata['latlng']['lon']
-
-        #     raise PreventUpdate
-
-
-        # @app.callback(
-        #     Output('mainview_tabs','children'),
-        #     Input('mainmap','n_clicks'),
-        #     State('mainmap', 'clickData')
-        # )
-        # def marker_click(x, clickdata):
-        #     print(x, clickdata)
-        #     raise PreventUpdate
-
-
-        # ## CHANGING MAP
-        # @app.callback(
-        #     [
-        #         # Output(self.store_json, 'data',allow_duplicate=True),
-        #         Output('featuregroup-markers', 'children', allow_duplicate=True),
-        #         Output(self.store,'data',allow_duplicate=True),
-        #         Output('layout-loading-output', 'children', allow_duplicate=True),
-        #         # Output(self.mainview_tabs,'active_tab')
-        #     ],
-        #     [
-        #         Input(self.L.store, 'data'),
-        #         Input(self.R.store, 'data'),
-        #         # Input(self.mainview_tabs, 'active_tab')
-        #     ],
-        #     [
-        #         # State(self.mainmap,'figure'),
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # def update_LR_data(Lstore, Rstore):#, oldfig):
-        #     ostore=[Lstore,Rstore]
-        #     logger.debug(ostore)
-        #     ff = self.ff(Lstore,Rstore)
-        #     markers = ff.plot_map(return_markers=True)
-        #     # print(markers)
-        #     # with Logwatch('computing figdata on server'):
-        #     #     newfig_gz_str=get_cached_fig_or_table(serialize([Lstore,Rstore,'map','',{}]))
-            
-        #     # logger.debug(f'Assigning a json string of size {sys.getsizeof(newfig_gz_str)} compressed, to self.store_json')
-                
-        #     # o=newfig_gz_str
-        #     # o = pickled(markers)
-        #     return markers, ostore, True
-                    ## CHANGING MAP
-        
         app.clientside_callback(
             """
             function(Lstore, Rstore) {
@@ -922,54 +794,6 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
 
-        # app.clientside_callback(
-        #     ClientsideFunction(
-        #         namespace='clientside',
-        #         function_name='unpickle'
-        #     ),
-        #     Output('featuregroup-markers', 'children', allow_duplicate=True),
-        #     Input(self.store_json, 'data'),
-        #     prevent_initial_call=True
-        # )
-
-
-
-        
-        ## STATE TRACKING
-
-        # @app.callback(
-        #     Output('url-output', 'search', allow_duplicate=True),
-        #     [
-        #         Input(self.L.store, 'data'),
-        #         Input(self.R.store, 'data'),
-        #         Input(self.mainview_tabs, 'active_tab'),
-        #         Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
-        #         # Input(self.mainmap, 'zoom'),
-        #         # Input(self.mainmap, 'center'),
-        #     ],
-        #     prevent_initial_call=True
-        # )
-        # def track_state(fdL, fdR, tab, tab2):#, zoom, center):
-        #     logger.debug(f'state changed, triggered by {ctx.triggered_id}: {fdL}, {fdR}, {tab}, {tab2}')#, {zoom}, {center}')
-        #     state = {}
-        #     for k,v in fdL.items(): state[k]=rejoin_sep(v)
-        #     for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
-        #     state['tab']=tab
-        #     state['tab2']=tab2
-        #     # state['lat']=center['lat']
-        #     # state['lon']=center['lng']
-        #     # state['zoom']=zoom
-        #     state = {
-        #         k:v 
-        #         for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v
-        #     }
-        #     # logger.debug(f'state changed to: {state}')
-        #     if not state: return ''
-        #     ostr=f'?{urlencode(state)}'
-        #     logger.debug(f'-> {ostr}')
-        #     return ostr
-                
-
 
         app.clientside_callback(
             ClientsideFunction(
@@ -1026,61 +850,6 @@ class ComparisonPanel(BaseComponent):
         )      
 
 
-        # @app.callback(
-        #     [
-        #         Output(self.L.store_incoming, 'data',allow_duplicate=True),
-        #         Output(self.R.store_incoming, 'data',allow_duplicate=True),
-        #         Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
-        #         Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
-        #         Output(self.app_begun, 'data',allow_duplicate=True),
-        #         Output('welcome-modal', 'is_open')
-        #     ],
-        #     Input('url-input','search'),
-        #     State(self.app_begun, 'data'),
-        #     prevent_initial_call=True
-        # )
-        # def load_query_param(searchstr, app_begun):
-        #     if app_begun: raise PreventUpdate
-        #     if not searchstr: raise PreventUpdate
-        #     params = get_query_params(searchstr)
-        #     params = {k:v[0] for k,v in params.items()}  # only allow one query param per param name
-        #     logger.debug(f'params = {params}')
-        #     is_contrast = 'contrast' in params and params.pop('contrast')!='False'
-        #     fdL, fdR, tab, tab2 = {}, {}, 'map', 'arrond'
-        #     # fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
-        #     for k,v in list(params.items()):
-        #         if not v: continue
-        #         if k=='tab':
-        #             tab=v
-        #         elif k=='tab2':
-        #             tab2=v
-        #         else:
-        #             if k.endswith('2'):
-        #                 fd=fdR
-        #                 k=k[:-1]
-        #             else:
-        #                 fd=fdL
-        #             is_neg = v[0]=='~'
-        #             if v[0]=='~': v=v[1:]
-        #             fd[k]=(['~'] if is_neg else []) + [
-        #                 as_int_if_poss(val.strip())
-        #                 for val in v.split('_')
-        #                 if val.strip()
-        #             ]
-        #     def negate_fd(fd):
-        #         return {
-        #             k:['~']+vl if vl and vl[0]!='~' else vl[1:]
-        #             for k,vl in fd.items()
-        #         }
-
-        #     # negate other fields if contrast else manually set
-        #     if is_contrast:
-        #         fdR={**negate_fd(fdL), **fdR}
-            
-        #     out = [fdL, fdR, tab, tab2, True, False]
-        #     logger.debug(f'--> {out}')
-        #     return out
-            
 
 
         ### TEST SUITE
@@ -1109,21 +878,6 @@ class ComparisonPanel(BaseComponent):
         def test_suite_btn2_onclick(n_clicks):
             return {'member_nationalities':['United States']}
 
-        # @app.callback(
-        #     Output(self.R.store, 'data', allow_duplicate=True),
-        #     Input('test_suite_btn3', 'n_clicks'),
-        #     prevent_initial_call=True
-        #  )
-        # def test_suite_btn3_onclick(n_clicks):
-        #     return {}
-        
-        # @app.callback(
-        #     Output(self.mainmap, 'relayoutData', allow_duplicate=True),
-        #     Input('test_suite_btn4', 'n_clicks'),
-        #     prevent_initial_call=True
-        #  )
-        # def test_suite_btn4_onclick(n_clicks):
-        #     return {'mapbox.center': {'lon': 2.3296628122833454, 'lat': 48.85670759234435}, 'mapbox.zoom': 19.538994378471113, 'mapbox.bearing': 0, 'mapbox.pitch': 0, 'mapbox._derived': {'coordinates': [[2.3288653266106394, 48.857002735938494], [2.330460297955881, 48.857002735938494], [2.330460297955881, 48.85641244701037], [2.3288653266106394, 48.85641244701037]]}}
         
         @app.callback(
             Output(self.L.store, 'data', allow_duplicate=True),
