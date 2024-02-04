@@ -392,7 +392,8 @@ class FilterPlotCard(FilterCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=get_empty_fig(),
+            # figure=get_empty_fig(),
+            figure=self.ff().plot().update_layout(height=100, width=250),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
@@ -445,7 +446,7 @@ class FilterPlotCard(FilterCard):
             ],
             prevent_initial_call=True
         )
-        def draw(is_open,json_now, my_filter_data, panel_filter_data):
+        def cache_graph_json(is_open,json_now, my_filter_data, panel_filter_data):
             print('?????')
             if not is_open or json_now: raise PreventUpdate
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
@@ -518,8 +519,8 @@ class FilterSliderCard(FilterPlotCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            # figure=self.ff().plot(),
-            figure=get_empty_fig(),
+            figure=self.ff().plot().update_layout(height=100, width=250),
+            # figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
@@ -663,26 +664,29 @@ class FilterInputCard(FilterCard):
         # do my parent's too
         super().component_callbacks(app)
 
-        @app.callback(
+        app.clientside_callback(
+            """
+            function(values) {
+                return {"""+self.key+""":values}
+            }
+            """,
             Output(self.store, "data", allow_duplicate=True),
             Input(self.input, 'value'),
             prevent_initial_call=True
         )
-        def input_value_changed(vals):
-            if not vals: raise PreventUpdate
-            logger.debug(f'[{self.name}] {self.key} -> {vals}')
-            return {self.key:vals}
-        
-        # Clear part 2
-        @app.callback(
+        # def input_value_changed(vals):
+        #     if not vals: raise PreventUpdate
+        #     logger.debug(f'[{self.name}] {self.key} -> {vals}')
+        #     return {self.key:vals}
+
+        app.clientside_callback(
+            """
+            function (clk) { return []; }
+            """,
             Output(self.input,'value'),
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
-        #@logger.catch
-        def clear_selection_input(n_clicks):
-            logger.debug('clear_selection as input')
-            return []
 
 
 
