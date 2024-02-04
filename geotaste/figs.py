@@ -504,7 +504,8 @@ class MemberFigure(FigureFactory):
 
 class MemberDOBFigure(MemberFigure):
     """
-    A child class of MemberFigure that creates a figure based on the member's date of birth.
+    A child class of MemberFigure that creates a figure 
+    based on the member's date of birth.
     """
     key = 'member_dob'
     quant = True
