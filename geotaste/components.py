@@ -292,13 +292,16 @@ class FilterCard(FilterComponent):
             function(nclick1,nclick2,isOpen) { 
                 console.log(nclick1,nclick2,isOpen);
                 if (nclick1+nclick2 > 0) {
-                    return !isOpen
+                    return [!isOpen, "[+]"];
                 } else {
-                    return isOpen;
+                    return [isOpen, "[-]"];
                 }
             }
             """,
-            Output(self.body,'is_open',allow_duplicate=True),
+            [
+                Output(self.body,'is_open',allow_duplicate=True),
+                Output(self.showhide_btn, "children", allow_duplicate=True),
+            ],
             [
                 Input(self.showhide_btn, "n_clicks"),
                 Input(self.header_btn, 'n_clicks'),
