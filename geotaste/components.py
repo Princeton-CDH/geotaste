@@ -423,22 +423,42 @@ class FilterPlotCard(FilterCard):
         
 
         
-
-        
-        @app.callback(
+        app.clientside_callback(
+            """
+            function(selectedData, oldData) {
+                console.log("selecting data <-",selectedData);
+                if(!bool(selectedData)) { return window.dash_clientside.no_update; }
+                let sels = getSelectedRecordsFromFigureSelectedData(selectedData);
+                if(!bool(sels)) { return window.dash_clientside.no_update; }
+                let out = {"""+repr(self.key)+""": sels};
+                console.log("selecting data ->",out,oldData,out==oldData);
+                if (JSON.stringify(out) === JSON.stringify(oldData)) {
+                    return window.dash_clientside.no_update; 
+                }
+                return out;
+            }
+            """,
             Output(self.store, "data", allow_duplicate=True),
             Input(self.graph, 'selectedData'),
             State(self.store, 'data'),
             prevent_initial_call=True
         )
-        #@logger.catch
-        def graph_selection_updated(selected_data, old_data={}):
-            if selected_data is None: raise PreventUpdate
-            o=self.ff().get_selected(selected_data)
-            if not o or o==old_data: raise PreventUpdate
-            if type(o)==dict and not o.get(self.key): raise PreventUpdate
-            logger.debug(f'[{self.name}) selection updated to {o}')
-            return o
+
+        
+        # @app.callback(
+        #     Output(self.store, "data", allow_duplicate=True),
+        #     Input(self.graph, 'selectedData'),
+        #     State(self.store, 'data'),
+        #     prevent_initial_call=True
+        # )
+        # #@logger.catch
+        # def graph_selection_updated(selected_data, old_data={}):
+        #     if selected_data is None: raise PreventUpdate
+        #     o=self.ff().get_selected(selected_data)
+        #     if not o or o==old_data: raise PreventUpdate
+        #     if type(o)==dict and not o.get(self.key): raise PreventUpdate
+        #     logger.debug(f'[{self.name}) selection updated to {o}')
+        #     return o
         
         
         @app.callback(
@@ -452,8 +472,8 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def cache_graph_json(is_open,json_now, my_filter_data, panel_filter_data):
-            print('?????')
-            if not is_open or json_now: raise PreventUpdate
+            # if not is_open or json_now: raise PreventUpdate
+            if not json_now: raise PreventUpdate
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
             return ofig_json_gz_str
@@ -476,7 +496,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
-            if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
+            # if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
             logger.debug(f'triggered by {ctx.triggered_id}, with panel_filter_data = {panel_filter_data} and my_filter_data = {my_filter_data}')
             # if not panel_filter_data:
                 # then a panel wide clear?
@@ -524,7 +544,7 @@ class FilterSliderCard(FilterPlotCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
+            figure=self.ff().plot().update_layout(height=100, width=250),
             # figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},

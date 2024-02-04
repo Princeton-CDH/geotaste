@@ -1,16 +1,5 @@
 
 
-function list_is_negation(vals) {
-    console.log('list_is_negation <-',vals,ensureArray(vals));
-    let res = (ensureArray(vals).length && (ensureArray(vals)[0]=='~'))
-    console.log('list_is_negation ->',res);
-    return res;
-}
-
-
-function isNumeric(str) {
-    return !isNaN(str) && !isNaN(parseInt(str));
-}
 
 DEFAULT_STATE={
     'bearing': 0,
@@ -44,31 +33,6 @@ function track_state(fdL, fdR, tab, tab2) { // , zoom, center) {
     console.debug(`track_state -> ${res}`);
     return res;
 }
-
-
-function processValue(val) {
-    console.log('processValue <-',val);
-    // Check for numeric range indicated by double underscore "__"
-    let res = [];
-    if (val.includes('--')) {
-        let [start, end] = val.split('--').map(Number);
-        if (!isNaN(start) && !isNaN(end) && start < end +1) {
-            // Generate range [start, start+1, ..., end]
-            res = Array.from({ length: end - start + 1 }, (_, i) => start + i);
-        }
-    }
-    // Split non-numeric strings by "_"
-    else if (val.includes('_')) {
-        res = val.split('_').map(asIntIfPoss); // Handle mixed string and numeric values
-    } else {
-        // Single numeric value or single string
-        res = [asIntIfPoss(val)];
-    }
-    console.log('processValue ->',res);
-    return res
-}
-
-
 
 
 
@@ -108,7 +72,7 @@ function loadQueryParam(searchStr, appBegun) {
                 v.split('_')
                  .map(val => val.trim())
                  .filter(val => val)
-                 .flatMap(processValue) // Use processValue to handle all specified formats
+                 .flatMap(processQueryParamValue) // Use processValue to handle all specified formats
             );
         }
     });
@@ -128,84 +92,6 @@ function loadQueryParam(searchStr, appBegun) {
     console.debug(`--> ${JSON.stringify(out)}`);
     return out;
 }
-
-function getQueryParams(searchStr) {
-    // This function should parse the query string and return an object
-    // where each key is a query parameter name, and the value is an array of values.
-    // Placeholder implementation:
-    const urlSearchParams = new URLSearchParams(searchStr);
-    return Array.from(urlSearchParams.keys()).reduce((acc, key) => {
-        acc[key] = urlSearchParams.getAll(key);
-        return acc;
-    }, {});
-}
-
-function asIntIfPoss(value) {
-    // Convert value to an integer if possible, otherwise return the original value
-    const num = parseInt(value, 10);
-    return isNaN(num) ? value : num;
-}
-
-
-
-
-
-
-function rejoinSep(value) {
-    // Assuming rejoinSep is a function that formats the value. Implement it according to your logic.
-    // This is a placeholder implementation.
-    let new_val = value.slice();
-    let posneg='';
-    let out='';
-    if(list_is_negation(value)) {
-        new_val = value.slice(1);
-        posneg='~';
-    }
-    console.log(new_val);
-    if(new_val.length > 1) {
-        [first,last] = [new_val[0], new_val[new_val.length - 1]];
-        if(isNumeric(first) && isNumeric(last)) {
-            [first2,last2] = sortedFirstAndLast(new_val);
-            out=first2.toString().concat('--').concat(last2.toString());
-            console.log(out);
-        }
-    } else {
-        out=Array.isArray(new_val) ? new_val.join('_') : new_val;
-    }
-    return posneg.concat(out)
-}
-
-
-function sortedFirstAndLast(arr) {
-    // Convert strings to numbers, sort the array in ascending order, and then map back to strings if necessary
-    const sortedArr = arr.map(Number).sort((a, b) => a - b).map(String);
-    
-    if (sortedArr.length === 0) {
-      // If the array is empty, return an empty array
-      return [];
-    } else if (sortedArr.length === 1) {
-      // If the array has only one element, return an array with that element twice
-      return [sortedArr[0], sortedArr[0]];
-    } else {
-      // Return an array containing the first and last elements of the sorted array
-      return [sortedArr[0], sortedArr[sortedArr.length - 1]];
-    }
-  }
-function ensureArray(input) {
-    // Check if the input is an array and return it directly
-    if (Array.isArray(input)) {
-      return input;
-    }
-  
-    // Check if the input is a non-empty string and return it in an array
-    if (typeof input === 'string' && input.length > 0) {
-      return [input];
-    }
-  
-    // Return an empty array for empty strings or any other input types
-    return [];
-  }
-  
 
 
 
@@ -245,23 +131,6 @@ function describe_filters(filter_data) {
     return out;
 }
 
-function pretty_format_string(str) {
-    // Replace underscores with spaces
-    const stringWithSpaces = str.replace(/_/g, ' ');
-    
-    // Capitalize the first letter of the entire string and make sure the rest is in lowercase
-    const formattedString = stringWithSpaces.charAt(0).toUpperCase() + stringWithSpaces.slice(1).toLowerCase();
-    
-    return formattedString;
-}
-
-
-function filters_are_active(filter_data) {
-    console.log('filters_are_active <-',filter_data)
-    let res= (Object.keys(filter_data).length>0);
-    console.log('filters_are_active ->',res);
-    return res;
-}
 
 function get_component_desc_and_is_open(filter_data) {
     console.log('get_component_desc_and_is_open <-',filter_data);    
@@ -310,26 +179,6 @@ function toggle_showhide_btn(nclick1,nclick2,isOpen) {
     return [isOpenNow, btn];
 }
 
-function negate_filter_data(nclick,filter_data) {
-    console.log('negate_filter_data',filter_data);
-    for (const key of Object.keys(filter_data)) {
-        const val_list = ensureArray(filter_data[key]);
-        if(val_list.length) {
-            if(list_is_negation(val_list)) {
-                filter_data[key] = val_list.slice(1);
-            } else {
-                filter_data[key] = ["~"].concat(val_list);
-            }
-        }
-    }
-    return filter_data;
-}
-
-function mergeSubcomponentFilters(...objs) {
-    // Merge all objects into a single object
-    return Object.assign({}, ...objs);
-  }
-  
 
 function intersect_subcomponent_filters(...args) {
     console.log('intersect_subcomponent_filters <-',args);
@@ -353,6 +202,23 @@ function intersect_subcomponent_filters(...args) {
     console.log('intersected',intersectedFilters);
     return intersectedFilters;
   }
+
+
+
+function negate_filter_data(nclick,filter_data) {
+    console.log('negate_filter_data',filter_data);
+    for (const key of Object.keys(filter_data)) {
+        const val_list = ensureArray(filter_data[key]);
+        if(val_list.length) {
+            if(list_is_negation(val_list)) {
+                filter_data[key] = val_list.slice(1);
+            } else {
+                filter_data[key] = ["~"].concat(val_list);
+            }
+        }
+    }
+    return filter_data;
+}
 
 
 
