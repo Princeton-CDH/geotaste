@@ -217,17 +217,39 @@ class FilterCard(FilterComponent):
             className='button_showhide',
             id=self.id('button_showhide')
         )
+    @cached_property
+    def negate_btn(self):
+        logger.trace(self.name)
+        return dbc.Button(
+            "(NOT)", 
+            color="link", 
+            n_clicks=0,
+            className='button_negate',
+            id=self.id('button_negate'),
+            style={'color':self.color}
+        )
+    
     
     
     
     
     ## Body
     
+
+
     @cached_property
     def body(self):
+        from .panels import FilterPanel
         logger.trace(self.name)
+        negbtn = html.Div(
+            self.negate_btn,
+            style={
+                'color':self.color,
+                'display':'none' if isinstance(self, FilterPanel) else 'block'
+            }
+        )
         return dbc.Collapse(
-            dbc.CardBody(self.content), 
+            dbc.CardBody([self.content,negbtn]), 
             is_open=self.body_is_open, 
             id=self.id('body'),
         )
@@ -278,8 +300,12 @@ class FilterCard(FilterComponent):
 
 
     def describe_filters(self, store_data):
-        vals=', '.join(str(x) for x in flatten_list(store_data.get(self.key,[])))
-        return vals
+        vals=[str(x) for x in flatten_list(store_data.get(self.key,[]))]
+        if vals and vals[0]=='~':
+            valstr=", ".join(vals[1:])
+            return f'~({valstr})' if len(vals)>1 else '~'+valstr
+        else:
+            return ', '.join(vals)
 
 
     def component_callbacks(self, app):
@@ -305,6 +331,57 @@ class FilterCard(FilterComponent):
                 Input(self.header_btn, 'n_clicks'),
             ],
             State(self.body,'is_open'),
+            prevent_initial_call=True
+        )
+
+        
+        app.clientside_callback(
+            """
+            function(filter_data) {
+                var button_msg = "Switch to negative matches";
+                var style = {"display":"block"}
+                if(!filter_data) {
+                    style = {"display":"none"}
+                } else {
+                    for (const key in filter_data) {
+                        const val = filter_data[key];
+                        if(val.length) {
+                            if(val[0]=="~"){
+                                var button_msg = "Switch to positive matches";
+                            }
+                        }
+                    }
+                }
+                return [button_msg,style];
+            }
+            """,
+            [
+                Output(self.negate_btn, "children"),
+                Output(self.negate_btn, 'style')
+            ],
+            Input(self.store, 'data'),
+        )
+
+        app.clientside_callback(
+            """
+            function(nclick,filter_data) {
+                for (const key in filter_data) {
+                    const val = filter_data[key];
+                    if(val.length) {
+                        if(val[0]=="~"){
+                            filter_data[key] = val.slice(1);
+                        } else {
+                            filter_data[key] = ["~"].concat(val);
+                            button_msg = "(YES)";
+                        }
+                    }
+                }
+                return filter_data;
+            }
+            """,
+            Output(self.store, "data", allow_duplicate=True),
+            Input(self.negate_btn, 'n_clicks'),
+            State(self.store,'data'),
             prevent_initial_call=True
         )
 
@@ -375,11 +452,13 @@ class FilterCard(FilterComponent):
         def toggle_footer_storedesc(store_data):
             logger.debug(store_data)
             # filter cleared?
-            logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
+            # logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
             if not store_data: 
+                logger.debug('no data blank desc')
                 return BLANK, False
             else:
                 res=self.describe_filters(store_data)
+                logger.debug(res)
                 return res if res else BLANK, True
         
 
@@ -393,6 +472,9 @@ class FilterCard(FilterComponent):
         def clear_selection(n_clicks):
             logger.debug(f'[{self.name}] clearing selection v1')
             return {}
+        
+        
+        
 
 
 class FilterPlotCard(FilterCard):
@@ -420,10 +502,17 @@ class FilterPlotCard(FilterCard):
             ])
         )
     
+    
+    
 
     def component_callbacks(self, app):
         # do my parent's too
         super().component_callbacks(app)
+
+        
+
+        
+
         
         @app.callback(
             Output(self.store, "data", allow_duplicate=True),
@@ -566,10 +655,15 @@ class FilterSliderCard(FilterPlotCard):
         )
     
     def describe_filters(self,store_data):
-        vals=list(store_data.values())[0]
+        vals=[v for v in list(store_data.values())[0]]
+        is_neg=False
+        if vals and vals[0]=='~':
+            vals = vals[1:]
+            is_neg=True
         minval=min(vals) if vals else self.minval
         maxval=max(vals) if vals else self.maxval
-        return f'{minval} to {maxval}'
+        o = f'{minval} to {maxval}'
+        return f'~({o})' if is_neg else o
     
 
     def component_callbacks(self, app):

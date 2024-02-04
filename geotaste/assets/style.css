@@ -248,6 +248,10 @@ p {
 .button_showhide {
     float:right;
 }
+.button_negate {
+    float:right;
+    font-size:0.8em;
+}
 
 .button_clear { font-size:.8rem}
 

@@ -955,8 +955,9 @@ class ComparisonPanel(BaseComponent):
                     is_neg = v[0]=='~'
                     if v[0]=='~': v=v[1:]
                     fd[k]=(['~'] if is_neg else []) + [
-                        as_int_if_poss(val)
+                        as_int_if_poss(val.strip())
                         for val in v.split('_')
+                        if val.strip()
                     ]
                     # fd[k]=v.split('_')
 
