@@ -861,14 +861,19 @@ class ComparisonPanel(BaseComponent):
         #     # o = pickled(markers)
         #     return markers, ostore, True
                     ## CHANGING MAP
-        @app.callback(
+        
+        app.clientside_callback(
+            """
+            function(Lstore, Rstore) {
+                let ostore=[Lstore,Rstore];
+                let out = [ostore, true]
+                console.log('->',out);
+                return out;
+            }
+            """,
             [
                 Output(self.store,'data',allow_duplicate=True),
                 Output('layout-loading-output', 'children', allow_duplicate=True),
-                # Output(self.store_markers_L, 'data'),
-                # Output(self.store_markers_R, 'data'),
-                # Output('featuregroup-markers', 'children', allow_duplicate=True),
-                # Output('featuregroup-markers2', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.L.store, 'data'),
@@ -876,15 +881,7 @@ class ComparisonPanel(BaseComponent):
             ],
             prevent_initial_call=True
         )
-        def update_LR_data(Lstore, Rstore):
-            ostore=[Lstore,Rstore]
-            logger.debug(ostore)
-            out = [ostore, True]
-            # qd = {'fdL':Lstore} if ctx.triggered_id == self.L.store.id else {'fdR':Rstore}
-            # dwellings = list(self.ff(**qd).df_dwellings.index)
-            # out += [dwellings, dash.no_update] if ctx.triggered_id == self.L.store.id else [dash.no_update, dwellings]
-            return out
-
+        
 
         @app.callback(
             Output(self.store_markers_L, 'data'),
@@ -899,7 +896,7 @@ class ComparisonPanel(BaseComponent):
             Output(self.store_markers_R, 'data'),
             Input(self.R.store, 'data')
         )
-        def put_markers_L(data):
+        def put_markers_R(data):
             if not data: return []
             return list(self.ff(fdR=data).df_dwellings.index)
 
@@ -940,7 +937,45 @@ class ComparisonPanel(BaseComponent):
         
         ## STATE TRACKING
 
-        @app.callback(
+        # @app.callback(
+        #     Output('url-output', 'search', allow_duplicate=True),
+        #     [
+        #         Input(self.L.store, 'data'),
+        #         Input(self.R.store, 'data'),
+        #         Input(self.mainview_tabs, 'active_tab'),
+        #         Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
+        #         # Input(self.mainmap, 'zoom'),
+        #         # Input(self.mainmap, 'center'),
+        #     ],
+        #     prevent_initial_call=True
+        # )
+        # def track_state(fdL, fdR, tab, tab2):#, zoom, center):
+        #     logger.debug(f'state changed, triggered by {ctx.triggered_id}: {fdL}, {fdR}, {tab}, {tab2}')#, {zoom}, {center}')
+        #     state = {}
+        #     for k,v in fdL.items(): state[k]=rejoin_sep(v)
+        #     for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
+        #     state['tab']=tab
+        #     state['tab2']=tab2
+        #     # state['lat']=center['lat']
+        #     # state['lon']=center['lng']
+        #     # state['zoom']=zoom
+        #     state = {
+        #         k:v 
+        #         for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v
+        #     }
+        #     # logger.debug(f'state changed to: {state}')
+        #     if not state: return ''
+        #     ostr=f'?{urlencode(state)}'
+        #     logger.debug(f'-> {ostr}')
+        #     return ostr
+                
+
+
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='track_state'
+            ),
             Output('url-output', 'search', allow_duplicate=True),
             [
                 Input(self.L.store, 'data'),
@@ -952,98 +987,99 @@ class ComparisonPanel(BaseComponent):
             ],
             prevent_initial_call=True
         )
-        def track_state(fdL, fdR, tab, tab2):#, zoom, center):
-            logger.debug(f'state changed, triggered by {ctx.triggered_id}: {fdL}, {fdR}, {tab}, {tab2}')#, {zoom}, {center}')
-            state = {}
-            for k,v in fdL.items(): state[k]=rejoin_sep(v)
-            for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
-            state['tab']=tab
-            state['tab2']=tab2
-            # state['lat']=center['lat']
-            # state['lon']=center['lng']
-            # state['zoom']=zoom
-            state = {
-                k:v 
-                for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v
-            }
-            # logger.debug(f'state changed to: {state}')
-            if not state: return ''
-            ostr=f'?{urlencode(state)}'
-            logger.debug(f'-> {ostr}')
-            return ostr
-                
+        # def track_state(fdL, fdR, tab, tab2):#, zoom, center):
+        #     logger.debug(f'state changed, triggered by {ctx.triggered_id}: {fdL}, {fdR}, {tab}, {tab2}')#, {zoom}, {center}')
+        #     state = {}
+        #     for k,v in fdL.items(): state[k]=rejoin_sep(v)
+        #     for k,v in fdR.items(): state[k+'2']=rejoin_sep(v)
+        #     state['tab']=tab
+        #     state['tab2']=tab2
+        #     # state['lat']=center['lat']
+        #     # state['lon']=center['lng']
+        #     # state['zoom']=zoom
+        #     state = {
+        #         k:v 
+        #         for k,v in state.items() if v and DEFAULT_STATE.get(k)!=v
+        #     }
+        #     # logger.debug(f'state changed to: {state}')
+        #     if not state: return ''
+        #     ostr=f'?{urlencode(state)}'
+        #     logger.debug(f'-> {ostr}')
+        #     return ostr
 
-
-
-
-
-        @app.callback(
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='loadQueryParam'
+            ),
             [
                 Output(self.L.store_incoming, 'data',allow_duplicate=True),
                 Output(self.R.store_incoming, 'data',allow_duplicate=True),
                 Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
                 Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
-                # Output(self.mainmap, 'zoom',allow_duplicate=True),
-                # Output(self.mainmap, 'center',allow_duplicate=True),
                 Output(self.app_begun, 'data',allow_duplicate=True),
                 Output('welcome-modal', 'is_open')
             ],
             Input('url-input','search'),
             State(self.app_begun, 'data'),
             prevent_initial_call=True
-        )
-        def load_query_param(searchstr, app_begun):
-            if app_begun: raise PreventUpdate
-            if not searchstr: raise PreventUpdate
-            params = get_query_params(searchstr)
-            params = {k:v[0] for k,v in params.items()}  # only allow one query param per param name
-            logger.debug(f'params = {params}')
-            is_contrast = 'contrast' in params and params.pop('contrast')!='False'
-            fdL, fdR, tab, tab2 = {}, {}, 'map', 'arrond'
-            # fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
-            for k,v in list(params.items()):
-                if not v: continue
-                if k=='tab':
-                    tab=v
-                elif k=='tab2':
-                    tab2=v
-                else:
-                    if k.endswith('2'):
-                        fd=fdR
-                        k=k[:-1]
-                    else:
-                        fd=fdL
-                    is_neg = v[0]=='~'
-                    if v[0]=='~': v=v[1:]
-                    fd[k]=(['~'] if is_neg else []) + [
-                        as_int_if_poss(val.strip())
-                        for val in v.split('_')
-                        if val.strip()
-                    ]
-                    # fd[k]=v.split('_')
-
-                    # print(fd)
+        )      
 
 
-            # # def negate_val(int_or_str):
-            # #     if isinstance(int_or_str, Number):
-            # #         return int_or_str * -1
-            # #     else:
-            # #         return '-'+int_or_str if int_or_str[0]!='-' else int_or_str[1:]
+        # @app.callback(
+        #     [
+        #         Output(self.L.store_incoming, 'data',allow_duplicate=True),
+        #         Output(self.R.store_incoming, 'data',allow_duplicate=True),
+        #         Output(self.mainview_tabs, 'active_tab',allow_duplicate=True),
+        #         Output(self.maintbl_preface_analysis_tabs, 'active_tab',allow_duplicate=True),
+        #         Output(self.app_begun, 'data',allow_duplicate=True),
+        #         Output('welcome-modal', 'is_open')
+        #     ],
+        #     Input('url-input','search'),
+        #     State(self.app_begun, 'data'),
+        #     prevent_initial_call=True
+        # )
+        # def load_query_param(searchstr, app_begun):
+        #     if app_begun: raise PreventUpdate
+        #     if not searchstr: raise PreventUpdate
+        #     params = get_query_params(searchstr)
+        #     params = {k:v[0] for k,v in params.items()}  # only allow one query param per param name
+        #     logger.debug(f'params = {params}')
+        #     is_contrast = 'contrast' in params and params.pop('contrast')!='False'
+        #     fdL, fdR, tab, tab2 = {}, {}, 'map', 'arrond'
+        #     # fdL, fdR, tab, tab2, mapd = {}, {}, 'map', 'arrond', {}
+        #     for k,v in list(params.items()):
+        #         if not v: continue
+        #         if k=='tab':
+        #             tab=v
+        #         elif k=='tab2':
+        #             tab2=v
+        #         else:
+        #             if k.endswith('2'):
+        #                 fd=fdR
+        #                 k=k[:-1]
+        #             else:
+        #                 fd=fdL
+        #             is_neg = v[0]=='~'
+        #             if v[0]=='~': v=v[1:]
+        #             fd[k]=(['~'] if is_neg else []) + [
+        #                 as_int_if_poss(val.strip())
+        #                 for val in v.split('_')
+        #                 if val.strip()
+        #             ]
+        #     def negate_fd(fd):
+        #         return {
+        #             k:['~']+vl if vl and vl[0]!='~' else vl[1:]
+        #             for k,vl in fd.items()
+        #         }
 
-            def negate_fd(fd):
-                return {
-                    k:['~']+vl if vl and vl[0]!='~' else vl[1:]
-                    for k,vl in fd.items()
-                }
-
-            # negate other fields if contrast else manually set
-            if is_contrast:
-                fdR={**negate_fd(fdL), **fdR}
+        #     # negate other fields if contrast else manually set
+        #     if is_contrast:
+        #         fdR={**negate_fd(fdL), **fdR}
             
-            out = [fdL, fdR, tab, tab2, True, False]
-            logger.debug(f'--> {out}')
-            return out
+        #     out = [fdL, fdR, tab, tab2, True, False]
+        #     logger.debug(f'--> {out}')
+        #     return out
             
 
 

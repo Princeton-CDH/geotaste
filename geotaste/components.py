@@ -227,7 +227,7 @@ class FilterCard(FilterComponent):
             n_clicks=0,
             className='button_negate',
             id=self.id('button_negate'),
-            style={'color':self.color}
+            style={'color':self.color, 'display':'none'}
         )
     
     
@@ -398,7 +398,7 @@ class FilterPlotCard(FilterCard):
     def graph(self): 
         return dcc.Graph(
             # figure=get_empty_fig(),
-            figure=self.ff().plot().update_layout(height=100, width=250),
+            figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
@@ -524,7 +524,7 @@ class FilterSliderCard(FilterPlotCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.ff().plot().update_layout(height=100, width=250),
+            figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
             # figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},

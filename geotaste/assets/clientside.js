@@ -12,6 +12,170 @@ function isNumeric(str) {
     return !isNaN(str) && !isNaN(parseInt(str));
 }
 
+DEFAULT_STATE={
+    'bearing': 0,
+    'lat': 48.85107555543428, 
+    'lon': 2.3385039932538567,
+    'pitch': 0,
+    'zoom': 14,
+    'tab': 'map',
+    'tab2': 'arrond'
+}
+
+function track_state(fdL, fdR, tab, tab2) { // , zoom, center) {
+    console.log('track_state <-',fdL, fdR, tab, tab2);
+    let state = {};
+    Object.keys(fdL).forEach(k => state[k] = rejoinSep(fdL[k]));
+    Object.keys(fdR).forEach(k => state[k + '2'] = rejoinSep(fdR[k]));
+    state['tab'] = tab;
+    state['tab2'] = tab2;
+    console.log('state',state);
+    state = Object.fromEntries(
+        Object.entries(state).filter(([k, v]) => v && DEFAULT_STATE[k] !== v)
+    );
+    if (Object.keys(state).length === 0) return '';
+    let ostr = new URLSearchParams(state).toString();
+    let res = ostr;
+    if(ostr) {
+        res = '?'.concat(res);
+    } else {
+        res = window.dash_clientside.no_update;
+    }
+    console.debug(`track_state -> ${res}`);
+    return res;
+}
+
+
+function processValue(val) {
+    console.log('processValue <-',val);
+    // Check for numeric range indicated by double underscore "__"
+    let res = [];
+    if (val.includes('--')) {
+        let [start, end] = val.split('--').map(Number);
+        if (!isNaN(start) && !isNaN(end) && start < end +1) {
+            // Generate range [start, start+1, ..., end]
+            res = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+        }
+    }
+    // Split non-numeric strings by "_"
+    else if (val.includes('_')) {
+        res = val.split('_').map(asIntIfPoss); // Handle mixed string and numeric values
+    } else {
+        // Single numeric value or single string
+        res = [asIntIfPoss(val)];
+    }
+    console.log('processValue ->',res);
+    return res
+}
+
+
+
+
+
+function loadQueryParam(searchStr, appBegun) {
+    let out = new Array(6).fill(window.dash_clientside.no_update);
+    
+    if (appBegun || !searchStr) {
+        return out;
+    }
+
+    const params = getQueryParams(searchStr); // Assuming getQueryParams is implemented elsewhere
+    // Only allow one query param per param name
+    const singleParams = Object.keys(params).reduce((acc, key) => {
+        acc[key] = params[key][0];
+        return acc;
+    }, {});
+    console.debug(`params = ${JSON.stringify(singleParams)}`);
+
+    let isContrast = 'contrast' in singleParams && singleParams['contrast'] !== 'False';
+    let fdL = {}, fdR = {}, tab = 'map', tab2 = 'arrond';
+
+    Object.entries(singleParams).forEach(([k, v]) => {
+        if (!v) return;
+        if (k === 'tab') {
+            tab = v;
+        } else if (k === 'tab2') {
+            tab2 = v;
+        } else {
+            let fd = k.endsWith('2') ? fdR : fdL;
+            k = k.endsWith('2') ? k.slice(0, -1) : k;
+            const isNeg = v.startsWith('~');
+            if (isNeg) v = v.slice(1);
+            // fd[k] = (isNeg ? ['~'] : []).concat(
+            //     v.split('_').map(val => val.trim()).filter(val => val).map(asIntIfPoss)
+            // );
+            fd[k] = (isNeg ? ['~'] : []).concat(
+                v.split('_')
+                 .map(val => val.trim())
+                 .filter(val => val)
+                 .flatMap(processValue) // Use processValue to handle all specified formats
+            );
+        }
+    });
+
+    function negateFd(fd) {
+        return Object.fromEntries(
+            Object.entries(fd).map(([k, vl]) => [k, vl && vl[0] !== '~' ? ['~'].concat(vl) : vl.slice(1)])
+        );
+    }
+
+    // Negate other fields if contrast else manually set
+    if (isContrast) {
+        fdR = { ...negateFd(fdL), ...fdR };
+    }
+
+    out = [fdL, fdR, tab, tab2, true, false];
+    console.debug(`--> ${JSON.stringify(out)}`);
+    return out;
+}
+
+function getQueryParams(searchStr) {
+    // This function should parse the query string and return an object
+    // where each key is a query parameter name, and the value is an array of values.
+    // Placeholder implementation:
+    const urlSearchParams = new URLSearchParams(searchStr);
+    return Array.from(urlSearchParams.keys()).reduce((acc, key) => {
+        acc[key] = urlSearchParams.getAll(key);
+        return acc;
+    }, {});
+}
+
+function asIntIfPoss(value) {
+    // Convert value to an integer if possible, otherwise return the original value
+    const num = parseInt(value, 10);
+    return isNaN(num) ? value : num;
+}
+
+
+
+
+
+
+function rejoinSep(value) {
+    // Assuming rejoinSep is a function that formats the value. Implement it according to your logic.
+    // This is a placeholder implementation.
+    let new_val = value.slice();
+    let posneg='';
+    let out='';
+    if(list_is_negation(value)) {
+        new_val = value.slice(1);
+        posneg='~';
+    }
+    console.log(new_val);
+    if(new_val.length > 1) {
+        [first,last] = [new_val[0], new_val[new_val.length - 1]];
+        if(isNumeric(first) && isNumeric(last)) {
+            [first2,last2] = sortedFirstAndLast(new_val);
+            out=first2.toString().concat('--').concat(last2.toString());
+            console.log(out);
+        }
+    } else {
+        out=Array.isArray(new_val) ? new_val.join('_') : new_val;
+    }
+    return posneg.concat(out)
+}
+
+
 function sortedFirstAndLast(arr) {
     // Convert strings to numbers, sort the array in ascending order, and then map back to strings if necessary
     const sortedArr = arr.map(Number).sort((a, b) => a - b).map(String);
@@ -200,6 +364,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         negate_filter_data: negate_filter_data,
         toggle_showhide_btn: toggle_showhide_btn,
         describe_filters: describe_filters,
-        intersect_subcomponent_filters: intersect_subcomponent_filters
+        intersect_subcomponent_filters: intersect_subcomponent_filters,
+        track_state:track_state,
+        loadQueryParam:loadQueryParam
     }
 });
