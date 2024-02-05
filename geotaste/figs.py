@@ -844,49 +844,14 @@ class CombinedFigureFactory(FigureFactory):
             for fn in self.filter_data)
 
     def table_arrond(self):
-        df = delist_df(self.data).replace('', 0).fillna(0).applymap(ensure_int)
-        df = pd.concat(
-            gdf.assign(
-                arrond_num_addresses=len(gdf.drop_duplicates('dwelling_address')),
-                arrond_num_members=len(gdf.drop_duplicates('member')),
-                arrond_num_books=len(gdf.drop_duplicates('book')),
-                arrond_num_borrows=len(gdf.drop_duplicates('event'))
-            )
-            for g, gdf in df.groupby('arrond_id')
-        )
-        df = df.drop_duplicates('arrond_id')
-        df = df.sort_values('arrond_num_members', ascending=False)
-        cols = [c for c in df if c.startswith('arrond_')]
-        rename = {c: c.split('arrond_', 1)[-1] for c in cols}
-        rename['arrond_id'] = 'arrond'
-        return get_dash_table(
-            df,
-            cols=cols,
-            rename=rename,
-        )
-
+        return generate_table(self. data, 'arrond_id', 'arrond')
     def table_members(self):
-        df = delist_df(self.data).fillna('').query('member!=""')
-        df = pd.concat(
-            gdf.assign(
-                member_num_addresses=len(gdf.drop_duplicates('dwelling_address')),
-                member_num_books=len(gdf.drop_duplicates('book')),
-                member_num_borrows=len(gdf.drop_duplicates('event')),
-            )
-            for g, gdf in df.groupby('member')
-        )
-        df = df.drop_duplicates('member')
-        cols = [c for c in df if c.startswith('member')]
-        rename = {c: c.split('member_', 1)[-1] for c in cols}
-        return get_dash_table(
-            df,
-            cols=cols,
-            rename=rename,
-            sort_by=[{
-                'id': '0',
-                'direction': 'asc'
-            }],
-        )
+        return generate_table(self.data, 'member')
+    def table_books(self):
+        return generate_table(self.data, 'book', also_cols={'author_name'})
+    def table_authors(self):
+        return generate_table(self.data, 'author')
+        
 
     def table(self, tab=None, **kwargs):
         """Generate a dash_table.DataTable table using the provided data and columns. Cols will be st to to `self.cols_table_members` if `self.book_filters_exist`; otherwise, both `self.cols_table_members` and `self.cols_table_books` will be used.
@@ -905,34 +870,6 @@ class CombinedFigureFactory(FigureFactory):
             return self.table_books()
         elif tab=='author':
             return self.table_authors()
-
-        df = self.df_dwellings.reset_index()
-        df = df[df.dwelling_address != '']
-        df = pd.concat(
-            gdf.assign(member_num_borrows=len(gdf))
-            for g, gdf in df.drop_duplicates('event').groupby('member'))
-        # if only members filtered...
-        if not self.book_filters_exist:
-
-            # df=pd.concat(
-            #     gdf.assign(member_num_books=len(gdf))
-            #     for g,gdf in df.drop_duplicates('book').groupby('member')
-            # )
-            df = df.drop_duplicates('member')
-            cols = self.cols_table_members + ['member_num_borrows']
-        else:
-            df = pd.concat(
-                gdf.assign(book_num_borrows=len(gdf))
-                for g, gdf in df.drop_duplicates('event').groupby('book'))
-            df = pd.concat(
-                gdf.assign(book_num_members=len(gdf))
-                for g, gdf in df.drop_duplicates('member').groupby('book'))
-            df = df.drop_duplicates(['member', 'book'])
-
-            cols = self.cols_table_members + self.cols_table_books + [
-                'member_num_borrows', 'book_num_borrows'
-            ]
-        return get_dash_table(df, cols=cols)
 
     def plot_map_mapbox(self,
                         color=None,
@@ -1645,3 +1582,43 @@ def store_all_markers_in_assets_folder(ofn=None):
             odx[marker['props']['id']] = marker
     compress_to(odx, ofn)
     return ofn
+
+
+
+def preprocess_df(data):
+    return delist_df(data).fillna('').applymap(ensure_int)
+
+def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, also_cols=None):
+    if not entity_prefix: entity_prefix=group_by_field
+    df = preprocess_df(data)
+    df = df[df[group_by_field] != ""]
+    df = pd.concat(
+        gdf.assign(
+            **{
+                f"{entity_prefix}_num_addresses": len(gdf.drop_duplicates('dwelling_address')),
+                f"{entity_prefix}_num_books": len(gdf.drop_duplicates('book')),
+                f"{entity_prefix}_num_borrows": len(gdf.drop_duplicates('event')),
+                f"{entity_prefix}_num_members": len(gdf.drop_duplicates('member'))
+            }
+        )
+        for g, gdf in df.groupby(group_by_field)
+    )
+    df = df.drop_duplicates(group_by_field)
+    if sort_by:
+        df = df.sort_values(sort_by, ascending=False)
+    cols = [
+        c for c in df 
+        if (
+            (also_cols and c in also_cols)
+            or
+            ( c.startswith(entity_prefix) and not f'_num_{entity_prefix}' in c )
+        )
+    ]
+    rename = {c: c.split(f"{entity_prefix}_", 1)[-1].replace('_',' ').title() for c in cols}
+    rename[group_by_field] = entity_prefix.title()
+    return get_dash_table(
+        df,
+        cols=cols,
+        rename=rename,
+        sort_by=[{'id': '0', 'direction': 'asc'}] if not sort_by else None,
+    )

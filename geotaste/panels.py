@@ -476,10 +476,14 @@ class ComparisonPanel(BaseComponent):
         """
 
         return dbc.Collapse([
-            html.H4('Data comparing filters'),
+            self.maintbl_preface_analysis_title,
             self.maintbl_preface_analysis_tabs,
         ],
                             is_open=True)
+
+    @cached_property
+    def maintbl_preface_analysis_title(self):
+        return html.H4('Data')
 
     @cached_property
     def maintbl_preface_analysis_tabs(self):
@@ -610,51 +614,6 @@ class ComparisonPanel(BaseComponent):
             [State(card.store, 'data') for card in self.L.store_subcomponents],
             prevent_initial_call=True)
 
-        ### SWITCHING TABS
-
-        # app.clientside_callback(ClientsideFunction(
-        #     namespace='clientside', function_name='switch_tab_simple'), [
-        #         Output(self.tblview, 'style', allow_duplicate=True),
-        #         Output(self.maintbl_preface_landmarks,
-        #                'is_open',
-        #                allow_duplicate=True),
-        #         Output(self.maintbl_preface_members,
-        #                'is_open',
-        #                allow_duplicate=True),
-        #         Output(self.maintbl_preface_analysis,
-        #                'is_open',
-        #                allow_duplicate=True),
-        #         Output(
-        #             'layout-loading-output', 'children', allow_duplicate=True),
-        #     ], [
-        #         Input(self.mainview_tabs, 'active_tab'),
-        #         Input(self.maintbl_preface_analysis_tabs, 'active_tab')
-        #     ], [
-        #         State(self.tblview, 'style'),
-        #         State(self.L.store, 'data'),
-        #         State(self.R.store, 'data'),
-        #     ],
-        #                         prevent_initial_call=True)
-
-        # @app.callback(
-        #     Output(self.table_json, 'data', allow_duplicate=True),
-        #     # Output(self.maintbl, 'children',allow_duplicate=True),
-        #     # Output(self.maintbl, 'children', allow_duplicate=True),
-        #     [
-        #         # Input(self.mainview_tabs, 'active_tab'),
-        #         # Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
-        #         Input(self.L.store, 'data'),
-        #         Input(self.R.store, 'data'),
-        #     ],
-        #     prevent_initial_call=True)
-        # def recompute_table(tab1, tab2, fdL, fdR):
-        #     logger.debug(['recompute_table <-', tab1, tab2, fdL, fdR])
-        #     if tab1 != 'table': raise PreventUpdate
-        #     # ojson = get_cached_fig_or_table(
-        #     #     serialize([fdL, fdR, tab1, tab2, {}]))
-        #     # logger.debug(['recompute_table ->', ojson[:100]])
-        #     return to_json_gz_str(self.ff(fdL, fdR, landmarks=False).table())
-        #     # return ojson
 
         ### SWITCHING TABS
 
@@ -662,12 +621,8 @@ class ComparisonPanel(BaseComponent):
             [
                 Output(self.tblview,'style',allow_duplicate=True),
                 Output(self.table_json,'data',allow_duplicate=True),
-
-                # Output(self.maintbl_preface_landmarks, 'is_open', allow_duplicate=True),
-                # Output(self.maintbl_preface_members, 'is_open', allow_duplicate=True),
-                # Output(self.maintbl_preface_analysis, 'is_open', allow_duplicate=True),
-
-                # Output('layout-loading-output', 'children', allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
+                Output(self.maintbl_preface_analysis_title, 'children', allow_duplicate=True)
             ],
             [
                 Input(self.mainview_tabs,'active_tab'),
@@ -681,23 +636,25 @@ class ComparisonPanel(BaseComponent):
         )
         def switch_tab_simple(active_tab, data, analysis_tab, style_d):
             if style_d is None: style_d={}
-            is_open_l = [False, False, False]
-            if active_tab!='table':
-                ostyle={**style_d, **STYLE_INVIS}
-                return [ostyle, dash.no_update] + [dash.no_update for _ in is_open_l] + [True]
+            ostyle={**style_d, **STYLE_INVIS}
+            if active_tab!='table': 
+                return (ostyle, dash.no_update, dash.no_update,dash.no_update)
             
             # table is active tab
             ostyle={**style_d, **STYLE_VIS}
             fdL,fdR=data if data else ({},{})
-            if not fdL and not fdR:
-                is_open_l=[True,False,False]
-            elif fdL and fdR:
-                is_open_l=[False,False,True]
-            else:
-                is_open_l=[False,True,False]
-            
             ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab,{}]))
-            return [ostyle,ojson]#+is_open_l+[True]
+
+            if fdL and fdR:
+                title='Data comparing filters'
+            elif fdL:
+                title='Data on Filter 1'
+            elif fdR:
+                title='Data on Filter 2'
+            else:
+                title="Data"
+
+            return [ostyle,ojson,"",title]
             
         app.clientside_callback(
             ClientsideFunction(
@@ -727,18 +684,29 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
 
-        @app.callback(Output(self.store_markers_L, 'data'),
-                      Input(self.L.store, 'data'))
+        @app.callback(
+            [
+                Output(self.store_markers_L, 'data'),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
+            ],
+            Input(self.L.store, 'data'),
+            prevent_initial_call=True
+        )
         def put_markers_L(data):
-            if not data: return []
-            print(data)
-            return list(self.ff(fdL=data).df_dwellings.index)
+            if not data: return [],""
+            return list(self.ff(fdL=data).df_dwellings.index),""
 
-        @app.callback(Output(self.store_markers_R, 'data'),
-                      Input(self.R.store, 'data'))
+        @app.callback(
+                [
+                    Output(self.store_markers_R, 'data'),
+                    Output('layout-loading-output', 'children', allow_duplicate=True),
+                ],
+                Input(self.R.store, 'data'),
+                prevent_initial_call=True
+        )
         def put_markers_R(data):
-            if not data: return []
-            return list(self.ff(fdR=data).df_dwellings.index)
+            if not data: return [],""
+            return list(self.ff(fdR=data).df_dwellings.index),""
 
         app.clientside_callback("""
             function(dwellings) {

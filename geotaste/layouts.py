@@ -56,23 +56,25 @@ class GeotasteLayout(BaseComponent):
                 get_welcome_modal(),
             ], className='content-row'),
 
-            dcc.Loading(
-                id='layout-loading', 
-                children=html.Div(id="layout-loading-output"),
-                type='graph', 
-                fullscreen=False, 
-                style={'background-color':'rgba(255,255,255,0)'},
-            ),
+            # dcc.Loading(
+            #     id='layout-loading', 
+            #     children=html.Div(id="layout-loading-output"),
+            #     type='default', 
+            #     fullscreen=True, 
+            #     style={'background-color':'rgba(255,255,255,0)'},
+            # ),
+
+            dbc.Spinner(html.Div(id="layout-loading-output"), id='layout-loading'),
 
             dcc.Location(id='url-output', refresh="callback-nav"),
             dcc.Location(id='url-input', refresh="callback-nav"),
 
-            dbc.Button(
-                'ⓘ',
-                color="link",
-                n_clicks=0,
-                id='welcome_modal_info_btn',
-            ),
+            # dbc.Button(
+            #     'ⓘ',
+            #     color="link",
+            #     n_clicks=0,
+            #     id='welcome_modal_info_btn',
+            # ),
 
             # dbc.Container(DONOTCITE, id='donotcite')
 
@@ -86,17 +88,26 @@ class GeotasteLayout(BaseComponent):
         super().component_callbacks(app)
 
         ### SWITCHING TABS
+        outputs=[
+            Output(card.store, 'data', allow_duplicate=True)
+            for panel in [self.comparison_panel.L, self.comparison_panel.R]
+            for card in panel.store_subcomponents
+        ]
+        num_outputs=len(outputs)
 
         app.clientside_callback(
             """
-            function toggle(is_open){ return !is_open; }
+            function toggle(clk1){ return new Array("""+str(num_outputs)+""").fill({}); }
             """,
-            Output('welcome-modal','is_open',allow_duplicate=True),
-            [
-                Input('welcome_modal_info_btn', 'n_clicks'),
-                Input('logo_popup', 'n_clicks')
-            ],
-            State('welcome-modal', 'is_open'),
+            outputs,
+            # Output('welcome-modal','is_open',allow_duplicate=True),
+
+            # [
+                # Output(self.comparison_panel.L.store_incoming, 'data', allow_duplicate=True),
+                # Output(self.comparison_panel.R.store_incoming, 'data', allow_duplicate=True),
+            # ],
+            Input('logo_popup', 'n_clicks'),
+            # State('welcome-modal', 'is_open'),
             prevent_initial_call=True
         )
         

@@ -541,6 +541,8 @@ button {
     margin-top:1em;
 }
 
+.layout
+
 .layout-container {min-width:800px;}
 
 /* .test_suite { display:none; } */
@@ -572,4 +574,14 @@ button {
     width:100vw;
     height:100vh;
     z-index:0;
+}
+
+
+#layout-loading, #layout-loading-output {
+    z-index:100;
+    position: absolute;
+    top:40px;
+    right:.75em;
+    padding:0;
+    margin:0;
 }

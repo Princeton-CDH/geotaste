@@ -460,7 +460,10 @@ class FilterPlotCard(FilterCard):
         )
 
         @app.callback(
-            Output(self.store_json, "data", allow_duplicate=True),
+            [
+                Output(self.store_json, "data", allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
+            ],
             Input(self.body, "is_open"),
             [
                 State(self.store_json, "data"),
@@ -473,13 +476,14 @@ class FilterPlotCard(FilterCard):
             if not is_open or json_now: raise PreventUpdate
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
-            return ofig_json_gz_str
+            return ofig_json_gz_str,""
             
             
         @app.callback(
             [
                 Output(self.store_json, "data", allow_duplicate=True),
-                Output(self.store, 'data', allow_duplicate=True)
+                Output(self.store, 'data', allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.store_panel, 'data'),
@@ -511,7 +515,7 @@ class FilterPlotCard(FilterCard):
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
             logger.debug(f'Assigning a json string of size {sys.getsizeof(ofig_json_gz_str)} compressed, to self.store_json')
             odat=my_filter_data if not panel_filter_data else dash.no_update
-            return ofig_json_gz_str,odat
+            return ofig_json_gz_str,odat,""
         
         app.clientside_callback(
             ClientsideFunction(
@@ -610,6 +614,7 @@ class FilterSliderCard(FilterPlotCard):
                 Output(self.store,'data',allow_duplicate=True),
                 Output(self.id('input_start'), 'value',allow_duplicate=True),
                 Output(self.id('input_end'), 'value',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.graph, 'selectedData'),
@@ -634,7 +639,7 @@ class FilterSliderCard(FilterPlotCard):
                 logger.debug(f'vals = {vals}')
                 minval=min(vals[0]) if vals and vals[0] else 0
                 maxval=max(vals[0]) if vals and vals[0] else 0
-                return dash.no_update,dash.no_update,minval,maxval
+                return dash.no_update,dash.no_update,minval,maxval,""
             else:
                 newvals=list(range(start_value, end_value+1))
                 ofig_json_gz_str = self.plot(
@@ -642,12 +647,13 @@ class FilterSliderCard(FilterPlotCard):
                     selected=newvals
                 )
                 odat = {self.figure_factory.key:newvals}
-                return ofig_json_gz_str,odat,dash.no_update,dash.no_update
+                return ofig_json_gz_str,odat,dash.no_update,dash.no_update,""
             
         @app.callback(
             [
                 Output(self.id('input_start'), 'value',allow_duplicate=True),
                 Output(self.id('input_end'), 'value',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             Input(self.button_clear, 'n_clicks'),
             State(self.store_panel, 'data'),
@@ -656,7 +662,7 @@ class FilterSliderCard(FilterPlotCard):
         def clear_selection_inputs(clear_clicked, panel_data):
             if not clear_clicked: raise PreventUpdate
             ff=self.ff(panel_data)
-            return ff.minval, ff.maxval
+            return ff.minval, ff.maxval,""
 
                 
 
