@@ -47,19 +47,6 @@ class FilterPanel(FilterCard):
                 prevent_initial_call=True
             )
 
-            # def subcomponent_filters_updated(*args):
-            #     filters_d=args[:-1]
-            #     old_data=args[-1]
-            #     intersected_filters={
-            #         k:v 
-            #         for d in filters_d 
-            #         for k,v in d.items()
-            #         if d
-            #     }
-            #     if old_data == intersected_filters: raise PreventUpdate
-            #     logger.debug(f'[{self.name}] subcomponent filters updated, triggered by: {ctx.triggered_id}, incoming = {filters_d}, returning {intersected_filters}, which is diff from {old_data}')
-            #     return intersected_filters
-                
             app.clientside_callback(
                 """
                 function(panel_data) {
@@ -76,33 +63,24 @@ class FilterPanel(FilterCard):
                 prevent_initial_call=True
                 )
 
-            # def filter_panel_store_updated(panel_filter_data):
-            #     # out
-            #     out = [
-            #         panel_filter_data
-            #         for card in self.store_panel_subcomponents    
-            #     ]
-            #     logger.debug(f'sending updates for new store_panel --> {out}')
-            #     return out
             
-            if not isinstance(self,ComparisonPanel):
-                app.clientside_callback(
-                    """
-                    function(clicks) {
-                        res = new Array("""+(
-                            str(len(self.store_subcomponents))
-                        )+""").fill({});
-                        console.log('clearing',""" + repr(self.name) +""",res);
-                        return res;
-                    }
-                    """,
-                    [
-                        Output(card.store, 'data', allow_duplicate=True)
-                        for card in self.store_subcomponents
-                    ],
-                    Input(self.button_clear, 'n_clicks'),
-                    prevent_initial_call=True
-                )
+            app.clientside_callback(
+                """
+                function(clicks) {
+                    res = new Array("""+(
+                        str(len(self.store_subcomponents))
+                    )+""").fill({});
+                    console.log('clearing',""" + repr(self.name) +""",res);
+                    return res;
+                }
+                """,
+                [
+                    Output(card.store, 'data', allow_duplicate=True)
+                    for card in self.store_subcomponents
+                ],
+                Input(self.button_clear, 'n_clicks'),
+                prevent_initial_call=True
+            )
 
             # if not isinstance(self, ComparisonPanel):
             app.clientside_callback(
@@ -110,22 +88,7 @@ class FilterPanel(FilterCard):
                 function(data) {
                     console.log('incoming data',data);
                     let keys = [""" + ", ".join(f'{repr(card.key)}' for card in self.store_subcomponents) + """];
-                    let key2out={};
-                    for(const key of keys) {
-                        key2out[key]=window.dash_clientside.no_update;
-                    }
-                    for(const key of Object.keys(data)) {
-                        if(key in key2out) {
-                            key2out[key] = {};
-                            key2out[key][key]=data[key]; // kinda weird but we want each to have its key
-                        }
-                    }
-                    let out = [];
-                    for(key of keys) {
-                        out.push(key2out[key]);
-                    }
-                    console.log('out',out);
-                    return out;
+                    return process_incoming_data(data,keys);
                 }
                 """,
                 [
@@ -330,6 +293,8 @@ class LeftPanel(CombinedPanel):
     L_or_R='L'
     color=LEFT_COLOR
     unfiltered=UNFILTERED_L
+    show_contrast_btn=True
+    contrast_btn_msg='[cf. 2]'
 
 class RightPanel(CombinedPanel):
     name='Filter_2'
@@ -337,6 +302,8 @@ class RightPanel(CombinedPanel):
     L_or_R='R'
     color=RIGHT_COLOR
     unfiltered=UNFILTERED_R
+    show_contrast_btn=True
+    contrast_btn_msg='[cf. 1]'
 
 
 
@@ -678,7 +645,34 @@ class ComparisonPanel(BaseComponent):
         
 
         super().component_callbacks(app)
+        
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='intersect_and_negate'
+            ),
+            Output(self.L.store_incoming, 'data',allow_duplicate=True),
+            Input(self.L.contrast_btn, 'n_clicks'),
+            [
+                State(card.store, 'data')
+                for card in self.R.store_subcomponents
+            ],
+            prevent_initial_call=True
+        )
 
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='intersect_and_negate'
+            ),
+            Output(self.R.store_incoming, 'data',allow_duplicate=True),
+            Input(self.R.contrast_btn, 'n_clicks'),
+            [
+                State(card.store, 'data')
+                for card in self.L.store_subcomponents
+            ],
+            prevent_initial_call=True
+        )
         
 
         ### SWITCHING TABS

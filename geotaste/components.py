@@ -171,6 +171,8 @@ class FilterCard(FilterComponent):
     body_is_open = False
     className='collapsible-card'
     tooltip = ''
+    show_contrast_btn = False
+    contrast_btn_msg = "[contrast]"
 
     def layout(self, params=None):
         return dbc.Card([
@@ -194,9 +196,22 @@ class FilterCard(FilterComponent):
             [
                 self.showhide_btn,
                 self.header_btn, 
+                self.contrast_btn
             ],
             className=f'card-header-{self.className}'
         )
+    
+    @cached_property
+    def contrast_btn(self):
+        return dbc.Button(
+            self.contrast_btn_msg,
+            color="link",
+            n_clicks=0,
+            id=self.id('contrast_btn'),
+            className='contrast_btn',
+            style={'display':'none' if not self.show_contrast_btn else 'inline'}
+        )
+
     
     @cached_property
     def header_btn(self):
@@ -455,8 +470,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def cache_graph_json(is_open,json_now, my_filter_data, panel_filter_data):
-            # if not is_open or json_now: raise PreventUpdate
-            if not json_now: raise PreventUpdate
+            if not is_open or json_now: raise PreventUpdate
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
             return ofig_json_gz_str
@@ -479,7 +493,7 @@ class FilterPlotCard(FilterCard):
             prevent_initial_call=True
         )
         def panel_data_updated(panel_filter_data, my_filter_data, _clicked_open_1,_clicked_open_2, current_sels):
-            # if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
+            if not _clicked_open_1 and not _clicked_open_2: raise PreventUpdate
             logger.debug(f'triggered by {ctx.triggered_id}, with panel_filter_data = {panel_filter_data} and my_filter_data = {my_filter_data}')
             # if not panel_filter_data:
                 # then a panel wide clear?

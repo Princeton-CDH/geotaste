@@ -253,6 +253,15 @@ p {
     font-size:0.8em;
 }
 
+.contrast_btn {
+    /* float:right; */
+    font-size:0.8em;
+    padding-left:.5em;
+    padding-bottom:1em;
+    vertical-align: middle;
+}
+
+
 .button_clear { font-size:.8rem}
 
 .button_clear_div {
@@ -265,7 +274,7 @@ p {
 }
 
 .card-footer {
-    background: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.9);
 }
 
 .card-footer-desc .store_desc {
@@ -306,11 +315,11 @@ p {
 
 
 .panel_R .card-header { 
-    background-color: rgba(125, 106, 182, 0.9);
+    background-color: rgba(125, 106, 182, 0.8);
 }
 
 .panel_R .card-body .card-header {
-    background-color: rgba(125, 106, 182, 0.7);
+    background-color: rgba(125, 106, 182, 0.8);
 }
 
 .panel_R .card-body .card-body .card-header {
@@ -325,10 +334,10 @@ p {
 }
 
 .panel_L .card-header { 
-    background-color: rgba(64, 176, 166, 0.9);
+    background-color: rgba(64, 176, 166, 0.8);
 }
 .panel_L .card-body .card-header { 
-    background-color: rgba(64, 176, 166, 0.7);
+    background-color: rgba(64, 176, 166, 0.8);
 }.panel_L .card-body .card-body .card-header { 
     background-color: rgba(64, 176, 166, 0.5);
     

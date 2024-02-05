@@ -116,7 +116,7 @@ function describe_filters(filter_data) {
                 } else {
                     if(isNumeric(val_list[0]) && isNumeric(val_list[val_list.length-1])) {
                         const [x,y] = sortedFirstAndLast(val_list);
-                        thisvalstr = thisvalstr.concat(x).concat(" to ").concat(y)
+                        thisvalstr = thisvalstr.concat(x).concat(" to ").concat((parseInt(y)+1).toString())
                     } else {
                         console.log('val_list',val_list, val_list.join);
                         thisvalstr = thisvalstr.concat(val_list.join(", "));
@@ -205,7 +205,7 @@ function intersect_subcomponent_filters(...args) {
 
 
 
-function negate_filter_data(nclick,filter_data) {
+function negate_filter_data(filter_data) {
     console.log('negate_filter_data',filter_data);
     for (const key of Object.keys(filter_data)) {
         const val_list = ensureArray(filter_data[key]);
@@ -220,6 +220,31 @@ function negate_filter_data(nclick,filter_data) {
     return filter_data;
 }
 
+function intersect_and_negate(nclick, ...filters_data) {
+    let filter_d = mergeSubcomponentFilters(...filters_data);
+    let filter_d_neg = negate_filter_data(filter_d);
+    return filter_d_neg;
+}
+
+function process_incoming_data(data,keys) {
+    console.log('incoming data',data);
+    let key2out={};
+    for(const key of keys) {
+        key2out[key]=window.dash_clientside.no_update;
+    }
+    for(const key of Object.keys(data)) {
+        if(key in key2out) {
+            key2out[key] = {};
+            key2out[key][key]=data[key]; // kinda weird but we want each to have its key
+        }
+    }
+    let out = [];
+    for(const key of keys) {
+        out.push(key2out[key]);
+    }
+    console.log('out',out);
+    return out;
+}
 
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
@@ -232,6 +257,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         describe_filters: describe_filters,
         intersect_subcomponent_filters: intersect_subcomponent_filters,
         track_state:track_state,
-        loadQueryParam:loadQueryParam
+        loadQueryParam:loadQueryParam,
+        intersect_and_negate:intersect_and_negate
     }
 });

@@ -45,9 +45,11 @@ function processQueryParamValue(val) {
     let res = [];
     if (val.includes('--')) {
         let [start, end] = val.split('--').map(Number);
-        if (!isNaN(start) && !isNaN(end) && start < end) {
+        if (!isNaN(start) && !isNaN(end) && start < end + 1) {
             // Generate range [start, start+1, ..., end-1]
-            return Array.from({ length: end - start }, (_, i) => start + i);
+            let res = Array.from({ length: end - start + 1}, (_, i) => start + i);
+            res.pop();
+            return res;
         }
     }
     // Split non-numeric strings by "_"
@@ -101,7 +103,7 @@ function rejoinSep(value) {
         [first,last] = [new_val[0], new_val[new_val.length - 1]];
         if(isNumeric(first) && isNumeric(last)) {
             [first2,last2] = sortedFirstAndLast(new_val);
-            out=first2.toString().concat('--').concat(last2.toString());
+            out=first2.toString().concat('--').concat((parseInt(last2)+1).toString());
             console.log(out);
         }
     } else {
@@ -194,11 +196,11 @@ function mergeSubcomponentFilters(...objs) {
     }
 
     let selectedRecords = pointsData.map(d => getRecordId(d))
-                                     .filter(x => x !== null); // Filter out null or undefined records
+                                     .filter(x => x != null);
 
     // Apply asIntIfPoss if quant is true
     if (quant === true) {
-        selectedRecords = selectedRecords.map(asIntIfPoss);
+        selectedRecords = selectedRecords.map(val => val.trim()).filter(val => val).map(asIntIfPoss)
     }
 
     selectedRecords.sort(); // Simple alphabetical or numerical sort
