@@ -412,8 +412,8 @@ class FilterPlotCard(FilterCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            # figure=get_empty_fig(),
-            figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
+            figure=get_empty_fig(),
+            # figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
@@ -551,8 +551,8 @@ class FilterSliderCard(FilterPlotCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
-            # figure=get_empty_fig(),
+            # figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
+            figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
