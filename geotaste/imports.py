@@ -7,7 +7,7 @@ PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
 PATH_SRVR = os.path.join(PATH_DATA,'webview.db')
 PATH_LOG = os.path.join(PATH_DATA,'geotaste.log')
 
-USE_CACHE=False
+USE_CACHE=True
 
 # setup logs
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
