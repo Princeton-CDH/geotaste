@@ -500,7 +500,8 @@ class ComparisonPanel(BaseComponent):
             dbc.Tab(label='Books', tab_id='book'),
         ],
                         id='maintbl_preface_analysis_tabs',
-                        active_tab='arrond')
+                        active_tab='arrond'
+                )
 
     @cached_property
     def maintbl(self):

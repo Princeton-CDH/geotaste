@@ -1617,7 +1617,7 @@ def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, also_
     rename = {c: c.split(f"{entity_prefix}_", 1)[-1].replace('_',' ').title() for c in cols}
     rename[group_by_field] = entity_prefix.title()
     return get_dash_table(
-        df,
+        df.sort_values(df.columns[-1] if not sort_by else sort_by),
         cols=cols,
         rename=rename,
         sort_by=[{'id': '0', 'direction': 'asc'}] if not sort_by else None,
