@@ -89,7 +89,7 @@ function loadQueryParam(searchStr, appBegun) {
 
 
 
-function describe_filters(filter_data) {
+function describe_filters(filter_data, ignore_key=false) {
     console.log('describe_filters',filter_data);
     let desc_parts = [];
     if(filters_are_active(filter_data)) {
@@ -103,7 +103,10 @@ function describe_filters(filter_data) {
                     is_neg = true;
                     val_list = val_list.slice(1);
                 }
-                let thisvalstr = pretty_format_string(key).concat(" is ");
+                let thisvalstr = "";
+                if(!ignore_key) {
+                    thisvalstr=pretty_format_string(key).concat(" is ");
+                }
                 if(is_neg) { thisvalstr = thisvalstr.concat("not ") }
                 if(val_list.length == 1) {
                     thisvalstr=thisvalstr.concat(val_list[0]);
@@ -126,13 +129,14 @@ function describe_filters(filter_data) {
 }
 
 
-function get_component_desc_and_is_open(filter_data) {
+function get_component_desc_and_is_open(filter_data, ignore_key=false) {
     console.log('get_component_desc_and_is_open <-',filter_data);    
+    const fd_keys = Object.keys(filter_data);
     if(!filters_are_active(filter_data)) {
         var res = ["",false];
     } else {
-        let valstr = describe_filters(filter_data);
-        console.log('valstr2',valstr);
+        var really_ignore_key = (ignore_key && (fd_keys.length==1));
+        var valstr = describe_filters(filter_data, ignore_key=really_ignore_key);
         var res = [valstr, true];
     }
     console.log('get_component_desc_and_is_open ->',res);    

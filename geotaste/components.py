@@ -10,6 +10,7 @@ from .imports import *
 
 class BaseComponent(DashComponent):
     name = None
+    is_panel = False
 
     def __init__(
             self,
@@ -255,13 +256,12 @@ class FilterCard(FilterComponent):
 
     @cached_property
     def body(self):
-        from .panels import FilterPanel
         logger.trace(self.name)
         negbtn = dbc.Container(
             self.negate_btn,
             style={
                 'color':self.color,
-                'display':'none' if isinstance(self, FilterPanel) else 'block',
+                'display':'none' if self.is_panel else 'block',
                 'margin':'0',
                 'padding-right':'5px'
             }
@@ -310,8 +310,6 @@ class FilterCard(FilterComponent):
             className='button_clear',
             id=self.id('button_clear')
         )
-
-    
     
 
 
@@ -375,11 +373,20 @@ class FilterCard(FilterComponent):
             prevent_initial_call=True
         )
 
+        # ClientsideFunction(
+            #     namespace='clientside',
+            #     function_name='get_component_desc_and_is_open'
+            # ),
         app.clientside_callback(
-            ClientsideFunction(
-                namespace='clientside',
-                function_name='get_component_desc_and_is_open'
-            ),
+            """
+            function(filter_data) {
+                let ignore_key = """+(str(not self.is_panel).lower())+""";
+                return get_component_desc_and_is_open(
+                    filter_data,
+                    ignore_key
+                );
+            }
+            """,
             [
                 Output(self.store_desc, 'children', allow_duplicate=True),
                 Output(self.footer, 'is_open', allow_duplicate=True),

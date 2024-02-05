@@ -172,7 +172,7 @@ function ensureArray(input) {
     // Capitalize the first letter of the entire string and make sure the rest is in lowercase
     const formattedString = stringWithSpaces.charAt(0).toUpperCase() + stringWithSpaces.slice(1).toLowerCase();
     
-    return formattedString;
+    return formattedString.replace('Member membership', 'Years of membership');
 }
 
 
@@ -225,4 +225,37 @@ function mergeSubcomponentFilters(...objs) {
     selectedRecords.sort(); // Simple alphabetical or numerical sort
     console.log('selectedRecords ->',selectedRecords);
     return selectedRecords;
+}
+
+
+function delistify(inputList, sep = ', ') {
+    // Check if input is not an array
+    if (!Array.isArray(inputList)) {
+        return String(inputList);
+    }
+    // Handle empty array
+    else if (inputList.length === 0) {
+        return "";
+    }
+    // Handle single-element array
+    else if (inputList.length === 1) {
+        return String(inputList[0]);
+    }
+    // Handle multiple-element array
+    else {
+        try {
+            // Try to sort numerically
+            const sortedList = inputList.map(item => parseInt(item, 10)).sort((a, b) => a - b);
+            const a = sortedList[0], b = sortedList[sortedList.length - 1];
+            // If sorting was successful and didn't result in NaN
+            if (!isNaN(a) && !isNaN(b)) {
+                return `${a} to ${b}`;
+            } else {
+                throw new Error('Non-numeric values present');
+            }
+        } catch (error) {
+            // Handle non-numeric sorting
+            return inputList.map(String).sort().join(sep);
+        }
+    }
 }

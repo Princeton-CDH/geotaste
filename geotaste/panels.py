@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 
 class FilterPanel(FilterCard):
     unfiltered = UNFILTERED
+    is_panel = True
 
     def describe_filters(self, panel_data):
         """Describes the filters applied to the panel data.
@@ -76,7 +77,6 @@ class FilterPanel(FilterCard):
                 Input(self.button_clear, 'n_clicks'),
                 prevent_initial_call=True)
 
-            # if not isinstance(self, ComparisonPanel):
             app.clientside_callback(
                 """
                 function(data) {
