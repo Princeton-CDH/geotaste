@@ -481,7 +481,7 @@ button {
     top:50px;
     padding-left:501px;
     /* height:100vh; */
-    height:fit-content;
+    height:90dvh;
     width:100vw;
     min-width:800px;
     overflow-x: hidden;

@@ -1,11 +1,43 @@
+import os,tempfile,sys
 # paths
-import os
 PATH_HERE = os.path.abspath(os.path.dirname(__file__))
 PATH_REPO = os.path.dirname(PATH_HERE)
 PATH_DATA = os.path.expanduser('~/geotaste_data')
 PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
 PATH_SRVR = os.path.join(PATH_DATA,'webview.db')
 PATH_LOG = os.path.join(PATH_DATA,'geotaste.log')
+
+USE_CACHE=False
+
+# setup logs
+LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
+
+# 5 to include traces; 
+# 10 for debug; 20 info, 25 success; 
+# 30 warning, 40 error, 50 critical;
+LOG_LEVEL = 10
+
+from loguru import logger
+logger.remove()
+logger.add(
+    sink=sys.stderr,
+    format=LOG_FORMAT, 
+    level=LOG_LEVEL
+)
+logger.add(
+    sink=open(PATH_LOG, 'a'),
+    format=LOG_FORMAT, 
+    level=LOG_LEVEL
+)
+
+
+
+if not USE_CACHE:
+    PATH_CACHE=tempfile.TemporaryDirectory().name
+else:
+    PATH_CACHE = os.path.join(PATH_DATA, 'cache.dc')
+
+logger.debug({k:v for k,v in locals().items() if k.startswith('PATH_')})
 
 ## IMPORTS
 
@@ -22,7 +54,6 @@ from collections import Counter
 # for typing purposes
 from typing import *
 from collections.abc import *
-
 ## Non-sys imports
 os.environ['ASSETS_FOLDER'] = PATH_ASSETS
 
@@ -34,8 +65,9 @@ import warnings
 warnings.filterwarnings('ignore')
 from functools import cached_property, cache
 # cache = lru_cache(maxsize=None)
+
 from diskcache import Cache
-cache_obj = Cache(os.path.join(PATH_DATA, 'cache.dc'))
+cache_obj = Cache(PATH_CACHE)
 # cache = cache_obj.memoize()
 import dash
 from dash import Dash, dcc, html, Input, Output, dash_table, callback, State, ctx, ClientsideFunction, MATCH, ALL, DiskcacheManager, Patch
@@ -62,26 +94,6 @@ from colour import Color
 import dash_leaflet as dl
 
 
-# setup logs
-LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
-
-# 5 to include traces; 
-# 10 for debug; 20 info, 25 success; 
-# 30 warning, 40 error, 50 critical;
-LOG_LEVEL = 10
-
-from loguru import logger
-logger.remove()
-logger.add(
-    sink=sys.stderr,
-    format=LOG_FORMAT, 
-    level=LOG_LEVEL
-)
-logger.add(
-    sink=open(PATH_LOG, 'a'),
-    format=LOG_FORMAT, 
-    level=LOG_LEVEL
-)
 MAPBOX_ACCESS_TOKEN_b64=b'cGsuZXlKMUlqb2ljbmxoYm1obGRYTmxjaUlzSW1FaU9pSmpiRzFuYmpGM2NtNHdZV2Q1TTNKelpXOXVibXB3YzJwbEluMC5PQ0ZBVlppa0JHREZTOVRlQ0F6aDB3'
 mapbox_access_token = b64decode(MAPBOX_ACCESS_TOKEN_b64).decode('utf-8')
 px.set_mapbox_access_token(mapbox_access_token)

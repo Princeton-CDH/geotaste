@@ -1,6 +1,7 @@
 from .imports import *
 
-def hasone(x:list, y:list) -> bool:
+
+def hasone(x: list, y: list) -> bool:
     """Checks if there is at least one common element between two lists.
 
     Args:
@@ -10,10 +11,11 @@ def hasone(x:list, y:list) -> bool:
     Returns:
         bool: True if there is at least one common element between the two lists, False otherwise.
     """
-    res = bool(set(x)&set(y))
+    res = bool(set(x) & set(y))
     return res
 
-def isin(x:object, y:list) -> bool:
+
+def isin(x: object, y: list) -> bool:
     """Checks if an object is present in a given list.
 
     Args:
@@ -26,7 +28,8 @@ def isin(x:object, y:list) -> bool:
     res = bool(x in set(y))
     return res
 
-def isin_or_hasone(x:object, y:list) -> bool:
+
+def isin_or_hasone(x: object, y: list) -> bool:
     """Check if an object is in a list or has at least one element in a list.
 
     Args:
@@ -36,17 +39,18 @@ def isin_or_hasone(x:object, y:list) -> bool:
     Returns:
         bool: True if the object is in the list or has at least one element in the list, False otherwise.
     """
-    
-    if not is_listy(y): 
-        y={y}
+
+    if not is_listy(y):
+        y = {y}
     else:
-        y=set(y)
-    if type(x) in {list,set,tuple}:
-        return hasone(x,y)
+        y = set(y)
+    if type(x) in {list, set, tuple}:
+        return hasone(x, y)
     else:
-        return isin(x,y)
-    
-def to_set(x:object) -> set:
+        return isin(x, y)
+
+
+def to_set(x: object) -> set:
     """Converts a value to a set.
 
     Args:
@@ -56,7 +60,8 @@ def to_set(x:object) -> set:
         A set containing the value `x` if `x` is not a list-like object, otherwise a set containing all the elements of `x`.
     """
     return {x} if not is_listy(x) else set(flatten_list(x))
-    
+
+
 # def is_negation(number_or_str):
 #     # if isinstance(number_or_str,Number):
 #     #     return number_or_str<0
@@ -69,7 +74,8 @@ def to_set(x:object) -> set:
 #     else:
 #         return number_or_str
 
-def overlaps(series:pd.Series, vals:list) -> pd.Series:
+
+def overlaps(series: pd.Series, vals: list) -> pd.Series:
     """Checks if any element in the given series overlaps with the values in
     the given list.
 
@@ -86,7 +92,8 @@ def overlaps(series:pd.Series, vals:list) -> pd.Series:
     res = series_set.apply(lambda xset: bool(xset & vals_set))
     return res
 
-def is_numeric(x:object) -> bool:
+
+def is_numeric(x: object) -> bool:
     """Checks if the given object is a numeric value.
 
     Args:
@@ -97,7 +104,8 @@ def is_numeric(x:object) -> bool:
     """
     return isinstance(x, numbers.Number)
 
-def is_listy(x:object) -> bool:
+
+def is_listy(x: object) -> bool:
     """Checks if the input object is a list-like object.
 
     Args:
@@ -106,19 +114,21 @@ def is_listy(x:object) -> bool:
     Returns:
         bool: True if the object is a tuple, list, or pandas Series; False otherwise.
     """
-    return type(x) in {tuple,list,pd.Series}
+    return type(x) in {tuple, list, pd.Series}
 
 
-def as_int_if_poss(x:Number) -> int:
-    return ensure_int(x,return_orig=True)
+def as_int_if_poss(x: Number) -> int:
+    return ensure_int(x, return_orig=True)
 
-def ensure_int(x:Number, return_orig=True, default=None) -> int:
+
+def ensure_int(x: Number, return_orig=True, default=None) -> int:
     try:
         return int(x)
-    except ValueError:
+    except (ValueError, TypeError):
         return (x if return_orig else default)
 
-def ensure_dict(x:object) -> dict:
+
+def ensure_dict(x: object) -> dict:
     """Ensures that the input is a dictionary.
 
     Args:
@@ -141,7 +151,8 @@ def ensure_dict(x:object) -> dict:
     if type(x) is dict: return x
     return dict(x)
 
-def find_plural_cols(df:pd.DataFrame) -> list:
+
+def find_plural_cols(df: pd.DataFrame) -> list:
     """Finds the columns in a pandas DataFrame that contain lists.
 
     Args:
@@ -152,7 +163,8 @@ def find_plural_cols(df:pd.DataFrame) -> list:
     """
     return list(df.columns[(df.applymap(type) == list).any()])
 
-def first(l:Iterable, default:object=None) -> object:
+
+def first(l: Iterable, default: object = None) -> object:
     """Returns the first element of an iterable object.
 
     Args:
@@ -162,10 +174,12 @@ def first(l:Iterable, default:object=None) -> object:
     Returns:
         object: The first element of the iterable, or the default value if the iterable is empty.
     """
-    for x in l: return x
+    for x in l:
+        return x
     return default
 
-def flatten_list(s:Iterable) -> list:
+
+def flatten_list(s: Iterable) -> list:
     """Flattens a nested list into a single list.
 
     Args:
@@ -184,15 +198,16 @@ def flatten_list(s:Iterable) -> list:
         >>> flatten_list([1, [2, [3, [4, [5]]]]])
         [1, 2, 3, 4, 5]
     """
-    l=[]
+    l = []
     for x in s:
         if is_listy(x):
-            l+=flatten_list(x)
+            l += flatten_list(x)
         else:
-            l+=[x]
+            l += [x]
     return l
 
-def flatten_series(s:pd.Series) -> pd.Series:
+
+def flatten_series(s: pd.Series) -> pd.Series:
     """Flattens a pandas Series object by converting any nested lists into
     individual elements.
 
@@ -211,18 +226,19 @@ def flatten_series(s:pd.Series) -> pd.Series:
         3    4
         dtype: object
     """
-    iname=s.name
-    s=pd.Series(s)
-    l=[]
-    for i,x in zip(s.index, s):
+    iname = s.name
+    s = pd.Series(s)
+    l = []
+    for i, x in zip(s.index, s):
         if is_listy(x):
-            l+=[(i,xx) for xx in flatten_list(x)]
+            l += [(i, xx) for xx in flatten_list(x)]
         else:
-            l+=[(i,x)]
-    il,xl=zip(*l)
-    return pd.Series(xl,index=il, name=iname)
+            l += [(i, x)]
+    il, xl = zip(*l)
+    return pd.Series(xl, index=il, name=iname)
 
-def make_counts_df(series:pd.Series) -> pd.Series:
+
+def make_counts_df(series: pd.Series) -> pd.Series:
     """This function takes a pandas Series as input and returns a DataFrame
     containing the counts of each unique value in the Series.
 
@@ -245,15 +261,14 @@ def make_counts_df(series:pd.Series) -> pd.Series:
     2   orange            1
     """
     return pd.DataFrame(
-        pd.Series(
-            flatten_list(series), 
-            name=series.name
-        ).value_counts()
-    ).reset_index()
+        pd.Series(flatten_list(series),
+                  name=series.name).value_counts()).reset_index()
+
 
 def ordinal_str(n: int) -> str:
     """Derive the ordinal numeral string for a given number n."""
     return f"{n:d}{'tsnrhtdd'[(n//10%10!=1)*(n%10<4)*n%10::4]}"
+
 
 def force_int(x, errors=0) -> int:
     """Converts the input to an integer.
@@ -269,14 +284,13 @@ def force_int(x, errors=0) -> int:
         return int(x)
     except ValueError:
         return errors
-    
 
-    
-def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R'):
-    return pd.concat([
-        dfL.assign(**{colname:colval_L}),
-        dfR.assign(**{colname:colval_R})
-    ])
+
+def combine_LR_df(dfL, dfR, colname='L_or_R', colval_L='L', colval_R='R'):
+    return pd.concat(
+        [dfL.assign(**{colname: colval_L}),
+         dfR.assign(**{colname: colval_R})])
+
 
 # def combine_LR_df_1(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
 #     """
@@ -299,18 +313,17 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R'):
 #     allL, allR = set(dfL.index), set(dfR.index)
 #     print(allR)
 #     (
-#         onlyL, 
-#         onlyR, 
+#         onlyL,
+#         onlyR,
 #         both,
 #         either
 #      ) = (
-#         allL - allR, 
-#         allR - allL, 
+#         allL - allR,
+#         allR - allL,
 #         allR & allL,
 #         allR | allL
 #      )
-    
-    
+
 #     # logger.debug([len(allL), len(allR), len(both), len(either), 'lens'])
 
 #     def assign(idx, underdog=True):
@@ -330,7 +343,7 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R'):
 #                     o=colval_R
 #                 else:
 #                     o=colval_L
-        
+
 #         return o
 
 #     odf = pd.concat([dfL, dfR])
@@ -340,9 +353,7 @@ def combine_LR_df(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R'):
 #     return odf
 
 
-
-
-def serialize(d:object) -> str:
+def serialize(d: object) -> str:
     """Serializes an object into a JSON-encoded string.
 
     Args:
@@ -353,7 +364,8 @@ def serialize(d:object) -> str:
     """
     return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode()
 
-def unserialize(dstr:str) -> object:
+
+def unserialize(dstr: str) -> object:
     """Deserializes a JSON-encoded string into a python object.
 
     Args:
@@ -364,7 +376,8 @@ def unserialize(dstr:str) -> object:
     """
     return orjson.loads(dstr)
 
-def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
+
+def selectrename_df(df: pd.DataFrame, col2col: dict = {}) -> pd.DataFrame:
     """Selects and renames columns in a DataFrame.
 
     Args:
@@ -387,8 +400,21 @@ def selectrename_df(df:pd.DataFrame, col2col:dict={}) -> pd.DataFrame:
         - If a column in col2col is not present in the DataFrame, it will be ignored.
         - If a column in col2col is present in the DataFrame but not specified in col2col, it will be dropped from the resulting DataFrame.
     """
-    c2c = {k:v for k,v in col2col.items() if k in set(df.columns)}
+    c2c = {k: v for k, v in col2col.items() if k in set(df.columns)}
     return df[c2c.keys()].rename(columns=c2c)
+
+
+def is_numeric_ish(x: str):
+    try:
+        float(x)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def is_quant_series(series, ish=False):
+    return all(is_numeric(x) or (ish and is_numeric_ish(x)) for x in series)
+
 
 def qualquant_series(series, quant=False, drop_na=False, drop_empty=False):
     """This function takes a series as input and converts it into a pandas
@@ -405,14 +431,15 @@ def qualquant_series(series, quant=False, drop_na=False, drop_empty=False):
     Returns:
     - A pandas Series object with the converted values.
     """
-    series=pd.Series(series) if type(series)!=pd.Series else series
-    if quant is True: 
-        series=pd.to_numeric(series, errors='coerce')
-        if drop_na: series=series.dropna()
+    series = pd.Series(series) if type(series) != pd.Series else series
+    if quant is True:
+        series = pd.to_numeric(series, errors='coerce')
+        if drop_na: series = series.dropna()
     elif quant is False:
-        series=series.fillna('').apply(str)
-        if drop_empty: series=series[series!='']
+        series = series.fillna('').apply(str)
+        if drop_empty: series = series[series != '']
     return series
+
 
 def uid(length=10):
     """Generates a unique identifier (UID) using the shortuuid library.
@@ -432,6 +459,7 @@ def uid(length=10):
     import shortuuid
     return str(shortuuid.ShortUUID().random(length=length))
 
+
 class Logwatch:
     """A class for monitoring and logging the duration of tasks.
 
@@ -442,14 +470,16 @@ class Logwatch:
         log (Logger): The logger object for logging the task status.
         task_name (str): The name of the task being monitored.
     """
+
     def __init__(self, name=None, level='DEBUG'):
         self.started = None
         self.ended = None
-        self.level=level
-        self.log = getattr(logger,self.level.lower())
+        self.level = level
+        self.log = getattr(logger, self.level.lower())
         self.task_name = name
+
     @property
-    def tdesc(self): 
+    def tdesc(self):
         """Returns the formatted timespan of the duration.
         
         Returns:
@@ -461,18 +491,18 @@ class Logwatch:
             '2 hours 30 minutes'
         """
         return format_timespan(self.duration)
-    
+
     @property
-    def duration(self): 
+    def duration(self):
         """Calculates the duration of an event.
         
         Returns:
             float: The duration of the event in seconds.
         """
         return self.ended - self.started
-    
+
     @property
-    def desc(self): 
+    def desc(self):
         """Returns a description of the task.
         
         If the task has both a start time and an end time, it returns a string
@@ -488,8 +518,8 @@ class Logwatch:
             return f'{self.task_name} ... {self.tdesc}'
         else:
             return f'Task running ...' if not self.task_name else f'{self.task_name} ...'
-        
-    def __enter__(self):        
+
+    def __enter__(self):
         """Context manager method that is called when entering a 'with' statement.
         
         This method logs the description of the context manager and starts the timer.
@@ -502,15 +532,15 @@ class Logwatch:
         self.started = time.time()
         return self
 
-    def __exit__(self,*x):
+    def __exit__(self, *x):
         """
         Logs the resulting time.
-        """ 
+        """
         self.ended = time.time()
         self.log(self.desc)
 
 
-def is_range_of_ints(numbers:'Iterable') -> bool:
+def is_range_of_ints(numbers: 'Iterable') -> bool:
     """Check if the given numbers form a range of integers.
     
     Args:
@@ -527,20 +557,19 @@ def is_range_of_ints(numbers:'Iterable') -> bool:
         >>> is_range_of_ints([1, 2, 3, 3, 4, 5])
         False
     """
-    
+
     l = numbers
     if not is_listy(l): return False
-    if len(l)<2: return False
+    if len(l) < 2: return False
     try:
-        if any(x!=int(x) for x in l): return False
+        if any(x != int(x) for x in l): return False
     except ValueError:
         return False
     l = list(sorted(int(x) for x in l))
-    return l == list(range(l[0], l[-1]+1))
+    return l == list(range(l[0], l[-1] + 1))
 
 
-
-def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
+def delist_df(df: pd.DataFrame, sep: str = ' ', human=True) -> pd.DataFrame:
     """
     Takes a pandas DataFrame (df), iterates through each column, 
     and applies the function fix to each value in each column. The function 
@@ -560,15 +589,22 @@ def delist_df(df:pd.DataFrame, sep:str=' ') -> pd.DataFrame:
     Returns:
         pd.DataFrame: The processed DataFrame.
     """
-    def fix(y):
-        if is_listy(y): return sep.join(str(x) for x in y)
-        if is_numeric(y): y=round(y,2)
-        return y
-    df=df.copy()
-    for col in df:
-        df[col]=df[col].apply(fix)
-    return df
 
+    def fix(y):
+        if is_listy(y): 
+            if human:
+                return delistify(y)
+            else:
+                return sep.join(str(x) for x in y)
+        elif is_numeric(y): 
+            return round(y, 2)
+        else:
+            return y
+
+    # df = df.copy()
+    # for col in df:
+    #     df[col] = df[col].apply(fix)
+    return df.applymap(fix)
 
 
 def oxfordcomma(l, repr=repr, op='and'):
@@ -582,94 +618,91 @@ def oxfordcomma(l, repr=repr, op='and'):
     Returns:
         str: The joined string with an Oxford comma.
     """
-    
-    if len(l)<3:
+
+    if len(l) < 3:
         return f' {op} '.join(repr(x) for x in l)
     else:
         return f"{', '.join(repr(x) for x in l[:-1])}, {op} {repr(l[-1])}"
-    
-def ifnanintstr(x,y=''):
+
+
+def ifnanintstr(x, y=''):
     return ensure_int(x) if not np.isnan(x) else y
 
 
+def postproc_df(
+    df,
+    cols=[],  # or dict to rename
+    cols_sep=[],
+    cols_q=[],
+    cols_pref=[],
+    sep=';',
+    fillna=None,
+):
 
-
-
-
-def postproc_df(df, 
-        cols=[],  # or dict to rename
-        cols_sep=[],
-        cols_q=[],
-        cols_pref=[], 
-        sep=';',
-        fillna=None,
-        ):
-        
     # sep?
-    cols_qset=set(cols_q)
+    cols_qset = set(cols_q)
 
-    def split_sep_col(x,quant,sep):
+    def split_sep_col(x, quant, sep):
         if is_listy(x):
             l = x
         else:
             l = [y.strip() for y in str(x).split(sep)]
 
-        if quant: 
-            l = [pd.to_numeric(y,errors='coerce') for y in l]
-        
-        return l
-        
+        if quant:
+            l = [pd.to_numeric(y, errors='coerce') for y in l]
 
-    for c in cols_sep: 
-        df[c]=df[c].fillna('').apply(lambda x: split_sep_col(x, c in cols_qset, sep))
-    
+        return l
+
+    for c in cols_sep:
+        df[c] = df[c].fillna('').apply(
+            lambda x: split_sep_col(x, c in cols_qset, sep))
+
     # rename?
-    if cols: 
-        df=df[cols] if is_listy(cols) else selectrename_df(df, cols)
-    
+    if cols:
+        df = df[cols] if is_listy(cols) else selectrename_df(df, cols)
+
     # quantize?
     for c in cols_q:
         if c not in set(cols_sep) and c in set(df.columns):
-            df[c]=pd.to_numeric(df[c], errors='coerce')
+            df[c] = pd.to_numeric(df[c], errors='coerce')
 
     # prefcols
     if cols_pref:
-        cl1=[c for c in cols_pref if c in set(df.columns)] 
-        cl2=[c for c in df if c not in set(cols_pref)]
-        df=df[cl1+cl2]
+        cl1 = [c for c in cols_pref if c in set(df.columns)]
+        cl2 = [c for c in df if c not in set(cols_pref)]
+        df = df[cl1 + cl2]
 
     if fillna is not None:
-        df=df.fillna(fillna)
+        df = df.fillna(fillna)
 
     return df
 
 
-
-
 def get_date_cmp(*l):
-    l=[str(x) for x in l]
-    minlen=min([len(x) for x in l])
+    l = [str(x) for x in l]
+    minlen = min([len(x) for x in l])
     return [x[:minlen] for x in l]
 
-def date_fuzzily_precedes(x,y):
-    x2,y2=get_date_cmp(x,y)
-    return x2<y2
 
-def date_fuzzily_follows(x,y):
-    x2,y2=get_date_cmp(x,y)    
-    return x2>y2
+def date_fuzzily_precedes(x, y):
+    x2, y2 = get_date_cmp(x, y)
+    return x2 < y2
 
 
+def date_fuzzily_follows(x, y):
+    x2, y2 = get_date_cmp(x, y)
+    return x2 > y2
 
-def is_fuzzy_date_seq(x,y,z):
-    if any(not _ for _ in [x,y,z]): return False
-    
-    x,y,z=get_date_cmp(x,y,z)
-    return x<=y<=z
+
+def is_fuzzy_date_seq(x, y, z):
+    if any(not _ for _ in [x, y, z]): return False
+
+    x, y, z = get_date_cmp(x, y, z)
+    return x <= y <= z
 
 
 def ensure_dir(fn):
-    dirname=os.path.dirname(fn)
+    dirname = os.path.dirname(fn)
     if not os.path.exists(fn):
         try:
             os.makedirs(dirname)
@@ -680,8 +713,9 @@ def ensure_dir(fn):
 
 def rejoin_sep(listy_obj, sep=','):
     if not is_listy(listy_obj): return listy_obj
-    o=sep.join(str(x) for x in listy_obj if x)
-    while o.startswith('~,'): o='~'+o[2:]
+    o = sep.join(str(x) for x in listy_obj if x)
+    while o.startswith('~,'):
+        o = '~' + o[2:]
     return o
 
 
@@ -694,18 +728,20 @@ def compressed_bytes(obj):
     Returns:
         str: The base64 encoded string representing the compressed object.
     """
-    
-    ojson_b=orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
+
+    ojson_b = orjson.dumps(obj, option=orjson.OPT_SERIALIZE_NUMPY)
     ojson_bz = zlib.compress(ojson_b)
     ojson_bz64 = b64encode(ojson_bz)
     return ojson_bz64
 
+
 def uncompressed_bytes(ojson_bz64):
-    if type(ojson_bz64)==str: ojson_bz64=ojson_bz64.encode()
+    if type(ojson_bz64) == str: ojson_bz64 = ojson_bz64.encode()
     ojson_bz = b64decode(ojson_bz64)
     ojson_b = zlib.decompress(ojson_bz)
-    ojson=orjson.loads(ojson_b)
+    ojson = orjson.loads(ojson_b)
     return ojson
+
 
 def compressed_str(obj):
     """Return a compressed string representation of the given object.
@@ -719,11 +755,13 @@ def compressed_str(obj):
     Note:
         This function internally uses the `compressed_bytes` function to compress the object and then decodes the compressed bytes using 'utf-8' encoding.
     """
-    
+
     return compressed_bytes(obj).decode('utf-8')
+
 
 def uncompressed_str(x):
     return uncompressed_bytes(x)
+
 
 def compress_to(obj, fn):
     """Compresses the given object and writes the compressed bytes to a file.
@@ -738,15 +776,17 @@ def compress_to(obj, fn):
     Raises:
         IOError: If there is an error while writing to the file.
     """
-    
-    with open(fn,'wb') as of:
+
+    with open(fn, 'wb') as of:
         of.write(compressed_bytes(obj))
 
+
 def uncompress_from(fn):
-    with open(fn,'rb') as of:
+    with open(fn, 'rb') as of:
         return uncompressed_bytes(of.read())
 
-def get_query_params(qstr:str) -> dict:
+
+def get_query_params(qstr: str) -> dict:
     """Returns a dictionary of query parameters from the given query string.
     
     Args:
@@ -761,7 +801,25 @@ def get_query_params(qstr:str) -> dict:
     """
     from urllib.parse import parse_qs
     if not qstr: return {}
-    if qstr.startswith('?'): qstr=qstr[1:]
+    if qstr.startswith('?'): qstr = qstr[1:]
     if not qstr: return {}
     params = parse_qs(qstr)
     return dict(params) if params else {}
+
+
+
+
+def delistify(input_list, sep=', '):
+    if not is_listy(input_list):
+        return str(input_list)
+    elif len(input_list)==0:
+        return ""
+    elif len(input_list)==1:
+        return input_list[0]
+    else:
+        try:
+            sorted_list = sorted(int(item) for item in input_list)
+            a,b = sorted_list[0], sorted_list[-1]
+            return f'{a} to {b}'
+        except ValueError:
+            return sep.join(sorted(str(x) for x in input_list))
