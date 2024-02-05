@@ -844,13 +844,15 @@ class CombinedFigureFactory(FigureFactory):
             for fn in self.filter_data)
 
     def table_arrond(self):
-        return generate_table(self. data, 'arrond_id', 'arrond')
+        return generate_table(self. data, 'arrond_id', 'arrond',sort_by='arrond_num_members')
     def table_members(self):
-        return generate_table(self.data, 'member')
+        df=self.data.sample(frac=1)
+        df['member_num_years_of_membership'] = df['member_membership'].apply(len)
+        return generate_table(df, 'member',sort_by='member_num_years_of_membership')
     def table_books(self):
-        return generate_table(self.data, 'book', also_cols={'author_name'})
+        return generate_table(self.data.drop(['book_numborrow','book_circulated'],axis=1), 'book', also_cols={'author_name'},sort_by='book_num_members')
     def table_authors(self):
-        return generate_table(self.data, 'author')
+        return generate_table(self.data, 'author',sort_by='author_num_members')
         
 
     def table(self, tab=None, **kwargs):
@@ -1588,7 +1590,7 @@ def store_all_markers_in_assets_folder(ofn=None):
 def preprocess_df(data):
     return delist_df(data).fillna('').applymap(ensure_int)
 
-def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, also_cols=None):
+def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, sort_by_asc=False,also_cols=None):
     if not entity_prefix: entity_prefix=group_by_field
     df = preprocess_df(data)
     df = df[df[group_by_field] != ""]
@@ -1616,9 +1618,16 @@ def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, also_
     ]
     rename = {c: c.split(f"{entity_prefix}_", 1)[-1].replace('_',' ').title() for c in cols}
     rename[group_by_field] = entity_prefix.title()
+    if not sort_by: sort_by=cols[-1]
     return get_dash_table(
-        df.sort_values(df.columns[-1] if not sort_by else sort_by),
+        df.sort_values(sort_by, ascending=sort_by_asc),
         cols=cols,
         rename=rename,
-        sort_by=[{'id': '0', 'direction': 'asc'}] if not sort_by else None,
+        # sort_by=[{'id': '0', 'direction': 'asc'}] if not sort_by else None,
+        sort_by=[
+            {
+                'id': cols.index(sort_by), 
+                'direction': 'asc' if sort_by_asc else 'desc'
+             }
+        ]
     )

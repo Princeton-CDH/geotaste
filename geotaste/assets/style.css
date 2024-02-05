@@ -585,3 +585,10 @@ button {
     padding:0;
     margin:0;
 }
+
+
+.column-header-name {
+    font-size:.9em;
+    text-wrap:wrap;
+    font-weight:600;
+}

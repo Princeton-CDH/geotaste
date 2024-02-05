@@ -92,22 +92,19 @@ class GeotasteLayout(BaseComponent):
             Output(card.store, 'data', allow_duplicate=True)
             for panel in [self.comparison_panel.L, self.comparison_panel.R]
             for card in panel.store_subcomponents
-        ]
+        ] + [Output(self.comparison_panel.mainview_tabs, 'active_tab',allow_duplicate=True)]
         num_outputs=len(outputs)
 
         app.clientside_callback(
             """
-            function toggle(clk1){ return new Array("""+str(num_outputs)+""").fill({}); }
+            function toggle(clk1){ 
+                var arr = new Array("""+str(num_outputs)+""").fill({});
+                arr.push("map");
+                return arr;
+            }
             """,
             outputs,
-            # Output('welcome-modal','is_open',allow_duplicate=True),
-
-            # [
-                # Output(self.comparison_panel.L.store_incoming, 'data', allow_duplicate=True),
-                # Output(self.comparison_panel.R.store_incoming, 'data', allow_duplicate=True),
-            # ],
             Input('logo_popup', 'n_clicks'),
-            # State('welcome-modal', 'is_open'),
             prevent_initial_call=True
         )
         
