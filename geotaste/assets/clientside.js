@@ -65,15 +65,9 @@ function loadQueryParam(searchStr, appBegun) {
             k = k.endsWith('2') ? k.slice(0, -1) : k;
             const isNeg = v.startsWith('~');
             if (isNeg) v = v.slice(1);
-            // fd[k] = (isNeg ? ['~'] : []).concat(
-            //     v.split('_').map(val => val.trim()).filter(val => val).map(asIntIfPoss)
             // );
-            fd[k] = (isNeg ? ['~'] : []).concat(
-                v.split('_')
-                 .map(val => val.trim())
-                 .filter(val => val)
-                 .flatMap(processQueryParamValue) // Use processValue to handle all specified formats
-            );
+            fd[k] = (isNeg ? ['~'] : []).concat(processQueryParamValue(v));
+            console.log(k,fd[k]);
         }
     });
 
@@ -119,7 +113,7 @@ function describe_filters(filter_data) {
                         thisvalstr = thisvalstr.concat(x).concat(" to ").concat((parseInt(y)+1).toString())
                     } else {
                         console.log('val_list',val_list, val_list.join);
-                        thisvalstr = thisvalstr.concat(val_list.join(", "));
+                        thisvalstr = thisvalstr.concat(val_list.join(" or "));
                     }
                 }
                 desc_parts.push(thisvalstr)
@@ -220,6 +214,10 @@ function negate_filter_data(filter_data) {
     return filter_data;
 }
 
+function negate_filter_data_with_click(clk,filter_data) {
+    return negate_filter_data(filter_data);
+}
+
 function intersect_and_negate(nclick, ...filters_data) {
     let filter_d = mergeSubcomponentFilters(...filters_data);
     let filter_d_neg = negate_filter_data(filter_d);
@@ -247,6 +245,38 @@ function process_incoming_data(data,keys) {
 }
 
 
+function switch_tab_simple(activeTab, analysisTab, styleD, fdL, fdR) {
+    console.debug([activeTab, fdL, fdR, analysisTab, styleD]);
+    if (!bool(styleD)) styleD = {};
+    let isOpenL = [false, false, false];
+
+    // Assuming STYLE_INVIS and STYLE_VIS are predefined objects similar to Python
+    let oStyle={};
+    if (activeTab !== 'table') {
+        oStyle = { ...styleD, ...STYLE_INVIS };
+        // return [oStyle, null].concat(Array(isOpenL.length).fill(null)).concat([true]);
+    } else {
+
+        // Table is active tab
+        oStyle = { ...styleD, ...STYLE_VIS };
+        console.log('oStyle',oStyle);
+        if (!fdL && !fdR) {
+            isOpenL = [true, false, false];
+        } else if (fdL && fdR) {
+            isOpenL = [false, false, true];
+        } else {
+            isOpenL = [false, true, false];
+        }
+
+        // Assuming get_cached_fig_or_table and serialize functions are defined elsewhere and you adjust accordingly
+    }
+    let out = [oStyle].concat(isOpenL).concat([true]);
+    console.debug('switch_tab_clientside ->',out);
+    return out;
+}
+
+
+
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         decompress_json_gz: decompress_json_gz,
@@ -258,6 +288,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         intersect_subcomponent_filters: intersect_subcomponent_filters,
         track_state:track_state,
         loadQueryParam:loadQueryParam,
-        intersect_and_negate:intersect_and_negate
+        intersect_and_negate:intersect_and_negate,
+        negate_filter_data_with_click:negate_filter_data_with_click,
+        switch_tab_simple:switch_tab_simple
     }
 });

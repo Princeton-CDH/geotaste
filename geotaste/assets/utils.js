@@ -1,4 +1,6 @@
 
+const STYLE_INVIS = { display:'none' }; // Placeholder, adjust as needed
+const STYLE_VIS = { display:'block' }; // Placeholder, adjust as needed
 
 
 function list_is_negation(vals) {
@@ -37,29 +39,40 @@ function bool(obj) {
 }
 
 
-
+// function processQueryParamValueStr(valstr) {
+//     return processQueryParamValue(valstr);
+// }
 
 function processQueryParamValue(val) {
-    console.log('processValue <-',val);
+    console.log('processQueryParamValue <-',val);
     // Check for numeric range indicated by double underscore "__"
     let res = [];
-    if (val.includes('--')) {
-        let [start, end] = val.split('--').map(Number);
-        if (!isNaN(start) && !isNaN(end) && start < end + 1) {
-            // Generate range [start, start+1, ..., end-1]
-            let res = Array.from({ length: end - start + 1}, (_, i) => start + i);
-            res.pop();
-            return res;
+    if (val.includes('-')) {
+        const parts = val.split('-').map(asIntIfPoss);
+        console.log('parts',parts)
+        // Ensure at least two parts are available for a valid range
+        if (parts.length >= 2) {
+            const start = parts[0]; // The first element is the start
+            const end = parts[parts.length - 1]; // The last element is the end
+            // Validate start and end are numbers and start is less than end
+            if (!isNaN(start) && !isNaN(end) && start < end) {
+                // If valid, proceed with the range logic...
+                let res = Array.from({ length: end - start + 1}, (_, i) => start + i);
+                res.pop();
+                console.log('processQueryParamValue ->',res);
+                return res;
+            }
         }
     }
+
     // Split non-numeric strings by "_"
-    else if (val.includes('_')) {
+    if (val.includes('_')) {
         res = val.split('_').map(asIntIfPoss); // Handle mixed string and numeric values
     } else {
         // Single numeric value or single string
         res = [asIntIfPoss(val)];
     }
-    console.log('processValue ->',res);
+    console.log('processQueryParamValue ->',res);
     return res
 }
 
@@ -91,6 +104,7 @@ function asIntIfPoss(value) {
 function rejoinSep(value) {
     // Assuming rejoinSep is a function that formats the value. Implement it according to your logic.
     // This is a placeholder implementation.
+    console.log('rejoinSep <-',value);
     let new_val = value.slice();
     let posneg='';
     let out='';
@@ -100,16 +114,22 @@ function rejoinSep(value) {
     }
     console.log(new_val);
     if(new_val.length > 1) {
-        [first,last] = [new_val[0], new_val[new_val.length - 1]];
-        if(isNumeric(first) && isNumeric(last)) {
+        if (new_val.every(isNumeric)) {
             [first2,last2] = sortedFirstAndLast(new_val);
-            out=first2.toString().concat('--').concat((parseInt(last2)+1).toString());
-            console.log(out);
+            out=first2.toString().concat('-').concat((parseInt(last2)+1).toString());
+            out=posneg.concat(out);
+            console.log('rejoinSep ->',out,'!!!');
+            return out;
         }
-    } else {
-        out=Array.isArray(new_val) ? new_val.join('_') : new_val;
     }
-    return posneg.concat(out)
+    unique_new_val = [...new Set(new_val.map(String))];
+    unique_new_val = unique_new_val.map(asIntIfPoss);
+    unique_new_val.sort();
+    console.log('unique_new_val',unique_new_val)
+    out=Array.isArray(unique_new_val) ? unique_new_val.join('_') : unique_new_val;
+    out=posneg.concat(out)
+    console.log('rejoinSep ->',out);
+    return out;
 }
 
 
@@ -183,7 +203,7 @@ function mergeSubcomponentFilters(...objs) {
         if (!d) return null;
         for (let k of keys) {
             if (d.hasOwnProperty(k)) {
-                return d[k];
+                return asIntIfPoss(d[k]);
             }
         }
         console.error('What is the record id here? --> ' + JSON.stringify(d));
@@ -195,15 +215,14 @@ function mergeSubcomponentFilters(...objs) {
         return isNaN(num) ? value : num;
     }
 
-    let selectedRecords = pointsData.map(d => getRecordId(d))
-                                     .filter(x => x != null);
-
-    // Apply asIntIfPoss if quant is true
-    if (quant === true) {
-        selectedRecords = selectedRecords.map(val => val.trim()).filter(val => val).map(asIntIfPoss)
+    let selectedRecords = [];
+    for(const d of pointsData) {
+        const res = getRecordId(d);
+        if (bool(res)) {
+            selectedRecords.push(res);
+        }
     }
-
     selectedRecords.sort(); // Simple alphabetical or numerical sort
-
+    console.log('selectedRecords ->',selectedRecords);
     return selectedRecords;
 }

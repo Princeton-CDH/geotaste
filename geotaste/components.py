@@ -320,10 +320,10 @@ class FilterCard(FilterComponent):
     def describe_filters(self, store_data):
         vals=[str(x) for x in flatten_list(store_data.get(self.key,[]))]
         if vals and vals[0]=='~':
-            valstr=", ".join(vals[1:])
+            valstr=" or ".join(vals[1:])
             return f'~({valstr})' if len(vals[1:])>1 else '~'+valstr
         else:
-            return ', '.join(vals)
+            return ' or '.join(vals)
 
 
     def component_callbacks(self, app):
@@ -367,7 +367,7 @@ class FilterCard(FilterComponent):
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
-                function_name='negate_filter_data'
+                function_name='negate_filter_data_with_click'
             ),
             Output(self.store, "data", allow_duplicate=True),
             Input(self.negate_btn, 'n_clicks'),
@@ -499,8 +499,14 @@ class FilterPlotCard(FilterCard):
                 # then a panel wide clear?
                 # my_filter_data = {}
 
-
-            newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
+            print('my_filter_data',my_filter_data)
+            print('panel_filter_data',panel_filter_data)
+            newdata = {
+                k:v 
+                for k,v in panel_filter_data.items() 
+                if k not in my_filter_data
+            }
+            print('newdata',newdata)
             logger.debug(f'[{self.name}] incoming panel data: {newdata}')
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
             logger.debug(f'Assigning a json string of size {sys.getsizeof(ofig_json_gz_str)} compressed, to self.store_json')
@@ -541,7 +547,7 @@ class FilterSliderCard(FilterPlotCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            figure=self.ff().plot().update_layout(height=100, width=250),
+            figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
             # figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},

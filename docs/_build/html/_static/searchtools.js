@@ -353,7 +353,7 @@ const Search = {
     // note the reversing of results, so that in the case of duplicates, the highest-scoring entry is kept
     let seen = new Set();
     results = results.reverse().reduce((acc, result) => {
-      let resultStr = result.slice(0, 4).concat([result[5]]).map(v => String(v)).join(',');
+      let resultStr = result.slice(0, 4).concat([result[5]]).map(v => String(v)).join('_');
       if (!seen.has(resultStr)) {
         acc.push(result);
         seen.add(resultStr);

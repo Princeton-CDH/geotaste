@@ -677,51 +677,59 @@ class ComparisonPanel(BaseComponent):
 
         ### SWITCHING TABS
 
-        @app.callback(
+        
+
+
+
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='switch_tab_simple'
+            ),
             [
                 Output(self.tblview,'style',allow_duplicate=True),
-                Output(self.table_json,'data',allow_duplicate=True),
-
                 Output(self.maintbl_preface_landmarks, 'is_open', allow_duplicate=True),
                 Output(self.maintbl_preface_members, 'is_open', allow_duplicate=True),
                 Output(self.maintbl_preface_analysis, 'is_open', allow_duplicate=True),
-
                 Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.mainview_tabs,'active_tab'),
-                Input(self.store,'data'),
                 Input(self.maintbl_preface_analysis_tabs, 'active_tab')
             ],
             [
                 State(self.tblview,'style'),
+                State(self.L.store,'data'),
+                State(self.R.store,'data'),
             ],
             prevent_initial_call=True
         )
-        def switch_tab_simple(active_tab, data, analysis_tab, style_d):
-            if style_d is None: style_d={}
-            is_open_l = [False, False, False]
-            if active_tab!='table':
-                ostyle={**style_d, **STYLE_INVIS}
-                return [ostyle, dash.no_update] + [dash.no_update for _ in is_open_l] + [True]
-            
-            # table is active tab
-            ostyle={**style_d, **STYLE_VIS}
-            fdL,fdR=data if data else ({},{})
-            if not fdL and not fdR:
-                is_open_l=[True,False,False]
-            elif fdL and fdR:
-                is_open_l=[False,False,True]
-            else:
-                is_open_l=[False,True,False]
-            
-            ojson=get_cached_fig_or_table(serialize([fdL,fdR,'table',analysis_tab,{}]))
-            return [ostyle,ojson]+is_open_l+[True]
-            
+
+        @app.callback(
+            Output(self.table_json,'data',allow_duplicate=True),
+            [
+                Input(self.mainview_tabs,'active_tab'),
+                Input(self.maintbl_preface_analysis_tabs, 'active_tab'),
+                Input(self.L.store,'data'),
+                Input(self.R.store,'data'),
+            ],
+            prevent_initial_call=True
+        )
+        def recompute_table(tab1,tab2, fdL, fdR):
+            logger.debug(['recompute_table <-',tab1,tab2,fdL,fdR])
+            if tab1!='table': raise PreventUpdate
+            ojson=get_cached_fig_or_table(
+                serialize(
+                    [fdL,fdR,tab1,tab2,{}]
+                )
+            )
+            logger.debug(['recompute_table ->',ojson])
+            return ojson
+
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
-                function_name='decompress'
+                function_name='decompress_json_gz'
             ),
             Output(self.maintbl, 'children', allow_duplicate=True),
             Input(self.table_json, 'data'),
