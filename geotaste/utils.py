@@ -1,5 +1,14 @@
 from .imports import *
 
+def is_not_null(x):
+    if x is None: return False
+    if isinstance(x,Iterable): return bool(len(x))
+    if isinstance(x,str): return bool(x.strip())
+    if is_numeric(x): return not np.isnan(x)
+    raise Exception('unhandled type')
+
+def is_null(x):
+    return not is_not_null(x)
 
 def hasone(x: list, y: list) -> bool:
     """Checks if there is at least one common element between two lists.
@@ -59,38 +68,19 @@ def to_set(x: object) -> set:
     Returns:
         A set containing the value `x` if `x` is not a list-like object, otherwise a set containing all the elements of `x`.
     """
-    return {x} if not is_listy(x) else set(flatten_list(x))
+    if type(x) is set: return x
+    if is_not_null(x):
+        return {x} if not is_listy(x) else set(flatten_list(x))
+    else:
+        return set()
 
+def to_list(x: object) -> set:
+    if type(x) is list: return x
+    if is_not_null(x):
+        return [x] if not is_listy(x) else flatten_list(list(x))
+    else:
+        return []
 
-# def is_negation(number_or_str):
-#     # if isinstance(number_or_str,Number):
-#     #     return number_or_str<0
-#     # else:
-#     #     return number_or_str.startswith('-')
-
-# def de_negate(number_or_str):
-#     if is_negation(number_or_str):
-#         return number_or_str*-1 if isinstance(number_or_str,Number) else number_or_str[1:]
-#     else:
-#         return number_or_str
-
-
-def overlaps(series: pd.Series, vals: list) -> pd.Series:
-    """Checks if any element in the given series overlaps with the values in
-    the given list.
-
-    Args:
-        series (pandas.Series): The series to check for overlaps.
-        vals (list): The list of values to check for overlaps with the series.
-
-    Returns:
-        pandas.Series: A boolean series indicating if each element in the series overlaps with any value in the list.
-    """
-    if not vals: return series
-    vals_set = to_set(vals)
-    series_set = series.apply(to_set)
-    res = series_set.apply(lambda xset: bool(xset & vals_set))
-    return res
 
 
 def is_numeric(x: object) -> bool:
@@ -404,12 +394,19 @@ def selectrename_df(df: pd.DataFrame, col2col: dict = {}) -> pd.DataFrame:
     return df[c2c.keys()].rename(columns=c2c)
 
 
-def is_numeric_ish(x: str):
-    try:
-        float(x)
+def is_numeric_ish(val):
+    """
+    Checks if the value is numeric (int, float, or a string that represents a number).
+    """
+    if isinstance(val, (int, float, complex)):
         return True
-    except (TypeError, ValueError):
-        return False
+    if isinstance(val, str):
+        try:
+            float(val)  # Attempt to convert the string to a float
+            return True
+        except ValueError:
+            return False
+    return False
 
 
 def is_quant_series(series, ish=False):
@@ -823,3 +820,41 @@ def delistify(input_list, sep=', '):
             return f'{a} to {b}'
         except ValueError:
             return sep.join(sorted(str(x) for x in input_list))
+
+def is_full_integer_range(svals):
+    """
+    Checks if the list consists of integers and represents a full range from min to max.
+    """
+    try:
+        l = sorted(int(x) for x in svals)
+        minx,maxx = min(l),max(l)
+        intrange = list(range(minx,maxx+1))
+        return l == intrange
+    except ValueError:
+        return False
+
+
+def flatten_to_set(lst):
+    result = set()
+    for item in lst:
+        if is_listy(item):
+            result.update(flatten_list(item))
+        else:
+            result.add(item)
+    return result
+
+
+
+
+
+
+def no_null_series(series):
+    return series[series.apply(is_not_null)]
+
+def humancol(col):
+    if not '_' in col: return col
+    a,b = col.split('_',1)
+    b = b.title() if b!='dob' else 'DOB'
+    if b == 'Membership': return b
+    return a.title() + ' ' + b
+

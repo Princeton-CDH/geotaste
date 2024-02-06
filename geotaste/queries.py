@@ -1,96 +1,27 @@
 from .imports import *
 
-def humancol(col):
-    if not '_' in col: return col
-    a,b = col.split('_',1)
-    b = b.title() if b!='dob' else 'DOB'
-    if b == 'Membership': return b
-    return a.title() + ' ' + b
-
-
-def filter_query_str_series(
-        sname:str, 
-        svals:'Iterable', 
-        op:str='or', 
-        maxlen=1,
-        plural_cols=None,
-        fname='overlaps',
-        human:bool=False
-        ):
+def format_query_human(sname, svals):
     """
-    Generates a query string for filtering a series based on a given column name and values.
-
-    Args:
-        sname (str): The name of the column to filter on.
-        svals (Iterable): The values to filter on.
-        op (str, optional): The operator to use for combining multiple values. Defaults to 'or'.
-        maxlen (int, optional): The maximum number of values allowed before using a plural representation. Defaults to 1.
-        plural_cols (list, optional): A list of column names that should use a plural representation. Defaults to None.
-        fname (str, optional): The function name to use in the plural representation. Defaults to 'overlaps'.
-        human (bool, optional): Whether to generate a human-readable representation. Defaults to False.
-
-    Returns:
-        str: The generated query string.
+    Generates a human-readable query string.
     """
-    
     # make sure input is listlike
-    if not is_listy(svals): svals=[svals]
+    svals, is_neg = preprocess_for_possible_opening_negation(svals)
 
-    # is negation?
-    if svals and svals[0]=='~':
-        svals=[v for v in svals[1:]]
-        posneg='~'
-        is_neg=True
-    else:
-        posneg=''  
-        is_neg=False
-
-    # stringifying
     def repr(x): return json.dumps(x, ensure_ascii=False)
 
-    def getplural():
-        if not human:
-            return f'{posneg}@{fname}({sname}, {repr(svals)})'
-        else:
-            return f'{humancol(sname)} is {"n" if is_neg else ""}either {oxfordcomma(svals, repr=repr, op="or" if not is_neg else "nor")}'
-        
-    def getrange():
-        if not human:
-            return f'{posneg}({svals[0]} <= {sname} <= {svals[-1]})'
-        else:
-            return f'{humancol(sname)} {"does not" if is_neg else ""} range{"s" if not is_neg else ""} from {svals[0]} through {svals[-1]}'
-    
-    def getsinglequerygroup():
-        strs=[
-            (
-                f'({sname} {"=" if not is_neg else "!"}= {repr(x)})' 
-                if not human
-                else f'{humancol(sname)} is {"not " if is_neg else ""}{repr(x)}'
-            )
-            for x in svals
-        ]
-        o = f' {op} '.join(strs)
-        return f'({o})' if len(strs)>1 else o
-
-    # return function if this is a list-containing col
-    if (plural_cols is not None and sname in set(plural_cols)):
-        return getplural()
-    
-    # if a range of ints, use a less/greater than syntax
-    # elif is_range_of_ints(svals):
+    if len(svals) == 1:
+        return f'{humancol(sname)} is {"not " if is_neg else ""}{repr(svals[0])}'
     elif int in {type(svx) for svx in svals}:
-        return getrange()
-
-    # if simply too many vals
-    elif len(svals) > maxlen:
-        return getplural()
-
-    # otherwise, compound
+        return f'{humancol(sname)} {"does not " if is_neg else ""} range{"s" if is_neg else ""} from {svals[0]} through {svals[-1]}'
     else:
-        return getsinglequerygroup()
-        
+        return f'{humancol(sname)} is {"n" if is_neg else ""}either {oxfordcomma(svals, repr=repr, op="or" if not is_neg else "nor")}'
 
-def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, operator:str='and', plural_cols:list=None, human:bool=False) -> str:
+
+def format_query(
+        filter_data:dict, 
+        groupby:Optional[str]=None,
+        operator:str='and',
+        human:bool = False) -> str:
     """Filter a query string based on the given filter data.
 
     Args:
@@ -109,20 +40,22 @@ def filter_query_str(filter_data:dict, test_func:'function'=overlaps, maxlen=1, 
     """
     
     if not filter_data: return ''
-    fname=test_func.__name__ if type(test_func)!=str else test_func
-
-    # filter_data = {**filter_data}
-    # is_negation = '_not' in filter_data and filter_data.pop('_not')
-    
     sep = f' {operator} '
     query=sep.join([
-        filter_query_str_series(sname,svals,op='or',maxlen=maxlen,plural_cols=plural_cols,fname=fname,human=human)
+        (
+            format_query_pandas(sname,svals,groupby) 
+            if not human else
+            format_query_human(sname,svals)
+        )
         for sname,svals in filter_data.items()
         if svals
     ])
-    return query# if not is_negation else f'~({query})'
+    return query
 
-def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, operator:str='and', plural_cols:list=None, return_query:bool=False) -> pd.DataFrame:
+
+
+
+def filter_df(df:pd.DataFrame, filter_data={}, groupby:Optional[str]=None, fname:str='overlaps', fname_group:str='group_overlaps', operator:str='and', plural_cols:list=None, return_query:bool=False) -> pd.DataFrame:
     """Filter a pandas DataFrame based on the provided filter data.
 
     Args:
@@ -138,17 +71,169 @@ def filter_df(df:pd.DataFrame, filter_data={}, test_func:'function'=overlaps, op
     """
     
     # determine which cols are plural (have lists in them)
-    if plural_cols is None: plural_cols = find_plural_cols(df)
+    # if plural_cols is None: plural_cols = find_plural_cols(df)
         
     # get query string
-    qstr=filter_query_str(
+    qstr=format_query(
         filter_data,
-        test_func=test_func,
+        groupby=groupby,
         operator=operator, 
-        plural_cols=plural_cols
+        human=False,
     ) if type(filter_data)!=str else filter_data
 
     # query and return
     if qstr: logger.debug(f'Querying: {qstr}')
     odf=df.query(qstr) if qstr else df
-    return (qstr,df) if return_query else odf
+    return (qstr,odf) if return_query else odf
+
+
+
+def format_query_vals(x):
+    return json.dumps(x, ensure_ascii=False)
+
+def format_boolean_query_pandas(
+        sname, 
+        groupby:Optional[str]=None,
+        is_neg=False,
+        fname='has_any_value_for',
+        fname_group:str='group_has_any_value_for'
+    ):
+    posneg = '~' if is_neg else ''
+    if groupby:
+        return f'{posneg}@{fname_group}({groupby}, {sname})'
+    else:
+        return f'{posneg}@{fname}({sname})'
+
+    
+    
+
+
+
+
+def format_query_vals(x):
+    return json.dumps(x, ensure_ascii=False)
+
+def format_boolean_query_pandas(
+        sname, 
+        groupby:Optional[str]=None,
+        is_neg=False,
+        fname='has_any_value_for',
+        fname_group:str='group_has_any_value_for'
+    ):
+    posneg = '~' if is_neg else ''
+    if groupby:
+        return f'{posneg}@{fname_group}({groupby}, {sname})'
+    else:
+        return f'{posneg}@{fname}({sname})'
+
+    
+    
+def preprocess_for_possible_opening_negation(svals, symbol='~'):
+    """
+    Preprocesses the input values to handle negation and ensure list-like input.
+    """
+    if not svals: return svals
+    
+    # Ensure svals is list-like
+    if not is_listy(svals): 
+        if type(svals) is str and svals[0]==symbol:
+            is_neg=True
+            svals = [svals[1:]]
+        else:
+            is_neg=False
+            svals = [svals]
+    elif len(svals)==1:
+        return preprocess_for_possible_opening_negation(svals[0], symbol=symbol)
+    elif svals[0] == symbol:
+        svals = svals[1:]
+        is_neg = True
+    else:
+        is_neg = False
+
+    return svals, is_neg
+
+def format_query_pandas(sname, svals, groupby:Optional[str]=None,fname='overlaps',  fname_group:str='group_overlaps'):
+    """
+    Generates a pandas-compatible query string.
+    """
+    if to_set(svals) & {'*','~'}:
+        return format_boolean_query_pandas(
+            sname,
+            groupby,
+            is_neg='~' in to_set(svals)
+        )
+
+    # make sure input is listlike
+    svals, is_neg = preprocess_for_possible_opening_negation(svals)
+
+    posneg='~' if is_neg else ''
+    if not groupby:
+        return f'{posneg}@{fname}({sname}, {format_query_vals(svals)})'
+    else:
+        return f'{posneg}@{fname_group}({groupby}, {sname}, {format_query_vals(svals)})'
+
+
+
+
+
+def overlaps(series: pd.Series, matching: Union[Iterable,str,int], allow_none=False) -> pd.Series:
+    """Checks if any element in the given series overlaps with the values in
+    the given list.
+
+    Args:
+        series (pandas.Series): The series to check for overlaps.
+        vals (list): The list of values to check for overlaps with the series.
+
+    Returns:
+        pandas.Series: A boolean series indicating if each element in the series overlaps with any value in the list.
+    """
+    if is_null(matching): return series
+    vals_set = to_set(matching)
+    series_set = series.apply(to_set)
+    res = series_set.apply(lambda xset: None if not xset else bool(xset & vals_set))
+    return res if allow_none else res.apply(bool)
+
+
+def group_overlaps(groups:pd.Series, series: pd.Series, matching: list, allow_none=False) -> pd.Series:
+    if not len(matching): return series
+    if groups is None or not len(groups): groups = series.index
+    assert len(series) == len(groups)
+
+    matching,is_neg = preprocess_for_possible_opening_negation(matching)
+
+    minidf = pd.DataFrame({'grp':groups, 'val':series})
+    def get_grp_truth(series):
+        overlapping_by_row = no_null_series(overlaps(series,matching,allow_none=True))
+        valtypes = set(overlapping_by_row)
+        return False in valtypes if is_neg else True in valtypes
+    group_to_truth = {
+        grpname:get_grp_truth(grpdf.val)
+        for grpname,grpdf in minidf.groupby('grp')
+    }
+    res = pd.Series(
+        (group_to_truth[g] for g in groups), 
+        index=series.index, 
+        name=series.name
+    )
+    return res if allow_none else res.apply(bool)
+
+
+def has_any_value_for(series):
+    return series.apply(is_not_null)
+
+
+def group_has_any_value_for(groups, series):
+    minidf = pd.DataFrame({'grp':groups, 'val':series})
+    group_to_truth = {
+        grpname:any(has_any_value_for(grpdf.val))
+        for grpname,grpdf in minidf.groupby('grp')
+    }
+    return pd.Series(
+        (group_to_truth[g] for g in groups), 
+        index=series.index, 
+        name=series.name
+    )
+
+
+
+

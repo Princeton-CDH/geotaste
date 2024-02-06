@@ -129,7 +129,6 @@ TEXTFONT_SIZE=20
 COMPARISON_MAXCATS=None
 
 PREDICT_COLS=[
-    'member_title', 
     'member_gender', 
     'member_nationalities',
 

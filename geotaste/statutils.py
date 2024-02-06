@@ -12,6 +12,7 @@ def analyze_contingency_tables(
         p_col='fisher_exact_p',
         sort_asc=True, 
         min_p=MIN_P,
+        index_name=None,
         signif=False):
     """
     Analyzes contingency tables created from two input value series.
@@ -32,7 +33,7 @@ def analyze_contingency_tables(
 
     vals1=pd.Series(vals1)
     vals2=pd.Series(vals2)
-    index_name='__'.join(sorted(list(set([vals1.name, vals2.name]))))
+    index_name='__'.join(sorted(list(set([vals1.name, vals2.name])))) if not index_name else index_name
     ld=[]
     vals_ctbls = list(iter_contingency_tables(vals1, vals2))
     for val,ctbl in vals_ctbls:
@@ -41,7 +42,10 @@ def analyze_contingency_tables(
             **table_info(ctbl)
         }
         for func in funcs:
-            res = func(ctbl)
+            try:
+                res = func(ctbl)
+            except ValueError as e:
+                logger.error(e)
             method=func.__name__
             stat=res.statistic if hasattr(res,'statistic') else None
             pval=res.pvalue if hasattr(res,'pvalue') else None
@@ -136,6 +140,8 @@ def table_info(ctbl):
         'perc_L':perc1,
         'perc_R':perc2,
         'perc_L->R':perc_diff,
+        'support_L':support1,
+        'support_R':support2
     }
 
 
@@ -382,6 +388,3 @@ def describe_comparison(comparison_df, lim=10, min_fac=1.1):
 
     
     
-    
-
-

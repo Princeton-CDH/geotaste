@@ -218,3 +218,24 @@ def test_describe_comparison():
     assert '**Mme**' in R[0], 'not expected result'
 
 
+
+
+def test_group_overlaps():
+    df = pd.DataFrame([{'group':'shoe', 'part':'foot'}, {'group':'shoe', 'part':'toe'}, {'group':'hat', 'part':'head'}])
+    assert list(group_overlaps(df.group, df.part, ['head'])) == [False,False,True]
+    assert list(group_overlaps(df.group, df.part, ['toe'])) == [True,True,False]
+    assert list(group_overlaps(df.group, df.part, ['foot'])) == [True,True,False]
+    assert list(group_overlaps(df.group, df.part, ['xxx'])) == [False,False,False]
+
+    df.loc[len(df)] = {'group':'desk', 'part':''}
+    assert list(group_overlaps(df.group, df.part, ['head'], allow_none=True)) == [False,False,True,None]
+    assert list(group_overlaps(df.group, df.part, ['head'], allow_none=False)) == [False,False,True,False]
+
+def test_overlaps():
+    df = pd.DataFrame([{'group':'shoe', 'part':'foot'}, {'group':'shoe', 'part':'toe'}, {'group':'hat', 'part':'head'}])
+    assert list(overlaps(df.part, ['head'])) == [False,False,True]
+    assert list(overlaps(df.part, ['toe'])) == [False,True,False]
+
+    df.loc[len(df)] = {'group':'desk', 'part':''}
+    assert list(overlaps(df.part, ['head'], allow_none=True)) == [False,False,True,None]
+    assert list(overlaps(df.part, ['head'], allow_none=False)) == [False,False,True,False]

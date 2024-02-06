@@ -636,6 +636,7 @@ class ComparisonPanel(BaseComponent):
             prevent_initial_call=True
         )
         def switch_tab_simple(active_tab, data, analysis_tab, style_d):
+            logger.warning([active_tab, data, analysis_tab, style_d]);
             if style_d is None: style_d={}
             ostyle={**style_d, **STYLE_INVIS}
             if active_tab!='table': 
