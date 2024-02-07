@@ -1,5 +1,5 @@
 """
-All the classes and functions for drawing figures. These classes do not know about dash components, beyond the `dash_table.DataTable` component returned by `FigureFactory.table`. They rely on the `Dataset` classes in dataset.py and use plotly to plot figures. 
+All the classes and functions for drawing figures. These classes do not know about dash components, beyond the `dash_table.DataTable` component returned by `FigureFactory.table`. They rely on the `Dataset` classes in dataset.py and use plotly to plot figures.
 
 The base class is in `FigureFactory`, which defines the default behavior sufficient for most figures, e.g. `MemberDOBFigure`, etc. There are also `LandmarksFigureFactory`, `CombinedFigureFactory`, and `ComparisonFigureFactory` which contain the code for drawing maps and more complex figures.
 """
@@ -21,7 +21,7 @@ class FigureFactory(DashFigureFactory):
         A string indicating the name of the records (default is 'records')
     key : str
         A string to be used as a key to access elements in a record.
-    records_points_dim : str 
+    records_points_dim : str
         A string indicating the dimensionality of the records points (default is 'xy')
     dataset_class : class
         The class of the dataset to be used by the factory (default is Combined)
@@ -75,13 +75,11 @@ class FigureFactory(DashFigureFactory):
     text = None
     cols_table = []
 
-    def __init__(self,
-                 filter_data={},
-                 selected=[],
-                 name='FigureFactory',
-                 **kwargs):
+    def __init__(
+        self, filter_data={}, selected=[], name='FigureFactory', **kwargs
+    ):
         """Initializes an instance of the FigureFactory class.
-        
+
         Args:
             filter_data (dict, optional): A dictionary containing filter data. Defaults to an empty dictionary.
             selected (list or dict, optional): A list or dictionary containing selected data. Defaults to an empty list.
@@ -89,51 +87,56 @@ class FigureFactory(DashFigureFactory):
             **kwargs: Additional keyword arguments that can be used to set attributes of the FigureFactory instance.
         """
         self.name = name
-        if filter_data is None: filter_data = {}
+        if filter_data is None:
+            filter_data = {}
         self.filter_data = filter_data
         self.kwargs = kwargs
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-        self.selection_data = (selected if type(selected) is dict else
-                               ({
-                                   self.key: selected
-                               } if self.key else {}))
+        self.selection_data = (
+            selected
+            if type(selected) is dict
+            else ({self.key: selected} if self.key else {})
+        )
 
     def has_selected(self):
         """Check if there is any selected data.
-        
+
         Returns:
             bool: True if there is selected data, False otherwise.
         """
 
         return bool(
-            self.selection_data.get(self.key) and self.selected_indices)
+            self.selection_data.get(self.key) and self.selected_indices
+        )
 
     def get_selected(self, selectedData={}):
         """The `get_selected` function returns a dictionary containing selected records based on the provided `selectedData` parameter. If `selectedData` is empty or not provided, an empty dictionary is returned.
-        
+
         Args:
             selectedData (dict): A dictionary containing selected data. Default is an empty dictionary.
-        
+
         Returns:
         - dict: A dictionary with one key, `self.key`, and one value, the selected values [val1, val2, ...]
         """
         return {
-            self.key:
-            get_selected_records_from_figure_selected_data(selectedData,
-                                                           quant=self.quant)
+            self.key: get_selected_records_from_figure_selected_data(
+                selectedData, quant=self.quant
+            )
         }
 
     @cached_property
     def dataset(self):
         """Returns the dataset if the dataset class is defined, otherwise returns None.
-        
+
         Returns:
             object: The dataset object if the dataset class is defined, otherwise None.
         """
-        if self.dataset_obj is not None: return self.dataset_obj
-        if self.dataset_class is None: return None
+        if self.dataset_obj is not None:
+            return self.dataset_obj
+        if self.dataset_class is None:
+            return None
         if hasattr(self.dataset_class, '__func__'):
             return self.dataset_class.__func__()
         return self.dataset_class()
@@ -146,15 +149,18 @@ class FigureFactory(DashFigureFactory):
             pandas.DataFrame: The original data from the dataset.
         """
 
-        odf = (self.dataset.data if self.dataset is not None
-               and self.dataset.data is not None else pd.DataFrame())
+        odf = (
+            self.dataset.data
+            if self.dataset is not None and self.dataset.data is not None
+            else pd.DataFrame()
+        )
 
         return odf
 
     @cached_property
     def data(self):
         """Returns a filtered dataframe based on the original data and filter criteria.
-        
+
         Returns:
             pandas.DataFrame: The filtered dataframe.
         """
@@ -180,14 +186,14 @@ class FigureFactory(DashFigureFactory):
 
     def get_unique_vals(self, sort_by_count=True, series_orig=True, **kwargs):
         """Return a pandas Series containing unique values from the specified series.
-        
+
         Args:
-            sort_by_count (bool, optional): If True, sort the unique values by their count in descending order. 
+            sort_by_count (bool, optional): If True, sort the unique values by their count in descending order.
                 If False, sort the unique values in ascending order. Defaults to True.
-            series_orig (bool, optional): If True, use the original series for counting. 
+            series_orig (bool, optional): If True, use the original series for counting.
                 If False, use the deduplicated and filtered series. Defaults to True.
             **kwargs: Additional keyword arguments to be passed to the `get_series` method.
-        
+
         Returns:
             pd.Series: A pandas Series containing the unique values.
         """
@@ -209,7 +215,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def series(self):
         """Returns the series from the given dataframe, stored under column `self.key`.
-        
+
         Returns:
             pandas.Series: The series extracted from the dataframe.
         """
@@ -218,7 +224,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def series_orig(self):
         """Returns the series from the original unfiltered dataframe, stored under column `self.key`.
-        
+
         Returns:
             pandas.Series: The series extracted from the dataframe.
         """
@@ -228,7 +234,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def series_q(self):
         """Returns the series from the given dataframe, stored under column `self.key`, in forced quantitative mode.
-        
+
         Returns:
             pandas.Series: The series extracted from the dataframe.
         """
@@ -237,7 +243,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def series_all(self):
         """Returns the series from the original unfiltered dataframe, stored under column `self.key`.
-        
+
         Returns:
             pandas.Series: The series extracted from the dataframe.
         """
@@ -246,45 +252,51 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def series_all_q(self):
         """Returns the series from the original unfiltered dataframe, stored under column `self.key`, in forced quantitative mode.
-        
+
         Returns:
             pandas.Series: The series extracted from the dataframe.
         """
         return self.get_series(df=self.data_orig, quant=True)
 
-    def get_series(self,
-                   key: str = None,
-                   df: pd.DataFrame = None,
-                   quant: bool = None):
+    def get_series(
+        self, key: str = None, df: pd.DataFrame = None, quant: bool = None
+    ):
         """Get a series from a DataFrame.
-        
+
         Args:
             key (str, optional): The column name of the series. If not provided, the default key will be used.
             df (pd.DataFrame, optional): The DataFrame from which to extract the series. If not provided, the default DataFrame (`self.data`) will be used.
             quant (bool, optional): Whether to apply quantization to the series. If not provided, the default quantization value will be used.
-        
+
         Returns:
-            pd.Series: The extracted series.        
+            pd.Series: The extracted series.
         """
 
-        if key is None: key = self.key
+        if key is None:
+            key = self.key
         if not key:
             return pd.Series(name=key)
-        if df is None: df = self.data
+        if df is None:
+            df = self.data
         if not len(df) or not key in set(df.columns):
             return pd.Series(name=key)
-        s = pd.Series(qualquant_series(
-            flatten_series(df[key]),
-            quant=quant if quant is not None else self.quant),
-                      name=self.key).replace({'': UNKNOWN})
-        if self.min_series_val is not None: s = s[s >= self.min_series_val]
-        if self.max_series_val is not None: s = s[s <= self.max_series_val]
+        s = pd.Series(
+            qualquant_series(
+                flatten_series(df[key]),
+                quant=quant if quant is not None else self.quant,
+            ),
+            name=self.key,
+        ).replace({'': UNKNOWN})
+        if self.min_series_val is not None:
+            s = s[s >= self.min_series_val]
+        if self.max_series_val is not None:
+            s = s[s <= self.max_series_val]
         return s
 
     @cached_property
     def minval(self):
         """Returns the minimum value in the series.
-        
+
         Returns:
             object: The minimum value in the series.
         """
@@ -294,7 +306,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def maxval(self):
         """Returns the maximum value in the series.
-        
+
         Returns:
             object: The maximum value in the series.
         """
@@ -304,7 +316,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def minval_q(self):
         """Returns the minimum value in the quant series.
-        
+
         Returns:
             float: The minimum quant value in the series.
         """
@@ -314,7 +326,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def maxval_q(self):
         """Returns the maximum value in the quant series.
-        
+
         Returns:
             float: The maximum quant value in the series.
         """
@@ -324,7 +336,7 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def filtered(self):
         """Check if the filter_data attribute is not empty.
-        
+
         Returns:
             bool: True if filter_data is not empty, False otherwise.
         """
@@ -333,9 +345,9 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def df_selections(self) -> pd.DataFrame:
         """Filters the DataFrame based on the selection data.
-        
-            Returns:
-                pd.DataFrame: The filtered DataFrame.
+
+        Returns:
+            pd.DataFrame: The filtered DataFrame.
         """
 
         if self.selection_data.get(self.key) and len(self.df_counts):
@@ -345,20 +357,21 @@ class FigureFactory(DashFigureFactory):
     @cached_property
     def selected_indices(self) -> list:
         """Returns a list of selected values from the dataframe.
-        
+
         Returns:
             list: A list of selected values from the dataframe.
         """
 
-        return list(self.df_selections.index) if len(
-            self.df_selections) else []
+        return (
+            list(self.df_selections.index) if len(self.df_selections) else []
+        )
 
     @cached_property
     def df_counts(self):
         """Returns a DataFrame containing the value counts of the series in the filtered dataframe. If `self.keep_missing_types` is True, then value types not present in the filtered dataframe, but present in the original/unfiltered one, will be added to the returned data frame with a count of 0.
-        
-            Returns:
-                DataFrame: A DataFrame with at least two columns: `self.key` and 'count', where 'count' represents the number of instances of the value type in the filterd dataframe `self.data`.
+
+        Returns:
+            DataFrame: A DataFrame with at least two columns: `self.key` and 'count', where 'count' represents the number of instances of the value type in the filterd dataframe `self.data`.
         """
 
         valcounts = self.series.value_counts()
@@ -372,10 +385,10 @@ class FigureFactory(DashFigureFactory):
 
     def plot(self, **kwargs):
         """Plots, by default, a histogram via `self.plot_histogram`, and if selections exist, then these aree subsequently applied.
-        
+
         Args:
             **kwargs: Additional keyword arguments to customize the plot. These arguments will be merged with the existing arguments stored in `self.kwargs`.
-        
+
         Returns:
             fig: The resulting plot as a `plotly.graph_objects.Figure` object.
         """
@@ -391,36 +404,34 @@ class FigureFactory(DashFigureFactory):
 
     def plot_histogram(self, color=None, **kwargs):
         """Plots a histogram using Plotly.
-        
+
         Args:
             color (str, optional): The color of the bars. If not provided, the default color will be used.
             **kwargs: Additional keyword arguments that can be passed to the `px.bar` function.
-        
+
         Returns:
             fig: The Plotly figure object representing the histogram.
         """
 
         color = color if color else self.color
-        category_orders = ({
-            self.key: self.df_counts.index
-        } if self.quant is False else None)
+        category_orders = (
+            {self.key: self.df_counts.index} if self.quant is False else None
+        )
 
         fig = px.bar(
             self.df_counts,
             x=self.key if not self.vertical else 'count',
             y='count' if not self.vertical else self.key,
-            height=self.height if not self.vertical else len(self.df_counts) *
-            20,
+            height=self.height
+            if not self.vertical
+            else len(self.df_counts) * 20,
             color_discrete_sequence=[color] if color else None,
             category_orders=category_orders,
             log_x=self.log_x,
             log_y=self.log_y,
             text=self.text,
             template=PLOTLY_TEMPLATE,
-            hover_data={
-                self.key: False,
-                'count': False
-            },
+            hover_data={self.key: False, 'count': False},
             # **kwargs
         )
         fig.update_traces(textposition='auto', textfont_size=14)
@@ -428,52 +439,53 @@ class FigureFactory(DashFigureFactory):
         # cats=list(reversed(self.df_counts[self.key].index))
         cats = list(self.df_counts[self.key].index)
         if self.vertical:
-            fig.update_yaxes(categoryorder='array',
-                             categoryarray=cats,
-                             title_text='',
-                             tickangle=0,
-                             autorange='reversed')
-            fig.update_xaxes(title_text=f'Number of {self.records_name}',
-                             visible=False)
+            fig.update_yaxes(
+                categoryorder='array',
+                categoryarray=cats,
+                title_text='',
+                tickangle=0,
+                autorange='reversed',
+            )
+            fig.update_xaxes(
+                title_text=f'Number of {self.records_name}', visible=False
+            )
         else:
-            fig.update_xaxes(categoryorder='array',
-                             categoryarray=cats,
-                             title_text='')
-            fig.update_yaxes(title_text=f'Number of {self.records_name}',
-                             visible=False)
+            fig.update_xaxes(
+                categoryorder='array', categoryarray=cats, title_text=''
+            )
+            fig.update_yaxes(
+                title_text=f'Number of {self.records_name}', visible=False
+            )
 
         fig.update_layout(
             uniformtext_minsize=10,
             clickmode='event+select',
             dragmode='select',
             selectdirection='h' if not self.vertical else 'v',
-            margin={
-                "r": 0,
-                "t": 0,
-                "l": 0,
-                "b": 0
-            },
+            margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
         )
-        if self.opts_xaxis: fig.update_xaxes(**self.opts_xaxis)
-        if self.opts_yaxis: fig.update_yaxes(**self.opts_yaxis)
+        if self.opts_xaxis:
+            fig.update_xaxes(**self.opts_xaxis)
+        if self.opts_yaxis:
+            fig.update_yaxes(**self.opts_yaxis)
 
         return fig
 
     ## Tables
     def table(self, cols=[], **kwargs):
         """Generate a dash_table.DataTable table using the provided data and columns.
-        
+
         Args:
             cols (list, optional): A list of column names to include in the table. If not provided, all columns in `self.cols_table` will be included. Defaults to an empty list.
             **kwargs: Additional keyword arguments to pass to the `get_dash_table` function.
-        
+
         Returns:
             dash_table.DataTable: The generated table as a dash table component.
         """
 
-        return get_dash_table(self.data,
-                              cols=self.cols_table if not cols else cols,
-                              **kwargs)
+        return get_dash_table(
+            self.data, cols=self.cols_table if not cols else cols, **kwargs
+        )
 
 
 ## Individual figures
@@ -485,15 +497,17 @@ class MemberFigure(FigureFactory):
     """
     A class that creates a figure factory for Members.
     """
+
     records_name = 'members'
-    drop_duplicates = ('member', )
+    drop_duplicates = ('member',)
 
 
 class MemberDOBFigure(MemberFigure):
     """
-    A child class of MemberFigure that creates a figure 
+    A child class of MemberFigure that creates a figure
     based on the member's date of birth.
     """
+
     key = 'member_dob'
     quant = True
 
@@ -502,6 +516,7 @@ class MembershipYearFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the membership year.
     """
+
     records_name = 'annual subscriptions'
     key = 'member_membership'
     quant = True
@@ -511,6 +526,7 @@ class MemberGenderFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the member's gender.
     """
+
     key = 'member_gender'
     quant = False
     vertical = False
@@ -521,6 +537,7 @@ class NationalityFigure(FigureFactory):
     """
     A class that creates a figure factory for nationality.
     """
+
     records_points_dim = 'y'
     vertical = True
     log_x = True
@@ -531,6 +548,7 @@ class MemberNationalityFigure(NationalityFigure, MemberFigure):
     """
     A child class of NationalityFigure and MemberFigure that creates a figure based on nationality.
     """
+
     records_name = 'member nationalities'
     key = 'member_nationalities'
 
@@ -549,7 +567,7 @@ class MemberArrondFigure(MemberFigure):
     def df_counts(self):
         """
         A method that computes and returns a dataframe of counts after applying validation and sorting.
-        
+
         Returns:
             (DataFrame) A DataFrame sorted by 'arrond_i'.
         """
@@ -569,22 +587,25 @@ class MemberNameFigure(MemberFigure):
     """
     A child class of MemberFigure that creates a figure based on the member's name.
     """
+
     key = 'member_name'
-    drop_duplicates = ('member', )
+    drop_duplicates = ('member',)
 
 
 class BookFigure(FigureFactory):
     """
     A child class of FigureFactory that creates figures based on books.
     """
+
     records_name = 'books'
-    drop_duplicates = ('book', )
+    drop_duplicates = ('book',)
 
 
 class BookTitleFigure(BookFigure):
     """
     A child class of BookFigure that creates a figure based on the book's title.
     """
+
     key = 'book_title'
 
 
@@ -592,6 +613,7 @@ class BookGenreFigure(BookFigure):
     """
     A child class of BookFigure that creates a figure based on the book's genre.
     """
+
     key = 'book_genre'
     vertical = True
     text = 'count'
@@ -601,6 +623,7 @@ class BookYearFigure(BookFigure):
     """
     A child class of BookFigure that creates a figure based on the book's publication year.
     """
+
     key = 'book_year'
     quant = True
     min_series_val = 1800
@@ -614,14 +637,16 @@ class AuthorFigure(FigureFactory):
     """
     A child class of FigureFactory that creates figures based on authors.
     """
+
     records_name = 'authors'
-    drop_duplicates = ('author', )
+    drop_duplicates = ('author',)
 
 
 class AuthorGenderFigure(AuthorFigure):
     """
     A child class of AuthorFigure that creates a figure based on the author's gender.
     """
+
     key = 'author_gender'
     quant = False
     vertical = False
@@ -632,6 +657,7 @@ class AuthorNationalityFigure(NationalityFigure, AuthorFigure):
     """
     A child class of NationalityFigure and AuthorFigure that creates a figure based on the author's nationality.
     """
+
     key = 'author_nationalities'
     quant = False
 
@@ -640,6 +666,7 @@ class AuthorDOBFigure(AuthorFigure):
     """
     A child class of AuthorFigure that creates a figure based on the author's date of birth.
     """
+
     key = 'author_dob'
     quant = True
     min_series_val = 1800
@@ -650,6 +677,7 @@ class AuthorNameFigure(AuthorFigure):
     """
     A child class of AuthorFigure that creates a figure based on the author's name.
     """
+
     key = 'author_name'
 
 
@@ -657,13 +685,15 @@ class EventFigure(FigureFactory):
     """
     A child class of FigureFactory that creates figures based on events.
     """
-    drop_duplicates = ('event', )
+
+    drop_duplicates = ('event',)
 
 
 class EventYearFigure(EventFigure):
     """
     A child class of EventFigure that creates a figure based on the event's year.
     """
+
     key = 'event_year'
     quant = True
 
@@ -672,6 +702,7 @@ class EventMonthFigure(EventFigure):
     """
     A child class of EventFigure that creates a figure based on the event's month.
     """
+
     key = 'event_month'
     quant = True
 
@@ -680,6 +711,7 @@ class EventTypeFigure(EventFigure):
     """
     A child class of EventFigure that creates a figure based on the event's type.
     """
+
     key = 'event_type'
     quant = False
     vertical = True
@@ -694,22 +726,24 @@ class LandmarksFigureFactory(FigureFactory):
     """
     Figure factory for landmarks data. Dataset class is set to LandmarksDataset.
     """
+
     dataset_class = Landmarks
     cols_table = ['landmark', 'address', 'arrond_id', 'lat', 'lon']
 
     def plot_map_mapbox(self, color='gray', **kwargs):
         """Plot a scattermapbox with landmarks.
-        
+
         Args:
             color (str, optional): The color of the markers. Defaults to 'gray'.
             **kwargs: Additional keyword arguments.
-        
+
         Returns:
             go.Figure: The scattermapbox figure.
         """
 
         figdf = self.data
-        if not 'tooltip' in set(figdf.columns): figdf['tooltip'] = ''
+        if not 'tooltip' in set(figdf.columns):
+            figdf['tooltip'] = ''
         fig = update_fig_mapbox_background(go.Figure())
         fig.add_trace(
             go.Scattermapbox(
@@ -723,26 +757,27 @@ class LandmarksFigureFactory(FigureFactory):
                     # symbol='square',
                     size=20,
                     # opacity=1
-                    opacity=0.4),
+                    opacity=0.4,
+                ),
                 text=figdf['landmark'],
                 customdata=figdf['tooltip'],
                 hovertemplate='%{customdata}<extra></extra>',
                 textfont=dict(
                     size=TEXTFONT_SIZE,
-                    family=
-                    'Louize, Recursive, Tahoma, Verdana, Times New Roman',
-                    color='black'),
+                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                    color='black',
+                ),
                 textposition='bottom center',
                 hoverlabel=dict(
                     font=dict(
                         size=16,
-                        family=
-                        'Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                        family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
                         # color='black'
                     ),
                     bgcolor='white',
                 ),
-            ))
+            )
+        )
 
         # fig.update_layout(mapbox_style=self.map_style, mapbox_zoom=14)
 
@@ -750,31 +785,33 @@ class LandmarksFigureFactory(FigureFactory):
 
     def plot_map(self, color='gray', **kwargs):
         """Plot a dash leaflet map with one landmark, S and Co.
-        
+
         Args:
             color (str, optional): The color of the markers. Defaults to 'gray'.
             **kwargs: Additional keyword arguments.
-        
+
         Returns:
             go.Figure: The scattermapbox figure.
         """
-        map = dl.Map(children=[
-            dl.TileLayer(
-                url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
-            dl.TileLayer(
-                url=
-                "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"
-            ),
-            dl.FeatureGroup(id='featuregroup-markers2'),
-            dl.FeatureGroup(id='featuregroup-markers'),
-            get_sco_marker()
-        ],
-                     preferCanvas=True,
-                     center=LATLON_SCO,
-                     zoom=DEFAULT_STATE['zoom'],
-                     id="mainmap",
-                     maxZoom=16,
-                     minZoom=2)
+        map = dl.Map(
+            children=[
+                dl.TileLayer(
+                    url='https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                ),
+                dl.TileLayer(
+                    url='https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png'
+                ),
+                dl.FeatureGroup(id='featuregroup-markers2'),
+                dl.FeatureGroup(id='featuregroup-markers'),
+                get_sco_marker(),
+            ],
+            preferCanvas=True,
+            center=LATLON_SCO,
+            zoom=DEFAULT_STATE['zoom'],
+            id='mainmap',
+            maxZoom=16,
+            minZoom=2,
+        )
         return map
 
 
@@ -804,8 +841,12 @@ class CombinedFigureFactory(FigureFactory):
         # 'book_url'
     ]
     cols_table = [
-        'member_name', 'memer_membership', 'member_dob', 'member_gender',
-        'member_nationalities', 'arrond_id'
+        'member_name',
+        'memer_membership',
+        'member_dob',
+        'member_gender',
+        'member_nationalities',
+        'arrond_id',
     ]
 
     @cached_property
@@ -834,66 +875,87 @@ class CombinedFigureFactory(FigureFactory):
     @cached_property
     def book_filters_exist(self):
         """Check if any book filters are active.
-        
+
         Returns:
             bool: True if any book filters exist, False otherwise.
         """
         return any(
-            fn.startswith('book_') or fn.startswith('author_')
-            or fn.startswith('event_') or fn.startswith('author_')
-            for fn in self.filter_data)
+            fn.startswith('book_')
+            or fn.startswith('author_')
+            or fn.startswith('event_')
+            or fn.startswith('author_')
+            for fn in self.filter_data
+        )
 
     def table_arrond(self):
-        return generate_table(self. data, 'arrond_id', 'arrond',sort_by='arrond_num_members')
+        return generate_table(
+            self.data, 'arrond_id', 'arrond', sort_by='arrond_num_members'
+        )
+
     def table_members(self):
-        df=self.data.sample(frac=1)
-        df['member_num_years_of_membership'] = df['member_membership'].apply(len)
-        return generate_table(df, 'member',sort_by='member_num_years_of_membership')
+        df = self.data.sample(frac=1)
+        df['member_num_years_of_membership'] = df['member_membership'].apply(
+            len
+        )
+        return generate_table(
+            df, 'member', sort_by='member_num_years_of_membership'
+        )
+
     def table_books(self):
-        return generate_table(self.data.drop(['book_numborrow','book_circulated'],axis=1), 'book', also_cols={'author_name'},sort_by='book_num_members')
+        return generate_table(
+            self.data.drop(['book_numborrow', 'book_circulated'], axis=1),
+            'book',
+            also_cols={'author_name'},
+            sort_by='book_num_members',
+        )
+
     def table_authors(self):
-        return generate_table(self.data, 'author',sort_by='author_num_members')
-        
+        return generate_table(
+            self.data, 'author', sort_by='author_num_members'
+        )
 
     def table(self, tab=None, **kwargs):
         """Generate a dash_table.DataTable table using the provided data and columns. Cols will be st to to `self.cols_table_members` if `self.book_filters_exist`; otherwise, both `self.cols_table_members` and `self.cols_table_books` will be used.
-        
+
         Args:
             **kwargs: Additional keyword arguments to pass to the `get_dash_table` function.
-        
+
         Returns:
             dash_table.DataTable: The generated table as a dash table component.
         """
-        if tab=='arrond':
+        if tab == 'arrond':
             return self.table_arrond()
-        elif tab=='member':
+        elif tab == 'member':
             return self.table_members()
-        elif tab=='book':
+        elif tab == 'book':
             return self.table_books()
-        elif tab=='author':
+        elif tab == 'author':
             return self.table_authors()
 
-    def plot_map_mapbox(self,
-                        color=None,
-                        color_text='black',
-                        return_trace=False,
-                        **kwargs):
+    def plot_map_mapbox(
+        self, color=None, color_text='black', return_trace=False, **kwargs
+    ):
         """Plot a map with member dwellings from the currently filtered data.
-        
+
         Args:
             color (str, optional): The color of the markers. Defaults to None.
             color_text (str, optional): The color of the text. Defaults to 'black'.
             return_trace (bool, optional): Whether to return only the trace. Defaults to False.
             **kwargs: Additional keyword arguments to pass to the function.
-        
+
         Returns:
             go.Figure: The figure object with the map.
         """
         logger.debug([color, self.color, DEFAULT_COLOR])
-        if not color and self.color: color = self.color
-        if not color: color = DEFAULT_COLOR
-        figdf = self.df_dwellings.reset_index().fillna('').query(
-            '(lat!="") & (lon!="")')
+        if not color and self.color:
+            color = self.color
+        if not color:
+            color = DEFAULT_COLOR
+        figdf = (
+            self.df_dwellings.reset_index()
+            .fillna('')
+            .query('(lat!="") & (lon!="")')
+        )
         # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
 
         trace = go.Scattermapbox(
@@ -908,17 +970,18 @@ class CombinedFigureFactory(FigureFactory):
                 symbol='circle',
                 size=20,
                 # size=(figdf['num_borrows'] / 20)+5,
-                opacity=0.4),
+                opacity=0.4,
+            ),
             text=figdf['member_name'],
             textfont=dict(
                 size=TEXTFONT_SIZE,
                 color=color_text,
-                family='Louize, Recursive, Tahoma, Verdana, Times New Roman'),
+                family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
+            ),
             hoverlabel=dict(
                 font=dict(
                     size=16,
-                    family=
-                    'Louize, Recursive, Tahoma, Verdana, Times New Roman',
+                    family='Louize, Recursive, Tahoma, Verdana, Times New Roman',
                     # color='black'
                 ),
                 bgcolor='white',
@@ -926,56 +989,68 @@ class CombinedFigureFactory(FigureFactory):
             textposition='bottom center',
         )
 
-        if return_trace: return trace
+        if return_trace:
+            return trace
 
         fig = update_fig_mapbox_background(go.Figure())
         fig.add_trace(trace)
         return fig
 
-    def plot_map(self,
-                 color=None,
-                 color_text='black',
-                 return_trace=False,
-                 return_markers=True,
-                 **kwargs):
+    def plot_map(
+        self,
+        color=None,
+        color_text='black',
+        return_trace=False,
+        return_markers=True,
+        **kwargs,
+    ):
         """Plot a map with member dwellings from the currently filtered data.
-        
+
         Args:
             color (str, optional): The color of the markers. Defaults to None.
             color_text (str, optional): The color of the text. Defaults to 'black'.
             return_trace (bool, optional): Whether to return only the trace. Defaults to False.
             **kwargs: Additional keyword arguments to pass to the function.
-        
+
         Returns:
             go.Figure: The figure object with the map.
         """
 
         logger.debug([color, self.color, DEFAULT_COLOR])
-        if not color and self.color: color = self.color
-        if not color: color = DEFAULT_COLOR
-        figdf = self.df_dwellings.reset_index().fillna('').query(
-            '(lat!="") & (lon!="")')
+        if not color and self.color:
+            color = self.color
+        if not color:
+            color = DEFAULT_COLOR
+        figdf = (
+            self.df_dwellings.reset_index()
+            .fillna('')
+            .query('(lat!="") & (lon!="")')
+        )
         # figdf['hovertext']=[x[:100] for x in figdf['hover_tooltip']]
 
         markers = [get_member_marker(row) for i, row in figdf.iterrows()]
-        if return_markers: return markers
+        if return_markers:
+            return markers
         fg = dl.FeatureGroup(markers, id='featuregroup-markers')
 
-        map = dl.Map(children=[
-            dl.TileLayer(
-                url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
-            dl.TileLayer(
-                url=
-                "https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png"
-            ), fg,
-            get_sco_marker()
-        ],
-                     preferCanvas=True,
-                     center=LATLON_SCO,
-                     zoom=14,
-                     id="mainmap",
-                     maxZoom=16,
-                     minZoom=2)
+        map = dl.Map(
+            children=[
+                dl.TileLayer(
+                    url='https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                ),
+                dl.TileLayer(
+                    url='https://shakespeareandco.app/tiles/data/paris1937/{z}/{x}/{y}.png'
+                ),
+                fg,
+                get_sco_marker(),
+            ],
+            preferCanvas=True,
+            center=LATLON_SCO,
+            zoom=14,
+            id='mainmap',
+            maxZoom=16,
+            minZoom=2,
+        )
         return map
 
 
@@ -983,15 +1058,21 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     """
     A figure factory comparing two CombinedFigureFactories.
     """
+
     cols_table = [
-        'L_or_R', 'member_name', 'memer_membership', 'member_dob',
-        'member_gender', 'member_nationalities', 'arrond_id'
+        'L_or_R',
+        'member_name',
+        'memer_membership',
+        'member_dob',
+        'member_gender',
+        'member_nationalities',
+        'arrond_id',
     ]
     indiv_ff = CombinedFigureFactory
 
     def __init__(self, ff1={}, ff2={}, **kwargs):
         """Initializes the object with two filter dictionaries or strings.
-        
+
         Args:
             ff1 (dict or str): The first filter dictionary. If a list is provided and `ff2` is not specified, it will be unpacked into `ff1` and `ff2`.
             ff2 (dict or str): The second filter dictionary.
@@ -1003,25 +1084,31 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         if is_listy(ff1) and not ff2 and len(ff1) == 2:
             ff1, ff2 = ff1
 
-        self.ff1 = self.L = self.indiv_ff(
-            ff1, name='Filter 1',
-            color=LEFT_COLOR) if type(ff1) in {dict, str} else ff1
-        self.ff2 = self.R = self.indiv_ff(
-            ff2, name='Filter 2',
-            color=RIGHT_COLOR) if type(ff2) in {dict, str} else ff2
+        self.ff1 = self.L = (
+            self.indiv_ff(ff1, name='Filter 1', color=LEFT_COLOR)
+            if type(ff1) in {dict, str}
+            else ff1
+        )
+        self.ff2 = self.R = (
+            self.indiv_ff(ff2, name='Filter 2', color=RIGHT_COLOR)
+            if type(ff2) in {dict, str}
+            else ff2
+        )
 
-    def compare(self,
-            cols=PREDICT_COLS,
-            min_count=PREDICT_MIN_COUNT,
-            groupby='member',
-            **kwargs) -> pd.DataFrame:
+    def compare(
+        self,
+        cols=PREDICT_COLS,
+        min_count=PREDICT_MIN_COUNT,
+        groupby='member',
+        **kwargs,
+    ) -> pd.DataFrame:
         """Compare the dataframes of two objects and return a dataframe of distinctive qualitative values. Overwrite any of these constants in ~/geotaste_data/config.json.
-        
+
         Args:
             cols (list): The columns to compare. Defaults to PREDICT_COLS.
             min_count (int): The minimum count of values to consider. Defaults to PREDICT_MIN_COUNT.
             **kwargs: Additional keyword arguments.
-        
+
         Returns:
             pd.DataFrame: A dataframe of distinctive qualitative values.
         """
@@ -1032,7 +1119,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             cols=cols,
             min_count=min_count,
             df=self.data_orig,
-            groupby=groupby
+            groupby=groupby,
         )
 
         # return get_distinctive_qual_vals(self.L.data,
@@ -1053,26 +1140,28 @@ class ComparisonFigureFactory(CombinedFigureFactory):
 
     def describe_comparison(self, comparison_df=None, **kwargs):
         """Describes the comparison between two dataframes.
-        
+
         Args:
             comparison_df (pandas.DataFrame, optional): The dataframe containing the comparison results as the result of self.compare().
                 If not provided, the function will call self.compare(**kwargs) to generate the comparison dataframe.
             **kwargs: Additional keyword arguments to be passed to self.compare() if comparison_df is not provided.
-        
+
         Returns:
             tuple: A tuple containing two lists of descriptions. The first list describes the comparison for group L, and the second list describes the comparison for group R.
         """
 
         return describe_comparison(
-            comparison_df if comparison_df is not None else self.compare(
-                **kwargs))
+            comparison_df
+            if comparison_df is not None
+            else self.compare(**kwargs)
+        )
 
     def table(self, cols=['arrond_id'], **kwargs):
         """Returns the content of a table based on the provided keyword arguments.
-        
+
         Args:
             **kwargs: Additional keyword arguments to be passed to the `table_content` method.
-        
+
         Returns:
             dbc.Container: The content of the table as well as its prefatory description.
         """
@@ -1086,24 +1175,36 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         if 'arrond_id' in set(cols):
             fig = self.plot_oddsratio_map(odf)
         desc_L, desc_R = self.describe_comparison(odf, lim=10)
-        summary_row = dbc.Row([
-            dbc.Col([
-                html.H5([
-                    f'10 most distinctive features for Filter 1 (',
-                    self.L.filter_desc, ')'
-                ]),
-                dcc.Markdown('\n'.join(desc_L))
-            ],
-                    className='left-color'),
-            dbc.Col([
-                html.H5([
-                    f'10 most distinctive features for Filter 2 (',
-                    self.R.filter_desc, ')'
-                ]),
-                dcc.Markdown('\n'.join(desc_R))
-            ],
-                    className='right-color'),
-        ])
+        summary_row = dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.H5(
+                            [
+                                f'10 most distinctive features for Filter 1 (',
+                                self.L.filter_desc,
+                                ')',
+                            ]
+                        ),
+                        dcc.Markdown('\n'.join(desc_L)),
+                    ],
+                    className='left-color',
+                ),
+                dbc.Col(
+                    [
+                        html.H5(
+                            [
+                                f'10 most distinctive features for Filter 2 (',
+                                self.R.filter_desc,
+                                ')',
+                            ]
+                        ),
+                        dcc.Markdown('\n'.join(desc_R)),
+                    ],
+                    className='right-color',
+                ),
+            ]
+        )
 
         table_row = dbc.Row(get_dash_table(odf))
 
@@ -1115,7 +1216,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     @cached_property
     def df_dwellings(self):
         """Combines the 'df_dwellings' dataframes from the left and right datasets.
-            
+
         Returns:
             DataFrame: The combined dataframe of 'df_dwellings' from the left and right datasets.
         """
@@ -1130,7 +1231,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     @cached_property
     def df_members(self):
         """Combines the 'df_dwellings' dataframes from the left and right datasets.
-            
+
         Returns:
             DataFrame: The combined dataframe of 'df_dwellings' from the left and right datasets.
         """
@@ -1160,28 +1261,30 @@ class ComparisonFigureFactory(CombinedFigureFactory):
     #     ofig.add_traces([figL, figR])
     #     return update_fig_mapbox_background(ofig)
 
-    def plot_oddsratio_map(self,
-                           comparison_df=None,
-                           col='odds_ratio_log',
-                           **kwargs):
+    def plot_oddsratio_map(
+        self, comparison_df=None, col='odds_ratio_log', **kwargs
+    ):
         """Plots an odds ratio map using a choropleth mapbox.
-        
+
         Args:
             comparison_df (pd.DataFrame, optional): DataFrame containing the data for comparison. If not provided, the function will call the `compare` method of the class. Defaults to None.
             col (str, optional): Column name to use for coloring the map. Defaults to 'odds_ratio_log'.
             **kwargs: Additional keyword arguments to pass to the `compare` method if `comparison_df` is not provided.
-        
+
         Returns:
             plotly.graph_objects.Figure: The plotted odds ratio map.
         """
 
-        figdf = comparison_df if comparison_df is not None else self.compare(
-            **kwargs)
+        figdf = (
+            comparison_df
+            if comparison_df is not None
+            else self.compare(**kwargs)
+        )
         figdf = figdf.query('col=="arrond_id"').reset_index()
         Lcolor = Color(RIGHT_COLOR)
         Rcolor = Color(LEFT_COLOR)
         midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
-        midpoint.set_luminance(.95)
+        midpoint.set_luminance(0.95)
         fig_choro = px.choropleth_mapbox(
             figdf,
             geojson=get_geojson_arrondissement(),
@@ -1190,16 +1293,13 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             center=MAP_CENTER,
             zoom=11,
             # hover_data=[],
-            hover_data={
-                'val': False,
-                col: False
-            },
+            hover_data={'val': False, col: False},
             color_continuous_scale=[
                 Lcolor.hex,
                 midpoint.hex,
                 Rcolor.hex,
             ],
-            opacity=.5,
+            opacity=0.5,
         )
         fig_choro.update_mapboxes(
             style='light',
@@ -1208,59 +1308,59 @@ class ComparisonFigureFactory(CombinedFigureFactory):
 
         ofig = fig_choro
 
-        ofig.update_layout(margin={
-            "r": 0,
-            "t": 0,
-            "l": 0,
-            "b": 0
-        },
-                           legend=dict(yanchor="bottom",
-                                       y=0.06,
-                                       xanchor="right",
-                                       x=0.99),
-                           coloraxis=dict(colorbar=dict(orientation='h',
-                                                        y=.01,
-                                                        lenmode='fraction',
-                                                        len=.5,
-                                                        thickness=10,
-                                                        xanchor='right',
-                                                        x=.99)))
+        ofig.update_layout(
+            margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
+            legend=dict(yanchor='bottom', y=0.06, xanchor='right', x=0.99),
+            coloraxis=dict(
+                colorbar=dict(
+                    orientation='h',
+                    y=0.01,
+                    lenmode='fraction',
+                    len=0.5,
+                    thickness=10,
+                    xanchor='right',
+                    x=0.99,
+                )
+            ),
+        )
         return ofig
 
 
-def get_dash_table(df,
-                   cols=[],
-                   rename={},
-                   page_size=100,
-                   height_cell=60,
-                   **kwargs):
+def get_dash_table(
+    df, cols=[], rename={}, page_size=100, height_cell=60, **kwargs
+):
     """Returns a Dash DataTable object with specified parameters.
-    
+
     Args:
         df (pandas.DataFrame): The input DataFrame.
         cols (list, optional): The list of columns to include in the DataTable. If not provided, all columns from the DataFrame will be included. Defaults to [].
         page_size (int, optional): The number of rows to display per page. Defaults to 5.
         height_cell (int, optional): The height of each cell in pixels. Defaults to 60.
-    
+
     Returns:
         dash_table.DataTable: The Dash DataTable object.
     """
 
-    cols = list(df.columns) if not cols else [
-        col for col in cols if col in set(df.columns)
-    ]
+    cols = (
+        list(df.columns)
+        if not cols
+        else [col for col in cols if col in set(df.columns)]
+    )
     dff = delist_df(df[cols])
-    cols_l = [{
-        'id': col,
-        'name': rename.get(col, col).replace('_', ' ').title(),
-    } for col in cols]
+    cols_l = [
+        {
+            'id': col,
+            'name': rename.get(col, col).replace('_', ' ').title(),
+        }
+        for col in cols
+    ]
     return dash_table.DataTable(
         data=dff.to_dict('records'),
         columns=cols_l,
-        sort_action="native",
+        sort_action='native',
         # sort_mode="multi",
-        filter_action="native",
-        page_action="native",
+        filter_action='native',
+        page_action='native',
         export_format='csv',
         page_size=page_size,
         fixed_rows={'headers': True},
@@ -1285,12 +1385,12 @@ def get_dash_table(df,
 
 def get_empty_fig(height=100, width=250, **layout_kwargs):
     """Create an empty plot figure with specified height and width.
-    
+
     Args:
         height (int, optional): The height of the plot figure. Defaults to 100.
         width (int, optional): The width of the plot figure. Defaults to 250.
         **layout_kwargs: Additional keyword arguments to be passed to the layout dictionary.
-    
+
     Returns:
         go.Figure: An empty plot figure with the specified height, width, and layout.
     """
@@ -1304,18 +1404,19 @@ def get_empty_fig(height=100, width=250, **layout_kwargs):
 @cache_obj.memoize()
 def plot_cache(figure_class, serialized_data=''):
     """Plots the FIGURE using the specified figure class and serialized data. This function output is memoized so that future calls with the same arguments return cached results. This cache is stored in `PATH_CACHE` constant/config flag.
-    
+
     Args:
         figure_class (class): The figure class to use for plotting.
         serialized_data (str): The serialized data to be used for plotting, which should be unpackable to (filter_data,selected,kwargs). If `serialized_data` is empty, an empty filter data, None for selected, and an empty dictionary for kwargs will be used.
-    
+
     Returns:
         str: The zlib-compressed and base64 encoded JSON string representation of the plotted figure.
     """
 
     logger.debug(f'plot_cache({figure_class}, {serialized_data})')
-    filter_data, selected, kwargs = (unserialize(serialized_data)
-                                     if serialized_data else ({}, None, {}))
+    filter_data, selected, kwargs = (
+        unserialize(serialized_data) if serialized_data else ({}, None, {})
+    )
     ff = figure_class(filter_data=filter_data, selected=selected)
     fig = ff.plot(**kwargs)
     return to_json_gz_str(fig)
@@ -1323,30 +1424,30 @@ def plot_cache(figure_class, serialized_data=''):
 
 def get_ff_for_num_filters(fdL={}, fdR={}, landmarks=True, **kwargs):
     """Returns a figure factory based on the number of filters provided.
-    
+
     Args:
         fdL (dict): A dictionary representing the left filter.
         fdR (dict): A dictionary representing the right filter.
         **kwargs: Additional keyword arguments to be passed to the figure factory constructors.
-    
+
     Returns:
         FigureFactory: A figure factory object based on the number of filters provided.
-    
+
     Examples:
         # Example 1: No filters provided
         ff = get_ff_for_num_filters()
         # Returns a LandmarksFigureFactory object
-    
+
         # Example 2: Only left filter provided
         fdL = {'filter_param': 'value'}
         ff = get_ff_for_num_filters(fdL=fdL)
         # Returns a CombinedFigureFactory object with the left filter
-    
+
         # Example 3: Only right filter provided
         fdR = {'filter_param': 'value'}
         ff = get_ff_for_num_filters(fdR=fdR)
         # Returns a CombinedFigureFactory object with the right filter
-    
+
         # Example 4: Both left and right filters provided
         fdL = {'filter_param': 'value'}
         fdR = {'filter_param': 'value'}
@@ -1379,36 +1480,39 @@ def get_ff_for_num_filters(fdL={}, fdR={}, landmarks=True, **kwargs):
 
 @cache_obj.memoize()
 def get_cached_fig_or_table(args_id):
-    """Produce or retrieve memoized/cached figure or table based on the given serialized arguments 
-    
+    """Produce or retrieve memoized/cached figure or table based on the given serialized arguments
+
     Args:
         args_id (str): The serialized arguments. These should unpack to (fdL,fdR,active_tab,analysis_tab,kwargs).
-    
+
     Returns:
         str: The JSON, zlib-compressed string representation of the figure or table.
     """
 
     fdL, fdR, active_tab, analysis_tab, kwargs = unserialize(args_id)
-    ff = get_ff_for_num_filters(fdL, fdR, landmarks=active_tab!='table')
+    ff = get_ff_for_num_filters(fdL, fdR, landmarks=active_tab != 'table')
     logger.debug([args_id, ff])
     # if active_tab=='map':
     # out=ff.plot_map(**kwargs)
     if active_tab == 'table':
         if isinstance(ff, ComparisonFigureFactory):
-            pcols = [c for c in PREDICT_COLS if c.startswith(analysis_tab)
-                     ] if analysis_tab else PREDICT_COLS
+            pcols = (
+                [c for c in PREDICT_COLS if c.startswith(analysis_tab)]
+                if analysis_tab
+                else PREDICT_COLS
+            )
             out = ff.table(cols=pcols, tab=analysis_tab, **kwargs)
         else:
-            out = ff.table(tab=analysis_tab,**kwargs)
+            out = ff.table(tab=analysis_tab, **kwargs)
     return to_json_gz_str(out)
 
 
 def to_json_gz_str(out):
     """Converts the given object to a JSON string, compresses it using zlib, and returns the compressed string.
-    
+
     Args:
         out: The object to be converted to JSON.
-    
+
     Returns:
         str: The compressed JSON string.
     """
@@ -1442,10 +1546,10 @@ def from_json_gz_str(ojsongzstr):
 
 def update_fig_mapbox_background(fig):
     """Updates the background of a Mapbox figure.
-    
+
     Args:
         fig (plotly.graph_objs._figure.Figure): The figure to update.
-    
+
     Returns:
         plotly.graph_objs._figure.Figure: The updated figure.
     """
@@ -1453,7 +1557,7 @@ def update_fig_mapbox_background(fig):
     fig.update_mapboxes(
         # style='mapbox://styles/ryanheuser/cljef7th1000801qu6018gbx8',
         # style='stamen-toner',
-        style="streets",
+        style='streets',
         # layers=[
         #     {
         #         "below": 'traces',
@@ -1469,56 +1573,59 @@ def update_fig_mapbox_background(fig):
         pitch=0,
         zoom=14,
     )
-    fig.update_layout(margin={
-        "r": 0,
-        "t": 0,
-        "l": 0,
-        "b": 0
-    },
-                      legend=dict(yanchor="bottom",
-                                  y=0.06,
-                                  xanchor="right",
-                                  x=0.99),
-                      autosize=True)
+    fig.update_layout(
+        margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
+        legend=dict(yanchor='bottom', y=0.06, xanchor='right', x=0.99),
+        autosize=True,
+    )
     fig.update_layout(mapbox_accesstoken=mapbox_access_token)
     fig.layout._config = {'responsive': True, 'scrollZoom': True}
     fig.layout.update(showlegend=False)
     return fig
 
 
-def get_selected_records_from_figure_selected_data(selectedData: dict = {},
-                                                   quant=None):
+def get_selected_records_from_figure_selected_data(
+    selectedData: dict = {}, quant=None
+):
     """Get selected records from figure selected data.
-    
+
     Args:
         selectedData (dict, optional): The selected data from the figure. Defaults to {}.
-    
+
     Returns:
         list: The selected records.
-    
+
     Examples:
         >>> selectedData = {'points': [{'label': 'A', 'location': 'NY'}, {'label': 'B', 'location': 'LA'}]}
         >>> get_selected_records_from_figure_selected_data(selectedData)
         ['A', 'B']
     """
 
-    if not selectedData: return []
+    if not selectedData:
+        return []
     points_data = selectedData.get('points', [])
-    if not points_data: return []
+    if not points_data:
+        return []
 
     def get_record_id(d, keys=['label', 'location']):
         """
         Find the right kind of record label for the given plotly data type
         """
-        if not d: return None
+        if not d:
+            return None
         for k in keys:
             if k in d:
                 return d[k]
         logger.exception('What is the record id here? --> ' + pformat(d))
 
-    selected_records = qualquant_series(
-        [x for x in [get_record_id(d) for d in points_data] if x],
-        quant=quant).sort_values().tolist()
+    selected_records = (
+        qualquant_series(
+            [x for x in [get_record_id(d) for d in points_data] if x],
+            quant=quant,
+        )
+        .sort_values()
+        .tolist()
+    )
     return selected_records
 
 
@@ -1532,7 +1639,7 @@ def get_sco_marker():
         icon={
             'iconUrl': '/assets/bookstore-pin.png',
             'iconSize': (w, h),
-            'iconAnchor': (w // 2, h)
+            'iconAnchor': (w // 2, h),
         },
     )
     return sco_marker
@@ -1548,7 +1655,8 @@ def get_sco_marker():
 
 def get_member_marker(row, L_or_R='L', as_json=False):
     popup = dl.Popup(content=row.hover_tooltip)
-    if as_json: popup = popup.to_plotly_json()
+    if as_json:
+        popup = popup.to_plotly_json()
     marker = dl.Marker(
         children=popup,
         id=row.dwelling + '_' + L_or_R,
@@ -1557,20 +1665,19 @@ def get_member_marker(row, L_or_R='L', as_json=False):
         bubblingMouseEvents=True,
         position=(row.lat, row.lon),
         icon={
-            'iconUrl':
-            f'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-{"blue" if L_or_R=="L" else "violet"}.png',
-            'shadowUrl':
-            'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            'iconUrl': f'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-{"blue" if L_or_R=="L" else "violet"}.png',
+            'shadowUrl': 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             'iconSize': [25, 41],
             'iconAnchor': [12, 41],
             'popupAnchor': [1, -34],
-            'shadowSize': [10, 10]
+            'shadowSize': [10, 10],
         },
         # eventHandlers = dict(
         # click=marker_js_func
         # )
     )
-    if as_json: marker = marker.to_plotly_json()
+    if as_json:
+        marker = marker.to_plotly_json()
     return marker
 
 
@@ -1587,21 +1694,35 @@ def store_all_markers_in_assets_folder(ofn=None):
     return ofn
 
 
-
 def preprocess_df(data):
     return delist_df(data).fillna('').applymap(ensure_int)
 
-def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, sort_by_asc=False,also_cols=None):
-    if not entity_prefix: entity_prefix=group_by_field
+
+def generate_table(
+    data,
+    group_by_field,
+    entity_prefix=None,
+    sort_by=None,
+    sort_by_asc=False,
+    also_cols=None,
+):
+    if not entity_prefix:
+        entity_prefix = group_by_field
     df = preprocess_df(data)
-    df = df[df[group_by_field] != ""]
+    df = df[df[group_by_field] != '']
     df = pd.concat(
         gdf.assign(
             **{
-                f"{entity_prefix}_num_addresses": len(gdf.drop_duplicates('dwelling_address')),
-                f"{entity_prefix}_num_books": len(gdf.drop_duplicates('book')),
-                f"{entity_prefix}_num_borrows": len(gdf.drop_duplicates('event')),
-                f"{entity_prefix}_num_members": len(gdf.drop_duplicates('member'))
+                f'{entity_prefix}_num_addresses': len(
+                    gdf.drop_duplicates('dwelling_address')
+                ),
+                f'{entity_prefix}_num_books': len(gdf.drop_duplicates('book')),
+                f'{entity_prefix}_num_borrows': len(
+                    gdf.drop_duplicates('event')
+                ),
+                f'{entity_prefix}_num_members': len(
+                    gdf.drop_duplicates('member')
+                ),
             }
         )
         for g, gdf in df.groupby(group_by_field)
@@ -1610,16 +1731,23 @@ def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, sort_
     if sort_by:
         df = df.sort_values(sort_by, ascending=False)
     cols = [
-        c for c in df 
+        c
+        for c in df
         if (
             (also_cols and c in also_cols)
-            or
-            ( c.startswith(entity_prefix) and not f'_num_{entity_prefix}' in c )
+            or (
+                c.startswith(entity_prefix)
+                and not f'_num_{entity_prefix}' in c
+            )
         )
     ]
-    rename = {c: c.split(f"{entity_prefix}_", 1)[-1].replace('_',' ').title() for c in cols}
+    rename = {
+        c: c.split(f'{entity_prefix}_', 1)[-1].replace('_', ' ').title()
+        for c in cols
+    }
     rename[group_by_field] = entity_prefix.title()
-    if not sort_by: sort_by=cols[-1]
+    if not sort_by:
+        sort_by = cols[-1]
     return get_dash_table(
         df.sort_values(sort_by, ascending=sort_by_asc),
         cols=cols,
@@ -1627,8 +1755,8 @@ def generate_table(data, group_by_field, entity_prefix=None, sort_by=None, sort_
         # sort_by=[{'id': '0', 'direction': 'asc'}] if not sort_by else None,
         sort_by=[
             {
-                'id': cols.index(sort_by), 
-                'direction': 'asc' if sort_by_asc else 'desc'
-             }
-        ]
+                'id': cols.index(sort_by),
+                'direction': 'asc' if sort_by_asc else 'desc',
+            }
+        ],
     )

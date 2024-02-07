@@ -1,26 +1,27 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath(".."))
+
+sys.path.insert(0, os.path.abspath('..'))
 from geotaste import __version__
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.todo",
-    "sphinx.ext.coverage",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.githubpages",
-    "sphinx.ext.napoleon",
-    'sphinx_rtd_theme'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.napoleon',
+    'sphinx_rtd_theme',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
-source_suffix = ".rst"
-master_doc = "index"
-project = "Shakespeare and Co Project Lab"
-copyright = "2023, CDH @ Princeton University"
-author = "CDH @ Princeton University"
+templates_path = ['_templates']
+source_suffix = '.rst'
+master_doc = 'index'
+project = 'Shakespeare and Co Project Lab'
+copyright = '2023, CDH @ Princeton University'
+author = 'CDH @ Princeton University'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -41,10 +42,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
+pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -55,30 +56,30 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 html_theme_options = {
-    "description": 'Analytic dashboard application for the Shakespare and Co CDH project',
-    "github_user": "Princeton-CDH",
-    "github_repo": "geotaste",
-    "github_button": True,
+    'description': 'Analytic dashboard application for the Shakespare and Co CDH project',
+    'github_user': 'Princeton-CDH',
+    'github_repo': 'geotaste',
+    'github_button': True,
     # "logo": "ppa_logo.png",
     # "logo_name": True,
     # 'travis_button': True,
     # 'codecov_button': True,
-    "badge_branch": "main",
+    'badge_branch': 'main',
     'collapse_navigation': True,
 }
 
- 
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -86,12 +87,12 @@ html_static_path = ["_static"]
 # This is required for the alabaster theme
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
-    "**": [
-        "about.html",
-        "navigation.html",
-        "localtoc.html",
-        "searchbox.html",
-        "sidebar_footer.html",
+    '**': [
+        'about.html',
+        'navigation.html',
+        'localtoc.html',
+        'searchbox.html',
+        'sidebar_footer.html',
     ],
 }
 
@@ -99,7 +100,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "Geotastedoc"
+htmlhelp_basename = 'Geotastedoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -125,10 +126,10 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "Geotaste.tex",
-        "Shakespeare and Co Project Lab Documentation",
-        "CDH @ Princeton University",
-        "manual",
+        'Geotaste.tex',
+        'Shakespeare and Co Project Lab Documentation',
+        'CDH @ Princeton University',
+        'manual',
     ),
 ]
 
@@ -140,8 +141,8 @@ latex_documents = [
 man_pages = [
     (
         master_doc,
-        "geotaste",
-        "Shakespeare and Co Project Lab Documentation",
+        'geotaste',
+        'Shakespeare and Co Project Lab Documentation',
         [author],
         1,
     )
@@ -156,28 +157,26 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "Geotaste",
-        "Shakespeare and Co Project Lab Documentation",
+        'Geotaste',
+        'Shakespeare and Co Project Lab Documentation',
         author,
-        "Geotaste",
-        "One line description of project.",
-        "Miscellaneous",
+        'Geotaste',
+        'One line description of project.',
+        'Miscellaneous',
     ),
 ]
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    "https://docs.python.org/3/": None,
-    "django": ("https://django.readthedocs.io/en/latest/", None),
+    'https://docs.python.org/3/': None,
+    'django': ('https://django.readthedocs.io/en/latest/', None),
 }
 
 
 autodoc_member_order = 'bysource'
 
-coverage_ignore_pyobjects = [
-]
-
+coverage_ignore_pyobjects = []
 
 
 # import os
@@ -209,7 +208,6 @@ coverage_ignore_pyobjects = [
 
 # templates_path = ['_templates']
 # exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
 
 
 # # -- Options for HTML output -------------------------------------------------
