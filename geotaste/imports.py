@@ -8,7 +8,7 @@ PATH_ASSETS = os.path.join(PATH_HERE, 'assets')
 PATH_SRVR = os.path.join(PATH_DATA, 'webview.db')
 PATH_LOG = os.path.join(PATH_DATA, 'geotaste.log')
 
-USE_CACHE = True
+USE_CACHE = False
 
 # setup logs
 LOG_FORMAT = '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <cyan>{function}</cyan> | <level>{message}</level> | <cyan>{file}</cyan>:<cyan>{line}</cyan>'
@@ -146,15 +146,15 @@ COMPARISON_MAXCATS = None
 PREDICT_COLS = [
     'member_gender',
     'member_nationalities',
-    # 'author',
+    'author',
     'author_gender',
     'author_nationalities',
-    # 'book',
+    'book',
     'book_format',
     'book_genre',
     'arrond_id',
 ]
-PREDICT_MIN_COUNT = 1
+PREDICT_MIN_COUNT = 2
 PREDICT_MIN_SUM = 10
 
 WELOME_MSG_ON = True
@@ -202,10 +202,17 @@ URLS = dict(
 )
 
 COMPARISON_SCALES = {
-    'book': ['event'],  #'book'],
-    'author': ['event'],  # ['author','event'],
+    # 'book': ['member','book'],  #'book'],
+    # 'author': ['member','author'],  # ['author','event'],
     'member': ['member'],
     'arrond': ['member', 'arrond_id'],
+    # 'book': ['book'],  #'book'],
+    # 'author': ['author'],  # ['author','event'],
+    # 'member': ['member'],
+    # 'arrond': ['member', 'arrond_id'],
+    'event': ['event'],
+    'book': ['event'],
+    'author': ['event'],
 }
 
 
@@ -296,9 +303,9 @@ PATH_LOGO = os.path.join(PATH_ASSETS, os.path.basename(LOGO_SRC))
 
 
 from .utils import *
-from .statutils import *
 from .querystrings import *
 from .queries import *
+from .statutils import *
 from .datasets import *
 from .figs import *
 from .components import *

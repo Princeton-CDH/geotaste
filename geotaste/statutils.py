@@ -42,7 +42,7 @@ def analyze_contingency_tables(
     ld = []
     vals_ctbls = list(iter_contingency_tables(vals1, vals2))
     for val, ctbl in vals_ctbls:
-        val_d = {'value': val, **table_info(ctbl)}
+        val_d = {'val': val, **table_info(ctbl)}
         for func in funcs:
             try:
                 res = func(ctbl)
@@ -59,7 +59,7 @@ def analyze_contingency_tables(
         ld.append(val_d)
     df = pd.DataFrame(ld)
     if len(df):
-        df = df.set_index('value')
+        df = df.set_index('val')
         if signif and p_col:
             df = df[df[p_col] <= min_p]
     df = df.rename_axis(index_name)
@@ -146,15 +146,16 @@ def table_info(ctbl):
     perc2 = count2 / support2 * 100 if support2 else np.nan
     perc_diff = perc2 - perc1
     return {
-        'count_sum': count1 + count2,
-        'count_min': min([count1, count2]),
+        # 'count_sum': count1 + count2,
+        # 'count_min': min([count1, count2]),
         'count_L': count1,
         'count_R': count2,
+        'total_L': support1,
+        'total_R': support2,
+
         'perc_L': perc1,
         'perc_R': perc2,
         'perc_L->R': perc_diff,
-        'support_L': support1,
-        'support_R': support2,
     }
 
 
@@ -420,50 +421,33 @@ def filter_series_by_value_count(series, n):
 
 
 def iterate_comparisons(
-    fdL={}, fdR={}, groupby=None, cols=PREDICT_COLS, min_count=1, df=None
+    dfL: pd.DataFrame,
+    dfR: pd.DataFrame,
+    cols=PREDICT_COLS,
+    min_count=PREDICT_MIN_COUNT,
 ):
-    from .queries import filter_df
-
-    if fdL != fdR:
-        if df is None:
-            from .datasets import Combined
-
-            df = Combined().data
-
-        if cols is None:
-            cols = df.columns
-        fdL, fdR = make_filters_data_comparable(fdL, fdR)
-        qL, dfL = filter_df(df, fdL, groupby=groupby, return_query=True)
-        qR, dfR = filter_df(df, fdR, groupby=groupby, return_query=True)
-
-        dfL, dfR = dfL.applymap(make_hashable), dfR.applymap(make_hashable)
-        fdLj = json.dumps(fdL)
-        fdRj = json.dumps(fdR)
-        fdkeys = set(fdL.keys()) | set(fdR.keys())
-        for col in set(cols) - fdkeys:
-            # prefixes = sorted(list({k.split('_')[0].replace('arrond','arrond_id') for k in fdkeys|{col}}))
-            prefix = col.split('_')[0]
-            prefixes = COMPARISON_SCALES[prefix]
-            dfLx, dfRx = dfL.drop_duplicates(prefixes), dfR.drop_duplicates(
-                prefixes
-            )
-            odf = compare_series(
-                dfLx[col],
-                dfRx[col],
-                min_count=min_count,
-            )
-            if len(odf):
-                yield odf.assign(
-                    col=col,
-                    filter_L=fdLj,
-                    filter_R=fdRj,
-                    query_L=qL,
-                    query_R=qR,
-                    comparison_scale='-'.join(prefixes).replace('_id', ''),
-                ).set_index(['col', 'val'])
+    for col in cols:
+        # prefixes = sorted(list({k.split('_')[0].replace('arrond','arrond_id') for k in fdkeys|{col}}))
+        prefix = col.split('_')[0]
+        prefixes = COMPARISON_SCALES[prefix]
+        dfLx, dfRx = dfL.drop_duplicates(prefixes), dfR.drop_duplicates(
+            prefixes
+        )
+        s1 = dfLx[col]
+        s2 = dfRx[col]
+        odf = compare_series(
+            s1,
+            s2,
+            min_count=min_count,
+        )
+        if len(odf):
+            yield odf.assign(
+                col=col,
+                comparison_scale='-'.join(prefixes).replace('_id', ''),
+            ).set_index(['col', 'val'])
 
 
-def compare_series(s1, s2, min_count=1) -> pd.DataFrame:
+def compare_series(s1, s2, min_count=PREDICT_MIN_COUNT) -> pd.DataFrame:
     s1 = filter_series_by_value_count(
         no_null_series(flatten_series(s1)), min_count
     )
@@ -487,30 +471,52 @@ def postprocess_comparisons(iter_of_dfs: Iterable[pd.DataFrame]):
         lambda x: 1 / x if x < 1 else x
     )
     # alldf=alldf[~alldf.col_val.str.contains('\n')]
-    prefcols = [
-        'col',
-        'val',
-        'comparison_scale',
-        'odds_ratio',
-        'perc_L',
-        'perc_R',
-        'count_L',
-        'count_R',
-    ]
-    cols = prefcols + [c for c in alldf if c not in set(prefcols)]
-    alldf = alldf[cols].sort_values('fisher_exact', ascending=False)
+    # prefcols = [
+    #     'col',
+    #     'val',
+    #     'comparison_scale',
+    #     'odds_ratio',
+    #     'perc_L',
+    #     'perc_R',
+    #     'count_L',
+    #     'count_R',
+    # ]
+    # cols = prefcols + [c for c in alldf if c not in set(prefcols)]
+    alldf = alldf.sort_values('fisher_exact', ascending=False)
     # sigdf=alldf.query('fisher_exact_p<=0.05')
 
     return alldf   # (sigdf if only_signif else alldf).round(round)
 
 
 def generate_comparisons(
-    fdL={}, fdR={}, groupby=None, cols=PREDICT_COLS, min_count=1, df=None
+    fdL={}, fdR={}, groupby=None, cols=PREDICT_COLS, min_count=PREDICT_MIN_COUNT, df=None
 ):
-    return postprocess_comparisons(
-        iterate_comparisons(
-            fdL, fdR, groupby=groupby, cols=cols, min_count=min_count, df=df
-        )
+    from .imports import Combined, filter_df
+
+    if fdL == fdR:
+        return pd.DataFrame()
+    if df is None:
+        df = Combined().data
+    if cols is None:
+        cols = df.columns
+    fdL, fdR = make_filters_data_comparable(fdL, fdR)
+    qL, dfL = filter_df(df, fdL, groupby=groupby, return_query=True)
+    qR, dfR = filter_df(df, fdR, groupby=groupby, return_query=True)
+    dfL, dfR = dfL.applymap(make_hashable), dfR.applymap(make_hashable)
+    cols = set(cols) - (set(fdL.keys()) | set(fdR.keys()))
+    odf = postprocess_comparisons(
+        iterate_comparisons(dfL, dfR, cols=cols, min_count=min_count)
+    )
+    if min_count: 
+        odf=odf.query(f'(count_L>={min_count}) and (count_R>={min_count})')
+    return dict(
+        filter_L=fdL,
+        filter_R=fdR,
+        query_L=qL,
+        query_R=qR,
+        df_L=dfL,
+        df_R=dfR,
+        df_cmp=odf,
     )
 
 

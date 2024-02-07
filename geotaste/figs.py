@@ -184,6 +184,21 @@ class FigureFactory(DashFigureFactory):
 
         return format_query(self.filter_data, human=True)
 
+    @cached_property
+    def filter_query(self):
+        return format_query(self.filter_data, human=False)
+
+    def filter_query_cmp(self, other_ff):
+        """Filters the description based on the filter data.
+
+        Returns:
+            str: The filtered query string, in human-readable format.
+        """
+        fd_self, fd_other = make_filters_data_comparable(
+            self.filter_data, other_ff.filter_data
+        )
+        return format_query(fd_self, human=False)
+
     def get_unique_vals(self, sort_by_count=True, series_orig=True, **kwargs):
         """Return a pandas Series containing unique values from the specified series.
 
@@ -1099,7 +1114,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
         self,
         cols=PREDICT_COLS,
         min_count=PREDICT_MIN_COUNT,
-        groupby='member',
+        groupby=None,
         **kwargs,
     ) -> pd.DataFrame:
         """Compare the dataframes of two objects and return a dataframe of distinctive qualitative values. Overwrite any of these constants in ~/geotaste_data/config.json.
@@ -1113,7 +1128,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             pd.DataFrame: A dataframe of distinctive qualitative values.
         """
 
-        return generate_comparisons(
+        resd = generate_comparisons(
             self.L.filter_data,
             self.R.filter_data,
             cols=cols,
@@ -1121,6 +1136,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             df=self.data_orig,
             groupby=groupby,
         )
+        return resd['df_cmp']
 
         # return get_distinctive_qual_vals(self.L.data,
         #                                  self.R.data,
@@ -1170,7 +1186,6 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             return dbc.Container(
                 'Analysis failed, likely because one or both groups returns no data, or because both groups are identical.'
             )
-
         fig = None
         if 'arrond_id' in set(cols):
             fig = self.plot_oddsratio_map(odf)
@@ -1186,6 +1201,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                                 ')',
                             ]
                         ),
+                        html.P(self.L.filter_query_cmp(self.R)),
                         dcc.Markdown('\n'.join(desc_L)),
                     ],
                     className='left-color',
@@ -1199,6 +1215,7 @@ class ComparisonFigureFactory(CombinedFigureFactory):
                                 ')',
                             ]
                         ),
+                        html.P(self.R.filter_query_cmp(self.L)),
                         dcc.Markdown('\n'.join(desc_R)),
                     ],
                     className='right-color',

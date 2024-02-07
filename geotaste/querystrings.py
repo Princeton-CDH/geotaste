@@ -75,10 +75,15 @@ def format_query_pandas(
 
     # make sure input is listlike
     svals, is_neg = preprocess_for_possible_opening_negation(svals)
+
     fname = get_query_func(groupby, is_neg)
 
     if groupby:
         return f'@{fname}({groupby}, {sname}, {format_query_vals(svals)})'
+    elif len(svals) >= 3 and is_full_integer_range(svals):
+        svals.sort()
+        range_str = f'{svals[0]} <= {sname} < {svals[-1]}'
+        return f'{"~" if is_neg else ""}({range_str})'
     else:
         return f'@{fname}({sname}, {format_query_vals(svals)})'
 
