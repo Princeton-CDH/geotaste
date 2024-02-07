@@ -189,6 +189,12 @@ URLS=dict(
     geojson_arrond='https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/arrondissements/exports/geojson?lang=en&timezone=Europe%2FParis'
 )
 
+COMPARISON_SCALES = {
+    'book':['event'], #'book'],
+    'author':['event'],#['author','event'],
+    'member':['member'],
+    'arrond':['member','arrond_id']
+}
 
 
 LATLON_SCO = (
@@ -275,8 +281,9 @@ PATH_LOGO = os.path.join(PATH_ASSETS,os.path.basename(LOGO_SRC))
 
 
 from .utils import *
-from .queries import *
 from .statutils import *
+from .querystrings import *
+from .queries import *
 from .datasets import *
 from .figs import *
 from .components import *

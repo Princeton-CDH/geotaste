@@ -176,7 +176,7 @@ class FigureFactory(DashFigureFactory):
             str: The filtered query string, in human-readable format.
         """
 
-        return filter_query_str(self.filter_data, human=True)
+        return format_query(self.filter_data, human=True)
 
     def get_unique_vals(self, sort_by_count=True, series_orig=True, **kwargs):
         """Return a pandas Series containing unique values from the specified series.
@@ -1011,43 +1011,45 @@ class ComparisonFigureFactory(CombinedFigureFactory):
             color=RIGHT_COLOR) if type(ff2) in {dict, str} else ff2
 
     def compare(self,
-                maxcats=COMPARISON_MAXCATS,
-                cols=PREDICT_COLS,
-                only_signif=False,
-                round=4,
-                min_count=PREDICT_MIN_COUNT,
-                min_sum=PREDICT_MIN_SUM,
-                **kwargs) -> pd.DataFrame:
+            cols=PREDICT_COLS,
+            min_count=PREDICT_MIN_COUNT,
+            groupby='member',
+            **kwargs) -> pd.DataFrame:
         """Compare the dataframes of two objects and return a dataframe of distinctive qualitative values. Overwrite any of these constants in ~/geotaste_data/config.json.
         
         Args:
-            maxcats (int): The maximum number of categories to consider (i.e. how 'controlled' the vocabulary is). Defaults to COMPARISON_MAXCATS.
             cols (list): The columns to compare. Defaults to PREDICT_COLS.
-            only_signif (bool): Whether to return only statistically significant values. Defaults to False.
-            round (int): The number of decimal places to round the returned values. Defaults to 4.
             min_count (int): The minimum count of values to consider. Defaults to PREDICT_MIN_COUNT.
-            min_sum (int): The minimum sum of values to consider. Defaults to PREDICT_MIN_SUM.
             **kwargs: Additional keyword arguments.
         
         Returns:
             pd.DataFrame: A dataframe of distinctive qualitative values.
         """
 
-        return get_distinctive_qual_vals(self.L.data,
-                                         self.R.data,
-                                         maxcats=maxcats,
-                                         cols=cols,
-                                         only_signif=only_signif,
-                                         round=round,
-                                         min_count=min_count,
-                                         min_sum=min_sum,
-                                         drop_duplicates={
-                                             'member': ['member'],
-                                             'author': ['author', 'event'],
-                                             'book': ['book', 'event'],
-                                             'arrond_id':
-                                             ['arrond_id', 'member']
-                                         })
+        return generate_comparisons(
+            self.L.filter_data,
+            self.R.filter_data,
+            cols=cols,
+            min_count=min_count,
+            df=self.data_orig,
+            groupby=groupby
+        )
+
+        # return get_distinctive_qual_vals(self.L.data,
+        #                                  self.R.data,
+        #                                  maxcats=maxcats,
+        #                                  cols=cols,
+        #                                  only_signif=only_signif,
+        #                                  round=round,
+        #                                  min_count=min_count,
+        #                                  min_sum=min_sum,
+        #                                  drop_duplicates={
+        #                                      'member': ['member'],
+        #                                      'author': ['author', 'event'],
+        #                                      'book': ['book', 'event'],
+        #                                      'arrond_id':
+        #                                      ['arrond_id', 'member']
+        #                                  })
 
     def describe_comparison(self, comparison_df=None, **kwargs):
         """Describes the comparison between two dataframes.
@@ -1175,22 +1177,21 @@ class ComparisonFigureFactory(CombinedFigureFactory):
 
         figdf = comparison_df if comparison_df is not None else self.compare(
             **kwargs)
-        figdf = figdf.query('col=="arrond_id"')
+        figdf = figdf.query('col=="arrond_id"').reset_index()
         Lcolor = Color(RIGHT_COLOR)
         Rcolor = Color(LEFT_COLOR)
         midpoint = list(Lcolor.range_to(Rcolor, 3))[1]
         midpoint.set_luminance(.95)
-
         fig_choro = px.choropleth_mapbox(
             figdf,
             geojson=get_geojson_arrondissement(),
-            locations='col_val',
+            locations='val',
             color=col,
             center=MAP_CENTER,
             zoom=11,
             # hover_data=[],
             hover_data={
-                'col_val': False,
+                'val': False,
                 col: False
             },
             color_continuous_scale=[

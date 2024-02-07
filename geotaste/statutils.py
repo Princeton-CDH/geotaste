@@ -216,114 +216,114 @@ def get_dist_from_SCO(lat,lon):
 
 
 
-# @cache_obj.memoize()
-def get_distinctive_qual_vals(
-        dfL,
-        dfR,
-        maxcats=100,
-        cols=[
-            'member_title', 
-            'member_gender', 
-            'member_nationalities',
-            # 'event_type',
-            'creator_gender',
-            # 'creator_role',
-            'creator_nationalities',
-            'book_format',
-            'book_genre',
-            'arrond_id'
-        ],
-        only_signif=False,
-        round=4,
-        min_count=1,
-        min_sum=10,
-        drop_duplicates=[],
-        drop_empty=True
-        ):
-    """Calculates distinctive qualitative values between two dataframes.
+# # @cache_obj.memoize()
+# def get_distinctive_qual_vals(
+#         dfL,
+#         dfR,
+#         maxcats=100,
+#         cols=[
+#             'member_title', 
+#             'member_gender', 
+#             'member_nationalities',
+#             # 'event_type',
+#             'creator_gender',
+#             # 'creator_role',
+#             'creator_nationalities',
+#             'book_format',
+#             'book_genre',
+#             'arrond_id'
+#         ],
+#         only_signif=False,
+#         round=4,
+#         min_count=1,
+#         min_sum=10,
+#         drop_duplicates=[],
+#         drop_empty=True
+#         ):
+#     """Calculates distinctive qualitative values between two dataframes.
     
-    Args:
-        dfL (DataFrame): Left dataframe.
-        dfR (DataFrame): Right dataframe.
-        maxcats (int, optional): Maximum number of categories allowed for a column. Defaults to 100.
-        cols (list, optional): List of columns to analyze. Defaults to ['member_title', 'member_gender', 'member_nationalities', 'creator_gender', 'creator_nationalities', 'book_format', 'book_genre', 'arrond_id'].
-        only_signif (bool, optional): Flag to return only significant values. Defaults to False.
-        round (int, optional): Number of decimal places to round the results. Defaults to 4.
-        min_count (int, optional): Minimum count required for a value to be considered. Defaults to 1.
-        min_sum (int, optional): Minimum sum required for a value to be considered. Defaults to 10.
-        drop_duplicates (list or dict, optional): Columns to drop duplicates by. Defaults to [].
-        drop_empty (bool, optional): Flag to drop empty values. Defaults to True.
+#     Args:
+#         dfL (DataFrame): Left dataframe.
+#         dfR (DataFrame): Right dataframe.
+#         maxcats (int, optional): Maximum number of categories allowed for a column. Defaults to 100.
+#         cols (list, optional): List of columns to analyze. Defaults to ['member_title', 'member_gender', 'member_nationalities', 'creator_gender', 'creator_nationalities', 'book_format', 'book_genre', 'arrond_id'].
+#         only_signif (bool, optional): Flag to return only significant values. Defaults to False.
+#         round (int, optional): Number of decimal places to round the results. Defaults to 4.
+#         min_count (int, optional): Minimum count required for a value to be considered. Defaults to 1.
+#         min_sum (int, optional): Minimum sum required for a value to be considered. Defaults to 10.
+#         drop_duplicates (list or dict, optional): Columns to drop duplicates by. Defaults to [].
+#         drop_empty (bool, optional): Flag to drop empty values. Defaults to True.
     
-    Returns:
-        DataFrame: Distinctive qualitative values between the two dataframes.
+#     Returns:
+#         DataFrame: Distinctive qualitative values between the two dataframes.
     
-    Examples:
-        >>> dfL = pd.DataFrame({'col1': ['A', 'B', 'C'], 'col2': ['X', 'Y', 'Z']})
-        >>> dfR = pd.DataFrame({'col1': ['A', 'B', 'D'], 'col2': ['X', 'Y', 'W']})
-        >>> get_distinctive_qual_vals(dfL, dfR)
-           col col_val comparison_scale  odds_ratio  perc_L  perc_R  count_L  count_R
-        0  col1       C                    0.000000     0.0     0.0      0.0      0.0
-        1  col2       Z                    0.000000     0.0     0.0      0.0      0.0
-    """
+#     Examples:
+#         >>> dfL = pd.DataFrame({'col1': ['A', 'B', 'C'], 'col2': ['X', 'Y', 'Z']})
+#         >>> dfR = pd.DataFrame({'col1': ['A', 'B', 'D'], 'col2': ['X', 'Y', 'W']})
+#         >>> get_distinctive_qual_vals(dfL, dfR)
+#            col col_val comparison_scale  odds_ratio  perc_L  perc_R  count_L  count_R
+#         0  col1       C                    0.000000     0.0     0.0      0.0      0.0
+#         1  col2       Z                    0.000000     0.0     0.0      0.0      0.0
+#     """
     
         
-    o=[]
+#     o=[]
 
-    if drop_duplicates:
-        if is_listy(drop_duplicates) or type(drop_duplicates)==str:
-            dfL=dfL.drop_duplicates(drop_duplicates)
-            dfR=dfR.drop_duplicates(drop_duplicates)
+#     if drop_duplicates:
+#         if is_listy(drop_duplicates) or type(drop_duplicates)==str:
+#             dfL=dfL.drop_duplicates(drop_duplicates)
+#             dfR=dfR.drop_duplicates(drop_duplicates)
 
 
-    if cols is None: cols=list(set(dfL.columns) & set(dfR.columns))
+#     if cols is None: cols=list(set(dfL.columns) & set(dfR.columns))
     
-    for col in cols:
-        try:
-            colpref=col.split('_')[0]
-            if drop_duplicates and type(drop_duplicates)==dict:
-                if col in drop_duplicates: 
-                    dedupby=drop_duplicates[col] 
-                elif colpref in drop_duplicates:
-                    dedupby=drop_duplicates[colpref]
+#     for col in cols:
+#         try:
+#             colpref=col.split('_')[0]
+#             if drop_duplicates and type(drop_duplicates)==dict:
+#                 if col in drop_duplicates: 
+#                     dedupby=drop_duplicates[col] 
+#                 elif colpref in drop_duplicates:
+#                     dedupby=drop_duplicates[colpref]
                 
-                dfLnow = dfL.drop_duplicates(dedupby)
-                dfRnow = dfR.drop_duplicates(dedupby)
-            else:
-                dedupby = []
-                dfLnow = dfL
-                dfRnow = dfR
+#                 dfLnow = dfL.drop_duplicates(dedupby)
+#                 dfRnow = dfR.drop_duplicates(dedupby)
+#             else:
+#                 dedupby = []
+#                 dfLnow = dfL
+#                 dfRnow = dfR
                     
-            s1=qualquant_series(flatten_series(dfLnow[col]), quant=False, drop_empty=drop_empty)
-            s2=qualquant_series(flatten_series(dfRnow[col]), quant=False, drop_empty=drop_empty)
+#             s1=qualquant_series(flatten_series(dfLnow[col]), quant=False, drop_empty=drop_empty)
+#             s2=qualquant_series(flatten_series(dfRnow[col]), quant=False, drop_empty=drop_empty)
 
-            if maxcats and (s1.nunique()>maxcats or s2.nunique()>maxcats):
-                continue
+#             if maxcats and (s1.nunique()>maxcats or s2.nunique()>maxcats):
+#                 continue
 
-            coldf = analyze_contingency_tables(s1, s2)
-            coldf = coldf.query(
-                f'count_min>={min_count} & count_sum>={min_sum}'
-            ).assign(
-                col=col,
-                comparison_scale=' '.join(dedupby)
-            )
-            o.append(coldf)
-        except Exception as e:
-            logger.warning(e)
+#             coldf = analyze_contingency_tables(s1, s2)
+#             coldf = coldf.query(
+#                 f'count_min>={min_count} & count_sum>={min_sum}'
+#             ).assign(
+#                 col=col,
+#                 comparison_scale=' '.join(dedupby)
+#             )
+#             o.append(coldf)
+#         except Exception as e:
+#             logger.warning(e)
 
-    if not len(o): return pd.DataFrame()
+#     if not len(o): return pd.DataFrame()
 
-    alldf=pd.concat(o).rename_axis('col_val').reset_index()
-    alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
-    alldf=alldf[alldf.fisher_exact!=0] # both must have counts?
-    alldf['odds_ratio_log']=alldf['odds_ratio'].apply(np.log10)
-    alldf['odds_ratio_pos']=alldf['odds_ratio'].apply(lambda x: 1/x if x<1 else x)
-    alldf=alldf[~alldf.col_val.str.contains('\n')]
-    prefcols=['col','col_val','comparison_scale','odds_ratio','perc_L','perc_R','count_L','count_R']
-    cols = prefcols + [c for c in alldf if c not in set(prefcols)]
-    alldf=alldf[cols].sort_values('fisher_exact',ascending=False)
-    sigdf=alldf.query('fisher_exact_p<=0.05')
+#     alldf=pd.concat(o).rename_axis('col_val').reset_index()
+#     alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
+#     alldf=alldf[alldf.fisher_exact!=0] # both must have counts?
+#     alldf['odds_ratio_log']=alldf['odds_ratio'].apply(np.log10)
+#     alldf['odds_ratio_pos']=alldf['odds_ratio'].apply(lambda x: 1/x if x<1 else x)
+#     alldf=alldf[~alldf.col_val.str.contains('\n')]
+#     prefcols=['col','col_val','comparison_scale','odds_ratio','perc_L','perc_R','count_L','count_R']
+#     cols = prefcols + [c for c in alldf if c not in set(prefcols)]
+#     alldf=alldf[cols].sort_values('fisher_exact',ascending=False)
+#     sigdf=alldf.query('fisher_exact_p<=0.05')
 
-    return (sigdf if only_signif else alldf).round(round)
+#     return (sigdf if only_signif else alldf).round(round)
 
 
 
@@ -375,7 +375,7 @@ def describe_comparison(comparison_df, lim=10, min_fac=1.1):
              tR=cR/(pR/100)
              p=row.fisher_exact_p
              pstr='\*\*\*' if p<0.01 else ('\*\*' if p<0.05 else ('\*' if p<0.1 else ''))
-             colval=row.col_val.replace("[","\[").replace("]","\]")
+             colval=row.val.replace("[","\[").replace("]","\]")
              orow=f'''* *{row.odds_ratio_pos:.2f}x* likelier for {row.col.replace("_id","").replace("_"," ").title()} to be **{colval}** {pstr}
     * Group 1: {pL:.1f}% ({cL:.0f} of {tL:,.0f})
     * Group 2: {pR:.1f}% ({cR:.0f} of {tR:,.0f})
@@ -388,3 +388,116 @@ def describe_comparison(comparison_df, lim=10, min_fac=1.1):
 
     
     
+
+    
+
+def make_hashable(x):
+    if isinstance(x, (list, set)):
+        return tuple(make_hashable(item) for item in x)
+    elif isinstance(x, dict):
+        return tuple((make_hashable(key), make_hashable(value)) for key, value in x.items())
+    else:
+        return x
+
+def filter_series_by_value_count(series, n):
+    value_counts = series.value_counts()
+    filtered_series = series[series.isin(value_counts[value_counts >= n].index)]
+    return filtered_series
+
+
+def iterate_comparisons(
+        fdL={}, 
+        fdR={}, 
+        groupby=None,
+        cols=PREDICT_COLS, 
+        min_count=1,
+        df=None):
+    from .queries import filter_df
+    if fdL != fdR:
+        if df is None: 
+            from .datasets import Combined
+            df = Combined().data 
+        
+
+        if cols is None: cols = df.columns
+        fdL,fdR=make_filters_data_comparable(fdL,fdR)
+        qL,dfL = filter_df(df,fdL,groupby=groupby,return_query=True)
+        qR,dfR = filter_df(df,fdR,groupby=groupby,return_query=True)
+
+        dfL,dfR=dfL.applymap(make_hashable),dfR.applymap(make_hashable)
+        fdLj = json.dumps(fdL)
+        fdRj = json.dumps(fdR)
+        fdkeys=set(fdL.keys())|set(fdR.keys())
+        for col in set(cols)-fdkeys:
+            # prefixes = sorted(list({k.split('_')[0].replace('arrond','arrond_id') for k in fdkeys|{col}}))
+            prefix = col.split('_')[0]
+            prefixes = COMPARISON_SCALES[prefix]
+            dfLx,dfRx=dfL.drop_duplicates(prefixes),dfR.drop_duplicates(prefixes)
+            odf = compare_series(
+                dfLx[col], 
+                dfRx[col],
+                min_count=min_count, 
+            )
+            if len(odf):
+                yield odf.assign(
+                    col=col,
+                    filter_L=fdLj,
+                    filter_R=fdRj,
+                    query_L=qL,
+                    query_R=qR,
+                    comparison_scale='-'.join(prefixes).replace('_id','')
+                ).set_index(['col','val'])
+
+def compare_series(s1, s2, min_count=1) -> pd.DataFrame:
+    s1 = filter_series_by_value_count(no_null_series(flatten_series(s1)), min_count)
+    s2 = filter_series_by_value_count(no_null_series(flatten_series(s2)), min_count)
+    s1,s2=s1[s1.isin(s2)],s2[s2.isin(s1)]
+    return analyze_contingency_tables(
+        s1,
+        s2,
+        index_name='val'
+
+    ).reset_index()
+
+def postprocess_comparisons(iter_of_dfs:Iterable[pd.DataFrame]):
+    l = list(iter_of_dfs)
+    if not l: return pd.DataFrame()
+    
+    alldf = pd.concat(l).reset_index()
+    alldf=alldf.replace([np.inf, -np.inf], np.nan).dropna()
+    # alldf=alldf[alldf.fisher_exact!=0] # both must have counts?
+    alldf['odds_ratio_log']=alldf['odds_ratio'].apply(np.log10)
+    alldf['odds_ratio_pos']=alldf['odds_ratio'].apply(lambda x: 1/x if x<1 else x)
+    # alldf=alldf[~alldf.col_val.str.contains('\n')]
+    prefcols=['col','val','comparison_scale','odds_ratio','perc_L','perc_R','count_L','count_R']
+    cols = prefcols + [c for c in alldf if c not in set(prefcols)]
+    alldf=alldf[cols].sort_values('fisher_exact',ascending=False)
+    # sigdf=alldf.query('fisher_exact_p<=0.05')
+
+    return alldf #(sigdf if only_signif else alldf).round(round)
+
+
+def generate_comparisons(
+        fdL={}, 
+        fdR={}, 
+        groupby=None,
+        cols=PREDICT_COLS, 
+        min_count=1,
+        df=None):
+    return postprocess_comparisons(
+        iterate_comparisons(
+            fdL,
+            fdR,
+            groupby=groupby,
+            cols=cols,
+            min_count=min_count, 
+            df=df
+        )
+    )
+
+def make_filters_data_comparable(fd1,fd2):
+    keys_missing_from_1=set(fd2.keys()) - set(fd1.keys())
+    keys_missing_from_2=set(fd1.keys()) - set(fd2.keys())
+    fd1={**fd1, **{k:'*' for k in keys_missing_from_1}}
+    fd2={**fd2, **{k:'*' for k in keys_missing_from_2}}
+    return (fd1,fd2)
