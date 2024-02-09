@@ -1,6 +1,22 @@
 from .imports import *
 
 
+def is_not_null(x):
+    if x is None:
+        return False
+    if isinstance(x, Iterable):
+        return bool(len(x))
+    if isinstance(x, str):
+        return bool(x.strip())
+    if is_numeric(x):
+        return not np.isnan(x)
+    raise Exception('unhandled type')
+
+
+def is_null(x):
+    return not is_not_null(x)
+
+
 def hasone(x: list, y: list) -> bool:
     """Checks if there is at least one common element between two lists.
 
@@ -59,38 +75,21 @@ def to_set(x: object) -> set:
     Returns:
         A set containing the value `x` if `x` is not a list-like object, otherwise a set containing all the elements of `x`.
     """
-    return {x} if not is_listy(x) else set(flatten_list(x))
+    if type(x) is set:
+        return x
+    if is_not_null(x):
+        return {x} if not is_listy(x) else set(flatten_list(x))
+    else:
+        return set()
 
 
-# def is_negation(number_or_str):
-#     # if isinstance(number_or_str,Number):
-#     #     return number_or_str<0
-#     # else:
-#     #     return number_or_str.startswith('-')
-
-# def de_negate(number_or_str):
-#     if is_negation(number_or_str):
-#         return number_or_str*-1 if isinstance(number_or_str,Number) else number_or_str[1:]
-#     else:
-#         return number_or_str
-
-
-def overlaps(series: pd.Series, vals: list) -> pd.Series:
-    """Checks if any element in the given series overlaps with the values in
-    the given list.
-
-    Args:
-        series (pandas.Series): The series to check for overlaps.
-        vals (list): The list of values to check for overlaps with the series.
-
-    Returns:
-        pandas.Series: A boolean series indicating if each element in the series overlaps with any value in the list.
-    """
-    if not vals: return series
-    vals_set = to_set(vals)
-    series_set = series.apply(to_set)
-    res = series_set.apply(lambda xset: bool(xset & vals_set))
-    return res
+def to_list(x: object) -> set:
+    if type(x) is list:
+        return x
+    if is_not_null(x):
+        return [x] if not is_listy(x) else flatten_list(list(x))
+    else:
+        return []
 
 
 def is_numeric(x: object) -> bool:
@@ -125,30 +124,39 @@ def ensure_int(x: Number, return_orig=True, default=None) -> int:
     try:
         return int(x)
     except (ValueError, TypeError):
-        return (x if return_orig else default)
+        return x if return_orig else default
 
+def ensure_intfloat(x, return_orig=True, default=None):
+    try:
+        f=float(x)
+        i=int(f)
+        return i if i==f else f
+    except (ValueError, TypeError):
+        return x if return_orig else default
 
 def ensure_dict(x: object) -> dict:
     """Ensures that the input is a dictionary.
 
     Args:
         x (object): The input object to be checked.
-    
+
     Returns:
         dict: The input object as a dictionary, or an empty dictionary if the input is None.
-    
+
     Examples:
         >>> ensure_dict(None)
         {}
-        
+
         >>> ensure_dict({'a': 1, 'b': 2})
         {'a': 1, 'b': 2}
-        
+
         >>> ensure_dict([('a', 1), ('b', 2)])
         {'a': 1, 'b': 2}
     """
-    if x is None: return {}
-    if type(x) is dict: return x
+    if x is None:
+        return {}
+    if type(x) is dict:
+        return x
     return dict(x)
 
 
@@ -184,17 +192,17 @@ def flatten_list(s: Iterable) -> list:
 
     Args:
         s (Iterable): The input iterable containing nested lists.
-    
+
     Returns:
         list: A flattened list containing all elements from the input iterable.
-    
+
     Examples:
         >>> flatten_list([1, 2, [3, 4], [5, [6, 7]]])
         [1, 2, 3, 4, 5, 6, 7]
-    
+
         >>> flatten_list([[1, 2], [3, 4], [5, 6]])
         [1, 2, 3, 4, 5, 6]
-    
+
         >>> flatten_list([1, [2, [3, [4, [5]]]]])
         [1, 2, 3, 4, 5]
     """
@@ -213,10 +221,10 @@ def flatten_series(s: pd.Series) -> pd.Series:
 
     Args:
         s (pd.Series): The pandas Series object to be flattened.
-    
+
     Returns:
         pd.Series: The flattened pandas Series object.
-    
+
     Example:
         >>> s = pd.Series([1, [2, 3], 4])
         >>> flatten_series(s)
@@ -243,15 +251,15 @@ def make_counts_df(series: pd.Series) -> pd.Series:
     containing the counts of each unique value in the Series.
 
     Parameters:
-    - series (pandas Series): 
+    - series (pandas Series):
         The input Series containing the values to be counted.
-    
+
     Returns:
-    - counts_df (pandas DataFrame): 
-        A DataFrame with two columns - `series.name` and 'count'. 
+    - counts_df (pandas DataFrame):
+        A DataFrame with two columns - `series.name` and 'count'.
         The `series.name` column contains the unique values from the input Series and bears its name,
         and the 'count' column contains the corresponding counts.
-    
+
     Example:
     >>> series = pd.Series(['apple', 'banana', 'apple', 'orange', 'banana'], name='fruits')
     >>> make_counts_df(series)
@@ -261,8 +269,8 @@ def make_counts_df(series: pd.Series) -> pd.Series:
     2   orange            1
     """
     return pd.DataFrame(
-        pd.Series(flatten_list(series),
-                  name=series.name).value_counts()).reset_index()
+        pd.Series(flatten_list(series), name=series.name).value_counts()
+    ).reset_index()
 
 
 def ordinal_str(n: int) -> str:
@@ -288,8 +296,8 @@ def force_int(x, errors=0) -> int:
 
 def combine_LR_df(dfL, dfR, colname='L_or_R', colval_L='L', colval_R='R'):
     return pd.concat(
-        [dfL.assign(**{colname: colval_L}),
-         dfR.assign(**{colname: colval_R})])
+        [dfL.assign(**{colname: colval_L}), dfR.assign(**{colname: colval_R})]
+    )
 
 
 # def combine_LR_df_1(dfL, dfR, colname = 'L_or_R', colval_L='L', colval_R='R', colval_LR='LR'):
@@ -383,10 +391,10 @@ def selectrename_df(df: pd.DataFrame, col2col: dict = {}) -> pd.DataFrame:
     Args:
         df (pandas.DataFrame): The DataFrame to select and rename columns from.
         col2col (dict): A dictionary mapping old column names to new column names. The keys of the dictionary are the old column names, and the values are the new column names.
-    
+
     Returns:
         pandas.DataFrame: A new DataFrame with selected and renamed columns.
-    
+
     Example:
         >>> df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6], 'C': [7, 8, 9]})
         >>> col2col = {'A': 'X', 'B': 'Y'}
@@ -395,7 +403,7 @@ def selectrename_df(df: pd.DataFrame, col2col: dict = {}) -> pd.DataFrame:
         0  1  4
         1  2  5
         2  3  6
-    
+
     Note:
         - If a column in col2col is not present in the DataFrame, it will be ignored.
         - If a column in col2col is present in the DataFrame but not specified in col2col, it will be dropped from the resulting DataFrame.
@@ -404,12 +412,19 @@ def selectrename_df(df: pd.DataFrame, col2col: dict = {}) -> pd.DataFrame:
     return df[c2c.keys()].rename(columns=c2c)
 
 
-def is_numeric_ish(x: str):
-    try:
-        float(x)
+def is_numeric_ish(val):
+    """
+    Checks if the value is numeric (int, float, or a string that represents a number).
+    """
+    if isinstance(val, (int, float, complex)):
         return True
-    except (TypeError, ValueError):
-        return False
+    if isinstance(val, str):
+        try:
+            float(val)  # Attempt to convert the string to a float
+            return True
+        except ValueError:
+            return False
+    return False
 
 
 def is_quant_series(series, ish=False):
@@ -434,10 +449,12 @@ def qualquant_series(series, quant=False, drop_na=False, drop_empty=False):
     series = pd.Series(series) if type(series) != pd.Series else series
     if quant is True:
         series = pd.to_numeric(series, errors='coerce')
-        if drop_na: series = series.dropna()
+        if drop_na:
+            series = series.dropna()
     elif quant is False:
         series = series.fillna('').apply(str)
-        if drop_empty: series = series[series != '']
+        if drop_empty:
+            series = series[series != '']
     return series
 
 
@@ -446,10 +463,10 @@ def uid(length=10):
 
     Args:
         length (int, optional): The length of the UID to be generated. Defaults to 10.
-    
+
     Returns:
         str: A randomly generated unique identifier of the specified length.
-    
+
     Example:
         >>> uid()
         '2bXw7n3e9R'
@@ -457,6 +474,7 @@ def uid(length=10):
         '1A7b9C5d'
     """
     import shortuuid
+
     return str(shortuuid.ShortUUID().random(length=length))
 
 
@@ -481,10 +499,10 @@ class Logwatch:
     @property
     def tdesc(self):
         """Returns the formatted timespan of the duration.
-        
+
         Returns:
             str: The formatted timespan of the duration.
-        
+
         Examples:
             >>> t = tdesc(self)
             >>> print(t)
@@ -495,7 +513,7 @@ class Logwatch:
     @property
     def duration(self):
         """Calculates the duration of an event.
-        
+
         Returns:
             float: The duration of the event in seconds.
         """
@@ -504,26 +522,30 @@ class Logwatch:
     @property
     def desc(self):
         """Returns a description of the task.
-        
+
         If the task has both a start time and an end time, it returns a string
         indicating the task name and the time it took to complete the task.
-        
+
         If the task is currently running, it returns a string indicating that
         the task is still running.
-        
+
         Returns:
             str: A description of the task.
         """
         if self.started is not None and self.ended is not None:
             return f'{self.task_name} ... {self.tdesc}'
         else:
-            return f'Task running ...' if not self.task_name else f'{self.task_name} ...'
+            return (
+                f'Task running ...'
+                if not self.task_name
+                else f'{self.task_name} ...'
+            )
 
     def __enter__(self):
         """Context manager method that is called when entering a 'with' statement.
-        
+
         This method logs the description of the context manager and starts the timer.
-        
+
         Examples:
             with Logwatch():
                 # code to be executed within the context manager
@@ -542,13 +564,13 @@ class Logwatch:
 
 def is_range_of_ints(numbers: 'Iterable') -> bool:
     """Check if the given numbers form a range of integers.
-    
+
     Args:
         numbers (Iterable): A collection of numbers.
-    
+
     Returns:
         bool: True if the numbers form a range of integers, False otherwise.
-    
+
     Examples:
         >>> is_range_of_ints([1, 2, 3, 4, 5])
         True
@@ -559,10 +581,13 @@ def is_range_of_ints(numbers: 'Iterable') -> bool:
     """
 
     l = numbers
-    if not is_listy(l): return False
-    if len(l) < 2: return False
+    if not is_listy(l):
+        return False
+    if len(l) < 2:
+        return False
     try:
-        if any(x != int(x) for x in l): return False
+        if any(x != int(x) for x in l):
+            return False
     except ValueError:
         return False
     l = list(sorted(int(x) for x in l))
@@ -571,13 +596,13 @@ def is_range_of_ints(numbers: 'Iterable') -> bool:
 
 def delist_df(df: pd.DataFrame, sep: str = ' ', human=True) -> pd.DataFrame:
     """
-    Takes a pandas DataFrame (df), iterates through each column, 
-    and applies the function fix to each value in each column. The function 
-    fix turns list-like objects into strings, rounds numeric objects to 
-    two decimal places, and leaves all other types of objects unchanged. 
+    Takes a pandas DataFrame (df), iterates through each column,
+    and applies the function fix to each value in each column. The function
+    fix turns list-like objects into strings, rounds numeric objects to
+    two decimal places, and leaves all other types of objects unchanged.
 
     If an item in a column is a list-like object, it joins the items in the list
-    into a string, separated by the provided separator (default is a space). If an 
+    into a string, separated by the provided separator (default is a space). If an
     item is a numeric value, it rounds the number to two decimal places.
     The function returns a new DataFrame. The original DataFrame remains unchanged.
 
@@ -591,12 +616,12 @@ def delist_df(df: pd.DataFrame, sep: str = ' ', human=True) -> pd.DataFrame:
     """
 
     def fix(y):
-        if is_listy(y): 
+        if is_listy(y):
             if human:
                 return delistify(y)
             else:
                 return sep.join(str(x) for x in y)
-        elif is_numeric(y): 
+        elif is_numeric(y):
             return round(y, 2)
         else:
             return y
@@ -609,12 +634,12 @@ def delist_df(df: pd.DataFrame, sep: str = ' ', human=True) -> pd.DataFrame:
 
 def oxfordcomma(l, repr=repr, op='and'):
     """Join a list of elements with an Oxford comma.
-    
+
     Args:
         l (list): The list of elements to join.
         repr (function, optional): The function used to represent each element as a string. Defaults to repr.
         op (str, optional): The conjunction used before the last element. Defaults to 'and'.
-    
+
     Returns:
         str: The joined string with an Oxford comma.
     """
@@ -654,8 +679,11 @@ def postproc_df(
         return l
 
     for c in cols_sep:
-        df[c] = df[c].fillna('').apply(
-            lambda x: split_sep_col(x, c in cols_qset, sep))
+        df[c] = (
+            df[c]
+            .fillna('')
+            .apply(lambda x: split_sep_col(x, c in cols_qset, sep))
+        )
 
     # rename?
     if cols:
@@ -695,7 +723,8 @@ def date_fuzzily_follows(x, y):
 
 
 def is_fuzzy_date_seq(x, y, z):
-    if any(not _ for _ in [x, y, z]): return False
+    if any(not _ for _ in [x, y, z]):
+        return False
 
     x, y, z = get_date_cmp(x, y, z)
     return x <= y <= z
@@ -712,7 +741,8 @@ def ensure_dir(fn):
 
 
 def rejoin_sep(listy_obj, sep=','):
-    if not is_listy(listy_obj): return listy_obj
+    if not is_listy(listy_obj):
+        return listy_obj
     o = sep.join(str(x) for x in listy_obj if x)
     while o.startswith('~,'):
         o = '~' + o[2:]
@@ -721,10 +751,10 @@ def rejoin_sep(listy_obj, sep=','):
 
 def compressed_bytes(obj):
     """Compresses the given object into a base64 encoded string.
-    
+
     Args:
         obj: The object to be compressed.
-    
+
     Returns:
         str: The base64 encoded string representing the compressed object.
     """
@@ -736,7 +766,8 @@ def compressed_bytes(obj):
 
 
 def uncompressed_bytes(ojson_bz64):
-    if type(ojson_bz64) == str: ojson_bz64 = ojson_bz64.encode()
+    if type(ojson_bz64) == str:
+        ojson_bz64 = ojson_bz64.encode()
     ojson_bz = b64decode(ojson_bz64)
     ojson_b = zlib.decompress(ojson_bz)
     ojson = orjson.loads(ojson_b)
@@ -745,13 +776,13 @@ def uncompressed_bytes(ojson_bz64):
 
 def compressed_str(obj):
     """Return a compressed string representation of the given object.
-    
+
     Args:
         obj: The object to be compressed.
-    
+
     Returns:
         str: The compressed string representation of the object.
-    
+
     Note:
         This function internally uses the `compressed_bytes` function to compress the object and then decodes the compressed bytes using 'utf-8' encoding.
     """
@@ -765,14 +796,14 @@ def uncompressed_str(x):
 
 def compress_to(obj, fn):
     """Compresses the given object and writes the compressed bytes to a file.
-    
+
     Args:
         obj: The object to be compressed.
         fn: The filename of the file to write the compressed bytes to.
-    
+
     Returns:
         None
-    
+
     Raises:
         IOError: If there is an error while writing to the file.
     """
@@ -788,38 +819,100 @@ def uncompress_from(fn):
 
 def get_query_params(qstr: str) -> dict:
     """Returns a dictionary of query parameters from the given query string.
-    
+
     Args:
         qstr (str): The query string containing the parameters.
-    
+
     Returns:
         dict: A dictionary containing the query parameters.
-    
+
     Example:
         >>> get_query_params('?name=John&age=25')
         {'name': 'John', 'age': '25'}
     """
     from urllib.parse import parse_qs
-    if not qstr: return {}
-    if qstr.startswith('?'): qstr = qstr[1:]
-    if not qstr: return {}
+
+    if not qstr:
+        return {}
+    if qstr.startswith('?'):
+        qstr = qstr[1:]
+    if not qstr:
+        return {}
     params = parse_qs(qstr)
     return dict(params) if params else {}
-
-
 
 
 def delistify(input_list, sep=', '):
     if not is_listy(input_list):
         return str(input_list)
-    elif len(input_list)==0:
-        return ""
-    elif len(input_list)==1:
+    elif len(input_list) == 0:
+        return ''
+    elif len(input_list) == 1:
         return input_list[0]
     else:
         try:
             sorted_list = sorted(int(item) for item in input_list)
-            a,b = sorted_list[0], sorted_list[-1]
+            a, b = sorted_list[0], sorted_list[-1]
             return f'{a} to {b}'
         except ValueError:
             return sep.join(sorted(str(x) for x in input_list))
+
+
+def is_full_integer_range(svals):
+    """
+    Checks if the list consists of integers and represents a full range from min to max.
+    """
+    try:
+        l = sorted(int(x) for x in svals)
+        minx, maxx = min(l), max(l)
+        intrange = list(range(minx, maxx + 1))
+        return l == intrange
+    except ValueError:
+        return False
+
+
+def flatten_to_set(lst):
+    result = set()
+    for item in lst:
+        if is_listy(item):
+            result.update(flatten_list(item))
+        else:
+            result.add(item)
+    return result
+
+
+def no_null_series(series):
+    return series[series.apply(is_not_null)]
+
+
+def humancol(col):
+    if not '_' in col:
+        return col
+    a, b = col.split('_', 1)
+    b = b.title() if b != 'dob' else 'DOB'
+    if b == 'Membership':
+        return b
+    return a.title() + ' ' + b
+
+
+
+def remove_outliers(series, factor=1.5):
+    """
+    Remove outliers from a pandas Series based on the IQR method.
+    
+    Parameters:
+    - series: pandas.Series, the Series from which to remove outliers.
+    
+    Returns:
+    - pandas.Series: A new Series with outliers removed.
+    """
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    # Define the criteria for non-outliers
+    criteria = (series >= (Q1 - factor * IQR)) & (series <= (Q3 + factor * IQR))
+    
+    # Filter the series based on the criteria
+    filtered_series = series[criteria]
+    
+    return filtered_series

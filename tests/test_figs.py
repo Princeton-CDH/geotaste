@@ -1,11 +1,12 @@
-import sys,os,tempfile
-sys.path.insert(0,os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+import sys, os, tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 # code
 from geotaste.imports import *
 from pandas.testing import assert_frame_equal, assert_series_equal
 from pprint import pprint
 
-all_figs = [v for k,v in globals().items() if k.endswith('Figure')]
+all_figs = [v for k, v in globals().items() if k.endswith('Figure')]
 
 
 def test_FigureFactory():
@@ -13,19 +14,23 @@ def test_FigureFactory():
     with tempfile.TemporaryDirectory() as tdir:
         numrows = 1000
         df = pd.DataFrame(
-            {'a':random.random(), 'b':random.random(), 'c':random.random(), 'key':'Record Key' if random.random()>.75 else 'Second Key'}
+            {
+                'a': random.random(),
+                'b': random.random(),
+                'c': random.random(),
+                'key': 'Record Key'
+                if random.random() > 0.75
+                else 'Second Key',
+            }
             for n in range(numrows)
         )
-        ofn=os.path.join(tdir,'data.csv')
+        ofn = os.path.join(tdir, 'data.csv')
         df.to_csv(ofn, index=False)
-    
+
         class DatasetTemp(Dataset):
             path = ofn
 
-        ff = FigureFactory(
-            key='key',
-            dataset_class=DatasetTemp
-        )
+        ff = FigureFactory(key='key', dataset_class=DatasetTemp)
 
         # Test instance creation and default property values
         assert ff.key == 'key'
@@ -39,26 +44,34 @@ def test_FigureFactory():
         assert len(ff.get_unique_vals()) == 2
         assert ff.get_unique_vals(sort_by_count=True).iloc[0] == 'Second Key'
         assert ff.get_unique_vals(sort_by_count=False).iloc[0] == 'Record Key'
-        assert list(ff.get_unique_vals(series_orig=True)) == list(ff.get_unique_vals(series_orig=False))  # no filtring yet
+        assert list(ff.get_unique_vals(series_orig=True)) == list(
+            ff.get_unique_vals(series_orig=False)
+        )  # no filtring yet
         assert ff.minval == 'Record Key'
         assert ff.maxval == 'Second Key'
         assert np.isnan(ff.minval_q)
         assert np.isnan(ff.maxval_q)
         assert len(ff.df_selections) == 0
-        
+
         # Test the has_selected method
         assert not len(ff.selection_data.get(ff.key))
         assert ff.has_selected() == False
-        assert ff.get_selected() == {ff.key: []} or ff.get_selected() == {ff.key: {}}
+        assert ff.get_selected() == {ff.key: []} or ff.get_selected() == {
+            ff.key: {}
+        }
         assert not ff.plot().data[0]['selectedpoints']
 
         # test selections
-        ff = FigureFactory(key='key', selected=['Record Key'], dataset_class=DatasetTemp)
+        ff = FigureFactory(
+            key='key', selected=['Record Key'], dataset_class=DatasetTemp
+        )
         assert len(ff.selection_data.get(ff.key))
         assert len(ff.selected_indices)
         assert len(ff.df_selections)
         assert ff.has_selected() == True
-        assert ff.get_selected({'points': [{'label': 'A'}, {'label': 'B'}]}) == {ff.key: ['A','B']}
+        assert ff.get_selected(
+            {'points': [{'label': 'A'}, {'label': 'B'}]}
+        ) == {ff.key: ['A', 'B']}
         assert ff.filter_desc == ''
         assert not ff.filtered
         assert ff.plot().data[0]['selectedpoints']
@@ -66,65 +79,74 @@ def test_FigureFactory():
         print(ff.plot().data)
 
         # test filtering
-        ff=FigureFactory(filter_data={'key':'Second Key'}, key='key', dataset_class=DatasetTemp)
+        ff = FigureFactory(
+            filter_data={'key': 'Second Key'},
+            key='key',
+            dataset_class=DatasetTemp,
+        )
         assert ff.filtered
         assert len(ff.filter_data)
         assert 'Second Key' in ff.filter_desc
         assert len(ff.data) < numrows
         assert all(np.isnan(x) for x in ff.get_series(quant=True))
         assert all(np.isnan(x) for x in ff.series_all_q)
-        assert set(ff.get_series(quant=False, df=ff.data_orig).unique()) == {'Record Key', 'Second Key'}
+        assert set(ff.get_series(quant=False, df=ff.data_orig).unique()) == {
+            'Record Key',
+            'Second Key',
+        }
         assert set(ff.series_orig.unique()) == {'Record Key', 'Second Key'}
-        assert set(ff.get_series(quant=False, df=ff.data).unique()) == {'Second Key'}
+        assert set(ff.get_series(quant=False, df=ff.data).unique()) == {
+            'Second Key'
+        }
         assert set(ff.get_series(quant=False).unique()) == {'Second Key'}
         assert set(ff.series.unique()) == {'Second Key'}
-        s=ff.get_series(df=pd.DataFrame())
+        s = ff.get_series(df=pd.DataFrame())
         assert s.name == ff.key
         assert len(s) == 0
-        
-
 
         # test other
         ff = FigureFactory(key='key', dataset_class=DatasetTemp)
         assert not any(np.isnan(x) for x in ff.df_counts['count'])
-        fig=ff.plot()
+        fig = ff.plot()
         assert len(fig.data[0]['x'])
         assert len(fig.data[0]['y'])
 
-        tbl=ff.table(cols=['a','b','c','key'])
+        tbl = ff.table(cols=['a', 'b', 'c', 'key'])
         assert isinstance(tbl, dash_table.DataTable)
         assert len(tbl.data)
         assert len(tbl.columns)
 
+
 def test_all_figs():
-    fdata={'member_gender':['Male','Female']}
+    fdata = {'member_gender': ['Male', 'Female']}
     for fig_class in all_figs:
-        ff=fig_class(fdata)
+        ff = fig_class(fdata)
         assert ff.filter_data == fdata
         assert len(ff.data) < len(ff.data_orig)
         if ff.drop_duplicates:
-            assert len(ff.data.drop_duplicates(ff.drop_duplicates)) == len(ff.data)
+            assert len(ff.data.drop_duplicates(ff.drop_duplicates)) == len(
+                ff.data
+            )
         if ff.key:
-            fig=ff.plot()
-            figdat=fig.data[0]
+            fig = ff.plot()
+            figdat = fig.data[0]
             assert len(figdat['x'])
             assert len(figdat['y'])
 
 
 def test_LandmarksFigureFactory():
-    ff=LandmarksFigureFactory()
+    ff = LandmarksFigureFactory()
     assert_frame_equal(ff.data, LandmarksDataset().data)
-    fig=ff.plot_map()
+    fig = ff.plot_map()
     assert fig.zoom == DEFAULT_STATE['zoom']
-    d=fig.to_plotly_json()
-    assert type(d)==dict and d
+    d = fig.to_plotly_json()
+    assert type(d) == dict and d
 
-    fig=ff.plot_map_mapbox()
-    figdat=fig.data[0]
+    fig = ff.plot_map_mapbox()
+    figdat = fig.data[0]
     assert len(figdat['lat'])
     assert len(figdat['lon'])
     assert len(figdat['text'])
-
 
 
 def assert_frame_not_equal(*args, **kwargs):
@@ -138,74 +160,79 @@ def assert_frame_not_equal(*args, **kwargs):
         raise AssertionError
 
 
-
 def test_CombinedFigureFactory():
-    ff=CombinedFigureFactory()
+    ff = CombinedFigureFactory()
     assert_frame_equal(ff.data, ff.data_orig)
     assert_frame_equal(ff.data_orig, Combined().data)
 
-    assert_frame_equal(ff.df_dwellings.reset_index().drop_duplicates('dwelling'), ff.df_dwellings.reset_index())
-    assert_frame_equal(ff.df_members.reset_index().drop_duplicates('member'), ff.df_members.reset_index())
-
+    assert_frame_equal(
+        ff.df_dwellings.reset_index().drop_duplicates('dwelling'),
+        ff.df_dwellings.reset_index(),
+    )
+    assert_frame_equal(
+        ff.df_members.reset_index().drop_duplicates('member'),
+        ff.df_members.reset_index(),
+    )
 
     assert not ff.book_filters_exist
     assert not ff.filtered
 
     assert {d['id'] for d in ff.table().columns} == set(ff.cols_table_members)
 
-    fd={'book_genre':['Fiction']}
-    ff=CombinedFigureFactory(fd)
+    fd = {'book_genre': ['Fiction']}
+    ff = CombinedFigureFactory(fd)
     assert ff.book_filters_exist
     assert ff.filtered
-    assert ff.filter_data==fd
-    assert len(ff.data)<len(ff.data_orig)
+    assert ff.filter_data == fd
+    assert len(ff.data) < len(ff.data_orig)
     assert_frame_equal(ff.data_orig, Combined().data)
     assert_frame_not_equal(ff.data, ff.data_orig)
     assert not any({'Fiction' not in x for x in ff.data.book_genre})
-    fig=ff.plot_map(return_markers=False)
+    fig = ff.plot_map(return_markers=False)
     assert fig.zoom == DEFAULT_STATE['zoom']
-    d=fig.to_plotly_json()
-    assert type(d)==dict and d
-    markers=ff.plot_map(return_markers=True)
-    assert type(markers)==list and markers
+    d = fig.to_plotly_json()
+    assert type(d) == dict and d
+    markers = ff.plot_map(return_markers=True)
+    assert type(markers) == list and markers
 
-    fig=ff.plot_map_mapbox()
-    figdat=fig.data[0]
+    fig = ff.plot_map_mapbox()
+    figdat = fig.data[0]
     assert len(figdat['lat'])
     assert len(figdat['lon'])
     assert len(figdat['text'])
 
+
 def test_ComparisonFigureFactory():
     # test case 1: empty
-    ff=ComparisonFigureFactory()
+    ff = ComparisonFigureFactory()
     assert isinstance(ff.L, CombinedFigureFactory)
     assert isinstance(ff.R, CombinedFigureFactory)
     assert not ff.L.filtered
     assert not ff.R.filtered
-    odf=ff.compare()
+    odf = ff.compare()
     assert set(odf.odds_ratio.unique()) == {1.0}
     assert set(odf.fisher_exact_p.unique()) == {1.0}
-    desc_L,desc_R=ff.describe_comparison(odf)
+    desc_L, desc_R = ff.describe_comparison(odf)
     assert not desc_L
     assert not desc_R
-    fig=ff.plot_oddsratio_map()
-    figdat=json.loads(fig.data[0].to_json())
-    laydat=json.loads(fig.layout.to_json())
+    fig = ff.plot_oddsratio_map()
+    figdat = json.loads(fig.data[0].to_json())
+    laydat = json.loads(fig.layout.to_json())
     assert len(figdat['geojson']['features'])
-    assert not laydat.get('mapbox',{}).get('layers',{}) # only landmarks
-
-
+    assert not laydat.get('mapbox', {}).get('layers', {})   # only landmarks
 
     # test case 2: filtered
-    ff=ComparisonFigureFactory(
-        {'member_nationalities':['France']},
-        {'member_nationalities':['United States']}
+    ff = ComparisonFigureFactory(
+        {'member_nationalities': ['France']},
+        {'member_nationalities': ['United States']},
     )
     # test case 2: filtered
-    ff2=ComparisonFigureFactory([
-        {'member_nationalities':['France']},
-        {'member_nationalities':['United States']}
-    ])
+    ff2 = ComparisonFigureFactory(
+        [
+            {'member_nationalities': ['France']},
+            {'member_nationalities': ['United States']},
+        ]
+    )
     assert ff.L.filter_data == ff2.L.filter_data
     assert ff.R.filter_data == ff2.R.filter_data
     assert len(ff.L.data)
@@ -214,57 +241,64 @@ def test_ComparisonFigureFactory():
     assert isinstance(ff.R, CombinedFigureFactory)
     assert ff.L.filtered
     assert ff.R.filtered
-    odf=ff.compare()
+    odf = ff.compare()
     assert set(odf.odds_ratio.unique()) != {1.0}
     assert set(odf.fisher_exact_p.unique()) != {1.0}
-    desc_L,desc_R=ff.describe_comparison(odf)
+    desc_L, desc_R = ff.describe_comparison(odf)
     assert desc_L
     assert desc_R
-    fig=ff.plot_oddsratio_map()
-    figdat=json.loads(fig.data[0].to_json())
-    laydat=json.loads(fig.layout.to_json())
+    fig = ff.plot_oddsratio_map()
+    figdat = json.loads(fig.data[0].to_json())
+    laydat = json.loads(fig.layout.to_json())
     assert len(figdat['geojson']['features'])
-    assert not laydat.get('mapbox',{}).get('layers',{}) # only landmarks
-    ff3=ComparisonFigureFactory(
-        {'member_nationalities':['X']},
-        {'member_nationalities':['X']}
+    assert not laydat.get('mapbox', {}).get('layers', {})   # only landmarks
+    ff3 = ComparisonFigureFactory(
+        {'member_nationalities': ['X']}, {'member_nationalities': ['X']}
     )
-    res=ff3.table()
+    res = ff3.table()
     assert 'failed' in res.children
 
-    assert len(ff.df_dwellings) == len(ff.L.df_dwellings) + len(ff.R.df_dwellings)
+    assert len(ff.df_dwellings) == len(ff.L.df_dwellings) + len(
+        ff.R.df_dwellings
+    )
     assert len(ff.df_members) == len(ff.L.df_members) + len(ff.R.df_members)
 
 
 def test_get_dash_table():
-    df=pd.DataFrame([
-        {'a':random.random(), 'b':random.random(), 'i':i}
-        for i in range(100)
-    ])
-    dtbl=get_dash_table(df)
+    df = pd.DataFrame(
+        [
+            {'a': random.random(), 'b': random.random(), 'i': i}
+            for i in range(100)
+        ]
+    )
+    dtbl = get_dash_table(df)
     assert len(dtbl.columns) == 3
-    dtbl=get_dash_table(df, cols=['a','i'])
+    dtbl = get_dash_table(df, cols=['a', 'i'])
     assert len(dtbl.columns) == 2
     assert len(dtbl.data) == 100
 
+
 def test_get_empty_fig():
-    fig=get_empty_fig()
+    fig = get_empty_fig()
     assert not fig.data
-    
+
+
 def test_plot_cache():
     for fc in all_figs:
-        fig1 = plot_cache(fc, serialize([{},[],{}]))
+        fig1 = plot_cache(fc, serialize([{}, [], {}]))
         fig2 = plot_cache(fc)
         fig3 = fc().plot()
-        fig4 = plot_cache(fc,serialize([{'member_gender':['Female']},[],{}]))
-        fig5 = fc({'member_gender':['Female']}).plot()
+        fig4 = plot_cache(
+            fc, serialize([{'member_gender': ['Female']}, [], {}])
+        )
+        fig5 = fc({'member_gender': ['Female']}).plot()
 
-        fdat1=json.loads(from_json_gz_str(fig1).data[0].to_json())
-        fdat2=json.loads(from_json_gz_str(fig2).data[0].to_json())
-        fdat3=json.loads(fig3.data[0].to_json())
-        fdat4=json.loads(from_json_gz_str(fig4).data[0].to_json())
-        fdat5=json.loads(fig5.data[0].to_json())
-        for fdat in [fdat1,fdat2,fdat3,fdat4,fdat5]:
+        fdat1 = json.loads(from_json_gz_str(fig1).data[0].to_json())
+        fdat2 = json.loads(from_json_gz_str(fig2).data[0].to_json())
+        fdat3 = json.loads(fig3.data[0].to_json())
+        fdat4 = json.loads(from_json_gz_str(fig4).data[0].to_json())
+        fdat5 = json.loads(fig5.data[0].to_json())
+        for fdat in [fdat1, fdat2, fdat3, fdat4, fdat5]:
             if 'text' in fdat:
                 del fdat['text']
 
@@ -278,33 +312,31 @@ def test_plot_cache():
 
 
 def test_get_ff_for_num_filters():
-    ff=get_ff_for_num_filters()
+    ff = get_ff_for_num_filters()
     assert type(ff) is LandmarksFigureFactory
 
-    ff=get_ff_for_num_filters({'a':[1]})
+    ff = get_ff_for_num_filters({'a': [1]})
     assert type(ff) is CombinedFigureFactory
-    ff=get_ff_for_num_filters({}, {'a':[1]})
+    ff = get_ff_for_num_filters({}, {'a': [1]})
     assert type(ff) is CombinedFigureFactory
-    ff=get_ff_for_num_filters({'b':[2]}, {'a':[1]})
+    ff = get_ff_for_num_filters({'b': [2]}, {'a': [1]})
     assert type(ff) is ComparisonFigureFactory
 
 
 def test_get_cached_fig_or_table():
-    def get(fdL={},fdR={},tab='map',analysis_tab=''):
+    def get(fdL={}, fdR={}, tab='map', analysis_tab=''):
         return from_json_gz_str(
             get_cached_fig_or_table(
-                serialize(
-                    [fdL,fdR,tab,analysis_tab,{}]
-                )
+                serialize([fdL, fdR, tab, analysis_tab, {}])
             )
         )
 
-    # no longer used ->    
+    # no longer used ->
     # mapfig1=get()
     # mapfig2=get({'book_genre':['Fiction']})
     # mapfig3=get({}, {'book_genre':['Fiction']})
     # mapfig4=get({'book_genre':['Poetry']}, {'book_genre':['Fiction']})
-    
+
     # assert mapfig1.data[0].name.startswith('Landmark')
     # assert mapfig2.data[0].name.startswith('Member')
     # assert mapfig3.data[0].name.startswith('Member')
@@ -312,23 +344,27 @@ def test_get_cached_fig_or_table():
 
     # assert mapfig2.data[0]['marker']['color'] == LEFT_COLOR
     # assert mapfig3.data[0]['marker']['color'] == RIGHT_COLOR
-    
+
     # assert len(mapfig4.data)==2
     # assert mapfig4.data[0]['marker']['color'] == LEFT_COLOR
     # assert mapfig4.data[1]['marker']['color'] == RIGHT_COLOR
 
-    tblfig1=get(tab='table')
-    tblfig2=get({'book_genre':['Fiction']}, tab='table')
-    tblfig3=get({}, {'book_genre':['Fiction']}, tab='table')
-    tblfig4=get({'book_genre':['Poetry']}, {'book_genre':['Fiction']}, tab='table')
+    tblfig1 = get(tab='table')
+    tblfig2 = get({'book_genre': ['Fiction']}, tab='table')
+    tblfig3 = get({}, {'book_genre': ['Fiction']}, tab='table')
+    tblfig4 = get(
+        {'book_genre': ['Poetry']}, {'book_genre': ['Fiction']}, tab='table'
+    )
 
-    tbldat1=tblfig1.get('props',{}).get('data',[])
-    tbldat2=tblfig2.get('props',{}).get('data',[])
-    tbldat3=tblfig3.get('props',{}).get('data',[])    
+    tbldat1 = tblfig1.get('props', {}).get('data', [])
+    tbldat2 = tblfig2.get('props', {}).get('data', [])
+    tbldat3 = tblfig3.get('props', {}).get('data', [])
     assert 'landmark' in tbldat1[0], 'landmark dataset in first case'
     assert 'member_name' in tbldat2[0], 'members dataset in 2nd case'
     assert 'member_name' in tbldat3[0], 'members dataset in 3rd case'
-    assert 'children' in tblfig4['props'], 'Comparison output not a table but a Container'
+    assert (
+        'children' in tblfig4['props']
+    ), 'Comparison output not a table but a Container'
 
 
 def test_from_json_gz_str():
@@ -336,60 +372,54 @@ def test_from_json_gz_str():
     assert from_json_gz_str(to_json_gz_str(obj)) == obj
     assert type(to_json_gz_str(obj)) == str
 
-    obj = {'a':1, 'b':2}
+    obj = {'a': 1, 'b': 2}
     assert from_json_gz_str(to_json_gz_str(obj)) == obj
     assert type(to_json_gz_str(obj)) == str
 
-    
 
 def test_update_fig_mapbox_background():
-    fig=go.Figure()
-    laydat=json.loads(fig.layout.to_json())
-    assert not laydat.get('mapbox',{}).get('layers',{})
+    fig = go.Figure()
+    laydat = json.loads(fig.layout.to_json())
+    assert not laydat.get('mapbox', {}).get('layers', {})
 
     update_fig_mapbox_background(fig)
-    laydat=json.loads(fig.layout.to_json())
+    laydat = json.loads(fig.layout.to_json())
     # assert laydat.get('mapbox',{}).get('layers',{})   # not now
 
 
-
-
 def test_get_selected_records_from_figure_selected_data():
-    inp={'points':[
-        {'name': 'X', 'label':'X'},
-        {'name': 'Y', 'label':'Y'}
-    ]}
-    assert get_selected_records_from_figure_selected_data(inp) == ['X','Y']
+    inp = {
+        'points': [{'name': 'X', 'label': 'X'}, {'name': 'Y', 'label': 'Y'}]
+    }
+    assert get_selected_records_from_figure_selected_data(inp) == ['X', 'Y']
 
-    inp={'points':[
-        {'name': 'X', 'location':'X'},
-        {'name': 'Y', 'location':'Y'}
-    ]}
-    assert get_selected_records_from_figure_selected_data(inp) == ['X','Y']
+    inp = {
+        'points': [
+            {'name': 'X', 'location': 'X'},
+            {'name': 'Y', 'location': 'Y'},
+        ]
+    }
+    assert get_selected_records_from_figure_selected_data(inp) == ['X', 'Y']
 
-    inp={'points':[
-        {'name': 'X', 'label':'X', 'location':'LX'},
-        {'name': 'Y', 'label':'Y', 'location':'LY'}
-    ]}
-    assert get_selected_records_from_figure_selected_data(inp) == ['X','Y']
+    inp = {
+        'points': [
+            {'name': 'X', 'label': 'X', 'location': 'LX'},
+            {'name': 'Y', 'label': 'Y', 'location': 'LY'},
+        ]
+    }
+    assert get_selected_records_from_figure_selected_data(inp) == ['X', 'Y']
 
-
-    inp={'points':[
-        {'name': 'X'},
-        {'name': 'Y'}
-    ]}
+    inp = {'points': [{'name': 'X'}, {'name': 'Y'}]}
     assert get_selected_records_from_figure_selected_data(inp) == []
 
-    
-    
 
 def test_store_all_markers_in_assets_folder():
-    ofn=store_all_markers_in_assets_folder()
-    odx=uncompress_from(ofn)
+    ofn = store_all_markers_in_assets_folder()
+    odx = uncompress_from(ofn)
     assert type(odx) is dict and all(';' in key for key in odx.keys())
 
     with tempfile.TemporaryDirectory() as tdir:
-        ofn=os.path.join(tdir,'tmp.obj')
+        ofn = os.path.join(tdir, 'tmp.obj')
         store_all_markers_in_assets_folder(ofn)
-        odx=uncompress_from(ofn)
+        odx = uncompress_from(ofn)
         assert type(odx) is dict and all(';' in key for key in odx.keys())

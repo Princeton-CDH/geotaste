@@ -12,12 +12,12 @@ DEFAULT_STATE={
 }
 
 function track_state(fdL, fdR, tab, tab2) { // , zoom, center) {
-    console.log('track_state <-',fdL, fdR, tab, tab2);
+    console.log(['track_state <-',fdL, fdR, tab, tab2]);
     let state = {};
     Object.keys(fdL).forEach(k => state[k] = rejoinSep(fdL[k]));
     Object.keys(fdR).forEach(k => state[k + '2'] = rejoinSep(fdR[k]));
-    state['tab'] = tab;
-    state['tab2'] = tab2;
+    state['tab'] = bool(tab) ? tab : "map";
+    state['tab2'] = (tab!="map") ? tab2 : ""
     console.log('state',state);
     state = Object.fromEntries(
         Object.entries(state).filter(([k, v]) => v && DEFAULT_STATE[k] !== v)
@@ -81,9 +81,9 @@ function loadQueryParam(searchStr, appBegun) {
     if (isContrast) {
         fdR = { ...negateFd(fdL), ...fdR };
     }
-
+    if(!bool(tab)){tab='map';}
     out = [fdL, fdR, tab, tab2, true, false];
-    console.debug(`--> ${JSON.stringify(out)}`);
+    console.debug(`loadQParam -->`,out);
     return out;
 }
 
