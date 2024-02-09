@@ -126,6 +126,13 @@ def ensure_int(x: Number, return_orig=True, default=None) -> int:
     except (ValueError, TypeError):
         return x if return_orig else default
 
+def ensure_intfloat(x, return_orig=True, default=None):
+    try:
+        f=float(x)
+        i=int(f)
+        return i if i==f else f
+    except (ValueError, TypeError):
+        return x if return_orig else default
 
 def ensure_dict(x: object) -> dict:
     """Ensures that the input is a dictionary.
@@ -886,3 +893,26 @@ def humancol(col):
     if b == 'Membership':
         return b
     return a.title() + ' ' + b
+
+
+
+def remove_outliers(series, factor=1.5):
+    """
+    Remove outliers from a pandas Series based on the IQR method.
+    
+    Parameters:
+    - series: pandas.Series, the Series from which to remove outliers.
+    
+    Returns:
+    - pandas.Series: A new Series with outliers removed.
+    """
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    # Define the criteria for non-outliers
+    criteria = (series >= (Q1 - factor * IQR)) & (series <= (Q3 + factor * IQR))
+    
+    # Filter the series based on the criteria
+    filtered_series = series[criteria]
+    
+    return filtered_series

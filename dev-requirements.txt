@@ -15,3 +15,5 @@ sphinx_rtd_theme
 # pyautogui
 # opencv-python
 # python-xlib
+selenium==4
+blue
