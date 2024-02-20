@@ -16,3 +16,4 @@ pywebview
 screeninfo
 shapely
 dash-leaflet
+gunicorn
