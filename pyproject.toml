@@ -28,6 +28,6 @@ scripts = { geotaste-app = "geotaste.app:run" }
 packages = ['geotaste']
 
 [tool.setuptools.dynamic]
-version = {attr = "version.__version__"}
+version = {attr = "_version.__version__"}
 dependencies = {file = "requirements.txt"}
 optional-dependencies.dev = { file = "dev-requirements.txt"}
