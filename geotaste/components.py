@@ -10,6 +10,7 @@ from .imports import *
 
 class BaseComponent(DashComponent):
     name = None
+    is_panel = False
 
     def __init__(
             self,
@@ -52,6 +53,7 @@ class BaseComponent(DashComponent):
     @cached_property
     def subcomponents(self):
         return []  # subclass this
+    
     
     def cards_with_attr(self, attrname:str):
         return [
@@ -124,8 +126,6 @@ class FilterComponent(BaseComponent):
     def store_desc(self): 
         return html.Span(BLANK, className='store_desc')
 
-    def intersect_filters(self, *filters_d):
-        return intersect_filters(filters_d)
     
     def ff(self, filter_data={}, selected:list=[], **kwargs):
         # if self.figure_factory is not None:
@@ -172,6 +172,8 @@ class FilterCard(FilterComponent):
     body_is_open = False
     className='collapsible-card'
     tooltip = ''
+    show_contrast_btn = False
+    contrast_btn_msg = "[contrast]"
 
     def layout(self, params=None):
         return dbc.Card([
@@ -195,9 +197,22 @@ class FilterCard(FilterComponent):
             [
                 self.showhide_btn,
                 self.header_btn, 
+                self.contrast_btn
             ],
             className=f'card-header-{self.className}'
         )
+    
+    @cached_property
+    def contrast_btn(self):
+        return dbc.Button(
+            self.contrast_btn_msg,
+            color="link",
+            n_clicks=0,
+            id=self.id('contrast_btn'),
+            className='contrast_btn',
+            style={'display':'none' if not self.show_contrast_btn else 'inline'}
+        )
+
     
     @cached_property
     def header_btn(self):
@@ -219,17 +234,40 @@ class FilterCard(FilterComponent):
             className='button_showhide',
             id=self.id('button_showhide')
         )
+    @cached_property
+    def negate_btn(self):
+        logger.trace(self.name)
+        return dbc.Button(
+            "(NOT)", 
+            color="link", 
+            n_clicks=0,
+            className='button_negate',
+            id=self.id('button_negate'),
+            style={'color':self.color, 'display':'none'}
+        )
+    
     
     
     
     
     ## Body
     
+
+
     @cached_property
     def body(self):
         logger.trace(self.name)
+        negbtn = dbc.Container(
+            self.negate_btn,
+            style={
+                'color':self.color,
+                'display':'none' if self.is_panel else 'block',
+                'margin':'0',
+                'padding-right':'5px'
+            }
+        )
         return dbc.Collapse(
-            dbc.CardBody(self.content), 
+            dbc.CardBody([self.content,negbtn]), 
             is_open=self.body_is_open, 
             id=self.id('body'),
         )
@@ -239,8 +277,6 @@ class FilterCard(FilterComponent):
 
 
     ## footer
-    
-    
     @cached_property
     def footer(self):
         logger.trace(self.name)
@@ -274,77 +310,83 @@ class FilterCard(FilterComponent):
             className='button_clear',
             id=self.id('button_clear')
         )
-
-    
     
 
 
 
 
     def describe_filters(self, store_data):
-        vals=', '.join(str(x) for x in flatten_list(store_data.get(self.key,[])))
-        return vals
+        vals=[str(x) for x in flatten_list(store_data.get(self.key,[]))]
+        if vals and vals[0]=='~':
+            valstr=" or ".join(vals[1:])
+            return f'~({valstr})' if len(vals[1:])>1 else '~'+valstr
+        else:
+            return ' or '.join(vals)
 
 
     def component_callbacks(self, app):
         super().component_callbacks(app)
 
-        @app.callback(
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='toggle_showhide_btn'
+            ),
             [
-                Output(self.body, "is_open", allow_duplicate=True),
+                Output(self.body,'is_open',allow_duplicate=True),
                 Output(self.showhide_btn, "children", allow_duplicate=True),
-                Output(self.content, 'children', allow_duplicate=True),
-                # Output(self.store_json, "data", allow_duplicate=True),
             ],
             [
                 Input(self.showhide_btn, "n_clicks"),
                 Input(self.header_btn, 'n_clicks'),
             ],
             [
-                State(self.body, "is_open"),
-                State(self.content,'children'),
-                # State(self.store_json, 'data'),
-                State(self.store, 'data'),
-                State(self.store_panel, 'data'),
-                
+                State(self.body,'is_open'),
             ],
             prevent_initial_call=True
         )
-        #@logger.catch
-        def toggle_collapse(_clicked1, _clicked2, body_open_now, content_now, card_data, panel_data):
-            """Toggle the collapse state of a section.
-            
-            Args:
-                _clicked1 (any): The first clicked parameter.
-                _clicked2 (any): The second clicked parameter.
-                body_open_now (bool): The current state of the body.
-                content_now (any): The current content.
-            
-            Returns:
-                tuple: A tuple containing the new state of the body (bool), the new toggle symbol (str), and the new content (any).
-            """
-            
-            if body_open_now:
-                # then we're going to shut
-                logger.debug(f'[{self.name}] toggle_collapse: closing')
-                return False, '[+]', content_now
-            else:
-                # then we're going to open
-                logger.debug(f'[{self.name}] toggle_collapse: opening')
-                # logger.debug(content_now)
-                content_exists_already = bool(content_now)# and content_now[0].get('props',{}).get('children')
-                logger.debug(f'content currently exists? --> {content_exists_already}, {len(str(content_now))}')
-
-
-                return True, '[-]', content_now if content_exists_already else self.get_content(
-                    card_data=card_data,
-                    panel_data=panel_data
-                )
-
-
-            # return now_is_open, '[–]' if now_is_open else '[+]', content_now if content_now else self.get_content()
         
-        @app.callback(
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='get_negation_btn_msg_and_style'
+            ),
+            [
+                Output(self.negate_btn, "children"),
+                Output(self.negate_btn, 'style')
+            ],
+            [
+                Input(self.store, 'data'),
+                Input(self.body, 'is_open')
+            ],
+            prevent_initial_call=True
+        )
+
+        app.clientside_callback(
+            ClientsideFunction(
+                namespace='clientside',
+                function_name='negate_filter_data_with_click'
+            ),
+            Output(self.store, "data", allow_duplicate=True),
+            Input(self.negate_btn, 'n_clicks'),
+            State(self.store,'data'),
+            prevent_initial_call=True
+        )
+
+        # ClientsideFunction(
+            #     namespace='clientside',
+            #     function_name='get_component_desc_and_is_open'
+            # ),
+        app.clientside_callback(
+            """
+            function(filter_data) {
+                let ignore_key = """+(str(not self.is_panel).lower())+""";
+                return get_component_desc_and_is_open(
+                    filter_data,
+                    ignore_key
+                );
+            }
+            """,
             [
                 Output(self.store_desc, 'children', allow_duplicate=True),
                 Output(self.footer, 'is_open', allow_duplicate=True),
@@ -352,27 +394,19 @@ class FilterCard(FilterComponent):
             Input(self.store, 'data'),
             prevent_initial_call=True
         )
-        #@logger.catchq
-        def toggle_footer_storedesc(store_data):
-            # filter cleared?
-            logger.trace(f'[{self.name}] my card data updated, so I\'ll update my store_desc and open footer')
-            if not store_data: 
-                return BLANK, False
-            else:
-                res=self.describe_filters(store_data)
-                return res if res else BLANK, True
-        
 
-
-        @app.callback(
+        app.clientside_callback(
+            """
+            function(clear_clicked) {
+                return {};
+            }
+            """,
             Output(self.store, "data", allow_duplicate=True),
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
-        #@logger.catch
-        def clear_selection(n_clicks):
-            logger.debug(f'[{self.name}] clearing selection v1')
-            return {}
+        
+        
 
 
 class FilterPlotCard(FilterCard):
@@ -386,6 +420,7 @@ class FilterPlotCard(FilterCard):
     def graph(self): 
         return dcc.Graph(
             figure=get_empty_fig(),
+            # figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
             id=self.id('graph'),
             config={'displayModeBar':False},
         )
@@ -400,29 +435,42 @@ class FilterPlotCard(FilterCard):
             ])
         )
     
+    
+    
 
     def component_callbacks(self, app):
         # do my parent's too
         super().component_callbacks(app)
+
         
-        @app.callback(
+
+        
+        app.clientside_callback(
+            """
+            function(selectedData, oldData) {
+                console.log("selecting data <-",selectedData);
+                if(!bool(selectedData)) { return window.dash_clientside.no_update; }
+                let sels = getSelectedRecordsFromFigureSelectedData(selectedData);
+                if(!bool(sels)) { return window.dash_clientside.no_update; }
+                let out = {"""+repr(self.key)+""": sels};
+                console.log("selecting data ->",out,oldData,out==oldData);
+                if (JSON.stringify(out) === JSON.stringify(oldData)) {
+                    return window.dash_clientside.no_update; 
+                }
+                return out;
+            }
+            """,
             Output(self.store, "data", allow_duplicate=True),
             Input(self.graph, 'selectedData'),
             State(self.store, 'data'),
             prevent_initial_call=True
         )
-        #@logger.catch
-        def graph_selection_updated(selected_data, old_data={}):
-            if selected_data is None: raise PreventUpdate
-            o=self.ff().get_selected(selected_data)
-            if not o or o==old_data: raise PreventUpdate
-            if type(o)==dict and not o.get(self.key): raise PreventUpdate
-            logger.debug(f'[{self.name}) selection updated to {o}')
-            return o
-        
-        
+
         @app.callback(
-            Output(self.store_json, "data", allow_duplicate=True),
+            [
+                Output(self.store_json, "data", allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
+            ],
             Input(self.body, "is_open"),
             [
                 State(self.store_json, "data"),
@@ -431,17 +479,18 @@ class FilterPlotCard(FilterCard):
             ],
             prevent_initial_call=True
         )
-        def draw(is_open,json_now, my_filter_data, panel_filter_data):
+        def cache_graph_json(is_open,json_now, my_filter_data, panel_filter_data):
             if not is_open or json_now: raise PreventUpdate
             newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
-            return ofig_json_gz_str
+            return ofig_json_gz_str,""
             
             
         @app.callback(
             [
                 Output(self.store_json, "data", allow_duplicate=True),
-                Output(self.store, 'data', allow_duplicate=True)
+                Output(self.store, 'data', allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.store_panel, 'data'),
@@ -461,18 +510,24 @@ class FilterPlotCard(FilterCard):
                 # then a panel wide clear?
                 # my_filter_data = {}
 
-
-            newdata = {k:v for k,v in panel_filter_data.items() if k not in my_filter_data}
+            print('my_filter_data',my_filter_data)
+            print('panel_filter_data',panel_filter_data)
+            newdata = {
+                k:v 
+                for k,v in panel_filter_data.items() 
+                if k not in my_filter_data
+            }
+            print('newdata',newdata)
             logger.debug(f'[{self.name}] incoming panel data: {newdata}')
             ofig_json_gz_str=self.plot(newdata, selected=my_filter_data)
             logger.debug(f'Assigning a json string of size {sys.getsizeof(ofig_json_gz_str)} compressed, to self.store_json')
             odat=my_filter_data if not panel_filter_data else dash.no_update
-            return ofig_json_gz_str,odat
+            return ofig_json_gz_str,odat,""
         
         app.clientside_callback(
             ClientsideFunction(
                 namespace='clientside',
-                function_name='decompress'
+                function_name='decompress_json_gz'
             ),
             Output(self.graph, 'figure', allow_duplicate=True),
             Input(self.store_json, 'data'),
@@ -503,7 +558,7 @@ class FilterSliderCard(FilterPlotCard):
     @cached_property
     def graph(self): 
         return dcc.Graph(
-            # figure=self.ff().plot(),
+            # figure=self.ff().plot(color=self.color).update_layout(height=100, width=250),
             figure=get_empty_fig(),
             id=self.id('graph'),
             config={'displayModeBar':False},
@@ -546,10 +601,15 @@ class FilterSliderCard(FilterPlotCard):
         )
     
     def describe_filters(self,store_data):
-        vals=list(store_data.values())[0]
+        vals=[v for v in list(store_data.values())[0]]
+        is_neg=False
+        if vals and vals[0]=='~':
+            vals = vals[1:]
+            is_neg=True
         minval=min(vals) if vals else self.minval
         maxval=max(vals) if vals else self.maxval
-        return f'{minval} to {maxval}'
+        o = f'{minval} to {maxval}'
+        return f'~({o})' if is_neg else o
     
 
     def component_callbacks(self, app):
@@ -561,6 +621,7 @@ class FilterSliderCard(FilterPlotCard):
                 Output(self.store,'data',allow_duplicate=True),
                 Output(self.id('input_start'), 'value',allow_duplicate=True),
                 Output(self.id('input_end'), 'value',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             [
                 Input(self.graph, 'selectedData'),
@@ -585,7 +646,7 @@ class FilterSliderCard(FilterPlotCard):
                 logger.debug(f'vals = {vals}')
                 minval=min(vals[0]) if vals and vals[0] else 0
                 maxval=max(vals[0]) if vals and vals[0] else 0
-                return dash.no_update,dash.no_update,minval,maxval
+                return dash.no_update,dash.no_update,minval,maxval,""
             else:
                 newvals=list(range(start_value, end_value+1))
                 ofig_json_gz_str = self.plot(
@@ -593,12 +654,13 @@ class FilterSliderCard(FilterPlotCard):
                     selected=newvals
                 )
                 odat = {self.figure_factory.key:newvals}
-                return ofig_json_gz_str,odat,dash.no_update,dash.no_update
+                return ofig_json_gz_str,odat,dash.no_update,dash.no_update,""
             
         @app.callback(
             [
                 Output(self.id('input_start'), 'value',allow_duplicate=True),
                 Output(self.id('input_end'), 'value',allow_duplicate=True),
+                Output('layout-loading-output', 'children', allow_duplicate=True),
             ],
             Input(self.button_clear, 'n_clicks'),
             State(self.store_panel, 'data'),
@@ -607,7 +669,7 @@ class FilterSliderCard(FilterPlotCard):
         def clear_selection_inputs(clear_clicked, panel_data):
             if not clear_clicked: raise PreventUpdate
             ff=self.ff(panel_data)
-            return ff.minval, ff.maxval
+            return ff.minval, ff.maxval,""
 
                 
 
@@ -643,26 +705,29 @@ class FilterInputCard(FilterCard):
         # do my parent's too
         super().component_callbacks(app)
 
-        @app.callback(
+        app.clientside_callback(
+            """
+            function(values) {
+                return {"""+self.key+""":values}
+            }
+            """,
             Output(self.store, "data", allow_duplicate=True),
             Input(self.input, 'value'),
             prevent_initial_call=True
         )
-        def input_value_changed(vals):
-            if not vals: raise PreventUpdate
-            logger.debug(f'[{self.name}] {self.key} -> {vals}')
-            return {self.key:vals}
-        
-        # Clear part 2
-        @app.callback(
+        # def input_value_changed(vals):
+        #     if not vals: raise PreventUpdate
+        #     logger.debug(f'[{self.name}] {self.key} -> {vals}')
+        #     return {self.key:vals}
+
+        app.clientside_callback(
+            """
+            function (clk) { return []; }
+            """,
             Output(self.input,'value'),
             Input(self.button_clear, 'n_clicks'),
             prevent_initial_call=True
         )
-        #@logger.catch
-        def clear_selection_input(n_clicks):
-            logger.debug('clear_selection as input')
-            return []
 
 
 

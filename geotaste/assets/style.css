@@ -208,11 +208,11 @@ h5 { font-size:1.1rem;}
 }
 
 .card-footer {
-    padding:2px;
+    padding:5px;
     font-size:2em;
     /* background-color: rgba(255,255,255,0); */
     border:none;
-    text-align: center;
+    text-align: left;
 }
 .card-body .card-footer { text-align: right; }
 
@@ -248,6 +248,19 @@ p {
 .button_showhide {
     float:right;
 }
+.button_negate {
+    float:right;
+    font-size:0.8em;
+}
+
+.contrast_btn {
+    /* float:right; */
+    font-size:0.8em;
+    padding-left:.5em;
+    padding-bottom:1em;
+    vertical-align: middle;
+}
+
 
 .button_clear { font-size:.8rem}
 
@@ -261,7 +274,7 @@ p {
 }
 
 .card-footer {
-    background: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.9);
 }
 
 .card-footer-desc .store_desc {
@@ -302,11 +315,11 @@ p {
 
 
 .panel_R .card-header { 
-    background-color: rgba(125, 106, 182, 0.9);
+    background-color: rgba(125, 106, 182, 0.8);
 }
 
 .panel_R .card-body .card-header {
-    background-color: rgba(125, 106, 182, 0.7);
+    background-color: rgba(125, 106, 182, 0.8);
 }
 
 .panel_R .card-body .card-body .card-header {
@@ -321,10 +334,10 @@ p {
 }
 
 .panel_L .card-header { 
-    background-color: rgba(64, 176, 166, 0.9);
+    background-color: rgba(64, 176, 166, 0.8);
 }
 .panel_L .card-body .card-header { 
-    background-color: rgba(64, 176, 166, 0.7);
+    background-color: rgba(64, 176, 166, 0.8);
 }.panel_L .card-body .card-body .card-header { 
     background-color: rgba(64, 176, 166, 0.5);
     
@@ -468,7 +481,7 @@ button {
     top:50px;
     padding-left:501px;
     /* height:100vh; */
-    height:fit-content;
+    height:90dvh;
     width:100vw;
     min-width:800px;
     overflow-x: hidden;
@@ -528,6 +541,8 @@ button {
     margin-top:1em;
 }
 
+.layout
+
 .layout-container {min-width:800px;}
 
 /* .test_suite { display:none; } */
@@ -559,4 +574,21 @@ button {
     width:100vw;
     height:100vh;
     z-index:0;
+}
+
+
+#layout-loading, #layout-loading-output {
+    z-index:100;
+    position: absolute;
+    top:40px;
+    right:.75em;
+    padding:0;
+    margin:0;
+}
+
+
+.column-header-name {
+    font-size:.9em;
+    text-wrap:wrap;
+    font-weight:600;
 }

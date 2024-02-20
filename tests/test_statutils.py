@@ -23,7 +23,6 @@ def test_analyze_contingency_tables():
 
     # Call the function with the mock inputs
     output_df = analyze_contingency_tables(vals1, vals2, min_p=MIN_P, signif=True)
-    print(list(output_df.columns))
 
     # Check that the output DataFrame has the correct columns
     assert set(output_df.columns) == set(cols), f"Output DataFrame should contain columns for {cols}"

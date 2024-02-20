@@ -352,6 +352,8 @@ def test_update_fig_mapbox_background():
     # assert laydat.get('mapbox',{}).get('layers',{})   # not now
 
 
+
+
 def test_get_selected_records_from_figure_selected_data():
     inp={'points':[
         {'name': 'X', 'label':'X'},

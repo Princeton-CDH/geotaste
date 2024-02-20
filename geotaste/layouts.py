@@ -56,23 +56,25 @@ class GeotasteLayout(BaseComponent):
                 get_welcome_modal(),
             ], className='content-row'),
 
-            dcc.Loading(
-                id='layout-loading', 
-                children=html.Div(id="layout-loading-output"),
-                type='graph', 
-                fullscreen=False, 
-                style={'background-color':'rgba(255,255,255,0)'},
-            ),
+            # dcc.Loading(
+            #     id='layout-loading', 
+            #     children=html.Div(id="layout-loading-output"),
+            #     type='default', 
+            #     fullscreen=True, 
+            #     style={'background-color':'rgba(255,255,255,0)'},
+            # ),
+
+            dbc.Spinner(html.Div(id="layout-loading-output"), id='layout-loading'),
 
             dcc.Location(id='url-output', refresh="callback-nav"),
             dcc.Location(id='url-input', refresh="callback-nav"),
 
-            dbc.Button(
-                'ⓘ',
-                color="link",
-                n_clicks=0,
-                id='welcome_modal_info_btn',
-            ),
+            # dbc.Button(
+            #     'ⓘ',
+            #     color="link",
+            #     n_clicks=0,
+            #     id='welcome_modal_info_btn',
+            # ),
 
             # dbc.Container(DONOTCITE, id='donotcite')
 
@@ -86,16 +88,23 @@ class GeotasteLayout(BaseComponent):
         super().component_callbacks(app)
 
         ### SWITCHING TABS
+        outputs=[
+            Output(card.store, 'data', allow_duplicate=True)
+            for panel in [self.comparison_panel.L, self.comparison_panel.R]
+            for card in panel.store_subcomponents
+        ] + [Output(self.comparison_panel.mainview_tabs, 'active_tab',allow_duplicate=True)]
+        num_outputs=len(outputs)
 
-        @app.callback(
-            Output('welcome-modal','is_open',allow_duplicate=True),
-            [
-                Input('welcome_modal_info_btn', 'n_clicks'),
-                Input('logo_popup', 'n_clicks')
-            ],
-            State('welcome-modal', 'is_open'),
+        app.clientside_callback(
+            """
+            function toggle(clk1){ 
+                var arr = new Array("""+str(num_outputs)+""").fill({});
+                arr.push("map");
+                return arr;
+            }
+            """,
+            outputs,
+            Input('logo_popup', 'n_clicks'),
             prevent_initial_call=True
         )
-        def toggle_welcome_modal(n_clicks, n_clicks2, is_open):
-            return not is_open
         
