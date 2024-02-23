@@ -621,7 +621,7 @@ class CombinedDataset(Dataset):
     def data(self):
         # need to gen?
         if not os.path.exists(self.path):
-            if self.url:
+            if False: #self.url:
                 with Logwatch(
                     f'downloading combined dataset from: {self.url}'
                 ):
