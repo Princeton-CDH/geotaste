@@ -97,3 +97,10 @@ Python 3.10 / Dash 2.13 / Plotly 5.17 / Flask 2.2
     - [Effie Rentzou](https://fit.princeton.edu/people/effie-rentzou)
     - [Robert Spoo](https://law.utulsa.edu/law-faculty/profile/robert-spoo/)
     - [Keri Walsh](https://www.fordham.edu/academics/departments/english/faculty/keri-walsh/)
+
+
+## License
+
+This project is licensed under the [Apache 2.0 License](LICENSE).
+
+©2024 Trustees of Princeton University. Permission granted for non-commercial distribution online under a standard Open Source license.
