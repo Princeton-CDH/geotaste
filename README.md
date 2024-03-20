@@ -1,5 +1,6 @@
 # geotaste
-Code, notebooks and resources for a "Geography of Taste" in the Shakespeare &amp; Co. Project Dataset
+
+Code, notebooks and resources for a ["Geography of Taste"](https://cdh.princeton.edu/projects/geography-of-taste/), based on [Shakespeare &amp; Company Project Datasets](https://shakespeareandco.princeton.edu/about/data/)
 
 
 [![Documentation Status](https://readthedocs.org/projects/geotaste/badge/?version=latest)](https://geotaste.readthedocs.io/en/latest/?badge=latest)
